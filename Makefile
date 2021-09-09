@@ -1,5 +1,6 @@
 target = game
-cclibs = -lpthread -lreadline
+cclibs = -lGL -lGLU -lglut
+ccinclude = -Iinclude/glm/
 CC = g++
 CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition -std=c++17
 soflags =
@@ -31,12 +32,12 @@ $(cpp_objects_tmp) : %.o : %.h
 $(cpp_objects_tmp) : %.o : %.cc
 	@mkdir -p $(dir $@)
 	@echo -e "   CC      $<"
-	@$(CC) $(CPPFLAGS) $(soflags) -c $< -o $@
+	@$(CC) $(CPPFLAGS) $(soflags) $(ccinclude) -c $< -o $@
 
 dist/$(target): $(cpp_objects_tmp)
 	@mkdir -p $(dir dist/$(target))
 	@echo -e "   CC      $@"
-	@$(CC) $(cpp_objects_tmp) -Wall $(cclibs) -o $@
+	@$(CC) $(cpp_objects_tmp) -Wall $(cclibs) $(ccinclude) -o $@
 
 clean:
 	@echo -e "   RM      tmp"
