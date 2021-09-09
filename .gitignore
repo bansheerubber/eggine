@@ -1,0 +1,6 @@
+.vscode
+dist
+tmp
+*.o
+*.pyc
+__pycache__
