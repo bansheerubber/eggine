@@ -1,8 +1,8 @@
 target = game
-cclibs = -lGL -lGLU -lglut
-ccinclude = -Iinclude/glm/
+cclibs = -lpthread -lGL -lglfw3 -ldl
+ccinclude = -Iinclude/glm/ -Iinclude -Llib
 CC = g++
-CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition -std=c++17
+CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
 soflags =
 ldflags =
 
@@ -28,16 +28,20 @@ preprocessor:
 	@echo -e "   PY      tools/preprocessor.py"
 	@python3 tools/preprocessor.py
 
+glad/gl.o: glad/gl.c
+	@echo -e "   CC      $@"
+	@$(CC) $(CPPFLAGS) $(soflags) $(ccinclude) -c $< -o $@
+
 $(cpp_objects_tmp) : %.o : %.h
 $(cpp_objects_tmp) : %.o : %.cc
 	@mkdir -p $(dir $@)
 	@echo -e "   CC      $<"
 	@$(CC) $(CPPFLAGS) $(soflags) $(ccinclude) -c $< -o $@
 
-dist/$(target): $(cpp_objects_tmp)
+dist/$(target): $(cpp_objects_tmp) glad/gl.o
 	@mkdir -p $(dir dist/$(target))
 	@echo -e "   CC      $@"
-	@$(CC) $(cpp_objects_tmp) -Wall $(cclibs) $(ccinclude) -o $@
+	@$(CC) $(cpp_objects_tmp) glad/gl.o -Wall $(cclibs) $(ccinclude) -o $@
 
 clean:
 	@echo -e "   RM      tmp"

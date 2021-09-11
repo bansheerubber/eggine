@@ -45,6 +45,9 @@ def preprocess(filename, contents, directory = None):
 			new_contents.append(line)
 	return new_contents
 
+extensions = [".cc", ".h", ".frag", ".vert"]
+glsl_extensions = [".frag", ".vert"]
+
 if __name__ == "__main__":
 	for root, subdirs, files in os.walk("./src"):
 		files = [f"{root}/{file}" for file in files]
@@ -58,10 +61,14 @@ if __name__ == "__main__":
 			parent = file_object.parent
 			tmp_parent = tmp_file_object.parent
 
-			if extension == ".cc" or extension == ".h":
+			if extension in extensions:
 				opened_file = open(file_object, "r", encoding='utf-8')
 				file_contents = opened_file.readlines()
 				opened_file.close()
+
+				if extension in glsl_extensions:
+					file_contents.insert(0, "R\"\"(\n")
+					file_contents.append(")\"\"\n")
 				
 				if os.path.exists(tmp_file):
 					src_time = file_object.stat().st_mtime
