@@ -16,9 +16,12 @@ void Engine::initialize() {
 		printf("initialized glfw\n");
 	}
 
-	this->window = glfwCreateWindow(640, 480, "eggine", NULL, NULL);
+	this->window = glfwCreateWindow(640, 640, "eggine", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	gladLoadGL(glfwGetProcAddress);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glfwSetWindowSizeCallback(window, onWindowResize);
 	glfwSwapInterval(1);
@@ -34,6 +37,8 @@ void Engine::tick() {
 	long long startTime = getMicrosecondsNow();
 	double deltaTime = (startTime - this->lastRenderTime) / 100000.0;
 	this->lastRenderTime = getMicrosecondsNow();
+
+	printf("%f\n", deltaTime);
 
 	glClear(GL_COLOR_BUFFER_BIT);
 

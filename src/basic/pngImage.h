@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glfw/glfw3.h>
 #include <png.h>
 #include <string>
 
@@ -13,7 +14,10 @@ class PNGImage {
 		png_uint_32 height;
 		png_byte colorType;
 		png_byte bitDepth;
-		png_byte** image;
+		png_byte* image;
+
+		GLenum getFormat();
+		GLenum getType();
 
 	protected:
 		string fileName;

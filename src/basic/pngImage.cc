@@ -1,5 +1,7 @@
 #include "pngImage.h"
 
+#include <fstream>
+
 PNGImage::PNGImage(string fileName) {
   this->fileName = fileName;
 
@@ -46,6 +48,18 @@ PNGImage::PNGImage(string fileName) {
   this->colorType = png_get_color_type(png, info);
   this->bitDepth = png_get_bit_depth(png, info);
 
+  int bytesPerPixel = 0;
+  if(this->colorType == PNG_COLOR_TYPE_RGB) {
+    bytesPerPixel = 3;
+  }
+  else if(this->colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
+    bytesPerPixel = 4;
+  }
+  else {
+    printf("PNG format not supported\n");
+    return;
+  }
+
   png_read_update_info(png, info);
 
   /* read file */
@@ -54,12 +68,47 @@ PNGImage::PNGImage(string fileName) {
 		return;
 	}
 
-  this->image = (png_bytep*)malloc(sizeof(png_bytep) * height);
+  png_byte** image = (png_bytep*)malloc(sizeof(png_bytep) * height);
   for(png_uint_32 y = 0; y < this->height; y++) {
-    this->image[y] = (png_byte*)malloc(png_get_rowbytes(png, info));
+    image[y] = (png_byte*)malloc(png_get_rowbytes(png, info));
 	}
 
-  png_read_image(png, this->image);
+  png_read_image(png, image);
+
+  this->image = new png_byte[this->width * bytesPerPixel * this->height];
+  png_uint_32 index = 0;
+  for(png_uint_32 y = 0; y < this->height; y++) {
+    for(png_uint_32 x = 0; x < this->width * bytesPerPixel; x++) {
+      this->image[y * this->width * bytesPerPixel + x % (this->width * bytesPerPixel)] = image[y][x];
+    }
+  }
+
+  png_destroy_read_struct(&png, &info, NULL);
 
   fclose(fp);
+}
+
+GLenum PNGImage::getFormat() {
+  if(this->colorType == PNG_COLOR_TYPE_RGB) {
+    return GL_RGB;
+  }
+  else if(this->colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
+    return GL_RGBA;
+  }
+  else {
+    return GL_INVALID_INDEX;
+  }
+}
+
+GLenum PNGImage::getType() {
+  printf("%d\n", this->bitDepth);
+  if(this->bitDepth == 8) {
+    return GL_UNSIGNED_BYTE;
+  }
+  else if(this->bitDepth == 16) {
+    return GL_UNSIGNED_SHORT;
+  }
+  else {
+    return GL_INVALID_INDEX;
+  }
 }

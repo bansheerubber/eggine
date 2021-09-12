@@ -14,8 +14,6 @@
 int main(int argc, char* argv[]) {
 	engine->initialize();
 
-	PNGImage image = PNGImage("cube.png");
-
 	RenderTestContainer container;
 	for(int i = 0; i < 1000000; i++) {
 		RenderTest* object = new RenderTest(&container);

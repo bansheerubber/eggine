@@ -3,6 +3,7 @@
 #include <glfw/glfw3.h>
 
 #include "../basic/instancedRenderObjectContainer.h"
+#include "../basic/pngImage.h"
 #include "renderTest.h"
 
 class RenderTestContainer : public InstancedRenderObjectContainer<RenderTest> {
@@ -15,13 +16,24 @@ class RenderTestContainer : public InstancedRenderObjectContainer<RenderTest> {
 	
 	protected:
 		GLuint shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
+		GLuint uniforms[1];
 		GLuint shaderProgram = GL_INVALID_INDEX;
-		GLuint vertexBufferObjects[2];
+		GLuint vertexBufferObjects[3];
 		GLuint vertexArrayObject;
+		GLuint texture;
+		PNGImage image = PNGImage("cube.png");
 
-		float vertices[6] = {
-			0.0f,  0.01f, // Vertex 1 (X, Y)
-			0.01f, -0.01f, // Vertex 2 (X, Y)
-			-0.01f, -0.01f  // Vertex 3 (X, Y)
+		float vertices[8] = {
+			-0.03f,  0.06f,
+			-0.03f, -0.06f,
+			0.03f, 0.06f,
+			0.03f, -0.06f
+		};
+
+		float uvs[8] = {
+			0.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			1.0f, 1.0f
 		};
 };
