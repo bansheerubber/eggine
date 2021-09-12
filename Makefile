@@ -1,5 +1,5 @@
 target = game
-cclibs = -lpthread -lGL -lglfw3 -ldl
+cclibs = -lpthread -lGL -lglfw3 -ldl -lpng
 ccinclude = -Iinclude/glm/ -Iinclude -Llib
 CC = g++
 CPPFLAGS = -g -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
