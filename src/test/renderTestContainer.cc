@@ -13,26 +13,20 @@ RenderTestContainer::RenderTestContainer() {
 	int width = 400;
 	int height = 400;
 	int total = 0;
-	int maxDepth = width + height;
-	int depth = 0;
 	for(int d = height - 2; d >= 0; d--) {
 		for(int x = width - 1, y = height - 2 - d; y >= 0; x--, y--) {
 			this->offsets[total][0] = x * 0.06f / 2 + y * 0.06f / 2;
 			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4);
-			this->offsets[total][2] = (float)depth / (float)maxDepth;
 			total++;
 		}
-		depth++;
 	}
 
 	for(int d = width - 1; d >= 0; d--) {
 		for(int x = d, y = height - 1; x >= 0; x--, y--) {
 			this->offsets[total][0] = x * 0.06f / 2 + y * 0.06f / 2;
 			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4);
-			this->offsets[total][2] = (float)depth / (float)maxDepth;
 			total++;
 		}
-		depth++;
 	}
 	
 	// load vertices
@@ -56,9 +50,9 @@ RenderTestContainer::RenderTestContainer() {
 	// load offsets
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[2]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 160000, &this->offsets[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 160000, &this->offsets[0], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 		glVertexAttribDivisor(2, 1);
 		glEnableVertexAttribArray(2);
 	}

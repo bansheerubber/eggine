@@ -14,7 +14,7 @@ class RenderTestContainer : public InstancedRenderObjectContainer<RenderTest> {
 
 		void render(double deltaTime, RenderContext &context);
 
-		glm::vec3 offsets[160000];
+		glm::vec2 offsets[160000];
 	
 	protected:
 		GLuint shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
