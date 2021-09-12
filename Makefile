@@ -1,6 +1,6 @@
 target = game
-cclibs = -lpthread -lGL -lglfw3 -ldl -lpng
-ccinclude = -Iinclude/glm/ -Iinclude -Llib
+cclibs = -lpthread -lGL -lglfw3 -ldl -lpng -lfreetype
+ccinclude = -Iinclude/glm/ -Iinclude -Iinclude/robin-map/include -Iinclude/fmt/include/ -Llib
 CC = g++
 CPPFLAGS = -g -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
 soflags =

@@ -10,6 +10,7 @@
 #include "basic/pngImage.h"
 #include "test/renderTest.h"
 #include "test/renderTestContainer.h"
+#include "basic/text.h"
 
 int main(int argc, char* argv[]) {
 	engine->initialize();

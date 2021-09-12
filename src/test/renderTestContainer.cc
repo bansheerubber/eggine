@@ -52,7 +52,7 @@ RenderTestContainer::RenderTestContainer() {
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[2]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 160000, &this->offsets[0], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glVertexAttribDivisor(2, 1);
 		glEnableVertexAttribArray(2);
 	}
@@ -78,8 +78,6 @@ RenderTestContainer::RenderTestContainer() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	glBindVertexArray(0); // turn off vertex array object
