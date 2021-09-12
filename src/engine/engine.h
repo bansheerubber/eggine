@@ -3,9 +3,12 @@
 #include <glfw/glfw3.h>
 #include <vector>
 
+#include "../util/dynamicArray.h"
 #include "../basic/renderObject.h"
 
 using namespace std;
+
+void engineInitRenderables(class Engine*, RenderObject** object);
 
 class Engine {
 	public:
@@ -20,7 +23,7 @@ class Engine {
 
 		long long lastRenderTime;
 
-		vector<RenderObject*> renderables;
+		DynamicArray<RenderObject*, Engine> renderables = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 };
 
 extern Engine* engine;

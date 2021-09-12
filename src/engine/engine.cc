@@ -48,12 +48,9 @@ void Engine::tick() {
 	}
 
 	// render everything
-	long long frogtime = getMicrosecondsNow();
-	auto end = this->renderables.end();
-	for(auto it = this->renderables.begin(); it < end; ++it) {
-		(*it)->render(deltaTime);
+	for(size_t i = 0; i < this->renderables.head; i++) {
+		this->renderables[i]->render(deltaTime);
 	}
-	printf("%lld\n", getMicrosecondsNow() - frogtime);
 
 	glfwSwapBuffers(window);
 
@@ -61,5 +58,10 @@ void Engine::tick() {
 }
 
 void Engine::addRenderObject(RenderObject* renderable) {
-	this->renderables.push_back(renderable);
+	this->renderables[this->renderables.head] = renderable;
+	this->renderables.pushed();
+}
+
+void engineInitRenderables(class Engine*, RenderObject** object) {
+	*object = nullptr;
 }

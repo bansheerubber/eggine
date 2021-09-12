@@ -2,7 +2,7 @@ target = game
 cclibs = -lpthread -lGL -lglfw3 -ldl
 ccinclude = -Iinclude/glm/ -Iinclude -Llib
 CC = g++
-CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
+CPPFLAGS = -g -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
 soflags =
 ldflags =
 

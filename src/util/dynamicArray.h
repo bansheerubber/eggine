@@ -1,8 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <cstring>
-
-#include "../io.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 #define DYNAMIC_ARRAY_MAX_SIZE 5000000
 
@@ -31,7 +32,7 @@ class DynamicArray {
 
 			T* array = (T*)malloc(sizeof(T) * this->size);
 			if(array == NULL) {
-				printError("invalid dynamic array malloc\n");
+				printf("invalid dynamic array malloc\n");
 				exit(1);
 			}
 			this->array = array;
@@ -58,13 +59,13 @@ class DynamicArray {
 
 			if(this->head == this->size) {
 				if(this->size * 2 > DYNAMIC_ARRAY_MAX_SIZE) {
-					printError("stack overflow\n");
+					printf("stack overflow\n");
 					exit(1);
 				}
 				
 				T* array = (T*)realloc(this->array, sizeof(T) * this->size * 2);
 				if(array == NULL) {
-					printError("invalid dynamic array realloc\n");
+					printf("invalid dynamic array realloc\n");
 					exit(1);
 				}
 				this->array = array;

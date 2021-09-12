@@ -8,11 +8,14 @@
 #include "engine/engine.h"
 #include "basic/gameObject.h"
 #include "test/renderTest.h"
+#include "test/renderTestContainer.h"
 
 int main(int argc, char* argv[]) {
 	engine->initialize();
-	for(int i = 0; i < 100000; i++) {
-		RenderTest* object = new RenderTest();
+
+	RenderTestContainer container;
+	for(int i = 0; i < 1000000; i++) {
+		RenderTest* object = new RenderTest(&container);
 		object->offset[0] = ((double) rand() / (RAND_MAX)) * 2 - 1;
 		object->offset[1] = ((double) rand() / (RAND_MAX)) * 2 - 1;
 	}
