@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "renderContext.h"
 #include "renderObject.h"
 
 using namespace std;
@@ -20,7 +21,7 @@ class InstancedRenderObjectContainer : public RenderObject {
 			}
 		}
 
-		virtual void render(double deltaTime) = 0;
+		virtual void render(double deltaTime, RenderContext &context) = 0;
 	
 	protected:
 		vector<T*> objects;

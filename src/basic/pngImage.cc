@@ -101,7 +101,6 @@ GLenum PNGImage::getFormat() {
 }
 
 GLenum PNGImage::getType() {
-  printf("%d\n", this->bitDepth);
   if(this->bitDepth == 8) {
     return GL_UNSIGNED_BYTE;
   }

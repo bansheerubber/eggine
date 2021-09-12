@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "callbacks.h"
+#include "../basic/renderContext.h"
 #include "../util/time.h"
 
 Engine* engine = new Engine();
@@ -16,9 +17,14 @@ void Engine::initialize() {
 		printf("initialized glfw\n");
 	}
 
-	this->window = glfwCreateWindow(640, 640, "eggine", NULL, NULL);
+	this->windowWidth = 640;
+	this->windowHeight = 480;
+
+	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight, "eggine", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	gladLoadGL(glfwGetProcAddress);
+
+	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -38,9 +44,7 @@ void Engine::tick() {
 	double deltaTime = (startTime - this->lastRenderTime) / 100000.0;
 	this->lastRenderTime = getMicrosecondsNow();
 
-	printf("%f\n", deltaTime);
-
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if(deltaTime > 1.0) {
 		deltaTime = 0;
@@ -48,13 +52,19 @@ void Engine::tick() {
 
 	glfwPollEvents();
 
+	this->camera.see();
+
 	if(glfwWindowShouldClose(this->window)) {
 		return;
 	}
 
+	RenderContext context = {
+		camera: &this->camera,
+	};
+
 	// render everything
 	for(size_t i = 0; i < this->renderables.head; i++) {
-		this->renderables[i]->render(deltaTime);
+		this->renderables[i]->render(deltaTime, context);
 	}
 
 	glfwSwapBuffers(window);

@@ -7,5 +7,7 @@ in vec2 uv;
 uniform sampler2D spriteTexture;
 
 void main() {
-	color = texture(spriteTexture, uv);
+	vec4 textureColor = texture(spriteTexture, uv);
+	// color = vec4(vec3(gl_FragCoord.z), 1.0);
+	color = textureColor;
 }

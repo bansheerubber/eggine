@@ -6,13 +6,14 @@
 #include <vector>
 
 #include "../basic/instancedRenderObject.h"
+#include "../basic/renderContext.h"
 
 using namespace std;
 
 class RenderTest : public InstancedRenderObject {
 	public:
 		RenderTest(class RenderTestContainer* container);
-		void render(double deltaTime);
+		void render(double deltaTime, RenderContext &context);
 		void updateDisplayList(RenderTestContainer* container);
 
 		glm::vec2 offset = glm::vec2(0, 0.2);

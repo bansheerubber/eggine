@@ -3,6 +3,7 @@
 #include <glfw/glfw3.h>
 #include <vector>
 
+#include "../basic/camera.h"
 #include "../util/dynamicArray.h"
 #include "../basic/renderObject.h"
 
@@ -18,10 +19,13 @@ class Engine {
 
 		void addRenderObject(RenderObject* renderable);
 
+		int windowWidth;
+		int windowHeight;
+
 	private:
 		GLFWwindow* window;
-
-		long long lastRenderTime;
+		Camera camera;
+		long long lastRenderTime;		
 
 		DynamicArray<RenderObject*, Engine> renderables = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 };
