@@ -13,8 +13,12 @@ class Engine {
 		void tick();
 		void exit();
 
+		void addRenderObject(RenderObject* renderable);
+
 	private:
 		GLFWwindow* window;
+
+		long long lastRenderTime;
 
 		vector<RenderObject*> renderables;
 };

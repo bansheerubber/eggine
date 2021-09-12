@@ -6,7 +6,10 @@
 
 class RenderObject : public GameObject {
 	public:
-		virtual void render() = 0;
+		RenderObject();
+		
+		virtual void render(double deltaTime) = 0;
 
 		static void CompileShader(GLenum type, GLuint* destination, const char* source);
+		static bool LinkProgram(GLuint* destination, GLuint* shaders, GLuint shaderCount);
 };

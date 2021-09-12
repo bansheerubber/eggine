@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "callbacks.h"
+#include "../util/time.h"
 
 Engine* engine = new Engine();
 
@@ -21,8 +22,6 @@ void Engine::initialize() {
 
 	glfwSetWindowSizeCallback(window, onWindowResize);
 	glfwSwapInterval(1);
-
-	// this->tick();
 }
 
 void Engine::exit() {
@@ -32,6 +31,16 @@ void Engine::exit() {
 void Engine::tick() {
 	start_tick:
 
+	long long startTime = getMicrosecondsNow();
+	double deltaTime = (startTime - this->lastRenderTime) / 100000.0;
+	this->lastRenderTime = getMicrosecondsNow();
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	if(deltaTime > 1.0) {
+		deltaTime = 0;
+	}
+
 	glfwPollEvents();
 
 	if(glfwWindowShouldClose(this->window)) {
@@ -39,12 +48,18 @@ void Engine::tick() {
 	}
 
 	// render everything
+	long long frogtime = getMicrosecondsNow();
 	auto end = this->renderables.end();
 	for(auto it = this->renderables.begin(); it < end; ++it) {
-		(*it)->render();
+		(*it)->render(deltaTime);
 	}
+	printf("%lld\n", getMicrosecondsNow() - frogtime);
 
 	glfwSwapBuffers(window);
 
 	goto start_tick;
+}
+
+void Engine::addRenderObject(RenderObject* renderable) {
+	this->renderables.push_back(renderable);
 }
