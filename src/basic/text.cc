@@ -28,31 +28,41 @@ Text::Text(string family, int size) {
 		Text::Uniforms[2] = glGetUniformLocation(Text::ShaderProgram, "projection");
 	}
 
-	glGenVertexArrays(1, &this->vao);
-	glGenBuffers(1, &this->vbo);
-	glBindVertexArray(this->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	// new code
+	glGenBuffers(2, this->vertexBufferObjects);
+	glGenVertexArrays(1, &this->vertexArrayObject);
+	glBindVertexArray(this->vertexArrayObject);
+
+	// create vertices buffer
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+	}
+
+	// create uv buffer
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+		glEnableVertexAttribArray(1);
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
-void Text::render(double deltaTime, RenderContext &context) {
-	glUseProgram(Text::ShaderProgram);
-
-	glUniformMatrix4fv(Text::Uniforms[2], 1, false, &context.ui->projectionMatrix[0][0]);
-
-	glUniform3fv(Text::Uniforms[1], 1, &this->color[0]);
-	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(Text::Uniforms[0], 0);
-	
-	glBindVertexArray(this->vao);
-
+void Text::updateBuffers() {
 	float x = this->position.x, y = this->font->size + this->position.y, scale = 1.0f;
 
+	glm::vec2 vertices[this->text.size() * 6];
+	glm::vec2 uvs[this->text.size() * 6];
+
 	// iterate through all characters
+	size_t total = 0;
 	for(size_t i = 0; i < this->text.size(); i++) {
 		if(this->text[i] == '\n') {
 			x = this->position.x;
@@ -67,28 +77,79 @@ void Text::render(double deltaTime, RenderContext &context) {
 			float w = ch.width * scale;
 			float h = ch.height * scale;
 
-			// update VBO for each character
-			float vertices[6][4] = {
-					{ xpos,     ypos + h,   0.0f, 1.0f },            
-					{ xpos,     ypos,       0.0f, 0.0f },
-					{ xpos + w, ypos,       1.0f, 0.0f },
+			float u1 = ch.minUV.x;
+			float v1 = ch.minUV.y;
+			float u2 = ch.maxUV.x;
+			float v2 = ch.maxUV.y;
 
-					{ xpos,     ypos + h,   0.0f, 1.0f },
-					{ xpos + w, ypos,       1.0f, 0.0f },
-					{ xpos + w, ypos + h,   1.0f, 1.0f }           
-			};
-			// render glyph texture over quad
-			glBindTexture(GL_TEXTURE_2D, ch.texture);
-			// update content of VBO memory
-			glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			// render quad
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+			vertices[total][0] = xpos;
+			vertices[total][1] = ypos + h;
+			uvs[total][0] = u1;
+			uvs[total][1] = v2;
+			total++;
+
+			vertices[total][0] = xpos;
+			vertices[total][1] = ypos;
+			uvs[total][0] = u1;
+			uvs[total][1] = v1;
+			total++;
+
+			vertices[total][0] = xpos + w;
+			vertices[total][1] = ypos;
+			uvs[total][0] = u2;
+			uvs[total][1] = v1;
+			total++;
+
+			vertices[total][0] = xpos;
+			vertices[total][1] = ypos + h;
+			uvs[total][0] = u1;
+			uvs[total][1] = v2;
+			total++;
+
+			vertices[total][0] = xpos + w;
+			vertices[total][1] = ypos;
+			uvs[total][0] = u2;
+			uvs[total][1] = v1;
+			total++;
+
+			vertices[total][0] = xpos + w;
+			vertices[total][1] = ypos + h;
+			uvs[total][0] = u2;
+			uvs[total][1] = v2;
+			total++;
+
 			x += (ch.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
 		}
 	}
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_DYNAMIC_DRAW); // orphan buffer
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * this->text.size() * 6, &vertices[0][0]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_DYNAMIC_DRAW); // orphan buffer
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * this->text.size() * 6, &uvs[0][0]);
+}
+
+void Text::setText(string text) {
+	this->text = text;
+	this->updateBuffers();
+}
+
+string Text::getText() {
+	return this->text;
+}
+
+void Text::render(double deltaTime, RenderContext &context) {
+	glUseProgram(Text::ShaderProgram);
+	glBindVertexArray(this->vertexArrayObject);
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->font->texture);
+
+	glUniformMatrix4fv(Text::Uniforms[2], 1, false, &context.ui->projectionMatrix[0][0]);
+	glUniform3fv(Text::Uniforms[1], 1, &this->color[0]);
+	glUniform1i(Text::Uniforms[0], 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6 * this->text.size());
 }

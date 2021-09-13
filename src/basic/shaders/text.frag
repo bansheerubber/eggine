@@ -1,6 +1,8 @@
-#version 330 core
+#version 330 compatibility
+
+layout(location = 0) out vec4 color;
+
 in vec2 uv;
-out vec4 color;
 
 uniform sampler2D textTexture;
 uniform vec3 textColor;

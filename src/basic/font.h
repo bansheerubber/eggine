@@ -3,6 +3,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <glfw/glfw3.h>
+#include <glm/vec2.hpp>
 #include <tsl/robin_map.h>
 #include <string>
 
@@ -11,12 +12,13 @@
 using namespace std;
 
 struct FontGlyph {
-	GLuint texture;
 	unsigned int width;
 	unsigned int height;
 	int left;
 	int top;
 	long int advance;
+	glm::vec2 minUV;
+	glm::vec2 maxUV;
 };
 
 class Font : public GameObject {
@@ -30,9 +32,10 @@ class Font : public GameObject {
 		static Font* GetFont(string &family, int size);
 
 		int size;
+		char atlas[256][256];
 	
 	protected:
 		FT_Face face;
-		GLuint textures[128];
+		GLuint texture;
 		FontGlyph characterToGlyph[128];
 };

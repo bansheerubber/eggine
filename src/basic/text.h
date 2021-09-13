@@ -16,15 +16,20 @@ class Text : public RenderObject {
 	public:
 		Text(string family, int size);
 		void render(double deltaTime, RenderContext &context);
-		string text;
 		glm::vec3 color = glm::vec3(1, 1, 1);
 		glm::vec2 position = glm::vec2(0, 0);
+
+		void setText(string text);
+		string getText();
 	
 	protected:
 		Font* font;
 
-		GLuint vbo;
-		GLuint vao;
+		GLuint vertexBufferObjects[2];
+		GLuint vertexArrayObject;
+
+		void updateBuffers();
+		string text;
 		
 		static GLuint Shaders[2];
 		static GLuint Uniforms[3];

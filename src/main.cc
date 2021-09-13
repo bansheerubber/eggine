@@ -15,12 +15,12 @@
 int main(int argc, char* argv[]) {
 	engine->initialize();
 
-	RenderTestContainer container;
-	for(int i = 0; i < 160000; i++) {
-		RenderTest* object = new RenderTest(&container);
-		object->offset[0] = ((double)rand() / (RAND_MAX)) * 2 - 1;
-		object->offset[1] = ((double)rand() / (RAND_MAX)) * 2 - 1;
-	}
+	// RenderTestContainer container;
+	// for(int i = 0; i < 160000; i++) {
+	// 	RenderTest* object = new RenderTest(&container);
+	// 	object->offset[0] = ((double)rand() / (RAND_MAX)) * 2 - 1;
+	// 	object->offset[1] = ((double)rand() / (RAND_MAX)) * 2 - 1;
+	// }
 
 	engine->tick();
 
