@@ -1,13 +1,14 @@
 #include <glad/gl.h>
 #include "text.h"
 
+#include "../engine/engine.h"
 #include "ui.h"
 
 GLuint Text::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
 GLuint Text::Uniforms[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 GLuint Text::ShaderProgram = GL_INVALID_INDEX;
 
-Text::Text(string family, int size) {
+Text::Text(string family, int size) : RenderObject(false) {
 	this->font = Font::GetFont(family, size);
 
 	RenderObject::CompileShader(
@@ -53,6 +54,8 @@ Text::Text(string family, int size) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	engine->addUIObject(this);
 }
 
 void Text::updateBuffers() {

@@ -5,18 +5,65 @@
 
 #include "../basic/camera.h"
 
-RenderTestContainer::RenderTestContainer() {
-	glGenBuffers(3, this->vertexBufferObjects);
+RenderTestContainer::RenderTestContainer(bool houseLayer) {
+	glGenBuffers(4, this->vertexBufferObjects);
 	glGenVertexArrays(1, &this->vertexArrayObject);
 	glBindVertexArray(this->vertexArrayObject);
+
+	this->textureIndices = new int[160000];
+
+	if(houseLayer) {
+		for(int x = 0; x < 400; x++) {
+			for(int y = 0; y < 400; y++) {
+				this->tiles[x][y] = 35;
+			}
+		}
+
+		int offsetX = 2;
+		int offsetY = 2;
+		int maxX = 10;
+		int maxY = 10;
+		for(int x = offsetX; x < maxX + offsetX; x++) {
+			for(int y = offsetY; y < maxY + offsetY; y++) {
+				if(x == offsetX) {
+					this->tiles[x][y]	= 30;
+				}
+				else if(y == offsetY) {
+					this->tiles[x][y]	= 26;
+				}
+				else if(x == maxX + offsetX - 1) {
+					this->tiles[x][y]	= 32;
+				}
+				else if(y == maxY + offsetY - 1) {
+					this->tiles[x][y]	= 0;
+				}
+			}
+		}
+
+		this->tiles[offsetX][offsetY] = 23;
+		this->tiles[offsetX][maxY - 1 + offsetY] = 28;
+		this->tiles[maxX - 1 + offsetX][offsetY] = 19;
+		this->tiles[maxX - 1 + offsetX][maxY - 1 + offsetY] = 24;
+	}
+	else {
+		for(int x = 0; x < 400; x++) {
+			for(int y = 0; y < 400; y++) {
+				this->tiles[x][y] = 2;
+			}
+		}
+	}
 
 	int width = 400;
 	int height = 400;
 	int total = 0;
+
+	int z = houseLayer ? 1 : 0;
+
 	for(int d = height - 2; d >= 0; d--) {
 		for(int x = width - 1, y = height - 2 - d; y >= 0; x--, y--) {
 			this->offsets[total][0] = x * 0.06f / 2 + y * 0.06f / 2;
-			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4);
+			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4 - z * 0.0365625);
+			this->textureIndices[total] = this->tiles[x][y];
 			total++;
 		}
 	}
@@ -24,7 +71,8 @@ RenderTestContainer::RenderTestContainer() {
 	for(int d = width - 1; d >= 0; d--) {
 		for(int x = d, y = height - 1; x >= 0; x--, y--) {
 			this->offsets[total][0] = x * 0.06f / 2 + y * 0.06f / 2;
-			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4);
+			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4 - z * 0.0365625);
+			this->textureIndices[total] = this->tiles[x][y];
 			total++;
 		}
 	}
@@ -55,6 +103,16 @@ RenderTestContainer::RenderTestContainer() {
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glVertexAttribDivisor(2, 1);
 		glEnableVertexAttribArray(2);
+	}
+
+	// load texture indices
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[3]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(int) * 160000, this->textureIndices, GL_STATIC_DRAW);
+
+		glVertexAttribIPointer(3, 1, GL_INT, 0, 0);
+		glVertexAttribDivisor(3, 1);
+		glEnableVertexAttribArray(3);
 	}
 
 	// load textures

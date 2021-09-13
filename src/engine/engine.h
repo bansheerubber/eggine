@@ -16,12 +16,15 @@ using namespace std;
 void engineInitRenderables(class Engine*, RenderObject** object);
 
 class Engine {
+	friend Camera;
+	
 	public:
 		void initialize();
 		void tick();
 		void exit();
 
 		void addRenderObject(RenderObject* renderable);
+		void addUIObject(RenderObject* renderable);
 
 		int windowWidth;
 		int windowHeight;
@@ -39,6 +42,7 @@ class Engine {
 		Text* debugText;
 
 		DynamicArray<RenderObject*, Engine> renderables = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
+		DynamicArray<RenderObject*, Engine> renderableUIs = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 };
 
 extern Engine* engine;

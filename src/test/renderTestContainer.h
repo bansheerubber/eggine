@@ -3,6 +3,8 @@
 #include <glfw/glfw3.h>
 #include <glm/vec3.hpp>
 
+#include <tsl/robin_map.h>
+
 #include "../basic/instancedRenderObjectContainer.h"
 #include "../basic/pngImage.h"
 #include "../basic/renderContext.h"
@@ -10,20 +12,23 @@
 
 class RenderTestContainer : public InstancedRenderObjectContainer<RenderTest> {
 	public:
-		RenderTestContainer();
+		RenderTestContainer(bool houseLayer);
 
 		void render(double deltaTime, RenderContext &context);
 
 		glm::vec2 offsets[160000];
+		int* textureIndices;
 	
 	protected:
 		GLuint shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
 		GLuint uniforms[2];
 		GLuint shaderProgram = GL_INVALID_INDEX;
-		GLuint vertexBufferObjects[3];
+		GLuint vertexBufferObjects[4];
 		GLuint vertexArrayObject;
 		GLuint texture;
-		PNGImage image = PNGImage("cube.png");
+		PNGImage image = PNGImage("data/spritesheet.png");
+
+		tsl::robin_map<int, tsl::robin_map<int, int>> tiles;
 
 		float vertices[8] = {
 			-0.03f,  0.06f,
