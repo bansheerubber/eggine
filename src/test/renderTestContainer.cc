@@ -63,8 +63,7 @@ RenderTestContainer::RenderTestContainer(bool houseLayer) {
 	unsigned int size = 400;
 	for(unsigned i = 0; i < size * size; i++) {
 		glm::ivec2 coordinate = tilemath::indexToCoordinate(i, size);
-		this->offsets[i][0] = coordinate.x * 0.06f / 2 + coordinate.y * 0.06f / 2;
-		this->offsets[i][1] = -(coordinate.x * -0.06f / 4 + coordinate.y * 0.06f / 4 - z * 0.0365625);
+		this->offsets[i] = tilemath::tileToScreen(glm::vec3(coordinate, z));
 		this->textureIndices[i] = this->tiles[coordinate.x][coordinate.y];
 	}
 	

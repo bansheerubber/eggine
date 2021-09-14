@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 	engine->initialize();
 
 	RenderTestContainer container1(false);
-	RenderTestContainer container2(true);
+	// RenderTestContainer container2(true);
 
 	engine->tick();
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 namespace tilemath {
 	// convert an x y coordinate into a opengl buffer index
@@ -8,4 +9,7 @@ namespace tilemath {
 
 	// convert an opengl buffer index into x y coordinates
 	glm::uvec2 indexToCoordinate(unsigned long index, unsigned long size);
+
+	// convert tile coordinates to screenspace
+	glm::vec2 tileToScreen(glm::vec3 coordinate);
 }

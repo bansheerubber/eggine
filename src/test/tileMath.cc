@@ -44,3 +44,10 @@ glm::uvec2 tilemath::indexToCoordinate(unsigned long index, unsigned long size) 
 		return glm::uvec2(lround(size - x - 1), lround(y));
 	}
 }
+
+glm::vec2 tilemath::tileToScreen(glm::vec3 coordinate) {
+	return glm::vec2(
+		coordinate.x * 0.06f / 2 + coordinate.y * 0.06f / 2,
+		-(coordinate.x * -0.06f / 4 + coordinate.y * 0.06f / 4 - coordinate.z * 0.0365625)
+	);
+}
