@@ -10,8 +10,9 @@ void Camera::see(double deltaTime) {
 	int left = glfwGetKey(engine->window, 'A');
 	int right = glfwGetKey(engine->window, 'D');
 
-	this->position.x += (float)right * deltaTime - (float)left * deltaTime;
-	this->position.y += (float)up * deltaTime - (float)down * deltaTime;
+	float speed = 5.0f;
+	this->position.x += (float)right * speed * deltaTime - (float)left * speed * deltaTime;
+	this->position.y += (float)up * speed * deltaTime - (float)down * speed * deltaTime;
 	
 	double ratio = (double)engine->windowWidth / (double)engine->windowHeight;
 

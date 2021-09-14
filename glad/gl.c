@@ -33,6 +33,7 @@ int GLAD_GL_VERSION_3_1 = 0;
 int GLAD_GL_VERSION_3_2 = 0;
 int GLAD_GL_VERSION_3_3 = 0;
 int GLAD_GL_AMD_debug_output = 0;
+int GLAD_GL_ARB_base_instance = 0;
 int GLAD_GL_ARB_debug_output = 0;
 int GLAD_GL_EXT_debug_label = 0;
 int GLAD_GL_EXT_debug_marker = 0;
@@ -174,12 +175,15 @@ PFNGLDISABLEVERTEXATTRIBARRAYPROC glad_glDisableVertexAttribArray = NULL;
 PFNGLDISABLEIPROC glad_glDisablei = NULL;
 PFNGLDRAWARRAYSPROC glad_glDrawArrays = NULL;
 PFNGLDRAWARRAYSINSTANCEDPROC glad_glDrawArraysInstanced = NULL;
+PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glad_glDrawArraysInstancedBaseInstance = NULL;
 PFNGLDRAWBUFFERPROC glad_glDrawBuffer = NULL;
 PFNGLDRAWBUFFERSPROC glad_glDrawBuffers = NULL;
 PFNGLDRAWELEMENTSPROC glad_glDrawElements = NULL;
 PFNGLDRAWELEMENTSBASEVERTEXPROC glad_glDrawElementsBaseVertex = NULL;
 PFNGLDRAWELEMENTSINSTANCEDPROC glad_glDrawElementsInstanced = NULL;
+PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEPROC glad_glDrawElementsInstancedBaseInstance = NULL;
 PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC glad_glDrawElementsInstancedBaseVertex = NULL;
+PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC glad_glDrawElementsInstancedBaseVertexBaseInstance = NULL;
 PFNGLDRAWPIXELSPROC glad_glDrawPixels = NULL;
 PFNGLDRAWRANGEELEMENTSPROC glad_glDrawRangeElements = NULL;
 PFNGLDRAWRANGEELEMENTSBASEVERTEXPROC glad_glDrawRangeElementsBaseVertex = NULL;
@@ -1559,6 +1563,12 @@ static void glad_gl_load_GL_AMD_debug_output( GLADuserptrloadfunc load, void* us
     glad_glDebugMessageInsertAMD = (PFNGLDEBUGMESSAGEINSERTAMDPROC) load(userptr, "glDebugMessageInsertAMD");
     glad_glGetDebugMessageLogAMD = (PFNGLGETDEBUGMESSAGELOGAMDPROC) load(userptr, "glGetDebugMessageLogAMD");
 }
+static void glad_gl_load_GL_ARB_base_instance( GLADuserptrloadfunc load, void* userptr) {
+    if(!GLAD_GL_ARB_base_instance) return;
+    glad_glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC) load(userptr, "glDrawArraysInstancedBaseInstance");
+    glad_glDrawElementsInstancedBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEPROC) load(userptr, "glDrawElementsInstancedBaseInstance");
+    glad_glDrawElementsInstancedBaseVertexBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC) load(userptr, "glDrawElementsInstancedBaseVertexBaseInstance");
+}
 static void glad_gl_load_GL_ARB_debug_output( GLADuserptrloadfunc load, void* userptr) {
     if(!GLAD_GL_ARB_debug_output) return;
     glad_glDebugMessageCallbackARB = (PFNGLDEBUGMESSAGECALLBACKARBPROC) load(userptr, "glDebugMessageCallbackARB");
@@ -1699,6 +1709,7 @@ static int glad_gl_find_extensions_gl( int version) {
     if (!glad_gl_get_extensions(version, &exts, &num_exts_i, &exts_i)) return 0;
 
     GLAD_GL_AMD_debug_output = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_AMD_debug_output");
+    GLAD_GL_ARB_base_instance = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_base_instance");
     GLAD_GL_ARB_debug_output = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_debug_output");
     GLAD_GL_EXT_debug_label = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_EXT_debug_label");
     GLAD_GL_EXT_debug_marker = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_EXT_debug_marker");
@@ -1772,6 +1783,7 @@ int gladLoadGLUserPtr( GLADuserptrloadfunc load, void *userptr) {
 
     if (!glad_gl_find_extensions_gl(version)) return 0;
     glad_gl_load_GL_AMD_debug_output(load, userptr);
+    glad_gl_load_GL_ARB_base_instance(load, userptr);
     glad_gl_load_GL_ARB_debug_output(load, userptr);
     glad_gl_load_GL_EXT_debug_label(load, userptr);
     glad_gl_load_GL_EXT_debug_marker(load, userptr);
