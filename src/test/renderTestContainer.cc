@@ -4,6 +4,7 @@
 #include <random>
 
 #include "../basic/camera.h"
+#include "tileMath.h"
 
 RenderTestContainer::RenderTestContainer(bool houseLayer) {
 	glGenBuffers(4, this->vertexBufferObjects);
@@ -59,22 +60,12 @@ RenderTestContainer::RenderTestContainer(bool houseLayer) {
 
 	int z = houseLayer ? 1 : 0;
 
-	for(int d = height - 2; d >= 0; d--) {
-		for(int x = width - 1, y = height - 2 - d; y >= 0; x--, y--) {
-			this->offsets[total][0] = x * 0.06f / 2 + y * 0.06f / 2;
-			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4 - z * 0.0365625);
-			this->textureIndices[total] = this->tiles[x][y];
-			total++;
-		}
-	}
-
-	for(int d = width - 1; d >= 0; d--) {
-		for(int x = d, y = height - 1; x >= 0; x--, y--) {
-			this->offsets[total][0] = x * 0.06f / 2 + y * 0.06f / 2;
-			this->offsets[total][1] = -(x * -0.06f / 4 + y * 0.06f / 4 - z * 0.0365625);
-			this->textureIndices[total] = this->tiles[x][y];
-			total++;
-		}
+	unsigned int size = 400;
+	for(unsigned i = 0; i < size * size; i++) {
+		glm::ivec2 coordinate = tilemath::indexToCoordinate(i, size);
+		this->offsets[i][0] = coordinate.x * 0.06f / 2 + coordinate.y * 0.06f / 2;
+		this->offsets[i][1] = -(coordinate.x * -0.06f / 4 + coordinate.y * 0.06f / 4 - z * 0.0365625);
+		this->textureIndices[i] = this->tiles[coordinate.x][coordinate.y];
 	}
 	
 	// load vertices
@@ -168,5 +159,5 @@ void RenderTestContainer::render(double deltaTime, RenderContext &context) {
 
 	glUniformMatrix4fv(this->uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
 
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 160000);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 400 * 400);
 }
