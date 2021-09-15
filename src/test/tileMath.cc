@@ -27,20 +27,18 @@ long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size, bool shouldPr
 	}
 }
 
-glm::uvec2 tilemath::indexToCoordinate(unsigned long index, unsigned long size) {
-	double dindex = index;
-	double dsize = size;
+glm::uvec2 tilemath::indexToCoordinate(long index, long size) {
 	double threshold = size * (size + 1.0) / 2.0;
 	if(index < threshold) {
-		double m = floor((sqrt(8.0 * dindex + 1.0) - 1.0) / 2.0); // elements per row
-		double x = dindex - m * (m + 1.0) / 2.0;
-		double y = m - (dindex - m * (m + 1.0) / 2.0);
+		double m = floor((sqrt(8.0 * index + 1.0) - 1.0) / 2.0); // elements per row
+		double x = index - m * (m + 1.0) / 2.0;
+		double y = m - (index - m * (m + 1.0) / 2.0);
 		return glm::uvec2(lround(size - x - 1), lround(y));
 	}
 	else {
-		double m = ceil((sqrt(8.0 * -(dindex - pow(size, 2)) + 1) - 1) / 2.0) - 1;
-		double x = dindex + (m * ((m + 1.0) / 2.0)) - size * size + size;
-		double y = -dindex - (m * (m + 1.0) / 2.0) - m + size * size + size - 2; // lmao how did i ever figure that one out
+		double m = ceil((sqrt(8.0 * -(index - pow(size, 2)) + 1) - 1) / 2.0) - 1;
+		double x = index + (m * ((m + 1.0) / 2.0)) - size * size + size;
+		double y = -index - (m * (m + 1.0) / 2.0) - m + size * size + size - 2; // lmao how did i ever figure that one out
 		return glm::uvec2(lround(size - x - 1), lround(y));
 	}
 }

@@ -12,12 +12,14 @@
 
 class RenderTestContainer : public InstancedRenderObjectContainer<RenderTest> {
 	public:
-		RenderTestContainer(bool houseLayer);
+		RenderTestContainer(glm::vec2 position);
 
 		void render(double deltaTime, RenderContext &context);
 
-		glm::vec2 offsets[160000];
-		int* textureIndices;
+		glm::vec2* offsets = nullptr;
+		int* textureIndices = nullptr;
+
+		glm::vec2 position = glm::vec2(0, 0);
 	
 	protected:
 		GLuint shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
@@ -25,10 +27,14 @@ class RenderTestContainer : public InstancedRenderObjectContainer<RenderTest> {
 		GLuint shaderProgram = GL_INVALID_INDEX;
 		GLuint vertexBufferObjects[4];
 		GLuint vertexArrayObject;
-		GLuint texture;
-		PNGImage image = PNGImage("data/spritesheet.png");
 
 		tsl::robin_map<int, tsl::robin_map<int, int>> tiles;
+
+		static PNGImage* Image;
+		static GLuint Texture;
+
+		static constexpr int Size = 25;
+		int height = 1;
 
 		float vertices[8] = {
 			-0.03f,  0.06f,

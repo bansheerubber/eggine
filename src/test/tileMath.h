@@ -8,7 +8,7 @@ namespace tilemath {
 	long coordinateToIndex(glm::ivec2 coordinate, long size, bool shouldPrint = false);
 
 	// convert an opengl buffer index into x y coordinates
-	glm::uvec2 indexToCoordinate(unsigned long index, unsigned long size);
+	glm::uvec2 indexToCoordinate(long index, long size);
 
 	// convert tile coordinates to screenspace
 	glm::vec2 tileToScreen(glm::vec3 coordinate);

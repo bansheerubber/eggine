@@ -10,13 +10,13 @@ void Camera::see(double deltaTime) {
 	int left = glfwGetKey(engine->window, 'A');
 	int right = glfwGetKey(engine->window, 'D');
 
-	float speed = 5.0f;
+	float speed = 1.0f;
 	this->position.x += (float)right * speed * deltaTime - (float)left * speed * deltaTime;
 	this->position.y += (float)up * speed * deltaTime - (float)down * speed * deltaTime;
 	
 	double ratio = (double)engine->windowWidth / (double)engine->windowHeight;
 
-	double viewportWidth = 1;
+	double viewportWidth = 5;
 	double viewportHeight = viewportWidth / ratio;
 	
 	this->projectionMatrix = glm::ortho(

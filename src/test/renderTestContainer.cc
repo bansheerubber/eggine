@@ -4,67 +4,33 @@
 #include <random>
 
 #include "../basic/camera.h"
+#include "../util/doubleDimension.h"
 #include "tileMath.h"
 
-RenderTestContainer::RenderTestContainer(bool houseLayer) {
+PNGImage* RenderTestContainer::Image = nullptr;
+GLuint RenderTestContainer::Texture = 0;
+
+RenderTestContainer::RenderTestContainer(glm::vec2 position) {
+	this->position = position;
+
 	glGenBuffers(4, this->vertexBufferObjects);
 	glGenVertexArrays(1, &this->vertexArrayObject);
 	glBindVertexArray(this->vertexArrayObject);
 
-	this->textureIndices = new int[160000];
+	this->offsets = new glm::vec2[Size * Size * this->height];
+	this->textureIndices = new int[Size * Size * this->height];
 
-	if(houseLayer) {
-		for(int x = 0; x < 400; x++) {
-			for(int y = 0; y < 400; y++) {
-				this->tiles[x][y] = 35;
-			}
-		}
-
-		int offsetX = 2;
-		int offsetY = 2;
-		int maxX = 10;
-		int maxY = 10;
-		for(int x = offsetX; x < maxX + offsetX; x++) {
-			for(int y = offsetY; y < maxY + offsetY; y++) {
-				if(x == offsetX) {
-					this->tiles[x][y]	= 30;
-				}
-				else if(y == offsetY) {
-					this->tiles[x][y]	= 26;
-				}
-				else if(x == maxX + offsetX - 1) {
-					this->tiles[x][y]	= 32;
-				}
-				else if(y == maxY + offsetY - 1) {
-					this->tiles[x][y]	= 0;
-				}
-			}
-		}
-
-		this->tiles[offsetX][offsetY] = 23;
-		this->tiles[offsetX][maxY - 1 + offsetY] = 28;
-		this->tiles[maxX - 1 + offsetX][offsetY] = 19;
-		this->tiles[maxX - 1 + offsetX][maxY - 1 + offsetY] = 24;
-	}
-	else {
-		for(int x = 0; x < 400; x++) {
-			for(int y = 0; y < 400; y++) {
-				this->tiles[x][y] = 2;
-			}
-		}
+	for(unsigned i = 0; i < Size * Size * this->height; i++) {
+		this->offsets[i] = glm::vec2(0, 0);
+		this->textureIndices[i] = 2;
 	}
 
-	int width = 400;
-	int height = 400;
-	int total = 0;
-
-	int z = houseLayer ? 1 : 0;
-
-	unsigned int size = 400;
-	for(unsigned i = 0; i < size * size; i++) {
-		glm::ivec2 coordinate = tilemath::indexToCoordinate(i, size);
-		this->offsets[i] = tilemath::tileToScreen(glm::vec3(coordinate, z));
-		this->textureIndices[i] = this->tiles[coordinate.x][coordinate.y];
+	for(unsigned z = 0; z < this->height; z++) {
+		for(unsigned i = 0; i < Size * Size; i++) {
+			glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
+			this->offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z)) + tilemath::tileToScreen(glm::vec3((float)Size * this->position, 0.0));
+			this->textureIndices[i + z * Size * Size] = 2;
+		}
 	}
 	
 	// load vertices
@@ -88,7 +54,7 @@ RenderTestContainer::RenderTestContainer(bool houseLayer) {
 	// load offsets
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[2]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 160000, &this->offsets[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * RenderTestContainer::Size * RenderTestContainer::Size * this->height, &this->offsets[0], GL_STATIC_DRAW);
 
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glVertexAttribDivisor(2, 1);
@@ -98,7 +64,7 @@ RenderTestContainer::RenderTestContainer(bool houseLayer) {
 	// load texture indices
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[3]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(int) * 160000, this->textureIndices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(int) * RenderTestContainer::Size * RenderTestContainer::Size * this->height, this->textureIndices, GL_STATIC_DRAW);
 
 		glVertexAttribIPointer(3, 1, GL_INT, 0, 0);
 		glVertexAttribDivisor(3, 1);
@@ -106,20 +72,21 @@ RenderTestContainer::RenderTestContainer(bool houseLayer) {
 	}
 
 	// load textures
-	{
-		glGenTextures(1, &this->texture);
-		glBindTexture(GL_TEXTURE_2D, this->texture);
+	if(Image == nullptr) {
+		Image = new PNGImage("data/spritesheet.png");
+		glGenTextures(1, &Texture);
+		glBindTexture(GL_TEXTURE_2D, Texture);
 
 		glTexImage2D(
 			GL_TEXTURE_2D,
 			0,
-			this->image.getFormat(),
-			this->image.width,
-			this->image.height,
+			Image->getFormat(),
+			Image->width,
+			Image->height,
 			0,
-			this->image.getFormat(),
-			this->image.getType(),
-			this->image.image
+			Image->getFormat(),
+			Image->getType(),
+			Image->image
 		);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -153,10 +120,10 @@ void RenderTestContainer::render(double deltaTime, RenderContext &context) {
 	glBindVertexArray(this->vertexArrayObject);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, this->texture);
+	glBindTexture(GL_TEXTURE_2D, Texture);
 	glUniform1i(this->uniforms[1], 0); // bind texture
 
 	glUniformMatrix4fv(this->uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
 
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 400 * 400);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, RenderTestContainer::Size * RenderTestContainer::Size * this->height);
 }
