@@ -4,3 +4,11 @@ tmp
 *.o
 *.pyc
 __pycache__
+lib
+glad
+include/glad
+include/KHR
+include/glfw
+include/freetype
+include/ft2build.h
+tmp-setup
