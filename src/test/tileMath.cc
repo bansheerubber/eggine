@@ -5,9 +5,9 @@
 
 using namespace std;
 
-long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size, bool shouldPrint) {
-	long x = coordinate.x, y = coordinate.y;
-	if(coordinate.x + y < size) {
+long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size) {
+	long x = size - coordinate.x - 1, y = coordinate.y;
+	if(x + y < size) {
 		double q = x;
 		double m = y + q;
 		return lround(q + m * (m + 1) / 2);
@@ -18,11 +18,6 @@ long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size, bool shouldPr
 		double m = t - (dsize - 1);
 		double q = dsize - x - 1;
 		double start = -((m - dsize) * ((m - size + 1.0) / 2.0)) + size * size - 1.0;
-
-		if(shouldPrint) {
-			printf("%f %f %f %f %f\n", dsize, t, m, q, start);
-		}
-
 		return lround(start - q);
 	}
 }

@@ -10,6 +10,8 @@ using namespace std;
 template<class T>
 class InstancedRenderObjectContainer : public RenderObject {
 	public:
+		InstancedRenderObjectContainer(bool addToList) : RenderObject(addToList) {}
+
 		void addRenderObject(T* object) {
 			this->objects.push_back(object);
 		}

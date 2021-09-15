@@ -1,5 +1,5 @@
 #include <glad/gl.h>
-#include "renderTestContainer.h"
+#include "chunk.h"
 
 #include <random>
 
@@ -7,11 +7,13 @@
 #include "../util/doubleDimension.h"
 #include "tileMath.h"
 
-PNGImage* RenderTestContainer::Image = nullptr;
-GLuint RenderTestContainer::Texture = 0;
+PNGImage* Chunk::Image = nullptr;
+GLuint Chunk::Texture = 0;
 
-RenderTestContainer::RenderTestContainer(glm::vec2 position) {
+Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
 	this->position = position;
+
+	this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
 
 	glGenBuffers(4, this->vertexBufferObjects);
 	glGenVertexArrays(1, &this->vertexArrayObject);
@@ -28,7 +30,7 @@ RenderTestContainer::RenderTestContainer(glm::vec2 position) {
 	for(unsigned z = 0; z < this->height; z++) {
 		for(unsigned i = 0; i < Size * Size; i++) {
 			glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
-			this->offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z)) + tilemath::tileToScreen(glm::vec3((float)Size * this->position, 0.0));
+			this->offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z)) + tilemath::tileToScreen(glm::vec3(Size * this->position, 0.0));
 			this->textureIndices[i + z * Size * Size] = 2;
 		}
 	}
@@ -54,7 +56,7 @@ RenderTestContainer::RenderTestContainer(glm::vec2 position) {
 	// load offsets
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[2]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * RenderTestContainer::Size * RenderTestContainer::Size * this->height, &this->offsets[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * Chunk::Size * Chunk::Size * this->height, &this->offsets[0], GL_STATIC_DRAW);
 
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glVertexAttribDivisor(2, 1);
@@ -64,7 +66,7 @@ RenderTestContainer::RenderTestContainer(glm::vec2 position) {
 	// load texture indices
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[3]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(int) * RenderTestContainer::Size * RenderTestContainer::Size * this->height, this->textureIndices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(int) * Chunk::Size * Chunk::Size * this->height, this->textureIndices, GL_STATIC_DRAW);
 
 		glVertexAttribIPointer(3, 1, GL_INT, 0, 0);
 		glVertexAttribDivisor(3, 1);
@@ -96,34 +98,9 @@ RenderTestContainer::RenderTestContainer(glm::vec2 position) {
 	}
 
 	glBindVertexArray(0); // turn off vertex array object
-
-	RenderObject::CompileShader(
-		GL_VERTEX_SHADER,
-		&this->shaders[0],
-		#include "shaders/test.vert"
-	);
-
-	RenderObject::CompileShader(
-		GL_FRAGMENT_SHADER,
-		&this->shaders[1],
-		#include "shaders/test.frag"
-	);
-
-	if(RenderObject::LinkProgram(&this->shaderProgram, this->shaders, 2)) {
-		this->uniforms[0] = glGetUniformLocation(this->shaderProgram, "projection");
-		this->uniforms[1] = glGetUniformLocation(this->shaderProgram, "spriteTexture");
-	}
 }
 
-void RenderTestContainer::render(double deltaTime, RenderContext &context) {
-	glUseProgram(this->shaderProgram);
+void Chunk::render(double deltaTime, RenderContext &context) {
 	glBindVertexArray(this->vertexArrayObject);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture);
-	glUniform1i(this->uniforms[1], 0); // bind texture
-
-	glUniformMatrix4fv(this->uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
-
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, RenderTestContainer::Size * RenderTestContainer::Size * this->height);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, Chunk::Size * Chunk::Size * this->height);
 }

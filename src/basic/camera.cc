@@ -16,7 +16,7 @@ void Camera::see(double deltaTime) {
 	
 	double ratio = (double)engine->windowWidth / (double)engine->windowHeight;
 
-	double viewportWidth = 5;
+	double viewportWidth = 25;
 	double viewportHeight = viewportWidth / ratio;
 	
 	this->projectionMatrix = glm::ortho(

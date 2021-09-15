@@ -5,8 +5,7 @@
 
 namespace tilemath {
 	// convert an x y coordinate into a opengl buffer index
-	long coordinateToIndex(glm::ivec2 coordinate, long size, bool shouldPrint = false);
-
+	long coordinateToIndex(glm::ivec2 coordinate, long size);
 	// convert an opengl buffer index into x y coordinates
 	glm::uvec2 indexToCoordinate(long index, long size);
 
