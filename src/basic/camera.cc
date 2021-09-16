@@ -10,7 +10,7 @@ void Camera::see(double deltaTime) {
 	int left = glfwGetKey(engine->window, 'A');
 	int right = glfwGetKey(engine->window, 'D');
 
-	float speed = 1.0f;
+	float speed = 10.0f;
 	this->position.x += (float)right * speed * deltaTime - (float)left * speed * deltaTime;
 	this->position.y += (float)up * speed * deltaTime - (float)down * speed * deltaTime;
 	

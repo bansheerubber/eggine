@@ -36,10 +36,10 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		static PNGImage* Image;
 
 		float vertices[8] = {
-			-0.03f,  0.06f,
-			-0.03f, -0.06f,
-			0.03f, 0.06f,
-			0.03f, -0.06f
+			-0.5f,  1.0f,
+			-0.5f, -1.0f,
+			0.5f, 1.0f,
+			0.5f, -1.0f
 		};
 
 		float uvs[8] = {
