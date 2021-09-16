@@ -9,6 +9,7 @@
 #include "test/chunkContainer.h"
 #include "engine/engine.h"
 #include "basic/gameObject.h"
+#include "basic/line.h"
 #include "basic/pngImage.h"
 #include "basic/text.h"
 
@@ -19,15 +20,13 @@ int main(int argc, char* argv[]) {
 
 	ChunkContainer container;
 
-	size_t size = 5;
+	size_t size = 1;
 	size_t total = 0;
 	for(size_t i = 0; i < size * size; i++) {
 		Chunk* chunk = new Chunk(tilemath::indexToCoordinate(i, size));
 		total += chunk->height + Chunk::Size * Chunk::Size;
 		container.addChunk(chunk);
 	}
-
-	printf("%ld\n", total);
 
 	container.buildRenderOrder();
 
