@@ -35,12 +35,25 @@ void Engine::initialize() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glfwSetWindowSizeCallback(window, onWindowResize);
+	glfwSetKeyCallback(window, onKeyPress);
+
 	glfwSwapInterval(1);
 
 	this->debugText = new Text("Arial", 12);
 	this->debugText->color[0] = 0.0;
 	this->debugText->color[1] = 1.0;
 	this->debugText->color[2] = 0.0;
+
+	this->addKeybind(GLFW_KEY_EQUAL, binds::Keybind {
+		"camera.zoomIn",
+	});
+
+	this->addKeybind(GLFW_KEY_MINUS, binds::Keybind {
+		"camera.zoomOut",
+	});
+
+	this->registerBindPress("camera.zoomIn", &this->camera);
+	this->registerBindPress("camera.zoomOut", &this->camera);
 }
 
 void Engine::exit() {

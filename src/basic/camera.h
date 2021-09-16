@@ -9,8 +9,10 @@ class Camera : public GameObject {
 	public:
 		void see(double deltaTime);
 		glm::mat4 projectionMatrix;
+
+		void onBindPress(string &bind);
 	
 	private:
 		glm::vec2 position = glm::vec2(0, 0);
-		double zoom = 10;
+		double zoom = 1;
 };

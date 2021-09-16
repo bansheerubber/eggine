@@ -10,13 +10,13 @@ void Camera::see(double deltaTime) {
 	int left = glfwGetKey(engine->window, 'A');
 	int right = glfwGetKey(engine->window, 'D');
 
-	float speed = 10.0f;
-	this->position.x += (float)right * speed * deltaTime - (float)left * speed * deltaTime;
-	this->position.y += (float)up * speed * deltaTime - (float)down * speed * deltaTime;
+	float speed = deltaTime * 10.0f / this->zoom;
+	this->position.x += (float)right * speed - (float)left * speed;
+	this->position.y += (float)up * speed - (float)down * speed;
 	
 	double ratio = (double)engine->windowWidth / (double)engine->windowHeight;
 
-	double viewportWidth = 25;
+	double viewportWidth = 10 / this->zoom;
 	double viewportHeight = viewportWidth / ratio;
 	
 	this->projectionMatrix = glm::ortho(
@@ -27,4 +27,13 @@ void Camera::see(double deltaTime) {
 		-10.0,
 		10.0
 	);
+}
+
+void Camera::onBindPress(string &bind) {
+	if(bind == "camera.zoomIn") {
+		this->zoom += this->zoom * 0.2;
+	}
+	else if(bind == "camera.zoomOut") {
+		this->zoom += this->zoom * -0.2;
+	}
 }
