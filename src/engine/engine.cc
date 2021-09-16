@@ -54,6 +54,8 @@ void Engine::initialize() {
 
 	this->registerBindPress("camera.zoomIn", &this->camera);
 	this->registerBindPress("camera.zoomOut", &this->camera);
+	this->registerBindRelease("camera.zoomIn", &this->camera);
+	this->registerBindRelease("camera.zoomOut", &this->camera);
 }
 
 void Engine::exit() {
@@ -71,7 +73,8 @@ void Engine::tick() {
 	string text;
 	text = to_string((int)(1 / deltaTime)) + " fps\n";
 	text += fmt::format("{0:05d}", this->cpuRenderTime) + " us for CPU render time\n";
-	text += to_string(this->renderables.head + this->renderableUIs.head) + " renderables";
+	text += to_string(this->renderables.head + this->renderableUIs.head) + " renderables\n";
+	text += to_string(this->camera.getZoom()) + " zoom\n";
 	this->debugText->setText(text);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -81,6 +84,14 @@ void Engine::tick() {
 	}
 
 	glfwPollEvents();
+
+	// handle keybinds before we do anything else
+	if(this->heldEvents.size() > 0) {
+		for(auto &event: this->heldEvents) {
+			event.first->onBindHeld(event.second, deltaTime);
+		}
+		this->heldEvents.clear();
+	}
 
 	this->camera.see(deltaTime);
 	this->ui.update();

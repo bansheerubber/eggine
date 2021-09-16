@@ -58,6 +58,7 @@ class Engine {
 		robin_map<string, vector<GameObject*>> bindReleaseToGameObject;
 		robin_map<string, vector<GameObject*>> bindHeldToGameObject;
 		robin_map<int, vector<binds::Keybind>> keyToKeybind;
+		vector<pair<GameObject*, string>> heldEvents;
 };
 
 extern Engine* engine;

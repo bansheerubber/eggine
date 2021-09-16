@@ -11,8 +11,19 @@ class Camera : public GameObject {
 		glm::mat4 projectionMatrix;
 
 		void onBindPress(string &bind);
+		void onBindRelease(string &bind);
+
+		void setZoomLevel(float zoomLevel);
+		float getZoom();
 	
 	private:
 		glm::vec2 position = glm::vec2(0, 0);
-		double zoom = 1;
+		float zoomLevel = 5; // linear value that maps to quadratic
+		float minZoomLevel = 2.0;
+		float maxZoomLevel = 100.0;
+		
+		int zoomInRepeating = 0;
+		int zoomOutRepeating = 0;
+		double zoomInTimer = 0;
+		double zoomOutTimer = 0;
 };
