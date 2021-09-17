@@ -5,6 +5,7 @@
 
 #include "../basic/camera.h"
 #include "../util/doubleDimension.h"
+#include "../basic/line.h"
 #include "tileMath.h"
 
 PNGImage* Chunk::Image = nullptr;
@@ -12,6 +13,7 @@ GLuint Chunk::Texture = 0;
 
 Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
 	this->position = position;
+	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3(Size * this->position, 0.0));
 
 	this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
 
@@ -30,7 +32,7 @@ Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
 	for(unsigned z = 0; z < this->height; z++) {
 		for(unsigned i = 0; i < Size * Size; i++) {
 			glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
-			this->offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z)) + tilemath::tileToScreen(glm::vec3(Size * this->position, 0.0));
+			this->offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z)) + this->screenSpacePosition;
 			this->textureIndices[i + z * Size * Size] = 2;
 		}
 	}
@@ -98,9 +100,43 @@ Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
 	}
 
 	glBindVertexArray(0); // turn off vertex array object
+
+	this->defineBounds();
+}
+
+void Chunk::defineBounds() {
+	glm::vec2 bias(-0.5, -(32.0 / 2.0 + 39.0 * 2.0 + 2) / 128.0);
+
+	glm::vec2 top = tilemath::tileToScreen(glm::vec3(Size, 0, this->height)) + this->screenSpacePosition + bias;
+	glm::vec2 right = tilemath::tileToScreen(glm::vec3(Size, Size, 0)) + this->screenSpacePosition + bias;
+	glm::vec2 bottom = tilemath::tileToScreen(glm::vec3(0, Size, 0)) + this->screenSpacePosition + bias;
+	glm::vec2 left = tilemath::tileToScreen(glm::vec3(0, 0, 0)) + this->screenSpacePosition + bias;
+
+	this->left = left.x;
+	this->right = right.x;
+	this->top = top.y;
+	this->bottom = bottom.y;
+}
+
+void Chunk::buildDebugLines() {
+	this->debugLine = new Line();
+	this->debugLine->addPosition(glm::vec2(this->left, this->bottom));
+	this->debugLine->addPosition(glm::vec2(this->right, this->bottom));
+	this->debugLine->addPosition(glm::vec2(this->right, this->top));
+	this->debugLine->addPosition(glm::vec2(this->left, this->top));
+	this->debugLine->addPosition(glm::vec2(this->left, this->bottom));
+	this->debugLine->commit();
 }
 
 void Chunk::render(double deltaTime, RenderContext &context) {
-	glBindVertexArray(this->vertexArrayObject);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, Chunk::Size * Chunk::Size * this->height);
+	Camera* camera = context.camera;
+	if(!(
+		camera->left > this->right
+		|| camera->right < this->left
+		|| camera->top < this->bottom
+		|| camera->bottom > this->top
+	)) {
+		glBindVertexArray(this->vertexArrayObject);
+		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, Chunk::Size * Chunk::Size * this->height);
+	}
 }

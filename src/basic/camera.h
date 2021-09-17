@@ -15,6 +15,9 @@ class Camera : public GameObject {
 
 		void setZoomLevel(float zoomLevel);
 		float getZoom();
+
+		// keep track of view area bounds
+		double top = 0, right = 0, bottom = 0, left = 0;
 	
 	private:
 		glm::vec2 position = glm::vec2(0, 0);

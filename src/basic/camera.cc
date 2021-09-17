@@ -37,12 +37,17 @@ void Camera::see(double deltaTime) {
 
 	double viewportWidth = 10 / zoom;
 	double viewportHeight = viewportWidth / ratio;
+
+	this->top = viewportHeight / 2.0f + this->position.y;
+	this->right = viewportWidth / 2.0f + this->position.x;
+	this->bottom = -viewportHeight / 2.0f + this->position.y;
+	this->left = -viewportWidth / 2.0f + this->position.x;
 	
 	this->projectionMatrix = glm::ortho(
-		-viewportWidth / 2.0f + this->position.x,
-		viewportWidth / 2.0f + this->position.x,
-		-viewportHeight / 2.0f + this->position.y,
-		viewportHeight / 2.0f + this->position.y,
+		this->left,
+		this->right,
+		this->bottom,
+		this->top,
 		-10.0,
 		10.0
 	);

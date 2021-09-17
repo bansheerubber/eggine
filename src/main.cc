@@ -20,13 +20,14 @@ int main(int argc, char* argv[]) {
 
 	ChunkContainer container;
 
-	size_t size = 1;
+	size_t size = 50;
 	size_t total = 0;
 	for(size_t i = 0; i < size * size; i++) {
 		Chunk* chunk = new Chunk(tilemath::indexToCoordinate(i, size));
 		total += chunk->height + Chunk::Size * Chunk::Size;
 		container.addChunk(chunk);
 	}
+	printf("%ld\n", total);
 
 	container.buildRenderOrder();
 

@@ -41,6 +41,6 @@ glm::uvec2 tilemath::indexToCoordinate(long index, long size) {
 glm::vec2 tilemath::tileToScreen(glm::vec3 coordinate) {
 	return glm::vec2(
 		coordinate.x * 1.0f / 2 + coordinate.y * 1.0f / 2,
-		-(coordinate.x * -1.0f / 4 + coordinate.y * 1.0f / 4 - coordinate.z * 39 / 64)
+		-(coordinate.x * -1.0f / 4 + coordinate.y * 1.0f / 4 - coordinate.z * 39.0 / 64.0)
 	);
 }

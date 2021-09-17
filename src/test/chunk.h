@@ -22,18 +22,26 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		int* textureIndices = nullptr;
 
 		glm::ivec2 position = glm::vec2(0, 0);
+		glm::vec2 screenSpacePosition;
 		int height = 5;
 
 		static constexpr int Size = 25;
 		static GLuint Texture;
 	
 	protected:
+		void buildDebugLines();
+		void defineBounds();
+		
 		GLuint vertexBufferObjects[4];
 		GLuint vertexArrayObject;
+
+		class Line* debugLine = nullptr;
 
 		tsl::robin_map<int, tsl::robin_map<int, int>> tiles;
 
 		static PNGImage* Image;
+
+		double top = 0, right = 0, bottom = 0, left = 0;
 
 		float vertices[8] = {
 			-0.5f,  1.0f,
