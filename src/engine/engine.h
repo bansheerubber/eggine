@@ -4,6 +4,7 @@
 #include FT_FREETYPE_H
 #include <glfw/glfw3.h>
 #include <tsl/robin_map.h>
+#include <torquescript/ts.h>
 #include <vector>
 
 #include "../basic/camera.h"
@@ -42,7 +43,10 @@ class Engine {
 		FT_Library ft;
 
 	private:
-		long long cpuRenderTime = 0.0f;
+		tsEngine torquescript = nullptr;
+		
+		long long cpuRenderTime = 0;
+		long long torquescriptTickTime = 0;
 		
 		GLFWwindow* window;
 		Camera camera;

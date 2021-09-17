@@ -55,6 +55,9 @@ void Engine::initialize() {
 	this->registerBindPress("camera.zoomOut", &this->camera);
 	this->registerBindRelease("camera.zoomIn", &this->camera);
 	this->registerBindRelease("camera.zoomOut", &this->camera);
+
+	this->torquescript = tsCreateEngine(false);
+	tsExecFile(this->torquescript, "main.cs");
 }
 
 void Engine::exit() {
@@ -72,6 +75,7 @@ void Engine::tick() {
 	string text;
 	text = to_string((int)(1 / deltaTime)) + " fps\n";
 	text += fmt::format("{0:05d}", this->cpuRenderTime) + " us for CPU render time\n";
+	text += fmt::format("{0:05d}", this->torquescriptTickTime) + " us for TS tick time\n";
 	text += to_string(this->renderables.head + this->renderableUIs.head) + " renderables\n";
 	text += to_string(this->camera.getZoom()) + " zoom\n";
 	this->debugText->setText(text);
@@ -83,6 +87,11 @@ void Engine::tick() {
 	}
 
 	glfwPollEvents();
+
+	// handle torquescript
+	long long tsStartTime = getMicrosecondsNow();
+	tsTick(this->torquescript);
+	this->torquescriptTickTime = getMicrosecondsNow() - tsStartTime;
 
 	// handle keybinds before we do anything else
 	if(this->heldEvents.size() > 0) {

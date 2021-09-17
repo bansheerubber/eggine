@@ -1,5 +1,5 @@
 target = game
-cclibs = -lpthread -lGL -lglfw3 -ldl -lpng -lfreetype
+cclibs = -lpthread -lGL -lglfw3 -ldl -lpng -lfreetype -ltorquescript
 ccinclude = -Iinclude/glm/ -Iinclude -Iinclude/robin-map/include -Iinclude/fmt/include/ -Llib
 CC = g++
 CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
@@ -41,7 +41,7 @@ $(cpp_objects_tmp) : %.o : %.cc
 dist/$(target): $(cpp_objects_tmp) glad/gl.o
 	@mkdir -p $(dir dist/$(target))
 	@echo -e "   CC      $@"
-	@$(CC) $(cpp_objects_tmp) glad/gl.o -Wall $(cclibs) $(ccinclude) -o $@
+	@$(CC) $(cpp_objects_tmp) glad/gl.o -Wall $(ccinclude) $(cclibs) -o $@
 
 clean:
 	@echo -e "   RM      tmp"

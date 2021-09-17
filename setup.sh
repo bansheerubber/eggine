@@ -46,5 +46,19 @@ cd ..
 rm -Rf include/freetype
 rm include/ft2build.h
 mv -v tmp-setup/freetype/include/* include/
+echo -e "\033[0;32mFinished freetype"
+tput sgr0
+
+# configure torquescript
+pushd .
+cd tmp-setup
+git clone --recurse-submodules https://github.com/bansheerubber/torquescript-interpreter
+cd torquescript-interpreter
+git checkout tssl-and-friends
+make -j 8 library
+popd
+cp -v tmp-setup/torquescript-interpreter/dist/libtorquescript.so lib
+echo -e "\033[0;32mFinished torquescript"
+tput sgr0
 
 rm -Rf tmp-setup

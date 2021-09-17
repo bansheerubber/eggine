@@ -4,6 +4,7 @@
 #include <glfw/glfw3.h>
 #include <random>
 #include <stdio.h>
+#include <torquescript/ts.h>
 
 #include "test/chunk.h"
 #include "test/chunkContainer.h"
