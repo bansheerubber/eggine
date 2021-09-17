@@ -3,7 +3,7 @@
 mkdir -p tmp-setup
 
 # download glad
-wget -O tmp-setup/glad.zip https://bansheerubber.com/i/f/U3TGe.zip
+wget -O tmp-setup/glad.zip https://bansheerubber.com/i/f/_8dqL.zip
 unzip tmp-setup/glad.zip -d tmp-setup/glad
 
 # configure glad

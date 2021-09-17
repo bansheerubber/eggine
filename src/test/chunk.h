@@ -32,25 +32,27 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 		
-		GLuint vertexBufferObjects[4];
+		GLuint vertexBufferObjects[1];
 		GLuint vertexArrayObject;
 
 		class Line* debugLine = nullptr;
 
 		tsl::robin_map<int, tsl::robin_map<int, int>> tiles;
 
-		static PNGImage* Image;
-
 		double top = 0, right = 0, bottom = 0, left = 0;
 
-		float vertices[8] = {
+		static PNGImage* Image;
+		static glm::vec2 Offsets[];
+		static GLuint VertexBufferObjects[];
+
+		static constexpr float Vertices[8] = {
 			-0.5f,  1.0f,
 			-0.5f, -1.0f,
 			0.5f, 1.0f,
 			0.5f, -1.0f
 		};
 
-		float uvs[8] = {
+		static constexpr float UVs[8] = {
 			0.0f, 0.0f,
 			0.0f, 1.0f,
 			1.0f, 0.0f,

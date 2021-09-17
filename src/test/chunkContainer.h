@@ -17,12 +17,12 @@ class ChunkContainer: public RenderObject {
 		void buildRenderOrder();
 
 		void render(double deltaTime, RenderContext &context);
+
+		static GLuint Shaders[];
+		static GLuint Uniforms[];
+		static GLuint ShaderProgram;
 	
 	private:
-		GLuint shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
-		GLuint uniforms[2];
-		GLuint shaderProgram = GL_INVALID_INDEX;
-		
 		vector<class Chunk*> chunks;
 		DynamicArray<class Chunk*, ChunkContainer> renderOrder = DynamicArray<class Chunk*, ChunkContainer>(this, 8, initChunk, nullptr);
 };

@@ -5,6 +5,10 @@
 #include "chunk.h"
 #include "tileMath.h"
 
+GLuint ChunkContainer::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
+GLuint ChunkContainer::Uniforms[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
+GLuint ChunkContainer::ShaderProgram = GL_INVALID_INDEX;
+
 void initChunk(class ChunkContainer* container, class Chunk** chunk) {
 	*chunk = nullptr;
 }
@@ -12,19 +16,20 @@ void initChunk(class ChunkContainer* container, class Chunk** chunk) {
 ChunkContainer::ChunkContainer() {
 	RenderObject::CompileShader(
 		GL_VERTEX_SHADER,
-		&this->shaders[0],
+		&ChunkContainer::Shaders[0],
 		#include "shaders/test.vert"
 	);
 
 	RenderObject::CompileShader(
 		GL_FRAGMENT_SHADER,
-		&this->shaders[1],
+		&ChunkContainer::Shaders[1],
 		#include "shaders/test.frag"
 	);
 
-	if(RenderObject::LinkProgram(&this->shaderProgram, this->shaders, 2)) {
-		this->uniforms[0] = glGetUniformLocation(this->shaderProgram, "projection");
-		this->uniforms[1] = glGetUniformLocation(this->shaderProgram, "spriteTexture");
+	if(RenderObject::LinkProgram(&ChunkContainer::ShaderProgram, ChunkContainer::Shaders, 2)) {
+		ChunkContainer::Uniforms[0] = glGetUniformLocation(ChunkContainer::ShaderProgram, "projection");
+		ChunkContainer::Uniforms[1] = glGetUniformLocation(ChunkContainer::ShaderProgram, "spriteTexture");
+		ChunkContainer::Uniforms[2] = glGetUniformLocation(ChunkContainer::ShaderProgram, "chunkScreenSpace");
 	}
 }
 
@@ -56,12 +61,12 @@ void ChunkContainer::buildRenderOrder() {
 }
 
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
-	glUseProgram(this->shaderProgram);
+	glUseProgram(ChunkContainer::ShaderProgram);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Chunk::Texture);
-	glUniform1i(this->uniforms[1], 0); // bind texture
+	glUniform1i(ChunkContainer::Uniforms[1], 0); // bind texture
 
-	glUniformMatrix4fv(this->uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
+	glUniformMatrix4fv(ChunkContainer::Uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
 
 	for(size_t i = 0; i < this->renderOrder.head; i++) {
 		if(this->renderOrder[i] != nullptr) {

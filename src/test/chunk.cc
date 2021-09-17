@@ -4,62 +4,104 @@
 #include <random>
 
 #include "../basic/camera.h"
+#include "chunkContainer.h"
 #include "../util/doubleDimension.h"
 #include "../basic/line.h"
 #include "tileMath.h"
 
 PNGImage* Chunk::Image = nullptr;
-GLuint Chunk::Texture = 0;
+GLuint Chunk::Texture = GL_INVALID_INDEX;
+
+glm::vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
+GLuint Chunk::VertexBufferObjects[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 
 Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
+	// initialize dynamic static data
+	if(Image == nullptr) {
+		glGenBuffers(3, Chunk::VertexBufferObjects);
+		glGenTextures(1, &Chunk::Texture);
+
+		// load image
+		{	
+			Chunk::Image = new PNGImage("data/spritesheet.png");
+			glBindTexture(GL_TEXTURE_2D, Chunk::Texture);
+
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				Chunk::Image->getFormat(),
+				Chunk::Image->width,
+				Chunk::Image->height,
+				0,
+				Image->getFormat(),
+				Image->getType(),
+				Image->image
+			);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		}
+
+		// pre-calculate offsets
+		{
+			for(unsigned i = 0; i < Size * Size; i++) {
+				for(unsigned z = 0; z < 15; z++) {
+					glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
+					Chunk::Offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z));
+				}
+			}
+
+			glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[0]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * Chunk::Size * Chunk::Size * 15, &Chunk::Offsets[0], GL_STATIC_DRAW);
+		}
+
+		// vertices for square
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[1]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(Chunk::Vertices), Chunk::Vertices, GL_STATIC_DRAW);
+		}
+
+		// uvs for square
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[2]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(Chunk::UVs), Chunk::UVs, GL_STATIC_DRAW);
+		}
+	}
+	
+	// on with creating the chunk
 	this->position = position;
 	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3(Size * this->position, 0.0));
 
 	this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
 
-	glGenBuffers(4, this->vertexBufferObjects);
+	glGenBuffers(1, this->vertexBufferObjects);
 	glGenVertexArrays(1, &this->vertexArrayObject);
 	glBindVertexArray(this->vertexArrayObject);
 
-	this->offsets = new glm::vec2[Size * Size * this->height];
 	this->textureIndices = new int[Size * Size * this->height];
-
 	for(unsigned i = 0; i < Size * Size * this->height; i++) {
-		this->offsets[i] = glm::vec2(0, 0);
 		this->textureIndices[i] = 2;
-	}
-
-	for(unsigned z = 0; z < this->height; z++) {
-		for(unsigned i = 0; i < Size * Size; i++) {
-			glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
-			this->offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z)) + this->screenSpacePosition;
-			this->textureIndices[i + z * Size * Size] = 2;
-		}
 	}
 	
 	// load vertices
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(this->vertices), this->vertices, GL_STATIC_DRAW);
-
+		glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[1]);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 	}
 
 	// load uvs
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[1]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(this->uvs), this->uvs, GL_STATIC_DRAW);
-
+		glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[2]);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(1);
 	}
 
 	// load offsets
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[2]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * Chunk::Size * Chunk::Size * this->height, &this->offsets[0], GL_STATIC_DRAW);
-
+		glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[0]);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glVertexAttribDivisor(2, 1);
 		glEnableVertexAttribArray(2);
@@ -67,36 +109,12 @@ Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
 
 	// load texture indices
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[3]);
+		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(int) * Chunk::Size * Chunk::Size * this->height, this->textureIndices, GL_STATIC_DRAW);
 
 		glVertexAttribIPointer(3, 1, GL_INT, 0, 0);
 		glVertexAttribDivisor(3, 1);
 		glEnableVertexAttribArray(3);
-	}
-
-	// load textures
-	if(Image == nullptr) {
-		Image = new PNGImage("data/spritesheet.png");
-		glGenTextures(1, &Texture);
-		glBindTexture(GL_TEXTURE_2D, Texture);
-
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			Image->getFormat(),
-			Image->width,
-			Image->height,
-			0,
-			Image->getFormat(),
-			Image->getType(),
-			Image->image
-		);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 
 	glBindVertexArray(0); // turn off vertex array object
@@ -137,6 +155,7 @@ void Chunk::render(double deltaTime, RenderContext &context) {
 		|| camera->bottom > this->top
 	)) {
 		glBindVertexArray(this->vertexArrayObject);
+		glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, Chunk::Size * Chunk::Size * this->height);
 	}
 }
