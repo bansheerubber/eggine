@@ -6,12 +6,13 @@ layout(location = 2) in vec2 vOffset;
 layout(location = 3) in int vTextureIndex;
 
 uniform mat4 projection;
+uniform vec2 chunkScreenSpace;
 
 out vec2 uv;
 flat out int textureIndex;
 
 void main() {
-	gl_Position = projection * vec4(vPosition + vOffset, 0.0f, 1.0f);
+	gl_Position = projection * vec4(vPosition + vOffset + chunkScreenSpace, 0.0f, 1.0f);
 	uv = vUV;
 	textureIndex = vTextureIndex;
 }
