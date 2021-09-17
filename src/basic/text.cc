@@ -85,27 +85,27 @@ void Text::updateBuffers() {
 			float u2 = ch.maxUV.x;
 			float v2 = ch.maxUV.y;
 
+			vertices[total][0] = xpos + w;
+			vertices[total][1] = ypos;
+			uvs[total][0] = u2;
+			uvs[total][1] = v1;
+			total++;
+
+			vertices[total][0] = xpos;
+			vertices[total][1] = ypos;
+			uvs[total][0] = u1;
+			uvs[total][1] = v1;
+			total++;
+
 			vertices[total][0] = xpos;
 			vertices[total][1] = ypos + h;
 			uvs[total][0] = u1;
 			uvs[total][1] = v2;
 			total++;
 
-			vertices[total][0] = xpos;
-			vertices[total][1] = ypos;
-			uvs[total][0] = u1;
-			uvs[total][1] = v1;
-			total++;
-
 			vertices[total][0] = xpos + w;
-			vertices[total][1] = ypos;
-			uvs[total][0] = u2;
-			uvs[total][1] = v1;
-			total++;
-
-			vertices[total][0] = xpos;
 			vertices[total][1] = ypos + h;
-			uvs[total][0] = u1;
+			uvs[total][0] = u2;
 			uvs[total][1] = v2;
 			total++;
 
@@ -115,9 +115,9 @@ void Text::updateBuffers() {
 			uvs[total][1] = v1;
 			total++;
 
-			vertices[total][0] = xpos + w;
+			vertices[total][0] = xpos;
 			vertices[total][1] = ypos + h;
-			uvs[total][0] = u2;
+			uvs[total][0] = u1;
 			uvs[total][1] = v2;
 			total++;
 

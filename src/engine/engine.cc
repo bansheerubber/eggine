@@ -6,8 +6,6 @@
 #include <glm/vec3.hpp>
 #include <stdio.h>
 
-#include <iostream>
-
 #include "callbacks.h"
 #include "../basic/renderContext.h"
 #include "../util/time.h"
@@ -32,6 +30,7 @@ void Engine::initialize() {
 	gladLoadGL(glfwGetProcAddress);
 
 	glEnable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glfwSetWindowSizeCallback(window, onWindowResize);
