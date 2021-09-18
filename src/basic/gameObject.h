@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <string>
 
+#include <torquescript/ts.h>
+
 using namespace std;
 
 class GameObject {
@@ -16,6 +18,8 @@ class GameObject {
 		int operator==(const GameObject &other) {
 			return this->id == other.id;
 		}
+
+		tsObjectReferencePtr reference = nullptr;
 	
 	protected:
 		size_t id;

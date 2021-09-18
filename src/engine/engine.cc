@@ -12,7 +12,24 @@
 
 Engine* engine = new Engine();
 
+tsEntryPtr ts__getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
+	tsEntryPtr entry = new tsEntry();
+	entry->type = TS_ENTRY_OBJECT;
+	entry->objectData = engine->camera->reference;
+	return entry;
+}
+
+tsEntryPtr ts__Camera__setPosition(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
+	if(argc == 3 && tsCompareNamespaceToObject(args[0].objectData, "Camera")) {
+		((Camera*)args[0].objectData->objectWrapper->data)->setPosition(glm::vec2(args[1].numberData, args[2].numberData));
+	}
+	
+	return nullptr;
+}
+
 void Engine::initialize() {
+	this->torquescript = tsCreateEngine(false);
+	
 	FT_Init_FreeType(&this->ft);
 
 	if(!glfwInit()) {
@@ -51,12 +68,23 @@ void Engine::initialize() {
 		"camera.zoomOut",
 	});
 
-	this->registerBindPress("camera.zoomIn", &this->camera);
-	this->registerBindPress("camera.zoomOut", &this->camera);
-	this->registerBindRelease("camera.zoomIn", &this->camera);
-	this->registerBindRelease("camera.zoomOut", &this->camera);
+	// torquescript definitions
+	tsRegisterNamespace(this->torquescript, "Camera");
+	tsNamespaceInherit(this->torquescript, "SimObject", "Camera");
+	tsRegisterFunction(this->torquescript, TS_ENTRY_OBJECT, ts__getActiveCamera, "getActiveCamera", 0, nullptr);
 
-	this->torquescript = tsCreateEngine(false);
+	tsEntryType setPositionArguments[3] = {TS_ENTRY_OBJECT, TS_ENTRY_NUMBER, TS_ENTRY_NUMBER};
+	tsRegisterMethod(this->torquescript, TS_ENTRY_INVALID, ts__Camera__setPosition, "Camera", "setPosition", 3, setPositionArguments);
+
+	// create camera once we're done with torquescript definitions
+	this->camera = new Camera();
+
+	this->registerBindPress("camera.zoomIn", this->camera);
+	this->registerBindPress("camera.zoomOut", this->camera);
+	this->registerBindRelease("camera.zoomIn", this->camera);
+	this->registerBindRelease("camera.zoomOut", this->camera);
+
+	// execute torquescript file
 	tsExecFile(this->torquescript, "main.cs");
 }
 
@@ -77,7 +105,7 @@ void Engine::tick() {
 	text += fmt::format("{0:05d}", this->cpuRenderTime) + " us for CPU render time\n";
 	text += fmt::format("{0:05d}", this->torquescriptTickTime) + " us for TS tick time\n";
 	text += to_string(this->renderables.head + this->renderableUIs.head) + " renderables\n";
-	text += to_string(this->camera.getZoom()) + " zoom\n";
+	text += to_string(this->camera->getZoom()) + " zoom\n";
 	this->debugText->setText(text);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -101,7 +129,7 @@ void Engine::tick() {
 		this->heldEvents.clear();
 	}
 
-	this->camera.see(deltaTime);
+	this->camera->see(deltaTime);
 	this->ui.update();
 
 	if(glfwWindowShouldClose(this->window)) {
@@ -109,7 +137,7 @@ void Engine::tick() {
 	}
 
 	RenderContext context = {
-		camera: &this->camera,
+		camera: this->camera,
 		ui: &this->ui,
 	};
 

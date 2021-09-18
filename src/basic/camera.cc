@@ -4,6 +4,10 @@
 
 #include "../engine/engine.h"
 
+Camera::Camera() {
+	this->reference = tsCreateObject(engine->torquescript, "Camera", this);
+}
+
 void Camera::see(double deltaTime) {
 	this->zoomInTimer += deltaTime;
 	this->zoomOutTimer += deltaTime;
@@ -51,6 +55,10 @@ void Camera::see(double deltaTime) {
 		-10.0,
 		10.0
 	);
+}
+
+void Camera::setPosition(glm::vec2 position) {
+	this->position = position;
 }
 
 void Camera::onBindPress(string &bind) {

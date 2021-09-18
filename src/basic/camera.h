@@ -7,6 +7,8 @@
 
 class Camera : public GameObject {
 	public:
+		Camera();
+		
 		void see(double deltaTime);
 		glm::mat4 projectionMatrix;
 
@@ -15,6 +17,8 @@ class Camera : public GameObject {
 
 		void setZoomLevel(float zoomLevel);
 		float getZoom();
+
+		void setPosition(glm::vec2 position);
 
 		// keep track of view area bounds
 		double top = 0, right = 0, bottom = 0, left = 0;
