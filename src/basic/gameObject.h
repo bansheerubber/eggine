@@ -7,11 +7,6 @@
 
 using namespace std;
 
-enum GameObjectType {
-	INVALID = 0,
-	CHUNK_CONTAINER = 1,
-};
-
 class GameObject {
 	public:
 		GameObject();

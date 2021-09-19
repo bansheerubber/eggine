@@ -15,9 +15,7 @@ class ChunkContainer: public RenderObject {
 	public:
 		ChunkContainer();
 
-		virtual GameObjectType getType() {
-			return CHUNK_CONTAINER;
-		}
+		// ## game_object_definitions ChunkContainer
 		
 		void addChunk(class Chunk* container);
 		void buildRenderOrder();

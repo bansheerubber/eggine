@@ -18,6 +18,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	public:
 		Chunk(glm::vec2 position);
 
+		// ## game_object_definitions Chunk
+
 		void render(double deltaTime, RenderContext &context);
 
 		glm::vec2* offsets = nullptr;

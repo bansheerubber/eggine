@@ -16,6 +16,13 @@ def write_file(filename, contents):
 ts_definition_headers = []
 ts_definition_functions = []
 
+game_object_type_enums = []
+
+snake_case_regex = re.compile(r"(?<!^)(?=[A-Z])")
+def to_snake_case(name):
+	global snake_case_regex
+	return snake_case_regex.sub("_", name).upper()
+
 def preprocess(filename, contents, directory = None):
 	global total_lines
 	global ts_definition_headers
@@ -24,7 +31,7 @@ def preprocess(filename, contents, directory = None):
 	if "include" not in filename:
 		total_lines = total_lines + len(contents)
 	
-	pattern = r'^[\s]*?##(.+)$'
+	pattern = r'^[\s]*?// ##(.+)$'
 	new_contents = []
 	read_namespace = False
 	for line in contents:
@@ -46,6 +53,10 @@ def preprocess(filename, contents, directory = None):
 
 			if ".py" in command:
 				command = f"cd {directory} && python3 {command}"
+			elif "game_object_definitions" in command:
+				rest = " ".join(command.split(" ")[1:])
+				game_object_type_enums.append(to_snake_case(rest.split(" ")[0]))
+				command = f"python3 tools/game_object_definitions.py {rest}"
 			else:
 				command = f"cd {directory} && {command}"
 
@@ -129,3 +140,21 @@ if __name__ == "__main__":
 	
 	file.close()
 	write_file(torquescript_code_tmp, torquescript_code_contents)
+
+	# handle gameObject.h
+	game_object_header = "./src/basic/gameObject.h"
+	game_object_header_tmp = "./tmp/basic/gameObject.h"
+	game_object_header_contents = []
+	file = open(game_object_header)
+	for line in file.readlines():
+		if "class GameObject" in line:
+			game_object_header_contents.append("enum GameObjectType {\n")
+			game_object_header_contents.append("INVALID = 0,\n")
+			for enum_type in game_object_type_enums:
+				game_object_header_contents.append(f"{enum_type},\n")
+			game_object_header_contents.append("};\n")
+		
+		game_object_header_contents.append(line)
+	
+	file.close()
+	write_file(game_object_header_tmp, game_object_header_contents)

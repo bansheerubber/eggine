@@ -8,6 +8,8 @@
 class Camera : public GameObject {
 	public:
 		Camera();
+
+		// ## game_object_definitions Camera
 		
 		void see(double deltaTime);
 		glm::mat4 projectionMatrix;
