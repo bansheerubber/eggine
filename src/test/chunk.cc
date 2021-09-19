@@ -157,5 +157,9 @@ void Chunk::render(double deltaTime, RenderContext &context) {
 		glBindVertexArray(this->vertexArrayObject);
 		glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, Chunk::Size * Chunk::Size * this->height);
+		this->isCulled = false;
+	}
+	else {
+		this->isCulled = true;
 	}
 }

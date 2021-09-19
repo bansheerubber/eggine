@@ -79,15 +79,14 @@ void Engine::tick() {
 	double deltaTime = (startTime - this->lastRenderTime) / 1000000.0;
 	this->lastRenderTime = getMicrosecondsNow();
 
-	string text;
-	text = to_string((int)(1 / deltaTime)) + " fps\n";
-	text += fmt::format("{0:05d}", this->cpuRenderTime) + " us for CPU render time\n";
-	text += fmt::format("{0:05d}", this->torquescriptTickTime) + " us for TS tick time\n";
-	text += to_string(this->renderables.head + this->renderableUIs.head) + " renderables\n";
-	text += to_string(this->camera->getZoom()) + " zoom\n";
-	this->debugText->setText(text);
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	this->debug.clearInfoMessages();
+
+	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
+	this->debug.addInfoMessage(fmt::format("{0:05d} us for CPU render time", this->cpuRenderTime));
+	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->torquescriptTickTime));
+	this->debug.addInfoMessage(fmt::format("{} renderables", this->renderables.head + this->renderableUIs.head));
+	this->debug.addInfoMessage(fmt::format("{} zoom", this->camera->getZoom()));
 
 	if(deltaTime > 1.0) {
 		deltaTime = 0;
@@ -124,6 +123,8 @@ void Engine::tick() {
 	for(size_t i = 0; i < this->renderables.head; i++) {
 		this->renderables[i]->render(deltaTime, context);
 	}
+
+	this->debugText->setText(this->debug.getInfoText());
 
 	for(size_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);

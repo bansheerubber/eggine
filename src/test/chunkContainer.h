@@ -10,8 +10,14 @@ using namespace std;
 void initChunk(class ChunkContainer* container, class Chunk** chunk);
 
 class ChunkContainer: public RenderObject {
+	friend class Engine;
+	
 	public:
 		ChunkContainer();
+
+		virtual GameObjectType getType() {
+			return CHUNK_CONTAINER;
+		}
 		
 		void addChunk(class Chunk* container);
 		void buildRenderOrder();

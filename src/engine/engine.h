@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../basic/camera.h"
+#include "debug.h"
 #include "../util/dynamicArray.h"
 #include "keybind.h"
 #include "../basic/text.h"
@@ -43,6 +44,10 @@ class Engine {
 
 		FT_Library ft;
 		tsEnginePtr torquescript = nullptr;
+
+		#ifdef EGGINE_DEBUG
+		Debug debug;
+		#endif
 
 	private:
 		long long cpuRenderTime = 0;

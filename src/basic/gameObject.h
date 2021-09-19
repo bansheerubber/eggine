@@ -7,9 +7,18 @@
 
 using namespace std;
 
+enum GameObjectType {
+	INVALID = 0,
+	CHUNK_CONTAINER = 1,
+};
+
 class GameObject {
 	public:
 		GameObject();
+		
+		virtual GameObjectType getType() {
+			return INVALID;
+		}
 
 		virtual void onBindPress(string &bind) {}
 		virtual void onBindRelease(string &bind) {}

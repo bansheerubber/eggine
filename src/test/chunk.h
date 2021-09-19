@@ -13,6 +13,8 @@
 class Tile;
 
 class Chunk : public InstancedRenderObjectContainer<Tile> {
+	friend class ChunkContainer;
+	
 	public:
 		Chunk(glm::vec2 position);
 
@@ -31,6 +33,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	protected:
 		void buildDebugLines();
 		void defineBounds();
+
+		bool isCulled = false;
 		
 		GLuint vertexBufferObjects[1];
 		GLuint vertexArrayObject;

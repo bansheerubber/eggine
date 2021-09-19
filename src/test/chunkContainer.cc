@@ -1,8 +1,12 @@
 #include <glad/gl.h>
 #include "chunkContainer.h"
 
+#include <fmt/format.h>
+
 #include "../basic/camera.h"
 #include "chunk.h"
+#include "../engine/debug.h"
+#include "../engine/engine.h"
 #include "tileMath.h"
 
 GLuint ChunkContainer::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
@@ -68,9 +72,26 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 
 	glUniformMatrix4fv(ChunkContainer::Uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
 
+	size_t chunksRendered = 0;
+	size_t tilesRendered = 0;
+	size_t tiles = 0;
+
 	for(size_t i = 0; i < this->renderOrder.head; i++) {
-		if(this->renderOrder[i] != nullptr) {
-			this->renderOrder[i]->render(deltaTime, context);
+		Chunk* chunk = this->renderOrder[i];
+		if(chunk != nullptr) {
+			chunk->render(deltaTime, context);
+
+			if(!chunk->isCulled) {
+				chunksRendered++;
+				tilesRendered += Chunk::Size * Chunk::Size * chunk->height;
+			}
+
+			tiles += Chunk::Size * Chunk::Size * chunk->height;
 		}
 	}
+
+	#ifdef EGGINE_DEBUG
+	engine->debug.addInfoMessage(fmt::format("{}/{} chunks rendered", chunksRendered, this->renderOrder.head));
+	engine->debug.addInfoMessage(fmt::format("{}/{} tiles rendered", tilesRendered, tiles));
+	#endif
 }
