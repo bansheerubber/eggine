@@ -90,3 +90,28 @@ void Camera::setZoomLevel(float zoomLevel) {
 float Camera::getZoom() {
 	return 3.0f / this->zoomLevel;
 }
+
+// torquescript bindings
+void ts::defineCamera() {
+	tsRegisterNamespace(engine->torquescript, "Camera");
+	tsNamespaceInherit(engine->torquescript, "SimObject", "Camera");
+
+	tsRegisterFunction(engine->torquescript, TS_ENTRY_OBJECT, ts::getActiveCamera, "getActiveCamera", 0, nullptr);
+	tsEntryType setPositionArguments[3] = {TS_ENTRY_OBJECT, TS_ENTRY_NUMBER, TS_ENTRY_NUMBER};
+	tsRegisterMethod(engine->torquescript, TS_ENTRY_INVALID, ts::Camera__setPosition, "Camera", "setPosition", 3, setPositionArguments);
+}
+
+tsEntryPtr ts::getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
+	tsEntryPtr entry = new tsEntry();
+	entry->type = TS_ENTRY_OBJECT;
+	entry->objectData = engine->camera->reference;
+	return entry;
+}
+
+tsEntryPtr ts::Camera__setPosition(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
+	if(argc == 3 && tsCompareNamespaceToObject(args[0].objectData, "Camera")) {
+		((Camera*)args[0].objectData->objectWrapper->data)->setPosition(glm::vec2(args[1].numberData, args[2].numberData));
+	}
+	
+	return nullptr;
+}

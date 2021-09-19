@@ -22,7 +22,7 @@ void engineInitRenderables(class Engine*, RenderObject** object);
 class Engine {
 	friend Camera;
 	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
-	friend tsEntryPtr ts__getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
+	friend tsEntryPtr ts::getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
 	
 	public:
 		void initialize();
@@ -42,10 +42,9 @@ class Engine {
 		int windowHeight;
 
 		FT_Library ft;
+		tsEnginePtr torquescript = nullptr;
 
 	private:
-		tsEnginePtr torquescript = nullptr;
-		
 		long long cpuRenderTime = 0;
 		long long torquescriptTickTime = 0;
 		

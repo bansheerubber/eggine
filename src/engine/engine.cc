@@ -9,26 +9,13 @@
 #include "callbacks.h"
 #include "../basic/renderContext.h"
 #include "../util/time.h"
+#include "torquescript.h"
 
 Engine* engine = new Engine();
 
-tsEntryPtr ts__getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	tsEntryPtr entry = new tsEntry();
-	entry->type = TS_ENTRY_OBJECT;
-	entry->objectData = engine->camera->reference;
-	return entry;
-}
-
-tsEntryPtr ts__Camera__setPosition(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	if(argc == 3 && tsCompareNamespaceToObject(args[0].objectData, "Camera")) {
-		((Camera*)args[0].objectData->objectWrapper->data)->setPosition(glm::vec2(args[1].numberData, args[2].numberData));
-	}
-	
-	return nullptr;
-}
-
 void Engine::initialize() {
 	this->torquescript = tsCreateEngine(false);
+	ts::torquescriptDefinitions();
 	
 	FT_Init_FreeType(&this->ft);
 
@@ -67,14 +54,6 @@ void Engine::initialize() {
 	this->addKeybind(GLFW_KEY_MINUS, binds::Keybind {
 		"camera.zoomOut",
 	});
-
-	// torquescript definitions
-	tsRegisterNamespace(this->torquescript, "Camera");
-	tsNamespaceInherit(this->torquescript, "SimObject", "Camera");
-	tsRegisterFunction(this->torquescript, TS_ENTRY_OBJECT, ts__getActiveCamera, "getActiveCamera", 0, nullptr);
-
-	tsEntryType setPositionArguments[3] = {TS_ENTRY_OBJECT, TS_ENTRY_NUMBER, TS_ENTRY_NUMBER};
-	tsRegisterMethod(this->torquescript, TS_ENTRY_INVALID, ts__Camera__setPosition, "Camera", "setPosition", 3, setPositionArguments);
 
 	// create camera once we're done with torquescript definitions
 	this->camera = new Camera();

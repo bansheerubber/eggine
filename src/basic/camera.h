@@ -34,3 +34,9 @@ class Camera : public GameObject {
 		double zoomInTimer = 0;
 		double zoomOutTimer = 0;
 };
+
+namespace ts {
+	void defineCamera();
+	tsEntryPtr getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
+	tsEntryPtr Camera__setPosition(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
+}
