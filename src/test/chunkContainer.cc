@@ -46,6 +46,11 @@ void ChunkContainer::addChunk(glm::uvec2 position) {
 }
 
 Chunk& ChunkContainer::getChunk(size_t index) {
+	if(index >= this->size * this->size) {
+		printf("ChunkContainer::getChunk(): chunk index out of bounds\n");
+		exit(1);
+	}
+
 	return this->renderOrder[index];
 }
 
@@ -106,6 +111,12 @@ void ChunkContainer::removeOverlappingTile(OverlappingTile* tile) {
 
 void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
 	glm::uvec2 chunkPosition = tile->getPosition() / (unsigned int)Chunk::Size;
+
+	if(chunkPosition.x >= this->size || chunkPosition.y >= this->size) {
+		printf("ChunkContainer::setOverlappingTileChunk(): chunk position out of bounds\n");
+		exit(1);
+	}
+
 	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
 	this->renderOrder[index].addOverlappingTile(tile);
 }

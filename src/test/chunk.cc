@@ -16,18 +16,18 @@ GLuint Chunk::Texture = GL_INVALID_INDEX;
 glm::lowp_vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
 GLuint Chunk::VertexBufferObjects[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 
-void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper** tile) {
-	*tile = nullptr;
+void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper* tile) {
+	*tile = {};
 }
 
 int compareOverlappingTile(const void* a, const void* b) {
-	OverlappingTileWrapper** a2 = (OverlappingTileWrapper**)a;
-	OverlappingTileWrapper** b2 = (OverlappingTileWrapper**)b;
+	OverlappingTileWrapper* a2 = (OverlappingTileWrapper*)a;
+	OverlappingTileWrapper* b2 = (OverlappingTileWrapper*)b;
 
-	if((*a2)->index > (*b2)->index) {
+	if(a2->index > b2->index) {
 		return 1;
 	}
-	else if((*a2)->index < (*b2)->index) {
+	else if(a2->index < b2->index) {
 		return -1;
 	}
 	else {
@@ -192,7 +192,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 		// TODO handle wall draw order for overlapping tiles
 		// handle overlapping tiles
-		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles			
+		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = &this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles			
 			if(lastOverlappingIndex - 1 != tile->index) {
 				// draw [last, lastOverlappingIndex - tile.index + last)
 				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
@@ -220,7 +220,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 		// draw overlapping tiles above the height of the chunk
 		for(size_t i = leftOff; i < this->overlappingTiles.array.head; i++) {
-			this->overlappingTiles.array[i]->tile->render(deltaTime, context);
+			this->overlappingTiles.array[i].tile->render(deltaTime, context);
 		}
 
 		#ifdef EGGINE_DEBUG
@@ -238,14 +238,16 @@ void Chunk::addOverlappingTile(OverlappingTile* tile) {
 	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
 	long index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
 
-	OverlappingTileWrapper* wrapper = new OverlappingTileWrapper();
-	wrapper->index = index;
-	wrapper->tile = tile;
-
-	this->overlappingTiles.insert(wrapper);
+	this->overlappingTiles.insert(OverlappingTileWrapper {
+		index: index,
+		tile: tile,
+	});
 	tile->setChunk(this);
 }
 	
 void Chunk::removeOverlappingTile(OverlappingTile* tile) {
-	
+	this->overlappingTiles.remove(OverlappingTileWrapper {
+		index: 0,
+		tile: tile,
+	});
 }

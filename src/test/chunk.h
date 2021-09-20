@@ -26,10 +26,14 @@ struct OverlappingTileWrapper {
 	bool operator>(const OverlappingTileWrapper &other) {
 		return this->index > other.index;
 	}
+
+	bool operator==(const OverlappingTileWrapper &other) {
+		return this->tile == other.tile;
+	}
 };
 
 int compareOverlappingTile(const void* a, const void* b);
-void initOverlappingTileWrapper(class Chunk* chunk, OverlappingTileWrapper** tile);
+void initOverlappingTileWrapper(class Chunk* chunk, OverlappingTileWrapper* tile);
 
 class Chunk : public InstancedRenderObjectContainer<Tile> {
 	friend class ChunkContainer;
@@ -56,7 +60,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		static GLuint Texture;
 	
 	protected:
-		SortedArray<OverlappingTileWrapper*, Chunk> overlappingTiles = SortedArray<OverlappingTileWrapper*, Chunk>(this, compareOverlappingTile, initOverlappingTileWrapper, nullptr);
+		SortedArray<OverlappingTileWrapper, Chunk> overlappingTiles = SortedArray<OverlappingTileWrapper, Chunk>(this, compareOverlappingTile, initOverlappingTileWrapper, nullptr);
 
 		glm::uvec2 position = glm::uvec2(0, 0);
 		glm::vec2 screenSpacePosition;
