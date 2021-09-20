@@ -20,6 +20,21 @@ void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper** tile) {
 	*tile = nullptr;
 }
 
+int compareOverlappingTile(const void* a, const void* b) {
+	OverlappingTileWrapper** a2 = (OverlappingTileWrapper**)a;
+	OverlappingTileWrapper** b2 = (OverlappingTileWrapper**)b;
+
+	if((*a2)->index > (*b2)->index) {
+		return 1;
+	}
+	else if((*a2)->index < (*b2)->index) {
+		return -1;
+	}
+	else {
+		return 0;
+	}
+}
+
 Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	// initialize dynamic static data
 	if(Image == nullptr) {
@@ -177,7 +192,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 		// TODO handle wall draw order for overlapping tiles
 		// handle overlapping tiles
-		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles
+		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles			
 			if(lastOverlappingIndex - 1 != tile->index) {
 				// draw [last, lastOverlappingIndex - tile.index + last)
 				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch

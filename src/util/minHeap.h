@@ -48,9 +48,6 @@ class MinHeap {
 		DynamicArray<T, S> array;
 	
 	private:
-		void (*init) (S* parent, T* location);
-		void (*onRealloc) (S* parent);
-
 		size_t parentIndex(size_t index) {
 			return (index - 1) / 2;
 		}
