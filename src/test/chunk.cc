@@ -7,6 +7,7 @@
 #include "chunkContainer.h"
 #include "../util/doubleDimension.h"
 #include "../basic/line.h"
+#include "overlappingTile.h"
 #include "tileMath.h"
 
 PNGImage* Chunk::Image = nullptr;
@@ -15,7 +16,11 @@ GLuint Chunk::Texture = GL_INVALID_INDEX;
 glm::vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
 GLuint Chunk::VertexBufferObjects[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 
-Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
+void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper** tile) {
+	*tile = nullptr;
+}
+
+Chunk::Chunk(glm::uvec2 position) : InstancedRenderObjectContainer(false) {
 	// initialize dynamic static data
 	if(Image == nullptr) {
 		glGenBuffers(3, Chunk::VertexBufferObjects);
@@ -72,7 +77,7 @@ Chunk::Chunk(glm::vec2 position) : InstancedRenderObjectContainer(false) {
 	
 	// on with creating the chunk
 	this->position = position;
-	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3(Size * this->position, 0.0));
+	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0));
 
 	this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
 
@@ -147,6 +152,8 @@ void Chunk::buildDebugLines() {
 }
 
 void Chunk::render(double deltaTime, RenderContext &context) {
+	// TODO make smart shader binding
+	
 	Camera* camera = context.camera;
 	if(!(
 		camera->left > this->right
@@ -154,12 +161,55 @@ void Chunk::render(double deltaTime, RenderContext &context) {
 		|| camera->top < this->bottom
 		|| camera->bottom > this->top
 	)) {
+		unsigned int total = Chunk::Size * Chunk::Size * this->height;
+		unsigned int lastOverlappingIndex = 0;
+		size_t leftOff = 0;
+		OverlappingTileWrapper* tile = nullptr;
+		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles
+			if(lastOverlappingIndex - 1 != tile->index) {
+				// draw [last, lastOverlappingIndex - tile.index + last)
+				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
+				glBindVertexArray(this->vertexArrayObject);
+				glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
+				glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, tile->index - lastOverlappingIndex + 1, lastOverlappingIndex);
+			}
+
+			tile->tile->render(deltaTime, context);
+
+			lastOverlappingIndex = tile->index + 1;
+
+			leftOff = i + 1;
+		}
+
 		glBindVertexArray(this->vertexArrayObject);
 		glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
-		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, Chunk::Size * Chunk::Size * this->height);
+		glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, total - lastOverlappingIndex, lastOverlappingIndex);
+
+		// draw overlapping tiles above the height of the chunk
+		for(size_t i = leftOff; i < this->overlappingTiles.array.head; i++) {
+			printf("%ld %u\n", this->overlappingTiles.array[i]->index, total);
+			this->overlappingTiles.array[i]->tile->render(deltaTime, context);
+		}
+
 		this->isCulled = false;
 	}
 	else {
 		this->isCulled = true;
 	}
+}
+
+void Chunk::addOverlappingTile(OverlappingTile* tile) {
+	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
+	long index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+
+	OverlappingTileWrapper* wrapper = new OverlappingTileWrapper();
+	wrapper->index = index;
+	wrapper->tile = tile;
+
+	this->overlappingTiles.insert(wrapper);
+	tile->setChunk(this);
+}
+	
+void Chunk::removeOverlappingTile(OverlappingTile* tile) {
+	
 }

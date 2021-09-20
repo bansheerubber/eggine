@@ -7,6 +7,7 @@
 #include "chunk.h"
 #include "../engine/debug.h"
 #include "../engine/engine.h"
+#include "overlappingTile.h"
 #include "tileMath.h"
 
 GLuint ChunkContainer::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
@@ -45,13 +46,14 @@ void ChunkContainer::buildRenderOrder() {
 	this->renderOrder.head = 0;
 
 	// find the largest chunk extent
-	int largestAxis = -1;
+	unsigned int largestAxis = 0;
 	for(auto chunk: this->chunks) {
 		largestAxis = max(chunk->position.x, largestAxis);
 		largestAxis = max(chunk->position.y, largestAxis);
 	}
 
 	largestAxis += 1;
+	this->size = largestAxis;
 
 	// allocate space
 	for(size_t i = 0; i < largestAxis * largestAxis; i++) {
@@ -94,4 +96,22 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	engine->debug.addInfoMessage(fmt::format("{}/{} chunks rendered", chunksRendered, this->renderOrder.head));
 	engine->debug.addInfoMessage(fmt::format("{}/{} tiles rendered", tilesRendered, tiles));
 	#endif
+}
+
+void ChunkContainer::addOverlappingTile(OverlappingTile* tile) {
+	this->overlappingTiles.push_back(tile);
+	this->setOverlappingTileChunk(tile);
+}
+
+void ChunkContainer::removeOverlappingTile(OverlappingTile* tile) {
+	auto it = find(this->overlappingTiles.begin(), this->overlappingTiles.end(), tile);
+	if(it != this->overlappingTiles.end()) {
+		this->overlappingTiles.erase(it);
+	}
+}
+
+void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
+	glm::uvec2 chunkPosition = tile->getPosition() / (unsigned int)Chunk::Size;
+	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
+	this->chunks[index]->addOverlappingTile(tile);
 }

@@ -7,16 +7,34 @@
 #include <tsl/robin_map.h>
 
 #include "../basic/instancedRenderObjectContainer.h"
+#include "../util/minHeap.h"
 #include "../basic/pngImage.h"
 #include "../basic/renderContext.h"
+#include "../basic/renderObject.h"
 
 class Tile;
 
+struct OverlappingTileWrapper {
+	unsigned int index;
+	class OverlappingTile* tile;
+
+	bool operator<(const OverlappingTileWrapper &other) {
+		return this->index < other.index;
+	}
+
+	bool operator>(const OverlappingTileWrapper &other) {
+		return this->index > other.index;
+	}
+};
+
+void initOverlappingTileWrapper(class Chunk* chunk, OverlappingTileWrapper** tile);
+
 class Chunk : public InstancedRenderObjectContainer<Tile> {
 	friend class ChunkContainer;
+	friend class OverlappingTile;
 	
 	public:
-		Chunk(glm::vec2 position);
+		Chunk(glm::uvec2 position);
 
 		// ## game_object_definitions Chunk
 
@@ -25,14 +43,19 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		glm::vec2* offsets = nullptr;
 		int* textureIndices = nullptr;
 
-		glm::ivec2 position = glm::vec2(0, 0);
+		glm::uvec2 position = glm::uvec2(0, 0);
 		glm::vec2 screenSpacePosition;
 		int height = 5;
+
+		void addOverlappingTile(class OverlappingTile* tile);
+		void removeOverlappingTile(class OverlappingTile* tile);
 
 		static constexpr int Size = 25;
 		static GLuint Texture;
 	
 	protected:
+		MinHeap<OverlappingTileWrapper*, Chunk> overlappingTiles = MinHeap<OverlappingTileWrapper*, Chunk>(this, initOverlappingTileWrapper, nullptr);
+		
 		void buildDebugLines();
 		void defineBounds();
 

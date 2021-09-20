@@ -11,6 +11,7 @@
 #include "engine/engine.h"
 #include "basic/gameObject.h"
 #include "basic/line.h"
+#include "test/overlappingTile.h"
 #include "basic/pngImage.h"
 #include "basic/text.h"
 
@@ -27,6 +28,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	container.buildRenderOrder();
+
+	for(Chunk* chunk: container.chunks) {
+		OverlappingTile* alien = new OverlappingTile();
+		alien->setPosition(glm::uvec3(5 + chunk->position.x * Chunk::Size, 5 + chunk->position.y * Chunk::Size, chunk->height - 1));
+		container.addOverlappingTile(alien);	
+	}
 
 	engine->tick();
 
