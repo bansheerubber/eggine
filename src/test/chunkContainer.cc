@@ -38,6 +38,12 @@ ChunkContainer::ChunkContainer() {
 	}
 }
 
+ChunkContainer::~ChunkContainer() {
+	for(size_t i = 0; i < this->renderOrder.head; i++) {
+		this->renderOrder[i].~Chunk(); // because of how dynamic array reallocs we have to do this bullshit
+	}
+}
+
 void ChunkContainer::addChunk(glm::uvec2 position) {
 	this->renderOrder[this->renderOrder.head].setPosition(position);
 	this->renderOrder.pushed();
@@ -98,15 +104,7 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 }
 
 void ChunkContainer::addOverlappingTile(OverlappingTile* tile) {
-	this->overlappingTiles.push_back(tile);
 	this->setOverlappingTileChunk(tile);
-}
-
-void ChunkContainer::removeOverlappingTile(OverlappingTile* tile) {
-	auto it = find(this->overlappingTiles.begin(), this->overlappingTiles.end(), tile);
-	if(it != this->overlappingTiles.end()) {
-		this->overlappingTiles.erase(it);
-	}
 }
 
 void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {

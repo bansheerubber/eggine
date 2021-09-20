@@ -37,13 +37,20 @@ Line::Line() {
 	}
 }
 
+Line::~Line() {
+	glDeleteBuffers(1, this->vertexBufferObjects);
+	glDeleteVertexArrays(1, &this->vertexArrayObject);
+
+	delete[] this->positionBuffer;
+}
+
 void Line::addPosition(glm::vec2 position) {
 	this->positions.push_back(position);
 }
 
 void Line::commit() {
 	if(this->positionBuffer != nullptr) {
-		delete this->positionBuffer;
+		delete[] this->positionBuffer;
 	}
 
 	this->positionBuffer = new glm::vec2[this->positions.size()];

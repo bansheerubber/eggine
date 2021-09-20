@@ -10,6 +10,7 @@ using namespace std;
 class Line: public RenderObject {
 	public:
 		Line();
+		~Line();
 		
 		void addPosition(glm::vec2 position);
 		void commit();

@@ -15,6 +15,7 @@ class ChunkContainer : public RenderObject {
 	
 	public:
 		ChunkContainer();
+		~ChunkContainer();
 
 		// ## game_object_definitions ChunkContainer
 
@@ -35,6 +36,5 @@ class ChunkContainer : public RenderObject {
 		unsigned int size = 0;
 	
 	private:
-		vector<class OverlappingTile*> overlappingTiles;
 		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 8, initChunk, nullptr);
 };

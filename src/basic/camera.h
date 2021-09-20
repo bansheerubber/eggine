@@ -8,6 +8,7 @@
 class Camera : public GameObject {
 	public:
 		Camera();
+		~Camera();
 
 		// ## game_object_definitions Camera
 		

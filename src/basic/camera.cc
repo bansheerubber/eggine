@@ -8,6 +8,10 @@ Camera::Camera() {
 	this->reference = tsCreateObject(engine->torquescript, "Camera", this);
 }
 
+Camera::~Camera() {
+	tsDeleteObject(this->reference);
+}
+
 void Camera::see(double deltaTime) {
 	this->zoomInTimer += deltaTime;
 	this->zoomOutTimer += deltaTime;

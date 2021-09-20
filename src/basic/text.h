@@ -15,10 +15,12 @@ using namespace std;
 class Text : public RenderObject {
 	public:
 		Text(string family, int size);
-		void render(double deltaTime, RenderContext &context);
+		~Text();
+
 		glm::vec3 color = glm::vec3(1, 1, 1);
 		glm::vec2 position = glm::vec2(0, 0);
 
+		void render(double deltaTime, RenderContext &context);
 		void setText(string text);
 		string getText();
 	
@@ -27,9 +29,9 @@ class Text : public RenderObject {
 
 		GLuint vertexBufferObjects[2];
 		GLuint vertexArrayObject;
+		string text;
 
 		void updateBuffers();
-		string text;
 		
 		static GLuint Shaders[2];
 		static GLuint Uniforms[3];

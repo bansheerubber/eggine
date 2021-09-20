@@ -41,6 +41,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	
 	public:
 		Chunk();
+		~Chunk();
 
 		// ## game_object_definitions Chunk
 

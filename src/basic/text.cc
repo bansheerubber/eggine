@@ -58,6 +58,11 @@ Text::Text(string family, int size) : RenderObject(false) {
 	engine->addUIObject(this);
 }
 
+Text::~Text() {
+	glDeleteBuffers(2, this->vertexBufferObjects);
+	glDeleteBuffers(1, &this->vertexArrayObject);
+}
+
 void Text::updateBuffers() {
 	float x = this->position.x, y = this->font->size + this->position.y, scale = 1.0f;
 

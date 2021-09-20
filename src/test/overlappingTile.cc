@@ -47,6 +47,15 @@ OverlappingTile::OverlappingTile() : RenderObject(false) {
 	glBindVertexArray(0); // turn off vertex array object
 }
 
+OverlappingTile::~OverlappingTile() {
+	glDeleteBuffers(2, this->vertexBufferObjects);
+	glDeleteVertexArrays(1, &this->vertexArrayObject);
+
+	if(this->chunk != nullptr) {
+		this->chunk->removeOverlappingTile(this);
+	}
+}
+
 void OverlappingTile::setPosition(glm::uvec3 position) {
 	this->position = position;
 	this->setChunk(this->chunk);

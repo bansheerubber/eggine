@@ -8,6 +8,7 @@
 class OverlappingTile : public RenderObject {	
 	public:
 		OverlappingTile();
+		~OverlappingTile();
 
 		void setPosition(glm::uvec3 position);
 		glm::uvec3 getPosition();

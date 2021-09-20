@@ -98,6 +98,11 @@ void Engine::tick() {
 
 	glfwPollEvents();
 
+	int escape = glfwGetKey(engine->window, GLFW_KEY_ESCAPE);
+	if(escape) {
+		return;
+	}
+
 	// handle torquescript
 	long long tsStartTime = getMicrosecondsNow();
 	tsTick(this->torquescript);

@@ -138,6 +138,22 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	this->defineBounds();
 }
 
+Chunk::~Chunk() {
+	glDeleteBuffers(1, this->vertexBufferObjects);
+	glDeleteVertexArrays(1, &this->vertexArrayObject);
+
+	size_t head = this->overlappingTiles.array.head;
+	this->overlappingTiles.array.head = 0; // reset to zero to prevent double deallocations
+	for(size_t i = 0; i < head; i++) {
+		delete this->overlappingTiles.array[i].tile;
+	}
+
+	delete this->textureIndices;
+	if(this->debugLine != nullptr) {
+		delete this->debugLine;
+	}
+}
+
 void Chunk::setPosition(glm::uvec2 position) {
 	this->position = position;
 	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0));
@@ -246,8 +262,10 @@ void Chunk::addOverlappingTile(OverlappingTile* tile) {
 }
 	
 void Chunk::removeOverlappingTile(OverlappingTile* tile) {
-	this->overlappingTiles.remove(OverlappingTileWrapper {
-		index: 0,
-		tile: tile,
-	});
+	if(this->overlappingTiles.array.head != 0) { // signifies that the array has been deallocated
+		this->overlappingTiles.remove(OverlappingTileWrapper {
+			index: 0,
+			tile: tile,
+		});
+	}
 }
