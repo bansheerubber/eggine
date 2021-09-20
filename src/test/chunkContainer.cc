@@ -14,8 +14,8 @@ GLuint ChunkContainer::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
 GLuint ChunkContainer::Uniforms[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 GLuint ChunkContainer::ShaderProgram = GL_INVALID_INDEX;
 
-void initChunk(class ChunkContainer* container, class Chunk** chunk) {
-	*chunk = nullptr;
+void initChunk(class ChunkContainer* container, class Chunk* chunk) {
+	new((void*)chunk) Chunk();
 }
 
 ChunkContainer::ChunkContainer() {
@@ -38,32 +38,19 @@ ChunkContainer::ChunkContainer() {
 	}
 }
 
-void ChunkContainer::addChunk(Chunk* chunk) {
-	this->chunks.push_back(chunk);
+void ChunkContainer::addChunk(glm::uvec2 position) {
+	this->renderOrder[this->renderOrder.head].setPosition(position);
+	this->renderOrder.pushed();
+
+	this->size = ceil(sqrt(this->renderOrder.head));
 }
 
-void ChunkContainer::buildRenderOrder() {
-	this->renderOrder.head = 0;
+Chunk& ChunkContainer::getChunk(size_t index) {
+	return this->renderOrder[index];
+}
 
-	// find the largest chunk extent
-	unsigned int largestAxis = 0;
-	for(auto chunk: this->chunks) {
-		largestAxis = max(chunk->position.x, largestAxis);
-		largestAxis = max(chunk->position.y, largestAxis);
-	}
-
-	largestAxis += 1;
-	this->size = largestAxis;
-
-	// allocate space
-	for(size_t i = 0; i < largestAxis * largestAxis; i++) {
-		this->renderOrder.pushed();
-	}
-	
-	// rebuild render order
-	for(auto chunk: this->chunks) {
-		this->renderOrder[tilemath::coordinateToIndex(chunk->position, largestAxis)] = chunk;
-	}
+size_t ChunkContainer::getChunkCount() {
+	return this->renderOrder.head;
 }
 
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
@@ -83,21 +70,19 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	#endif
 
 	for(size_t i = 0; i < this->renderOrder.head; i++) {
-		Chunk* chunk = this->renderOrder[i];
-		if(chunk != nullptr) {
-			chunk->renderChunk(deltaTime, context);
+		Chunk &chunk = this->renderOrder[i];
+		chunk.renderChunk(deltaTime, context);
 
-			#ifdef EGGINE_DEBUG
-			if(!chunk->isCulled) {
-				chunksRendered++;
-				tilesRendered += Chunk::Size * Chunk::Size * chunk->height;
-				drawCalls += chunk->drawCalls;
-				overlappingCalls += chunk->overlappingTiles.array.head;
-			}
-			
-			tiles += Chunk::Size * Chunk::Size * chunk->height;
-			#endif
+		#ifdef EGGINE_DEBUG
+		if(!chunk.isCulled) {
+			chunksRendered++;
+			tilesRendered += Chunk::Size * Chunk::Size * chunk.height;
+			drawCalls += chunk.drawCalls;
+			overlappingCalls += chunk.overlappingTiles.array.head;
 		}
+		
+		tiles += Chunk::Size * Chunk::Size * chunk.height;
+		#endif
 	}
 
 	#ifdef EGGINE_DEBUG
@@ -122,5 +107,5 @@ void ChunkContainer::removeOverlappingTile(OverlappingTile* tile) {
 void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
 	glm::uvec2 chunkPosition = tile->getPosition() / (unsigned int)Chunk::Size;
 	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
-	this->chunks[index]->addOverlappingTile(tile);
+	this->renderOrder[index].addOverlappingTile(tile);
 }

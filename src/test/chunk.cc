@@ -20,7 +20,7 @@ void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper** tile) {
 	*tile = nullptr;
 }
 
-Chunk::Chunk(glm::uvec2 position) : InstancedRenderObjectContainer(false) {
+Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	// initialize dynamic static data
 	if(Image == nullptr) {
 		glGenBuffers(3, Chunk::VertexBufferObjects);
@@ -74,10 +74,6 @@ Chunk::Chunk(glm::uvec2 position) : InstancedRenderObjectContainer(false) {
 			glBufferData(GL_ARRAY_BUFFER, sizeof(Chunk::UVs), Chunk::UVs, GL_STATIC_DRAW);
 		}
 	}
-	
-	// on with creating the chunk
-	this->position = position;
-	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0));
 
 	this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
 
@@ -127,6 +123,16 @@ Chunk::Chunk(glm::uvec2 position) : InstancedRenderObjectContainer(false) {
 	this->defineBounds();
 }
 
+void Chunk::setPosition(glm::uvec2 position) {
+	this->position = position;
+	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0));
+	this->defineBounds();
+}
+
+glm::uvec2& Chunk::getPosition() {
+	return this->position;
+}
+
 void Chunk::defineBounds() {
 	glm::vec2 bias(-0.5, -(32.0 / 2.0 + 39.0 * 2.0 + 2) / 128.0);
 
@@ -153,7 +159,6 @@ void Chunk::buildDebugLines() {
 
 void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	// TODO make smart shader binding
-
 	#ifdef EGGINE_DEBUG
 	this->drawCalls = 0;
 	#endif

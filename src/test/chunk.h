@@ -35,7 +35,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	friend class OverlappingTile;
 	
 	public:
-		Chunk(glm::uvec2 position);
+		Chunk();
 
 		// ## game_object_definitions Chunk
 
@@ -45,8 +45,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		glm::vec2* offsets = nullptr;
 		int* textureIndices = nullptr;
 
-		glm::uvec2 position = glm::uvec2(0, 0);
-		glm::vec2 screenSpacePosition;
+		void setPosition(glm::uvec2 position);
+		glm::uvec2& getPosition();
 		unsigned int height = 5;
 
 		void addOverlappingTile(class OverlappingTile* tile);
@@ -57,6 +57,9 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	
 	protected:
 		MinHeap<OverlappingTileWrapper*, Chunk> overlappingTiles = MinHeap<OverlappingTileWrapper*, Chunk>(this, initOverlappingTileWrapper, nullptr);
+
+		glm::uvec2 position = glm::uvec2(0, 0);
+		glm::vec2 screenSpacePosition;
 		
 		void buildDebugLines();
 		void defineBounds();

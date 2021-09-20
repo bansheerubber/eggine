@@ -2,12 +2,13 @@
 
 #include <vector>
 
+#include "chunk.h"
 #include "../util/dynamicArray.h"
 #include "../basic/renderObject.h"
 
 using namespace std;
 
-void initChunk(class ChunkContainer* container, class Chunk** chunk);
+void initChunk(class ChunkContainer* container, class Chunk* chunk);
 
 class ChunkContainer : public RenderObject {
 	friend class Engine;
@@ -21,8 +22,9 @@ class ChunkContainer : public RenderObject {
 		void removeOverlappingTile(class OverlappingTile* tile);
 		void setOverlappingTileChunk(OverlappingTile* tile);
 		
-		void addChunk(class Chunk* container);
-		void buildRenderOrder();
+		void addChunk(glm::uvec2 position);
+		Chunk& getChunk(size_t index);
+		size_t getChunkCount();
 
 		void render(double deltaTime, RenderContext &context);
 
@@ -30,11 +32,9 @@ class ChunkContainer : public RenderObject {
 		static GLuint Uniforms[];
 		static GLuint ShaderProgram;
 
-		vector<class Chunk*> chunks;
-
 		unsigned int size = 0;
 	
 	private:
 		vector<class OverlappingTile*> overlappingTiles;
-		DynamicArray<class Chunk*, ChunkContainer> renderOrder = DynamicArray<class Chunk*, ChunkContainer>(this, 8, initChunk, nullptr);
+		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 8, initChunk, nullptr);
 };

@@ -24,14 +24,13 @@ int main(int argc, char* argv[]) {
 
 	size_t size = 100;
 	for(size_t i = 0; i < size * size; i++) {
-		container.addChunk(new Chunk(tilemath::indexToCoordinate(i, size)));
+		container.addChunk(tilemath::indexToCoordinate(i, size));
 	}
 
-	container.buildRenderOrder();
-
-	for(Chunk* chunk: container.chunks) {
+	for(size_t i = 0; i < container.getChunkCount(); i++) {
+		Chunk &chunk = container.getChunk(i);
 		OverlappingTile* alien = new OverlappingTile();
-		alien->setPosition(glm::uvec3(5 + chunk->position.x * Chunk::Size, 5 + chunk->position.y * Chunk::Size, chunk->height - 1));
+		alien->setPosition(glm::uvec3(5 + chunk.getPosition().x * Chunk::Size, 5 + chunk.getPosition().y * Chunk::Size, chunk.height - 1));
 		container.addOverlappingTile(alien);	
 	}
 
