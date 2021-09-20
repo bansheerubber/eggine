@@ -151,8 +151,12 @@ void Chunk::buildDebugLines() {
 	this->debugLine->commit();
 }
 
-void Chunk::render(double deltaTime, RenderContext &context) {
+void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	// TODO make smart shader binding
+
+	#ifdef EGGINE_DEBUG
+	this->drawCalls = 0;
+	#endif
 	
 	Camera* camera = context.camera;
 	if(!(
@@ -165,6 +169,9 @@ void Chunk::render(double deltaTime, RenderContext &context) {
 		unsigned int lastOverlappingIndex = 0;
 		size_t leftOff = 0;
 		OverlappingTileWrapper* tile = nullptr;
+
+		// TODO handle wall draw order for overlapping tiles
+		// handle overlapping tiles
 		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles
 			if(lastOverlappingIndex - 1 != tile->index) {
 				// draw [last, lastOverlappingIndex - tile.index + last)
@@ -172,6 +179,9 @@ void Chunk::render(double deltaTime, RenderContext &context) {
 				glBindVertexArray(this->vertexArrayObject);
 				glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
 				glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, tile->index - lastOverlappingIndex + 1, lastOverlappingIndex);
+				#ifdef EGGINE_DEBUG
+				this->drawCalls++;
+				#endif
 			}
 
 			tile->tile->render(deltaTime, context);
@@ -184,18 +194,24 @@ void Chunk::render(double deltaTime, RenderContext &context) {
 		glBindVertexArray(this->vertexArrayObject);
 		glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
 		glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, total - lastOverlappingIndex, lastOverlappingIndex);
+		#ifdef EGGINE_DEBUG
+		this->drawCalls++;
+		#endif
 
 		// draw overlapping tiles above the height of the chunk
 		for(size_t i = leftOff; i < this->overlappingTiles.array.head; i++) {
-			printf("%ld %u\n", this->overlappingTiles.array[i]->index, total);
 			this->overlappingTiles.array[i]->tile->render(deltaTime, context);
 		}
 
+		#ifdef EGGINE_DEBUG
 		this->isCulled = false;
+		#endif
 	}
+	#ifdef EGGINE_DEBUG
 	else {
 		this->isCulled = true;
 	}
+	#endif
 }
 
 void Chunk::addOverlappingTile(OverlappingTile* tile) {

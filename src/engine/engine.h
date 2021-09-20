@@ -58,7 +58,9 @@ class Engine {
 		UI ui;
 		long long lastRenderTime;
 
+		#ifdef EGGINE_DEBUG
 		Text* debugText;
+		#endif
 
 		DynamicArray<RenderObject*, Engine> renderables = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 		DynamicArray<RenderObject*, Engine> renderableUIs = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);

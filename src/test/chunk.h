@@ -6,6 +6,7 @@
 
 #include <tsl/robin_map.h>
 
+#include "../engine/debug.h"
 #include "../basic/instancedRenderObjectContainer.h"
 #include "../util/minHeap.h"
 #include "../basic/pngImage.h"
@@ -38,19 +39,20 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		// ## game_object_definitions Chunk
 
-		void render(double deltaTime, RenderContext &context);
+		void render(double deltaTime, RenderContext &context) {};
+		void renderChunk(double deltaTime, RenderContext &context);
 
 		glm::vec2* offsets = nullptr;
 		int* textureIndices = nullptr;
 
 		glm::uvec2 position = glm::uvec2(0, 0);
 		glm::vec2 screenSpacePosition;
-		int height = 5;
+		unsigned int height = 5;
 
 		void addOverlappingTile(class OverlappingTile* tile);
 		void removeOverlappingTile(class OverlappingTile* tile);
 
-		static constexpr int Size = 25;
+		static constexpr unsigned int Size = 25;
 		static GLuint Texture;
 	
 	protected:
@@ -59,7 +61,10 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 
+		#ifdef EGGINE_DEBUG
 		bool isCulled = false;
+		int drawCalls = 0;
+		#endif
 		
 		GLuint vertexBufferObjects[1];
 		GLuint vertexArrayObject;

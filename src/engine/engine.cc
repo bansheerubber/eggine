@@ -42,10 +42,12 @@ void Engine::initialize() {
 
 	glfwSwapInterval(1);
 
+	#ifdef EGGINE_DEBUG
 	this->debugText = new Text("Arial", 12);
 	this->debugText->color[0] = 0.0;
 	this->debugText->color[1] = 1.0;
 	this->debugText->color[2] = 0.0;
+	#endif
 
 	this->addKeybind(GLFW_KEY_EQUAL, binds::Keybind {
 		"camera.zoomIn",
@@ -80,13 +82,15 @@ void Engine::tick() {
 	this->lastRenderTime = getMicrosecondsNow();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	this->debug.clearInfoMessages();
 
+	#ifdef EGGINE_DEBUG
+	this->debug.clearInfoMessages();
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for CPU render time", this->cpuRenderTime));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->torquescriptTickTime));
 	this->debug.addInfoMessage(fmt::format("{} renderables", this->renderables.head + this->renderableUIs.head));
 	this->debug.addInfoMessage(fmt::format("{} zoom", this->camera->getZoom()));
+	#endif
 
 	if(deltaTime > 1.0) {
 		deltaTime = 0;
@@ -120,17 +124,20 @@ void Engine::tick() {
 	};
 
 	// render everything
+	long long startRenderTime = getMicrosecondsNow();
 	for(size_t i = 0; i < this->renderables.head; i++) {
 		this->renderables[i]->render(deltaTime, context);
 	}
 
+	#ifdef EGGINE_DEBUG
 	this->debugText->setText(this->debug.getInfoText());
+	#endif
 
 	for(size_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
 	}
 
-	this->cpuRenderTime = getMicrosecondsNow() - startTime;
+	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
 
 	glfwSwapBuffers(window);
 

@@ -74,27 +74,36 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 
 	glUniformMatrix4fv(ChunkContainer::Uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
 
+	#ifdef EGGINE_DEBUG
 	size_t chunksRendered = 0;
 	size_t tilesRendered = 0;
 	size_t tiles = 0;
+	size_t drawCalls = 0;
+	size_t overlappingCalls = 0;
+	#endif
 
 	for(size_t i = 0; i < this->renderOrder.head; i++) {
 		Chunk* chunk = this->renderOrder[i];
 		if(chunk != nullptr) {
-			chunk->render(deltaTime, context);
+			chunk->renderChunk(deltaTime, context);
 
+			#ifdef EGGINE_DEBUG
 			if(!chunk->isCulled) {
 				chunksRendered++;
 				tilesRendered += Chunk::Size * Chunk::Size * chunk->height;
+				drawCalls += chunk->drawCalls;
+				overlappingCalls += chunk->overlappingTiles.array.head;
 			}
-
+			
 			tiles += Chunk::Size * Chunk::Size * chunk->height;
+			#endif
 		}
 	}
 
 	#ifdef EGGINE_DEBUG
 	engine->debug.addInfoMessage(fmt::format("{}/{} chunks rendered", chunksRendered, this->renderOrder.head));
 	engine->debug.addInfoMessage(fmt::format("{}/{} tiles rendered", tilesRendered, tiles));
+	engine->debug.addInfoMessage(fmt::format("{} chunk draw calls, {} overlapping calls", drawCalls, overlappingCalls));
 	#endif
 }
 
