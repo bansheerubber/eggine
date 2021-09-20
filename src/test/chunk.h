@@ -75,7 +75,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void defineBounds();
 
 		static PNGImage* Image;
-		static glm::vec2 Offsets[];
+		static glm::lowp_vec2 Offsets[];
 		static GLuint VertexBufferObjects[];
 
 		static constexpr float Vertices[8] = {

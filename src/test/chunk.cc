@@ -13,7 +13,7 @@
 PNGImage* Chunk::Image = nullptr;
 GLuint Chunk::Texture = GL_INVALID_INDEX;
 
-glm::vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
+glm::lowp_vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
 GLuint Chunk::VertexBufferObjects[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 
 void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper** tile) {
@@ -74,7 +74,7 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[0]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * Chunk::Size * Chunk::Size * 15, &Chunk::Offsets[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::lowp_vec2) * Chunk::Size * Chunk::Size * 15, &Chunk::Offsets[0], GL_STATIC_DRAW);
 		}
 
 		// vertices for square

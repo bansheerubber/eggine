@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 
 	ChunkContainer container;
 
-	size_t size = 100;
+	size_t size = 25;
 	for(size_t i = 0; i < size * size; i++) {
 		container.addChunk(tilemath::indexToCoordinate(i, size));
 	}

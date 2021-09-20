@@ -22,13 +22,13 @@ ChunkContainer::ChunkContainer() {
 	RenderObject::CompileShader(
 		GL_VERTEX_SHADER,
 		&ChunkContainer::Shaders[0],
-		#include "shaders/test.vert"
+		#include "shaders/tile.vert"
 	);
 
 	RenderObject::CompileShader(
 		GL_FRAGMENT_SHADER,
 		&ChunkContainer::Shaders[1],
-		#include "shaders/test.frag"
+		#include "shaders/tile.frag"
 	);
 
 	if(RenderObject::LinkProgram(&ChunkContainer::ShaderProgram, ChunkContainer::Shaders, 2)) {
