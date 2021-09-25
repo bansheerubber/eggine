@@ -7,7 +7,7 @@
 
 #define DYNAMIC_ARRAY_MAX_SIZE 5000000
 
-template <typename T, typename S>
+template <typename T, typename S = void>
 class DynamicArray {
 	public:
 		size_t head;
@@ -18,6 +18,17 @@ class DynamicArray {
 			this->dontDelete = true;
 		}
 
+		DynamicArray(size_t size) {
+			this->parent = nullptr;
+			this->init = nullptr;
+			this->onRealloc = nullptr;
+
+			this->head = 0;
+			this->size = size;
+
+			this->constructArray();
+		}
+
 		DynamicArray(
 			S* parent,
 			size_t size,
@@ -25,21 +36,13 @@ class DynamicArray {
 			void (*onRealloc) (S* parent)
 		) {
 			this->parent = parent;
-			this->size = size;
-			this->head = 0;
 			this->init = init;
 			this->onRealloc = onRealloc;
 
-			T* array = (T*)malloc(sizeof(T) * this->size);
-			if(array == NULL) {
-				printf("invalid dynamic array malloc\n");
-				exit(1);
-			}
-			this->array = array;
+			this->head = 0;
+			this->size = size;
 
-			for(size_t i = 0; i < this->size; i++) {
-				(*this->init)(this->parent, &(this->array[i]));
-			}
+			this->constructArray();
 		}
 
 		~DynamicArray() {
@@ -70,8 +73,10 @@ class DynamicArray {
 				}
 				this->array = array;
 
-				for(size_t i = this->size; i < this->size * 2; i++) {
-					(*this->init)(this->parent, &this->array[i]);
+				if(this->init != nullptr) {
+					for(size_t i = this->size; i < this->size * 2; i++) {
+						(*this->init)(this->parent, &this->array[i]);
+					}
 				}
 				this->size *= 2;
 				
@@ -90,6 +95,21 @@ class DynamicArray {
 		}
 	
 	private:
+		void constructArray() {
+			T* array = (T*)malloc(sizeof(T) * this->size);
+			if(array == NULL) {
+				printf("invalid dynamic array malloc\n");
+				exit(1);
+			}
+			this->array = array;
+
+			if(this->init != nullptr) {
+				for(size_t i = 0; i < this->size; i++) {
+					(*this->init)(this->parent, &(this->array[i]));
+				}
+			}
+		}
+
 		bool dontDelete = false;
 		T* array;
 		S* parent;
