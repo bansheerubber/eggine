@@ -55,10 +55,23 @@ cd tmp-setup
 git clone --recurse-submodules https://github.com/bansheerubber/torquescript-interpreter
 cd torquescript-interpreter
 git checkout tssl-and-friends
+echo -e "\033[0;33mCompiling torquescrcipt"
+tput sgr0
 make -j 8 library
 popd
 cp -v tmp-setup/torquescript-interpreter/dist/libtorquescript.so lib
 echo -e "\033[0;32mFinished torquescript"
 tput sgr0
 
+# configure eggine-carton
+cd tmp-setup
+git clone https://github.com/bansheerubber/eggine-carton
+cd ..
+rm -Rf src/carton
+mkdir -p src/carton
+mv -v tmp-setup/eggine-carton/src/carton/* src/carton/
+echo -e "\033[0;32mFinished eggine-carton"
+tput sgr0
+
+# delete tmp-setup
 rm -Rf tmp-setup
