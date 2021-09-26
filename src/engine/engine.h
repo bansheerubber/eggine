@@ -13,6 +13,7 @@
 #include "keybind.h"
 #include "../basic/text.h"
 #include "../basic/renderObject.h"
+#include "../resources/resourceManager.h"
 #include "../basic/ui.h"
 
 using namespace std;
@@ -44,6 +45,8 @@ class Engine {
 
 		FT_Library ft;
 		tsEnginePtr torquescript = nullptr;
+
+		resources::ResourceManager manager = resources::ResourceManager("test.carton");
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;

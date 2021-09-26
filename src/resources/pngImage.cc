@@ -1,18 +1,28 @@
+#include <glad/gl.h>
 #include "pngImage.h"
 
+#include <cstring>
 #include <fstream>
 
-PNGImage::PNGImage(string fileName) {
-  this->fileName = fileName;
+struct PNGBuffer {
+  const unsigned char* buffer;
+  size_t currentIndex;
+};
 
-  png_byte header[8]; // 8 is the maximum size that can be checked
+void copyDataToPNGBuffer(png_structp png, png_bytep output, png_size_t size) {
+  PNGBuffer* buffer = (PNGBuffer*)png_get_io_ptr(png);
+  if(buffer == NULL) {
+    printf("could not load PNG io pointer\n");
+    return;
+  }
 
-  /* open file and test for it being a png */
-  FILE* fp = fopen(fileName.c_str(), "rb");
-  fread(header, 1, 8, fp);
-  if(png_sig_cmp(header, 0, 8)) {
+  memcpy(output, &buffer->buffer[buffer->currentIndex], size);
+  buffer->currentIndex += size;
+}
+
+resources::PNGImage::PNGImage(ResourceManager* manager, const unsigned char* buffer, size_t bufferSize) : ResourceObject(manager) {
+  if(png_sig_cmp(buffer, 0, 8)) {
     printf("could not recognize %s as PNG\n", fileName.c_str());
-		fclose(fp);
 		return;
 	}
 
@@ -21,24 +31,25 @@ PNGImage::PNGImage(string fileName) {
 
   if(!png) {
 		printf("could not initialize PNG reader\n");
-		fclose(fp);
 		return;
 	}
 
   png_infop info = png_create_info_struct(png);
   if(!info) {
 		printf("could not load PNG info\n");
-		fclose(fp);
 		return;
 	}
 
   if(setjmp(png_jmpbuf(png))) {
     printf("error reading PNG info");
-		fclose(fp);
 		return;
 	}
 
-  png_init_io(png, fp);
+  PNGBuffer* pngBuffer = new PNGBuffer;
+  pngBuffer->buffer = buffer;
+  pngBuffer->currentIndex = 8;
+
+  png_set_read_fn(png, (void*)pngBuffer, &copyDataToPNGBuffer);
   png_set_sig_bytes(png, 8);
 
   png_read_info(png, info);
@@ -85,10 +96,31 @@ PNGImage::PNGImage(string fileName) {
 
   png_destroy_read_struct(&png, &info, NULL);
 
-  fclose(fp);
+  // load the GL texture
+  glGenTextures(1, &this->texture);
+  glBindTexture(GL_TEXTURE_2D, this->texture);
+
+  glTexImage2D(
+    GL_TEXTURE_2D,
+    0,
+    this->getFormat(),
+    this->width,
+    this->height,
+    0,
+    this->getFormat(),
+    this->getType(),
+    this->image
+  );
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  delete this->image; // delete the image once we're done with it
 }
 
-GLenum PNGImage::getFormat() {
+GLenum resources::PNGImage::getFormat() {
   if(this->colorType == PNG_COLOR_TYPE_RGB) {
     return GL_RGB;
   }
@@ -100,7 +132,7 @@ GLenum PNGImage::getFormat() {
   }
 }
 
-GLenum PNGImage::getType() {
+GLenum resources::PNGImage::getType() {
   if(this->bitDepth == 8) {
     return GL_UNSIGNED_BYTE;
   }

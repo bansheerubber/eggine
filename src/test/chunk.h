@@ -8,7 +8,7 @@
 
 #include "../engine/debug.h"
 #include "../basic/instancedRenderObjectContainer.h"
-#include "../basic/pngImage.h"
+#include "../resources/pngImage.h"
 #include "../basic/renderContext.h"
 #include "../basic/renderObject.h"
 #include "../util/sortedArray.h"
@@ -79,7 +79,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 
-		static PNGImage* Image;
+		static resources::PNGImage* Image;
 		static glm::lowp_vec2 Offsets[];
 		static GLuint VertexBufferObjects[];
 

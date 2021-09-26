@@ -6,11 +6,13 @@
 #include "../basic/camera.h"
 #include "chunkContainer.h"
 #include "../util/doubleDimension.h"
+#include "../engine/engine.h"
 #include "../basic/line.h"
 #include "overlappingTile.h"
+#include "../resources/resourceManager.h"
 #include "tileMath.h"
 
-PNGImage* Chunk::Image = nullptr;
+resources::PNGImage* Chunk::Image = nullptr;
 GLuint Chunk::Texture = GL_INVALID_INDEX;
 
 glm::lowp_vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
@@ -39,29 +41,14 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	// initialize dynamic static data
 	if(Image == nullptr) {
 		glGenBuffers(3, Chunk::VertexBufferObjects);
-		glGenTextures(1, &Chunk::Texture);
 
 		// load image
-		{	
-			Chunk::Image = new PNGImage("data/spritesheet.png");
-			glBindTexture(GL_TEXTURE_2D, Chunk::Texture);
+		{
+			Chunk::Image = (resources::PNGImage*)engine->manager.metadataToResources(
+				engine->manager.carton->database.get()->has("fileName")->exec()
+			)[0];
 
-			glTexImage2D(
-				GL_TEXTURE_2D,
-				0,
-				Chunk::Image->getFormat(),
-				Chunk::Image->width,
-				Chunk::Image->height,
-				0,
-				Image->getFormat(),
-				Image->getType(),
-				Image->image
-			);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			Chunk::Texture = Chunk::Image->texture;
 		}
 
 		// pre-calculate offsets

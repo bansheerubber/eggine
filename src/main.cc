@@ -12,13 +12,17 @@
 #include "basic/gameObject.h"
 #include "basic/line.h"
 #include "test/overlappingTile.h"
-#include "basic/pngImage.h"
+#include "carton/metadata/queryList.h"
+#include "resources/resourceManager.h"
 #include "basic/text.h"
 
 #include "test/tileMath.h"
 
 int main(int argc, char* argv[]) {
 	engine->initialize();
+
+	// TODO do smarter loading of files
+	engine->manager.loadResources(engine->manager.carton->database.get()->has("fileName")->exec());
 
 	ChunkContainer container;
 
