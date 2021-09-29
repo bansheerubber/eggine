@@ -25,8 +25,12 @@ tput sgr0
 # configure glfw
 pushd .
 cd tmp-setup
+[[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
+
 git clone https://github.com/glfw/glfw
 cd glfw
+[[ "$PWD" != *glfw* ]] && echo "\033[0;31mNot in glfw" && exit 1
+
 cmake -S . -B build
 cd build
 make
@@ -41,6 +45,8 @@ tput sgr0
 
 # configure freetype
 cd tmp-setup
+[[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
+
 git clone https://github.com/freetype/freetype
 cd ..
 rm -Rf include/freetype
@@ -52,8 +58,13 @@ tput sgr0
 # configure torquescript
 pushd .
 cd tmp-setup
+[[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
+
 git clone --recurse-submodules https://github.com/bansheerubber/torquescript-interpreter
+
 cd torquescript-interpreter
+[[ "$PWD" != *torquescript-interpreter* ]] && echo "\033[0;31mNot in torquescript-interpreter" && exit 1
+
 git checkout tssl-and-friends
 echo -e "\033[0;33mCompiling torquescrcipt"
 tput sgr0
@@ -65,6 +76,8 @@ tput sgr0
 
 # configure eggine-carton
 cd tmp-setup
+[[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
+
 git clone https://github.com/bansheerubber/eggine-carton
 cd ..
 rm -Rf src/carton

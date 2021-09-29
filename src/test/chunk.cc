@@ -45,7 +45,7 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 		// load image
 		{
 			Chunk::Image = (resources::PNGImage*)engine->manager.metadataToResources(
-				engine->manager.carton->database.get()->equals("extension", ".png")->exec()
+				engine->manager.carton->database.get()->equals("extension", ".png")->exec(true)
 			)[0];
 
 			Chunk::Texture = Chunk::Image->texture;
@@ -239,7 +239,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 void Chunk::addOverlappingTile(OverlappingTile* tile) {
 	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
-	long index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
 
 	this->overlappingTiles.insert(OverlappingTileWrapper {
 		index: index,

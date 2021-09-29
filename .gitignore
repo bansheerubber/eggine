@@ -3,6 +3,7 @@ dist
 tmp
 *.o
 *.pyc
+*.gen
 __pycache__
 lib
 glad

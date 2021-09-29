@@ -1,9 +1,10 @@
 #pragma once
 
 #include <cstddef>
+#include <torquescript/ts.h>
 #include <string>
 
-#include <torquescript/ts.h>
+#include "gameObject.h.gen"
 
 using namespace std;
 

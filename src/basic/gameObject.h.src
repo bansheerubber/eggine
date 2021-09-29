@@ -1,0 +1,5 @@
+#pragma once
+
+enum GameObjectType {
+	// ##1 game_object_enums.py
+};
