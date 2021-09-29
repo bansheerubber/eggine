@@ -45,7 +45,7 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 		// load image
 		{
 			Chunk::Image = (resources::PNGImage*)engine->manager.metadataToResources(
-				engine->manager.carton->database.get()->has("fileName")->exec()
+				engine->manager.carton->database.get()->equals("extension", ".png")->exec()
 			)[0];
 
 			Chunk::Texture = Chunk::Image->texture;

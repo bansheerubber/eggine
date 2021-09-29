@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 	engine->initialize();
 
 	// TODO do smarter loading of files
-	engine->manager.loadResources(engine->manager.carton->database.get()->has("fileName")->exec());
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".png")->exec());
 
 	ChunkContainer container;
 

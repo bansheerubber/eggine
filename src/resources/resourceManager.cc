@@ -1,15 +1,22 @@
 #include "resourceManager.h"
 
 #include "pngImage.h"
+#include "scriptFile.h"
 
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::PNGImage((resources::ResourceManager*)owner, (const unsigned char*)buffer, bufferSize);
 }
 
+void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::ScriptFile((resources::ResourceManager*)owner, (const unsigned char*)buffer, bufferSize);
+}
+
 resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton = new carton::Carton();
 	this->carton->addExtensionHandler(".png", handlePNGs, this);
+	this->carton->addExtensionHandler(".cs", handleScripts, this);
 	this->carton->read(fileName);
 }
 

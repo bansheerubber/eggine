@@ -46,7 +46,7 @@ class Engine {
 		FT_Library ft;
 		tsEnginePtr torquescript = nullptr;
 
-		resources::ResourceManager manager = resources::ResourceManager("test.carton");
+		resources::ResourceManager manager = resources::ResourceManager("out.carton");
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;

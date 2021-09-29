@@ -11,11 +11,13 @@
 #include "resourceObject.h"
 
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 
 namespace resources {
 	class ResourceManager {
 		friend ResourceObject;
 		friend void ::handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+		friend void ::handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		
 		public:
 			ResourceManager(string fileName);

@@ -8,6 +8,7 @@
 
 #include "callbacks.h"
 #include "../basic/renderContext.h"
+#include "../resources/scriptFile.h"
 #include "../util/time.h"
 #include "torquescript.h"
 
@@ -65,8 +66,14 @@ void Engine::initialize() {
 	this->registerBindRelease("camera.zoomIn", this->camera);
 	this->registerBindRelease("camera.zoomOut", this->camera);
 
+	// pre-load all .cs files
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".cs")->exec());
+
 	// execute torquescript file
-	tsExecFile(this->torquescript, "main.cs");
+	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager.metadataToResources(
+		engine->manager.carton->database.get()->equals("fileName", "scripts/main.cs")->exec()
+	)[0];
+	tsEval(this->torquescript, mainCS->script.c_str());
 }
 
 void Engine::exit() {
