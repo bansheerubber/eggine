@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <torquescript/ts.h>
 
+#include "test/character.h"
 #include "test/chunk.h"
 #include "test/chunkContainer.h"
 #include "engine/engine.h"
@@ -39,6 +40,10 @@ int main(int argc, char* argv[]) {
 			container.addOverlappingTile(alien);
 		}
 	}
+
+	Character* character = new Character();
+	character->setPosition(glm::uvec3(0, 0, 10));
+	container.addOverlappingTile(character);
 
 	engine->tick();
 
