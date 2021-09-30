@@ -11,7 +11,7 @@ using namespace std;
 namespace resources {
 	class PNGImage: public ResourceObject {
 		public:
-			PNGImage(class ResourceManager* manager, const unsigned char* buffer, size_t bufferSize);
+			PNGImage(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
 
 			png_uint_32 width;
 			png_uint_32 height;

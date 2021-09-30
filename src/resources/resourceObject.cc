@@ -2,8 +2,9 @@
 
 #include "resourceManager.h"
 
-resources::ResourceObject::ResourceObject(ResourceManager* manager) {
+resources::ResourceObject::ResourceObject(ResourceManager* manager, carton::Metadata* metadata) {
 	this->manager = manager;
+	this->metadata = metadata;
 	if(manager != nullptr) {
 		manager->objects.insert(this);
 	}

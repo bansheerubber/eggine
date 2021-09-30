@@ -12,7 +12,7 @@
 #include "../resources/resourceManager.h"
 #include "tileMath.h"
 
-resources::PNGImage* Chunk::Image = nullptr;
+resources::SpriteSheet* Chunk::Image = nullptr;
 GLuint Chunk::Texture = GL_INVALID_INDEX;
 
 glm::lowp_vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
@@ -39,13 +39,15 @@ int compareOverlappingTile(const void* a, const void* b) {
 
 Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	// initialize dynamic static data
+	bool first = false;
 	if(Image == nullptr) {
+		first = true;
 		glGenBuffers(3, Chunk::VertexBufferObjects);
 
 		// load image
 		{
-			Chunk::Image = (resources::PNGImage*)engine->manager.metadataToResources(
-				engine->manager.carton->database.get()->equals("extension", ".png")->exec(true)
+			Chunk::Image = (resources::SpriteSheet*)engine->manager.metadataToResources(
+				engine->manager.carton->database.get()->equals("extension", ".png")->exec()
 			)[0];
 
 			Chunk::Texture = Chunk::Image->texture;
@@ -196,12 +198,13 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		// TODO handle wall draw order for overlapping tiles
 		// handle overlapping tiles
 		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = &this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles			
+			int overlapBias = Chunk::Image->drawOntopOfOverlap(this->textureIndices[tile->index]) ? 0 : 1;
 			if(lastOverlappingIndex - 1 != tile->index) {
 				// draw [last, lastOverlappingIndex - tile.index + last)
 				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
 				glBindVertexArray(this->vertexArrayObject);
 				glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
-				glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, tile->index - lastOverlappingIndex + 1, lastOverlappingIndex);
+				glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, tile->index - lastOverlappingIndex + overlapBias, lastOverlappingIndex);
 				#ifdef EGGINE_DEBUG
 				this->drawCalls++;
 				#endif
@@ -209,7 +212,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 			tile->tile->render(deltaTime, context);
 
-			lastOverlappingIndex = tile->index + 1;
+			lastOverlappingIndex = tile->index + overlapBias;
 
 			leftOff = i + 1;
 		}

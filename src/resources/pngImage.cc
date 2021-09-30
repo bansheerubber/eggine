@@ -20,7 +20,12 @@ void copyDataToPNGBuffer(png_structp png, png_bytep output, png_size_t size) {
   buffer->currentIndex += size;
 }
 
-resources::PNGImage::PNGImage(ResourceManager* manager, const unsigned char* buffer, size_t bufferSize) : ResourceObject(manager) {
+resources::PNGImage::PNGImage(
+  ResourceManager* manager,
+  carton::Metadata* metadata,
+  const unsigned char* buffer,
+  size_t bufferSize
+) : ResourceObject(manager, metadata) {
   if(png_sig_cmp(buffer, 0, 8)) {
     printf("could not recognize %s as PNG\n", fileName.c_str());
 		return;

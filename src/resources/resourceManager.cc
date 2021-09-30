@@ -2,15 +2,16 @@
 
 #include "pngImage.h"
 #include "scriptFile.h"
+#include "spriteSheet.h"
 
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::PNGImage((resources::ResourceManager*)owner, (const unsigned char*)buffer, bufferSize);
+		= new resources::SpriteSheet((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::ScriptFile((resources::ResourceManager*)owner, (const unsigned char*)buffer, bufferSize);
+		= new resources::ScriptFile((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 resources::ResourceManager::ResourceManager(string fileName) {

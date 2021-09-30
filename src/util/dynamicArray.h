@@ -61,33 +61,37 @@ class DynamicArray {
 			this->head++;
 
 			if(this->head == this->size) {
-				if(this->size * 2 > DYNAMIC_ARRAY_MAX_SIZE) {
-					printf("stack overflow\n");
-					exit(1);
-				}
-				
-				T* array = (T*)realloc(this->array, sizeof(T) * this->size * 2);
-				if(array == NULL) {
-					printf("invalid dynamic array realloc\n");
-					exit(1);
-				}
-				this->array = array;
-
-				if(this->init != nullptr) {
-					for(size_t i = this->size; i < this->size * 2; i++) {
-						(*this->init)(this->parent, &this->array[i]);
-					}
-				}
-				this->size *= 2;
-				
-				if(this->onRealloc != nullptr) {
-					(*this->onRealloc)(this->parent);
-				}
+				this->allocate(this->size * 2);
 			}
 		}
 
 		void popped() {
 			this->head--;
+		}
+
+		void allocate(size_t amount) {
+			if(amount * 2 > DYNAMIC_ARRAY_MAX_SIZE) {
+				printf("stack overflow\n");
+				exit(1);
+			}
+			
+			T* array = (T*)realloc(this->array, sizeof(T) * amount);
+			if(array == NULL) {
+				printf("invalid dynamic array realloc\n");
+				exit(1);
+			}
+			this->array = array;
+
+			if(this->init != nullptr) {
+				for(size_t i = this->size; i < amount; i++) {
+					(*this->init)(this->parent, &this->array[i]);
+				}
+			}
+			this->size = amount;
+			
+			if(this->onRealloc != nullptr) {
+				(*this->onRealloc)(this->parent);
+			}
 		}
 
 		T& operator[](size_t index) {

@@ -8,10 +8,10 @@
 
 #include "../engine/debug.h"
 #include "../basic/instancedRenderObjectContainer.h"
-#include "../resources/pngImage.h"
 #include "../basic/renderContext.h"
 #include "../basic/renderObject.h"
 #include "../util/sortedArray.h"
+#include "../resources/spriteSheet.h"
 
 class Tile;
 
@@ -79,7 +79,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 
-		static resources::PNGImage* Image;
+		static resources::SpriteSheet* Image;
 		static glm::lowp_vec2 Offsets[];
 		static GLuint VertexBufferObjects[];
 
