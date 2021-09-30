@@ -5,6 +5,7 @@
 #include "chunk.h"
 #include "../util/dynamicArray.h"
 #include "../basic/renderObject.h"
+#include "../resources/spriteSheet.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ class ChunkContainer : public RenderObject {
 		static GLuint Shaders[];
 		static GLuint Uniforms[];
 		static GLuint ShaderProgram;
+		static resources::SpriteSheet* Image;
 
 		unsigned int size = 0;
 	

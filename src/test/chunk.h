@@ -79,7 +79,6 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 
-		static resources::SpriteSheet* Image;
 		static glm::lowp_vec2 Offsets[];
 		static GLuint VertexBufferObjects[];
 

@@ -13,12 +13,17 @@
 GLuint ChunkContainer::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
 GLuint ChunkContainer::Uniforms[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 GLuint ChunkContainer::ShaderProgram = GL_INVALID_INDEX;
+resources::SpriteSheet* ChunkContainer::Image = nullptr;
 
 void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 	new((void*)chunk) Chunk();
 }
 
 ChunkContainer::ChunkContainer() {
+	ChunkContainer::Image = (resources::SpriteSheet*)engine->manager.metadataToResources(
+		engine->manager.carton->database.get()->equals("extension", ".png")->exec()
+	)[0];
+	
 	RenderObject::CompileShader(
 		GL_VERTEX_SHADER,
 		&ChunkContainer::Shaders[0],
@@ -67,7 +72,7 @@ size_t ChunkContainer::getChunkCount() {
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	glUseProgram(ChunkContainer::ShaderProgram);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Chunk::Texture);
+	glBindTexture(GL_TEXTURE_2D, ChunkContainer::Image->texture);
 	glUniform1i(ChunkContainer::Uniforms[1], 0); // bind texture
 
 	glUniformMatrix4fv(ChunkContainer::Uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);

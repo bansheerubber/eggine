@@ -12,9 +12,6 @@
 #include "../resources/resourceManager.h"
 #include "tileMath.h"
 
-resources::SpriteSheet* Chunk::Image = nullptr;
-GLuint Chunk::Texture = GL_INVALID_INDEX;
-
 glm::lowp_vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
 GLuint Chunk::VertexBufferObjects[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
 
@@ -40,18 +37,9 @@ int compareOverlappingTile(const void* a, const void* b) {
 Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	// initialize dynamic static data
 	bool first = false;
-	if(Image == nullptr) {
+	if(Chunk::VertexBufferObjects[0] == GL_INVALID_INDEX) {
 		first = true;
 		glGenBuffers(3, Chunk::VertexBufferObjects);
-
-		// load image
-		{
-			Chunk::Image = (resources::SpriteSheet*)engine->manager.metadataToResources(
-				engine->manager.carton->database.get()->equals("extension", ".png")->exec()
-			)[0];
-
-			Chunk::Texture = Chunk::Image->texture;
-		}
 
 		// pre-calculate offsets
 		{
@@ -198,7 +186,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		// TODO handle wall draw order for overlapping tiles
 		// handle overlapping tiles
 		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = &this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles			
-			int overlapBias = Chunk::Image->drawOntopOfOverlap(this->textureIndices[tile->index]) ? 0 : 1;
+			int overlapBias = ChunkContainer::Image->drawOntopOfOverlap(this->textureIndices[tile->index]) ? 0 : 1;
 			if(lastOverlappingIndex - 1 != tile->index) {
 				// draw [last, lastOverlappingIndex - tile.index + last)
 				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
