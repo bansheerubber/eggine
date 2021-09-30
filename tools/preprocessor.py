@@ -198,7 +198,7 @@ if __name__ == "__main__":
 			for header in ts_definition_headers:
 				tmp_file = header.replace("./src/", "./tmp/")
 				relative_path = os.path.relpath(tmp_file, "./tmp/engine/")
-				torquescript_header_contents.append(f"#include \"{relative_path}\"")
+				torquescript_header_contents.append(f"#include \"{relative_path}\"\n")
 	
 	file.close()
 	write_file(torquescript_header_tmp, torquescript_header_contents)
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
 		if "torquescriptDefinitions" in line:
 			for function in ts_definition_functions:
-				torquescript_code_contents.append(f"ts::{function}();")
+				torquescript_code_contents.append(f"ts::{function}();\n")
 	
 	file.close()
 	write_file(torquescript_code_tmp, torquescript_code_contents)
