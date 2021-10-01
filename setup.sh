@@ -70,7 +70,7 @@ echo -e "\033[0;33mCompiling torquescrcipt"
 tput sgr0
 make -j 8 library
 popd
-cp -v tmp-setup/torquescript-interpreter/dist/libtorquescript.so lib
+cp -v tmp-setup/torquescript-interpreter/dist/libtorquescript.a lib
 echo -e "\033[0;32mFinished torquescript"
 tput sgr0
 
