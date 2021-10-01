@@ -1,6 +1,16 @@
 #include "keybind.h"
 #include "engine.h"
 
+void Engine::registerTSKeybindCallback(string bind, string key, string callback) {
+	if(this->keyToScancode.find(key) != this->keyToScancode.end()) {
+		this->addKeybind(this->keyToScancode[key], {
+			bind: bind,
+		});
+
+		this->bindToTSCallback[bind].push_back(callback);
+	}
+}
+
 void Engine::registerBindPress(string command, GameObject* gameObject) {
 	this->bindPressToGameObject[command].push_back(gameObject);
 }
