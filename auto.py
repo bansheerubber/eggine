@@ -25,6 +25,10 @@ def make():
 		else:
 			os.system(f"make -j 8")
 		
+		print("Packing carton...")
+		os.system(f"carton pack resources --output ./dist/out.carton")
+		print("Done")
+
 		print("---------------------------------------------------------------------------------")
 
 		last_compile = time()
@@ -36,10 +40,15 @@ if target:
 else:
 	os.system(f"make -j 8")
 
+print("Packing carton...")
+os.system(f"carton pack resources --output ./dist/out.carton")
+print("Done")
+
 print("---------------------------------------------------------------------------------")
 
 handler = EventHandler()
 watch_manager = pyinotify.WatchManager()
 notifier = pyinotify.Notifier(watch_manager, handler)
 wdd = watch_manager.add_watch("./src/", pyinotify.IN_CREATE | pyinotify.IN_MODIFY, rec=True)
+wdd = watch_manager.add_watch("./resources/", pyinotify.IN_CREATE | pyinotify.IN_MODIFY, rec=True)
 notifier.loop()
