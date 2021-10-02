@@ -30,9 +30,7 @@ class ChunkContainer : public RenderObject {
 
 		void render(double deltaTime, RenderContext &context);
 
-		static GLuint Shaders[];
-		static GLuint Uniforms[];
-		static GLuint ShaderProgram;
+		static class Shader* Program;
 		static resources::SpriteSheet* Image;
 
 		unsigned int size = 0;

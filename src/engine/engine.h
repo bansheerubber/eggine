@@ -24,6 +24,7 @@ void engineInitRenderables(class Engine*, RenderObject** object);
 
 class Engine {
 	friend Camera;
+	friend class Shader;
 	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
 	friend tsEntryPtr ts::getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
 	friend tsEntryPtr ts::onKeyPress(tsEnginePtr tsEngine, unsigned int argc, tsEntryPtr arguments);
@@ -61,6 +62,7 @@ class Engine {
 		
 		GLFWwindow* window;
 		Camera* camera = nullptr;
+		class Shader* boundShader = nullptr;
 		UI ui;
 		long long lastRenderTime;
 

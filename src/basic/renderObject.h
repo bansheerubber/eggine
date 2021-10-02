@@ -12,8 +12,5 @@ class RenderObject : public GameObject {
 		
 		virtual void render(double deltaTime, RenderContext &context) = 0;
 
-		static void CompileShader(GLenum type, GLuint* destination, const char* source);
-		static bool LinkProgram(GLuint* destination, GLuint* shaders, GLuint shaderCount);
-
 		bool visible = true;
 };

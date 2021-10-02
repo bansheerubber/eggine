@@ -8,11 +8,10 @@
 #include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "overlappingTile.h"
+#include "../basic/shader.h"
 #include "tileMath.h"
 
-GLuint ChunkContainer::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
-GLuint ChunkContainer::Uniforms[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
-GLuint ChunkContainer::ShaderProgram = GL_INVALID_INDEX;
+Shader* ChunkContainer::Program = nullptr;
 resources::SpriteSheet* ChunkContainer::Image = nullptr;
 
 void initChunk(class ChunkContainer* container, class Chunk* chunk) {
@@ -20,26 +19,14 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 }
 
 ChunkContainer::ChunkContainer() {
-	ChunkContainer::Image = (resources::SpriteSheet*)engine->manager.metadataToResources(
-		engine->manager.carton->database.get()->equals("extension", ".png")->exec()
-	)[0];
-	
-	RenderObject::CompileShader(
-		GL_VERTEX_SHADER,
-		&ChunkContainer::Shaders[0],
-		#include "shaders/tile.vert"
-	);
+	if(ChunkContainer::Program == nullptr) {
+		ChunkContainer::Program = new Shader("shaders/tile.vert", "shaders/tile.frag");
+	}
 
-	RenderObject::CompileShader(
-		GL_FRAGMENT_SHADER,
-		&ChunkContainer::Shaders[1],
-		#include "shaders/tile.frag"
-	);
-
-	if(RenderObject::LinkProgram(&ChunkContainer::ShaderProgram, ChunkContainer::Shaders, 2)) {
-		ChunkContainer::Uniforms[0] = glGetUniformLocation(ChunkContainer::ShaderProgram, "projection");
-		ChunkContainer::Uniforms[1] = glGetUniformLocation(ChunkContainer::ShaderProgram, "spriteTexture");
-		ChunkContainer::Uniforms[2] = glGetUniformLocation(ChunkContainer::ShaderProgram, "chunkScreenSpace");
+	if(ChunkContainer::Image == nullptr) {
+		ChunkContainer::Image = (resources::SpriteSheet*)engine->manager.metadataToResources(
+			engine->manager.carton->database.get()->equals("extension", ".png")->exec()
+		)[0];
 	}
 }
 
@@ -70,12 +57,12 @@ size_t ChunkContainer::getChunkCount() {
 }
 
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
-	glUseProgram(ChunkContainer::ShaderProgram);
+	ChunkContainer::Program->bind();
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, ChunkContainer::Image->texture);
-	glUniform1i(ChunkContainer::Uniforms[1], 0); // bind texture
-
-	glUniformMatrix4fv(ChunkContainer::Uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
+	glUniform1i(ChunkContainer::Program->getUniform("spriteTexture"), 0); // bind texture	
+	glUniformMatrix4fv(ChunkContainer::Program->getUniform("projection"), 1, false, &context.camera->projectionMatrix[0][0]);
 
 	#ifdef EGGINE_DEBUG
 	size_t chunksRendered = 0;

@@ -2,33 +2,31 @@
 #include "text.h"
 
 #include "../engine/engine.h"
+#include "shader.h"
 #include "ui.h"
 
 GLuint Text::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
-GLuint Text::Uniforms[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
-GLuint Text::ShaderProgram = GL_INVALID_INDEX;
+Shader* Text::Program = nullptr;
 
 Text::Text(string family, int size) : RenderObject(false) {
 	this->font = Font::GetFont(family, size);
 
-	RenderObject::CompileShader(
-		GL_VERTEX_SHADER,
-		&Text::Shaders[0],
-		#include "shaders/text.vert"
-	);
+	if(Text::Program == nullptr) {
+		Shader::CompileShader(
+			&Text::Shaders[0],
+			GL_VERTEX_SHADER,
+			#include "shaders/text.vert"
+		);
 
-	RenderObject::CompileShader(
-		GL_FRAGMENT_SHADER,
-		&Text::Shaders[1],
-		#include "shaders/text.frag"
-	);
+		Shader::CompileShader(
+			&Text::Shaders[1],
+			GL_FRAGMENT_SHADER,
+			#include "shaders/text.frag"
+		);
 
-	if(RenderObject::LinkProgram(&Text::ShaderProgram, Text::Shaders, 2)) {
-		Text::Uniforms[0] = glGetUniformLocation(Text::ShaderProgram, "textTexture");
-		Text::Uniforms[1] = glGetUniformLocation(Text::ShaderProgram, "textColor");
-		Text::Uniforms[2] = glGetUniformLocation(Text::ShaderProgram, "projection");
+		Text::Program = new Shader(Text::Shaders[0], Text::Shaders[1]);
 	}
-
+	
 	// new code
 	glGenBuffers(2, this->vertexBufferObjects);
 	glGenVertexArrays(1, &this->vertexArrayObject);
@@ -149,15 +147,15 @@ string Text::getText() {
 }
 
 void Text::render(double deltaTime, RenderContext &context) {
-	glUseProgram(Text::ShaderProgram);
+	Text::Program->bind();
 	glBindVertexArray(this->vertexArrayObject);
 	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, this->font->texture);
 
-	glUniformMatrix4fv(Text::Uniforms[2], 1, false, &context.ui->projectionMatrix[0][0]);
-	glUniform3fv(Text::Uniforms[1], 1, &this->color[0]);
-	glUniform1i(Text::Uniforms[0], 0);
+	glUniformMatrix4fv(Text::Program->getUniform("projection"), 1, false, &context.ui->projectionMatrix[0][0]);
+	glUniform3fv(Text::Program->getUniform("textColor"), 1, &this->color[0]);
+	glUniform1i(Text::Program->getUniform("textTexture"), 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * this->text.size());
 }

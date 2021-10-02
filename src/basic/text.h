@@ -34,6 +34,5 @@ class Text : public RenderObject {
 		void updateBuffers();
 		
 		static GLuint Shaders[2];
-		static GLuint Uniforms[3];
-		static GLuint ShaderProgram;
+		static class Shader* Program;
 };

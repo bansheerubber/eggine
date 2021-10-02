@@ -19,8 +19,7 @@ class Line: public RenderObject {
 	
 	private:
 		static GLuint Shaders[];
-		static GLuint Uniforms[];
-		static GLuint ShaderProgram;
+		static class Shader* Program;
 		
 		GLuint vertexBufferObjects[1];
 		GLuint vertexArrayObject;

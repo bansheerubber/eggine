@@ -10,6 +10,7 @@
 #include "../basic/line.h"
 #include "overlappingTile.h"
 #include "../resources/resourceManager.h"
+#include "../basic/shader.h"
 #include "tileMath.h"
 
 glm::lowp_vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
@@ -190,7 +191,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 				// draw [last, lastOverlappingIndex - tile.index + last)
 				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
 				glBindVertexArray(this->vertexArrayObject);
-				glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
+				glUniform2f(ChunkContainer::Program->getUniform("chunkScreenSpace"), this->screenSpacePosition.x, this->screenSpacePosition.y);
 				glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, tile->index - lastOverlappingIndex + overlapBias, lastOverlappingIndex);
 				#ifdef EGGINE_DEBUG
 				this->drawCalls++;
@@ -205,7 +206,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		}
 
 		glBindVertexArray(this->vertexArrayObject);
-		glUniform2f(ChunkContainer::Uniforms[2], this->screenSpacePosition.x, this->screenSpacePosition.y);
+		glUniform2f(ChunkContainer::Program->getUniform("chunkScreenSpace"), this->screenSpacePosition.x, this->screenSpacePosition.y);
 		glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, total - lastOverlappingIndex, lastOverlappingIndex);
 		#ifdef EGGINE_DEBUG
 		this->drawCalls++;

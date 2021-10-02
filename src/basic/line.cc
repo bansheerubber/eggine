@@ -2,10 +2,10 @@
 #include "line.h"
 
 #include "camera.h"
+#include "shader.h"
 
 GLuint Line::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
-GLuint Line::Uniforms[1] = {GL_INVALID_INDEX};
-GLuint Line::ShaderProgram = GL_INVALID_INDEX;
+Shader* Line::Program = nullptr;
 
 Line::Line() {
 	glGenBuffers(1, this->vertexBufferObjects);
@@ -20,21 +20,19 @@ Line::Line() {
 
 	glBindVertexArray(0);
 
-	RenderObject::CompileShader(
-		GL_VERTEX_SHADER,
+	Shader::CompileShader(
 		&Line::Shaders[0],
+		GL_VERTEX_SHADER,
 		#include "shaders/line.vert"
 	);
 
-	RenderObject::CompileShader(
-		GL_FRAGMENT_SHADER,
+	Shader::CompileShader(
 		&Line::Shaders[1],
+		GL_FRAGMENT_SHADER,
 		#include "shaders/line.frag"
 	);
 
-	if(RenderObject::LinkProgram(&Line::ShaderProgram, Line::Shaders, 2)) {
-		Line::Uniforms[0] = glGetUniformLocation(Line::ShaderProgram, "projection");
-	}
+	Line::Program = new Shader(Line::Shaders[0], Line::Shaders[1]);
 }
 
 Line::~Line() {
@@ -67,9 +65,9 @@ void Line::commit() {
 
 void Line::render(double deltaTime, RenderContext &context) {
 	if(this->positions.size() > 0) {
-		glUseProgram(Line::ShaderProgram);
+		Line::Program->bind();
 
-		glUniformMatrix4fv(Line::Uniforms[0], 1, false, &context.camera->projectionMatrix[0][0]);
+		glUniformMatrix4fv(Line::Program->getUniform("projection"), 1, false, &context.camera->projectionMatrix[0][0]);
 		
 		glBindVertexArray(this->vertexArrayObject);
 		glDrawArrays(GL_LINE_STRIP, 0, this->positions.size());
