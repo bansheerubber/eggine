@@ -44,6 +44,11 @@ void Engine::initialize() {
 	glfwSwapInterval(1);
 
 	#ifdef EGGINE_DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+	glDebugMessageCallback(glDebugOutput, nullptr);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
 	this->debugText = new Text("Arial", 12);
 	this->debugText->color[0] = 0.0;
 	this->debugText->color[1] = 1.0;
@@ -194,6 +199,8 @@ void Engine::tick() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	#ifdef EGGINE_DEBUG
+	this->debug.flushGLDebugMessages();
+	
 	this->debug.clearInfoMessages();
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for CPU render time", this->cpuRenderTime));
