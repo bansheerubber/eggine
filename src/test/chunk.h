@@ -54,9 +54,6 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void setPosition(glm::uvec2 position);
 		glm::uvec2& getPosition();
 
-		void addOverlappingTile(class OverlappingTile* tile);
-		void removeOverlappingTile(class OverlappingTile* tile);
-
 		static constexpr unsigned int Size = 25;
 		static GLuint Texture;
 	
@@ -75,6 +72,10 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		bool isCulled = false;
 		int drawCalls = 0;
 		#endif
+
+		void addOverlappingTile(class OverlappingTile* tile);
+		void updateOverlappingTile(class OverlappingTile* tile);
+		void removeOverlappingTile(class OverlappingTile* tile);
 		
 		void buildDebugLines();
 		void defineBounds();

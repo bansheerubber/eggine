@@ -9,14 +9,13 @@
 
 class Character: public OverlappingTile {
 	public:
-		Character();
+		Character(class ChunkContainer* container);
 		~Character();
 
-		glm::uvec2 position = glm::uvec2(0, 0);
 		TileSet destinations; // TODO move to unit class
 
-		bool move(glm::uvec2 position);
-		bool moveTest(glm::uvec2 position);
+		bool move(glm::uvec3 position);
+		bool moveTest(glm::uvec3 position);
 };
 
 namespace ts {

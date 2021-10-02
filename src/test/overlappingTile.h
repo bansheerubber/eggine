@@ -7,16 +7,17 @@
 
 class OverlappingTile : public RenderObject {	
 	public:
-		OverlappingTile();
+		OverlappingTile(class ChunkContainer* container);
 		~OverlappingTile();
 
 		void setPosition(glm::uvec3 position);
 		glm::uvec3 getPosition();
-		void setChunk(class Chunk* chunk);
 
 		void render(double deltaTime, RenderContext &context);
 
-	private:
+	protected:
+		class ChunkContainer* container = nullptr;
+		
 		GLuint vertexBufferObjects[2];
 		GLuint vertexArrayObject;
 		int textureIndex = 3;

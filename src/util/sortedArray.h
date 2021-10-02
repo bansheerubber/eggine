@@ -60,6 +60,10 @@ class SortedArray {
 				this->sort();
 			}
 		}
+
+		void sort() {
+			qsort(&this->array[0], this->array.head, sizeof(T), this->compare);
+		}
 	
 		DynamicArray<T, S> array;
 	
@@ -70,9 +74,5 @@ class SortedArray {
 			T temp = this->array[index1];
 			this->array[index1] = this->array[index2];
 			this->array[index2] = temp;
-		}
-
-		void sort() {
-			qsort(&this->array[0], this->array.head, sizeof(T), this->compare);
 		}
 };

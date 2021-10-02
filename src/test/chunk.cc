@@ -183,7 +183,6 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		size_t leftOff = 0;
 		OverlappingTileWrapper* tile = nullptr;
 
-		// TODO handle wall draw order for overlapping tiles
 		// handle overlapping tiles
 		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = &this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles			
 			int overlapBias = ChunkContainer::Image->drawOntopOfOverlap(this->textureIndices[tile->index]) ? 0 : 1;
@@ -236,7 +235,20 @@ void Chunk::addOverlappingTile(OverlappingTile* tile) {
 		index: index,
 		tile: tile,
 	});
-	tile->setChunk(this);
+}
+
+void Chunk::updateOverlappingTile(OverlappingTile* tile) {
+	// find the tile and update its index
+	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+
+	for(size_t i = 0; i < this->overlappingTiles.array.head; i++) {
+		if(this->overlappingTiles.array[i].tile == tile) {
+			this->overlappingTiles.array[i].index = index;
+		}
+	}
+
+	this->overlappingTiles.sort();
 }
 	
 void Chunk::removeOverlappingTile(OverlappingTile* tile) {

@@ -2,9 +2,12 @@
 #include "overlappingTile.h"
 
 #include "chunk.h"
+#include "chunkContainer.h"
 #include "tileMath.h"
 
-OverlappingTile::OverlappingTile() : RenderObject(false) {
+OverlappingTile::OverlappingTile(ChunkContainer* container) : RenderObject(false) {
+	this->container = container;	
+	
 	glGenBuffers(2, this->vertexBufferObjects);
 	glGenVertexArrays(1, &this->vertexArrayObject);
 	glBindVertexArray(this->vertexArrayObject);
@@ -58,27 +61,33 @@ OverlappingTile::~OverlappingTile() {
 
 void OverlappingTile::setPosition(glm::uvec3 position) {
 	this->position = position;
-	this->setChunk(this->chunk);
+
+	glm::uvec2 chunkPosition(position.x / Chunk::Size, position.y / Chunk::Size);
+	Chunk &chunk = this->container->getChunk(tilemath::coordinateToIndex(chunkPosition, this->container->size));
+
+	if(this->chunk != &chunk) {
+		if(this->chunk != nullptr) {
+			this->chunk->removeOverlappingTile(this);
+		}
+		chunk.addOverlappingTile(this);
+	}
+	this->chunk = &chunk;
+
+	glm::uvec3 relativePosition = this->position;
+	relativePosition.x -= this->chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
+	relativePosition.y -= this->chunk->position.y * Chunk::Size;
+	this->screenSpacePosition = tilemath::tileToScreen(relativePosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::lowp_vec2), NULL, GL_DYNAMIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::lowp_vec2), &this->screenSpacePosition[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	this->chunk->updateOverlappingTile(this);
 }
 
 glm::uvec3 OverlappingTile::getPosition() {
 	return this->position;
-}
-
-void OverlappingTile::setChunk(Chunk* chunk) {
-	this->chunk = chunk;
-
-	if(chunk != nullptr) {
-		glm::uvec3 position = this->position;
-		position.x -= this->chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
-		position.y -= this->chunk->position.y * Chunk::Size;
-		this->screenSpacePosition = tilemath::tileToScreen(position);
-
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::lowp_vec2), NULL, GL_DYNAMIC_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::lowp_vec2), &this->screenSpacePosition[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
 }
 
 void OverlappingTile::render(double deltaTime, RenderContext &context) {

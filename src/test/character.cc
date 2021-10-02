@@ -1,6 +1,6 @@
 #include "character.h"
 
-Character::Character() {
+Character::Character(ChunkContainer* chunkContainer) : OverlappingTile(chunkContainer) {
 	this->reference = tsCreateObject(engine->torquescript, "Character", this);
 }
 
@@ -8,9 +8,9 @@ Character::~Character() {
 	tsDeleteObject(this->reference);
 }
 
-bool Character::move(glm::uvec2 position) {
+bool Character::move(glm::uvec3 position) {
 	if(this->moveTest(position)) {
-		this->position = position;
+		this->setPosition(position);
 		return true;
 	}
 	else {
@@ -18,14 +18,16 @@ bool Character::move(glm::uvec2 position) {
 	}
 }
 
-bool Character::moveTest(glm::uvec2 position) {
+bool Character::moveTest(glm::uvec3 position) {
 	tsEntry arguments[2];
 	arguments[0].type = TS_ENTRY_NUMBER;
 	arguments[0].numberData = position.x;
 	arguments[1].type = TS_ENTRY_NUMBER;
 	arguments[1].numberData = position.y;
+	arguments[2].type = TS_ENTRY_NUMBER;
+	arguments[2].numberData = position.z;
 
-	tsEntryPtr result = tsCallMethod(engine->torquescript, this->reference, "moveTest", 2, arguments);
+	tsEntryPtr result = tsCallMethod(engine->torquescript, this->reference, "moveTest", 3, arguments);
 	bool output = result->numberData == 1.0;
 	delete result;
 	return output;

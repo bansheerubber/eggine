@@ -32,18 +32,8 @@ int main(int argc, char* argv[]) {
 		container.addChunk(tilemath::indexToCoordinate(i, size));
 	}
 
-	for(size_t i = 0; i < container.getChunkCount(); i++) {
-		for(int egg = 0; egg < 0; egg++) {
-			Chunk &chunk = container.getChunk(i);
-			OverlappingTile* alien = new OverlappingTile();
-			alien->setPosition(glm::uvec3(egg + chunk.getPosition().x * Chunk::Size, egg + chunk.getPosition().y * Chunk::Size, chunk.height - 1));
-			container.addOverlappingTile(alien);
-		}
-	}
-
-	Character* character = new Character();
-	character->setPosition(glm::uvec3(0, 0, 10));
-	container.addOverlappingTile(character);
+	Character* character = new Character(&container);
+	character->setPosition(glm::uvec3(0, 0, 10)); 
 
 	engine->tick();
 
