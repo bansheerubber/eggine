@@ -4,7 +4,7 @@
 #include FT_FREETYPE_H
 #include <glfw/glfw3.h>
 #include <tsl/robin_map.h>
-#include <torquescript/ts.h>
+#include <eggscript/egg.h>
 #include <vector>
 
 #include "../basic/camera.h"
@@ -18,7 +18,6 @@
 #include "../basic/ui.h"
 
 using namespace std;
-using namespace tsl;
 
 void engineInitRenderables(class Engine*, RenderObject** object);
 
@@ -26,8 +25,8 @@ class Engine {
 	friend Camera;
 	friend class Shader;
 	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
-	friend tsEntryPtr ts::getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
-	friend tsEntryPtr ts::onKeyPress(tsEnginePtr tsEngine, unsigned int argc, tsEntryPtr arguments);
+	friend esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	
 	public:
 		void initialize();
@@ -48,7 +47,7 @@ class Engine {
 		int windowHeight;
 
 		FT_Library ft;
-		tsEnginePtr torquescript = nullptr;
+		esEnginePtr eggscript = nullptr;
 
 		resources::ResourceManager manager = resources::ResourceManager("out.carton");
 
@@ -58,7 +57,7 @@ class Engine {
 
 	private:
 		long long cpuRenderTime = 0;
-		long long torquescriptTickTime = 0;
+		long long eggscriptTickTime = 0;
 		
 		GLFWwindow* window;
 		Camera* camera = nullptr;
@@ -73,15 +72,15 @@ class Engine {
 		DynamicArray<RenderObject*, Engine> renderables = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 		DynamicArray<RenderObject*, Engine> renderableUIs = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 
-		robin_map<string, vector<string>> bindToTSCallback;
-		robin_map<string, vector<GameObject*>> bindPressToGameObject;
-		robin_map<string, vector<GameObject*>> bindReleaseToGameObject;
-		robin_map<string, vector<GameObject*>> bindHeldToGameObject;
-		robin_map<int, vector<binds::Keybind>> keyToKeybind;
+		tsl::robin_map<string, vector<string>> bindToTSCallback;
+		tsl::robin_map<string, vector<GameObject*>> bindPressToGameObject;
+		tsl::robin_map<string, vector<GameObject*>> bindReleaseToGameObject;
+		tsl::robin_map<string, vector<GameObject*>> bindHeldToGameObject;
+		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;
 		vector<pair<GameObject*, string>> heldEvents;
 
-		robin_map<string, int> keyToScancode;
-		robin_map<int, string> scancodeToKey;
+		tsl::robin_map<string, int> keyToScancode;
+		tsl::robin_map<int, string> scancodeToKey;
 };
 
 extern Engine* engine;

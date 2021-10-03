@@ -12,7 +12,7 @@ include/KHR
 include/glfw
 include/freetype
 include/ft2build.h
-include/torquescript
+include/eggscript
 tmp-setup
 src/carton
 resources/spritesheets

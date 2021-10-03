@@ -3,11 +3,11 @@
 #include "../engine/engine.h"
 
 TileSet::TileSet() {
-	this->reference = tsCreateObject(engine->torquescript, "TileSet", this);
+	this->reference = esCreateObject(engine->eggscript, "TileSet", this);
 }
 
 TileSet::~TileSet() {
-	tsDeleteObject(this->reference);
+	esDeleteObject(this->reference);
 }
 
 bool TileSet::add(glm::uvec2 position) {
@@ -38,23 +38,23 @@ unsigned int TileSet::index(glm::uvec2 &position) {
 	return ((position.x + position.y) * (position.x + position.y + 1)) / 2 + position.y;
 }
 
-void ts::defineTileSet() {
-	tsRegisterNamespace(engine->torquescript, "TileSet");
-	tsNamespaceInherit(engine->torquescript, "SimObject", "TileSet");
+void es::defineTileSet() {
+	esRegisterNamespace(engine->eggscript, "TileSet");
+	esNamespaceInherit(engine->eggscript, "SimObject", "TileSet");
 
-	tsEntryType addArguments[3] = {TS_ENTRY_OBJECT, TS_ENTRY_NUMBER, TS_ENTRY_NUMBER};
-	tsRegisterMethod(engine->torquescript, TS_ENTRY_NUMBER, ts::TileSet__add, "TileSet", "add", 3, addArguments);
-	tsRegisterMethod(engine->torquescript, TS_ENTRY_NUMBER, ts::TileSet__remove, "TileSet", "remove", 3, addArguments);
-	tsRegisterMethod(engine->torquescript, TS_ENTRY_NUMBER, ts::TileSet__has, "TileSet", "has", 3, addArguments);
+	esEntryType addArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::TileSet__add, "TileSet", "add", 3, addArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::TileSet__remove, "TileSet", "remove", 3, addArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::TileSet__has, "TileSet", "has", 3, addArguments);
 
-	tsEntryType clearArguments[1] = {TS_ENTRY_OBJECT};
-	tsRegisterMethod(engine->torquescript, TS_ENTRY_INVALID, ts::TileSet__clear, "TileSet", "clear", 1, clearArguments);
+	esEntryType clearArguments[1] = {ES_ENTRY_OBJECT};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__clear, "TileSet", "clear", 1, clearArguments);
 }
 
-tsEntryPtr ts::TileSet__add(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	if(argc == 3 && tsCompareNamespaceToObject(args[0].objectData, "TileSet")) {
-		tsEntryPtr entry = new tsEntry();
-		entry->type = TS_ENTRY_NUMBER;
+esEntryPtr es::TileSet__add(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 3 && esCompareNamespaceToObject(args[0].objectData, "TileSet")) {
+		esEntryPtr entry = new esEntry();
+		entry->type = ES_ENTRY_NUMBER;
 		entry->numberData = ((TileSet*)args[0].objectData->objectWrapper->data)->add(glm::uvec2((int)args[1].numberData, (int)args[2].numberData));
 		return entry;
 	}
@@ -62,10 +62,10 @@ tsEntryPtr ts::TileSet__add(tsEnginePtr tsEngine, unsigned int argc, tsEntry* ar
 	return nullptr;
 }
 
-tsEntryPtr ts::TileSet__remove(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	if(argc == 3 && tsCompareNamespaceToObject(args[0].objectData, "TileSet")) {
-		tsEntryPtr entry = new tsEntry();
-		entry->type = TS_ENTRY_NUMBER;
+esEntryPtr es::TileSet__remove(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 3 && esCompareNamespaceToObject(args[0].objectData, "TileSet")) {
+		esEntryPtr entry = new esEntry();
+		entry->type = ES_ENTRY_NUMBER;
 		entry->numberData = ((TileSet*)args[0].objectData->objectWrapper->data)->remove(glm::uvec2((int)args[1].numberData, (int)args[2].numberData));
 		return entry;
 	}
@@ -73,10 +73,10 @@ tsEntryPtr ts::TileSet__remove(tsEnginePtr tsEngine, unsigned int argc, tsEntry*
 	return nullptr;
 }
 
-tsEntryPtr ts::TileSet__has(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	if(argc == 3 && tsCompareNamespaceToObject(args[0].objectData, "TileSet")) {
-		tsEntryPtr entry = new tsEntry();
-		entry->type = TS_ENTRY_NUMBER;
+esEntryPtr es::TileSet__has(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 3 && esCompareNamespaceToObject(args[0].objectData, "TileSet")) {
+		esEntryPtr entry = new esEntry();
+		entry->type = ES_ENTRY_NUMBER;
 		entry->numberData = ((TileSet*)args[0].objectData->objectWrapper->data)->has(glm::uvec2((int)args[1].numberData, (int)args[2].numberData));
 		return entry;
 	}
@@ -84,8 +84,8 @@ tsEntryPtr ts::TileSet__has(tsEnginePtr tsEngine, unsigned int argc, tsEntry* ar
 	return nullptr;
 }
 
-tsEntryPtr ts::TileSet__clear(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	if(argc == 1 && tsCompareNamespaceToObject(args[0].objectData, "TileSet")) {
+esEntryPtr es::TileSet__clear(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "TileSet")) {
 		((TileSet*)args[0].objectData->objectWrapper->data)->clear();
 	}
 

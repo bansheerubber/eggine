@@ -55,23 +55,26 @@ mv -v tmp-setup/freetype/include/* include/
 echo -e "\033[0;32mFinished freetype"
 tput sgr0
 
-# configure torquescript
+# configure eggscript
 pushd .
 cd tmp-setup
 [[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
 
-git clone --recurse-submodules https://github.com/bansheerubber/torquescript-interpreter
+git clone --recurse-submodules https://github.com/bansheerubber/eggscript-interpreter
 
-cd torquescript-interpreter
-[[ "$PWD" != *torquescript-interpreter* ]] && echo "\033[0;31mNot in torquescript-interpreter" && exit 1
+cd eggscript-interpreter
+[[ "$PWD" != *eggscript-interpreter* ]] && echo "\033[0;31mNot in eggscript-interpreter" && exit 1
 
-git checkout tssl-and-friends
-echo -e "\033[0;33mCompiling torquescrcipt"
+git checkout arrays-as-objects
+echo -e "\033[0;33mCompiling eggscript"
 tput sgr0
 make -j 8 library
 popd
-cp -v tmp-setup/torquescript-interpreter/dist/libtorquescript.a lib
-echo -e "\033[0;32mFinished torquescript"
+cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a lib
+rm -Rf include/eggscript
+mkdir -p include/eggscript
+cp -v tmp-setup/eggscript-interpreter/dist/include.cpp/egg.h include/eggscript/egg.h
+echo -e "\033[0;32mFinished eggscript"
 tput sgr0
 
 # configure eggine-carton

@@ -18,7 +18,7 @@ class Character: public OverlappingTile {
 		bool moveTest(glm::uvec3 position);
 };
 
-namespace ts {
+namespace es {
 	void defineCharacter();
-	tsEntryPtr Character__getDestinations(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
+	esEntryPtr Character__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };

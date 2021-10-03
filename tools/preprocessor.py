@@ -15,8 +15,8 @@ def write_file(filename, contents):
 	file.close()
 
 environment_variables = {}
-ts_definition_headers = []
-ts_definition_functions = []
+es_definition_headers = []
+es_definition_functions = []
 max_depth = 0
 files_with_custom_depth = set()
 
@@ -39,18 +39,18 @@ def to_snake_case(name):
 
 # headers are always scanned, because they have information that is needed in the preprocessing of other files
 def handle_headers(filename, contents):
-	global ts_definition_headers
-	global ts_definition_functions
+	global es_definition_headers
+	global es_definition_functions
 	global game_object_type_enums
 	
 	read_namespace = False
 	for line in contents:
-		if "namespace ts" in line:
+		if "namespace es" in line:
 			read_namespace = True
 		elif read_namespace:
 			if "void define" in line:
-				ts_definition_headers.append(filename)
-				ts_definition_functions.append(re.compile(r"^void ([\w]+)").match(line.strip()).group(1))
+				es_definition_headers.append(filename)
+				es_definition_functions.append(re.compile(r"^void ([\w]+)").match(line.strip()).group(1))
 				read_namespace = False
 		
 		if match := re.match(command_pattern, line):
@@ -61,8 +61,8 @@ def handle_headers(filename, contents):
 
 def preprocess(filename, contents, depth):
 	global total_lines
-	global ts_definition_headers
-	global ts_definition_functions
+	global es_definition_headers
+	global es_definition_functions
 	global max_depth
 	global files_with_custom_depth
 
@@ -186,34 +186,34 @@ if __name__ == "__main__":
 		for file in files_with_custom_depth:
 			handle_file(file, depth)
 	
-	# handle torquescript.h
-	torquescript_header = "./src/engine/torquescript.h"
-	torquescript_header_tmp = "./tmp/engine/torquescript.h"
-	torquescript_header_contents = []
-	file = open(torquescript_header)
+	# handle eggscript.h
+	eggscript_header = "./src/engine/eggscript.h"
+	eggscript_header_tmp = "./tmp/engine/eggscript.h"
+	eggscript_header_contents = []
+	file = open(eggscript_header)
 	for line in file.readlines():
-		torquescript_header_contents.append(line)
+		eggscript_header_contents.append(line)
 
 		if "#pragma once" in line:
-			for header in ts_definition_headers:
+			for header in es_definition_headers:
 				tmp_file = header.replace("./src/", "./tmp/")
 				relative_path = os.path.relpath(tmp_file, "./tmp/engine/")
-				torquescript_header_contents.append(f"#include \"{relative_path}\"\n")
+				eggscript_header_contents.append(f"#include \"{relative_path}\"\n")
 	
 	file.close()
-	write_file(torquescript_header_tmp, torquescript_header_contents)
+	write_file(eggscript_header_tmp, eggscript_header_contents)
 
-	# handle torquescript.cc
-	torquescript_code = "./src/engine/torquescript.cc"
-	torquescript_code_tmp = "./tmp/engine/torquescript.cc"
-	torquescript_code_contents = []
-	file = open(torquescript_code)
+	# handle eggscript.cc
+	eggscript_code = "./src/engine/eggscript.cc"
+	eggscript_code_tmp = "./tmp/engine/eggscript.cc"
+	eggscript_code_contents = []
+	file = open(eggscript_code)
 	for line in file.readlines():
-		torquescript_code_contents.append(line)
+		eggscript_code_contents.append(line)
 
-		if "torquescriptDefinitions" in line:
-			for function in ts_definition_functions:
-				torquescript_code_contents.append(f"ts::{function}();\n")
+		if "eggscriptDefinitions" in line:
+			for function in es_definition_functions:
+				eggscript_code_contents.append(f"es::{function}();\n")
 	
 	file.close()
-	write_file(torquescript_code_tmp, torquescript_code_contents)
+	write_file(eggscript_code_tmp, eggscript_code_contents)

@@ -23,7 +23,7 @@ void handleShaders(void* owner, carton::File* file, const char* buffer, size_t b
 resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton = new carton::Carton();
 	this->carton->addExtensionHandler(".png", handlePNGs, this);
-	this->carton->addExtensionHandler(".cs", handleScripts, this);
+	this->carton->addExtensionHandler(".egg", handleScripts, this);
 	this->carton->addExtensionHandler(".vert", handleShaders, this);
 	this->carton->addExtensionHandler(".frag", handleShaders, this);
 	this->carton->read(fileName);

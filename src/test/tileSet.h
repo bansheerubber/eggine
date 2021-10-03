@@ -20,10 +20,10 @@ class TileSet: public GameObject {
 		unsigned int index(glm::uvec2 &position);
 };
 
-namespace ts {
+namespace es {
 	void defineTileSet();
-	tsEntryPtr TileSet__add(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
-	tsEntryPtr TileSet__remove(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
-	tsEntryPtr TileSet__clear(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
-	tsEntryPtr TileSet__has(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args);
+	esEntryPtr TileSet__add(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr TileSet__remove(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr TileSet__clear(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr TileSet__has(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };

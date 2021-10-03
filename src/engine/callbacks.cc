@@ -5,9 +5,9 @@
 #include "engine.h"
 #include "../util/cloneString.h"
 
-void ts::defineCallbacks() {
-	tsEntryType keyPressArguments[2] = {TS_ENTRY_STRING, TS_ENTRY_NUMBER};
-	tsRegisterFunction(engine->torquescript, TS_ENTRY_INVALID, &ts::onKeyPress, "onKeyPress", 2, keyPressArguments);
+void es::defineCallbacks() {
+	esEntryType keyPressArguments[2] = {ES_ENTRY_STRING, ES_ENTRY_NUMBER};
+	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onKeyPress, "onKeyPress", 2, keyPressArguments);
 }
 
 void onWindowResize(GLFWwindow* window, int width, int height) {
@@ -18,7 +18,7 @@ void onWindowResize(GLFWwindow* window, int width, int height) {
 }
 
 // key string, action
-tsEntryPtr ts::onKeyPress(tsEnginePtr tsEngine, unsigned int argc, tsEntryPtr arguments) {
+esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments) {
 	if(argc != 2) {
 		return nullptr;
 	}
@@ -35,12 +35,12 @@ tsEntryPtr ts::onKeyPress(tsEnginePtr tsEngine, unsigned int argc, tsEntryPtr ar
 			}
 
 			// handle TS callbacks
-			vector<string> tsPresses = engine->bindToTSCallback[bind.bind];
-			for(string &callback: tsPresses) {
-				tsEntry arguments[1];
-				arguments[0].type = TS_ENTRY_NUMBER;
+			vector<string> esPresses = engine->bindToTSCallback[bind.bind];
+			for(string &callback: esPresses) {
+				esEntry arguments[1];
+				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = 1;
-				tsCallFunction(engine->torquescript, callback.c_str(), 1, arguments);
+				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
 			}
 		}
 	}
@@ -53,12 +53,12 @@ tsEntryPtr ts::onKeyPress(tsEnginePtr tsEngine, unsigned int argc, tsEntryPtr ar
 			}
 
 			// handle TS callbacks
-			vector<string> tsPresses = engine->bindToTSCallback[bind.bind];
-			for(string &callback: tsPresses) {
-				tsEntry arguments[1];
-				arguments[0].type = TS_ENTRY_NUMBER;
+			vector<string> esPresses = engine->bindToTSCallback[bind.bind];
+			for(string &callback: esPresses) {
+				esEntry arguments[1];
+				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = 0;
-				tsCallFunction(engine->torquescript, callback.c_str(), 1, arguments);
+				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
 			}
 		}
 	}
@@ -77,10 +77,10 @@ tsEntryPtr ts::onKeyPress(tsEnginePtr tsEngine, unsigned int argc, tsEntryPtr ar
 }
 
 void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
-	tsEntry arguments[2];
-	arguments[0].type = TS_ENTRY_STRING;
+	esEntry arguments[2];
+	arguments[0].type = ES_ENTRY_STRING;
 	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
-	arguments[1].type = TS_ENTRY_NUMBER;
+	arguments[1].type = ES_ENTRY_NUMBER;
 	arguments[1].numberData = action;
-	tsCallFunction(engine->torquescript, "onKeyPress", 2, arguments);
+	esCallFunction(engine->eggscript, "onKeyPress", 2, arguments);
 }

@@ -10,13 +10,13 @@
 #include "../basic/renderContext.h"
 #include "../resources/scriptFile.h"
 #include "../util/time.h"
-#include "torquescript.h"
+#include "eggscript.h"
 
 Engine* engine = new Engine();
 
 void Engine::initialize() {
-	this->torquescript = tsCreateEngine(false);
-	ts::torquescriptDefinitions();
+	this->eggscript = esCreateEngine(false);
+	es::eggscriptDefinitions();
 	
 	FT_Init_FreeType(&this->ft);
 
@@ -166,7 +166,7 @@ void Engine::initialize() {
 		"camera.zoomOut",
 	});
 
-	// create camera once we're done with torquescript definitions
+	// create camera once we're done with eggscript definitions
 	this->camera = new Camera();
 
 	this->registerBindPress("camera.zoomIn", this->camera);
@@ -174,14 +174,14 @@ void Engine::initialize() {
 	this->registerBindRelease("camera.zoomIn", this->camera);
 	this->registerBindRelease("camera.zoomOut", this->camera);
 
-	// pre-load all .cs files
-	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".cs")->exec());
+	// pre-load all .egg files
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".egg")->exec());
 
-	// execute torquescript file
+	// execute eggscript file
 	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager.metadataToResources(
-		engine->manager.carton->database.get()->equals("fileName", "scripts/main.cs")->exec()
+		engine->manager.carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
 	)[0];
-	tsEval(this->torquescript, mainCS->script.c_str());
+	esEval(this->eggscript, mainCS->script.c_str());
 }
 
 void Engine::exit() {
@@ -204,7 +204,7 @@ void Engine::tick() {
 	this->debug.clearInfoMessages();
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for CPU render time", this->cpuRenderTime));
-	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->torquescriptTickTime));
+	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->eggscriptTickTime));
 	this->debug.addInfoMessage(fmt::format("{} renderables", this->renderables.head + this->renderableUIs.head));
 	this->debug.addInfoMessage(fmt::format("{} zoom", this->camera->getZoom()));
 	#endif
@@ -220,10 +220,10 @@ void Engine::tick() {
 		return;
 	}
 
-	// handle torquescript
-	long long tsStartTime = getMicrosecondsNow();
-	tsTick(this->torquescript);
-	this->torquescriptTickTime = getMicrosecondsNow() - tsStartTime;
+	// handle eggscript
+	long long esStartTime = getMicrosecondsNow();
+	esTick(this->eggscript);
+	this->eggscriptTickTime = getMicrosecondsNow() - esStartTime;
 
 	// handle keybinds before we do anything else
 	if(this->heldEvents.size() > 0) {

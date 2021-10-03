@@ -5,11 +5,11 @@
 #include "../engine/engine.h"
 
 Camera::Camera() {
-	this->reference = tsCreateObject(engine->torquescript, "Camera", this);
+	this->reference = esCreateObject(engine->eggscript, "Camera", this);
 }
 
 Camera::~Camera() {
-	tsDeleteObject(this->reference);
+	esDeleteObject(this->reference);
 }
 
 void Camera::see(double deltaTime) {
@@ -95,25 +95,25 @@ float Camera::getZoom() {
 	return 3.0f / this->zoomLevel;
 }
 
-// torquescript bindings
-void ts::defineCamera() {
-	tsRegisterNamespace(engine->torquescript, "Camera");
-	tsNamespaceInherit(engine->torquescript, "SimObject", "Camera");
+// eggscript bindings
+void es::defineCamera() {
+	esRegisterNamespace(engine->eggscript, "Camera");
+	esNamespaceInherit(engine->eggscript, "SimObject", "Camera");
 
-	tsRegisterFunction(engine->torquescript, TS_ENTRY_OBJECT, ts::getActiveCamera, "getActiveCamera", 0, nullptr);
-	tsEntryType setPositionArguments[3] = {TS_ENTRY_OBJECT, TS_ENTRY_NUMBER, TS_ENTRY_NUMBER};
-	tsRegisterMethod(engine->torquescript, TS_ENTRY_INVALID, ts::Camera__setPosition, "Camera", "setPosition", 3, setPositionArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getActiveCamera, "getActiveCamera", 0, nullptr);
+	esEntryType setPositionArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Camera__setPosition, "Camera", "setPosition", 3, setPositionArguments);
 }
 
-tsEntryPtr ts::getActiveCamera(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	tsEntryPtr entry = new tsEntry();
-	entry->type = TS_ENTRY_OBJECT;
+esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	esEntryPtr entry = new esEntry();
+	entry->type = ES_ENTRY_OBJECT;
 	entry->objectData = engine->camera->reference;
 	return entry;
 }
 
-tsEntryPtr ts::Camera__setPosition(tsEnginePtr tsEngine, unsigned int argc, tsEntry* args) {
-	if(argc == 3 && tsCompareNamespaceToObject(args[0].objectData, "Camera")) {
+esEntryPtr es::Camera__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 3 && esCompareNamespaceToObject(args[0].objectData, "Camera")) {
 		((Camera*)args[0].objectData->objectWrapper->data)->setPosition(glm::vec2(args[1].numberData, args[2].numberData));
 	}
 	

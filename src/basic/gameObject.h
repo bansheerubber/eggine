@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include <torquescript/ts.h>
+#include <eggscript/egg.h>
 #include <string>
 
 #include "gameObject.h.gen"
@@ -24,7 +24,7 @@ class GameObject {
 			return this->id == other.id;
 		}
 
-		tsObjectReferencePtr reference = nullptr;
+		esObjectReferencePtr reference = nullptr;
 	
 	protected:
 		size_t id;

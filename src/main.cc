@@ -4,7 +4,7 @@
 #include <glfw/glfw3.h>
 #include <random>
 #include <stdio.h>
-#include <torquescript/ts.h>
+#include <eggscript/egg.h>
 
 #include "test/character.h"
 #include "test/chunk.h"
