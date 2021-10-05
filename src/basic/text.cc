@@ -1,4 +1,6 @@
-#include <glad/gl.h>
+#include "../helpers.h"
+#include GLAD_HEADER
+
 #include "text.h"
 
 #include "../engine/engine.h"

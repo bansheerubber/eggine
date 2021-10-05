@@ -2,7 +2,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <tsl/robin_map.h>
 #include <eggscript/egg.h>
 #include <vector>

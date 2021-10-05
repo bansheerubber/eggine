@@ -11,13 +11,13 @@ rm -Rf glad
 mkdir glad
 cp -v tmp-setup/glad/src/gl.c glad
 
-rm -Rf include/glad
-mkdir include/glad
-cp -v tmp-setup/glad/include/glad/gl.h include/glad
+rm -Rf include/pc/glad
+mkdir include/pc/glad
+cp -v tmp-setup/glad/include/glad/gl.h include/pc/glad
 
-rm -Rf include/KHR
-mkdir include/KHR
-cp -v tmp-setup/glad/include/KHR/khrplatform.h include/KHR
+rm -Rf include/pc/KHR
+mkdir include/pc/KHR
+cp -v tmp-setup/glad/include/KHR/khrplatform.h include/pc/KHR
 
 echo -e "\033[0;32mFinished GLAD"
 tput sgr0
@@ -38,8 +38,8 @@ popd
 rm lib/libglfw3.a
 mkdir -p lib
 cp -v tmp-setup/glfw/build/src/libglfw3.a lib
-rm -Rf include/glfw
-mv -v tmp-setup/glfw/include/GLFW include/glfw # make GLFW lowercase
+rm -Rf include/pc/GLFW
+mv -v tmp-setup/glfw/include/GLFW include/pc/GLFW # make GLFW lowercase
 echo -e "\033[0;32mFinished GLFW"
 tput sgr0
 
@@ -49,9 +49,9 @@ cd tmp-setup
 
 git clone https://github.com/freetype/freetype
 cd ..
-rm -Rf include/freetype
-rm include/ft2build.h
-mv -v tmp-setup/freetype/include/* include/
+rm -Rf include/pc/freetype
+rm include/pc/ft2build.h
+mv -v tmp-setup/freetype/include/* include/pc/
 echo -e "\033[0;32mFinished freetype"
 tput sgr0
 
@@ -71,9 +71,9 @@ tput sgr0
 make -j 8 library
 popd
 cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a lib
-rm -Rf include/eggscript
-mkdir -p include/eggscript
-cp -v tmp-setup/eggscript-interpreter/dist/include.cpp/egg.h include/eggscript/egg.h
+rm -Rf include/common/eggscript
+mkdir -p include/common/eggscript
+cp -v tmp-setup/eggscript-interpreter/dist/include.cpp/egg.h include/common/eggscript/egg.h
 echo -e "\033[0;32mFinished eggscript"
 tput sgr0
 

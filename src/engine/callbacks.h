@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <eggscript/egg.h>
 
 void onWindowResize(GLFWwindow* window, int width, int height);

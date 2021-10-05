@@ -1,4 +1,6 @@
-#include <glad/gl.h>
+#include "../helpers.h"
+#include GLAD_HEADER
+
 #include "engine.h"
 
 #define FMT_HEADER_ONLY
@@ -32,7 +34,12 @@ void Engine::initialize() {
 
 	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight, "eggine", NULL, NULL);
 	glfwMakeContextCurrent(window);
+
+	#ifdef __switch__
+	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	#else
 	gladLoadGL(glfwGetProcAddress);
+	#endif
 
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);

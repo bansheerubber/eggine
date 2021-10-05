@@ -2,7 +2,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 #include <tsl/robin_map.h>
 #include <string>

@@ -1,6 +1,9 @@
-#include <glad/gl.h>
+#include "../helpers.h"
+#include GLAD_HEADER
+
 #include "chunkContainer.h"
 
+#define FMT_HEADER_ONLY
 #include <fmt/format.h>
 
 #include "../basic/camera.h"

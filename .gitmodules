@@ -1,9 +1,9 @@
-[submodule "include/glm"]
-	path = include/glm
+[submodule "include/pc/glm"]
+	path = include/pc/glm
 	url = https://github.com/g-truc/glm
-[submodule "include/robin-map"]
-	path = include/robin-map
-	url = https://github.com/Tessil/robin-map
-[submodule "include/fmt"]
-	path = include/fmt
+[submodule "include/common/fmt"]
+	path = include/common/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "include/common/robin-map"]
+	path = include/common/robin-map
+	url = https://github.com/Tessil/robin-map

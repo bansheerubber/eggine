@@ -1,7 +1,9 @@
 #include "main.h"
 
-#include <glad/gl.h>
-#include <glfw/glfw3.h>
+#include "helpers.h"
+#include GLAD_HEADER
+
+#include <GLFW/glfw3.h>
 #include <random>
 #include <stdio.h>
 #include <eggscript/egg.h>

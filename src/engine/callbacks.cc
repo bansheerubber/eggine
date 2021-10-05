@@ -14,7 +14,9 @@ void onWindowResize(GLFWwindow* window, int width, int height) {
 	engine->windowWidth = width;
 	engine->windowHeight = height;
 
+	#ifndef __switch__
 	glViewport(0, 0, width, height);
+	#endif
 }
 
 // key string, action
