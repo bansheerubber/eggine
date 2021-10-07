@@ -11,16 +11,16 @@ Shader::Shader(string vertexFileName, string fragmentFileName) {
 	Shader::CompileShader(
 		&this->shaders[0],
 		GL_VERTEX_SHADER,
-		((resources::ShaderSource*)engine->manager.loadResources(
-			engine->manager.carton->database.get()->equals("fileName", vertexFileName)->exec()
+		((resources::ShaderSource*)engine->manager->loadResources(
+			engine->manager->carton->database.get()->equals("fileName", vertexFileName)->exec()
 		)[0])->source.c_str()
 	);
 
 	Shader::CompileShader(
 		&this->shaders[1],
 		GL_FRAGMENT_SHADER,
-		((resources::ShaderSource*)engine->manager.loadResources(
-			engine->manager.carton->database.get()->equals("fileName", fragmentFileName)->exec()
+		((resources::ShaderSource*)engine->manager->loadResources(
+			engine->manager->carton->database.get()->equals("fileName", fragmentFileName)->exec()
 		)[0])->source.c_str()
 	);
 

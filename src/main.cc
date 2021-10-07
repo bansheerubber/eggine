@@ -21,11 +21,19 @@
 
 #include "test/tileMath.h"
 
+#ifdef __switch__
+#include <switch.h>
+#endif
+
 int main(int argc, char* argv[]) {
+	#ifdef __switch__
+	engine->setFilePrefix("romfs:/");
+	#endif
+	
 	engine->initialize();
 
 	// TODO do smarter loading of files
-	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".png")->exec());
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".png")->exec());
 
 	ChunkContainer container;
 

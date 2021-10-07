@@ -27,8 +27,8 @@ ChunkContainer::ChunkContainer() {
 	}
 
 	if(ChunkContainer::Image == nullptr) {
-		ChunkContainer::Image = (resources::SpriteSheet*)engine->manager.metadataToResources(
-			engine->manager.carton->database.get()->equals("extension", ".png")->exec()
+		ChunkContainer::Image = (resources::SpriteSheet*)engine->manager->metadataToResources(
+			engine->manager->carton->database.get()->equals("extension", ".png")->exec()
 		)[0];
 	}
 }

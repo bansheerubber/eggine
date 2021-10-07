@@ -8,6 +8,7 @@ void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 		return;
 	}
 	
+	#ifdef EGGINE_DEBUG
 	engine->debug.glDebugMessages.push_back({
 		source: source,
 		type: type,
@@ -17,6 +18,7 @@ void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 		message: cloneString(message),
 		parameter: userParam,
 	});
+	#endif
 }
 
 void Debug::addInfoMessage(string message) {

@@ -11,12 +11,12 @@ LIBNX	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 SWITCH = -ffunction-sections -fno-rtti
 
 ARCH = -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft
-LIBS = -lglfw3 -lglad -lEGL -lglapi -ldrm_nouveau -lnx -lm -lglad -lz -lpng -lfreetype -leggscript -lbz2
+LIBS = -lglfw3 -lglad -lEGL -lglapi -ldrm_nouveau -lnx -lm -lglad -lpng -lfreetype -leggscript -lz -lbz2
 INCLUDE = -Iinclude/common -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ $(INCLUDENX)
 LIBPATHS = $(LIBNX) -Llibnx
 
-CPPFLAGS = -D__switch__ -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fPIE -fno-semantic-interposition --static $(ARCH) $(SWITCH)
-LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH)
+CPPFLAGS = -D__switch__ -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -fPIE --static -fno-semantic-interposition $(ARCH) $(SWITCH)
+LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -fPIE -fPIC
 
 cpp_source = $(shell find src -type f -name "*.cc" ! -path "src/include*")
 cpp_source_tmp = $(subst src, tmp, $(cpp_source))
@@ -48,12 +48,14 @@ $(cpp_objects_tmp) : %.o : %.h
 $(cpp_objects_tmp) : %.o : %.cc
 	@mkdir -p $(dir $@)
 	@echo -e "   CXX      $<"
-	@$(CXX) $(CPPFLAGS) $(INCLUDE) $(LIBPATHS) $(LDFLAGS) -c $< -o $@
+	@$(CXX) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 
 dist/$(target): $(cpp_objects_tmp)
 	@mkdir -p $(dir dist/$(target))
 	@echo -e "   CXX      $@"
-	@$(CXX) $(cpp_objects_tmp) -Wall -fPIE $(INCLUDE) $(LIBPATHS) $(LDFLAGS) -o $@ $(LIBS)
+	@$(CXX) $(cpp_objects_tmp) -Wall $(LIBPATHS) $(LDFLAGS) $(LIBS) -o $@
+	@nacptool --create eggine bansheerubber 0.0.1 dist/eggine.nacp
+	@elf2nro dist/$(target) dist/$(target).nro --icon=dist/egg.png --nacp=dist/eggine.nacp --romfsdir=dist/romfs
 
 clean:
 	@echo -e "   RM      tmp"

@@ -7,6 +7,9 @@
 #include <fmt/format.h>
 #include <glm/vec3.hpp>
 #include <stdio.h>
+#ifdef __switch__
+#include <switch.h>
+#endif
 
 #include "callbacks.h"
 #include "../basic/renderContext.h"
@@ -17,10 +20,21 @@
 Engine* engine = new Engine();
 
 void Engine::initialize() {
+	// initialize nxlink and romfs right away
+	#ifdef __switch__
+	socketInitializeDefault();
+	this->nxlink = nxlinkStdio();
+
+	Result romfsResult = romfsInit();
+	if(R_FAILED(romfsResult)) {
+		printf("romfs failure: %d\n", romfsResult);
+	}
+	#endif
+
+	FT_Init_FreeType(&this->ft);
+
 	this->eggscript = esCreateEngine(false);
 	es::eggscriptDefinitions();
-	
-	FT_Init_FreeType(&this->ft);
 
 	if(!glfwInit()) {
 		printf("failed to initialize glfw\n");
@@ -29,8 +43,10 @@ void Engine::initialize() {
 		printf("initialized glfw\n");
 	}
 
-	this->windowWidth = 640;
-	this->windowHeight = 480;
+	this->manager = new resources::ResourceManager(this->filePrefix + "out.carton");
+
+	this->windowWidth = 1280;
+	this->windowHeight = 720;
 
 	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight, "eggine", NULL, NULL);
 	glfwMakeContextCurrent(window);
@@ -182,11 +198,11 @@ void Engine::initialize() {
 	this->registerBindRelease("camera.zoomOut", this->camera);
 
 	// pre-load all .egg files
-	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".egg")->exec());
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());
 
 	// execute eggscript file
-	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager.metadataToResources(
-		engine->manager.carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
+	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
+		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
 	)[0];
 	esEval(this->eggscript, mainCS->script.c_str());
 }
@@ -194,6 +210,12 @@ void Engine::initialize() {
 void Engine::exit() {
 	glfwTerminate();
 	FT_Done_FreeType(ft);
+
+	#ifdef __switch__
+	close(this->nxlink);
+	romfsExit();
+	socketExit();
+	#endif
 }
 
 void Engine::tick() {
@@ -281,6 +303,10 @@ void Engine::addRenderObject(RenderObject* renderable) {
 void Engine::addUIObject(RenderObject* renderable) {
 	this->renderableUIs[this->renderableUIs.head] = renderable;
 	this->renderableUIs.pushed();
+}
+
+void Engine::setFilePrefix(string filePrefix) {
+	this->filePrefix = filePrefix;
 }
 
 void engineInitRenderables(class Engine*, RenderObject** object) {

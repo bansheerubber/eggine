@@ -24,6 +24,7 @@ void engineInitRenderables(class Engine*, RenderObject** object);
 class Engine {
 	friend Camera;
 	friend class Shader;
+	friend class Font;
 	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
 	friend esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
@@ -43,19 +44,27 @@ class Engine {
 		void addKeybind(int key, binds::Keybind keybind);
 		void registerTSKeybindCallback(string bind, string key, string callback);
 
+		void setFilePrefix(string filePrefix);
+
 		int windowWidth;
 		int windowHeight;
 
 		FT_Library ft;
 		esEnginePtr eggscript = nullptr;
 
-		resources::ResourceManager manager = resources::ResourceManager("out.carton");
+		resources::ResourceManager* manager;
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;
 		#endif
 
 	private:
+		#ifdef __switch__
+		unsigned int nxlink = 0;
+		#endif
+
+		string filePrefix = "";
+		
 		long long cpuRenderTime = 0;
 		long long eggscriptTickTime = 0;
 		
