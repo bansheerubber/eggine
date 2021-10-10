@@ -93,8 +93,6 @@ glm::uvec3 OverlappingTile::getPosition() {
 }
 
 void OverlappingTile::render(double deltaTime, RenderContext &context) {
-	// TODO make smart shader binding
-
 	glBindVertexArray(this->vertexArrayObject);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
 }

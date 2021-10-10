@@ -169,7 +169,6 @@ void Chunk::buildDebugLines() {
 }
 
 void Chunk::renderChunk(double deltaTime, RenderContext &context) {
-	// TODO make smart shader binding
 	#ifdef EGGINE_DEBUG
 	this->drawCalls = 0;
 	#endif

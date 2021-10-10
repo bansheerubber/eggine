@@ -48,6 +48,12 @@ void Engine::initialize() {
 	this->windowWidth = 1280;
 	this->windowHeight = 720;
 
+	#ifdef __switch__
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	#endif
+
 	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight, "eggine", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
@@ -244,8 +250,11 @@ void Engine::tick() {
 
 	glfwPollEvents();
 
+	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
+
 	int escape = glfwGetKey(engine->window, GLFW_KEY_ESCAPE);
-	if(escape) {
+	if(escape || this->gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]) {
+		this->exit();
 		return;
 	}
 

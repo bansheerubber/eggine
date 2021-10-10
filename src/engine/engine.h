@@ -54,6 +54,9 @@ class Engine {
 
 		resources::ResourceManager* manager;
 
+		GLFWgamepadstate gamepad;
+		bool hasGamepad = false;
+
 		#ifdef EGGINE_DEBUG
 		Debug debug;
 		#endif
