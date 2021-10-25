@@ -3,7 +3,10 @@
 #include <glm/vec2.hpp>
 #include <vector>
 
+#include "../renderer/program.h"
 #include "renderObject.h"
+#include "../renderer/vertexAttributes.h"
+#include "../renderer/vertexBuffer.h"
 
 using namespace std;
 
@@ -18,11 +21,10 @@ class Line: public RenderObject {
 		void render(double deltaTime, RenderContext &context);
 	
 	private:
-		// static GLuint Shaders[];
-		// static class Shader* Program;
+		static render::Program* Program;
 		
-		// GLuint vertexBufferObjects[1];
-		// GLuint vertexArrayObject;
+		render::VertexBuffer* buffer;
+		render::VertexAttributes* attributes;
 
 		vector<glm::vec2> positions;
 

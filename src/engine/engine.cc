@@ -252,7 +252,7 @@ void Engine::tick() {
 
 	for(int i = 0; i < 4; i++) {
 		int axis = axes[i];
-		float value = values[i];
+		float value = (float)values[i] / (float)(1 << 15);
 		auto &binds = this->axisToKeybind[axis];
 		for(binds::Keybind &bind: binds) {
 			for(GameObject* gameObject: this->bindAxisToGameObject[bind.bind]) {

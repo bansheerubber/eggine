@@ -154,7 +154,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		float spritesheetHeight;
 		float spriteWidth;
 		float spriteHeight;
-		int spritesOnRow;
+		float spritesOnRow;
 	} vb;
 	vb.projection = context.camera->projectionMatrix;
 	vb.chunkScreenSpace = this->screenSpacePosition;
@@ -162,7 +162,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	vb.spritesheetHeight = 391;
 	vb.spriteWidth = 64.0f;
 	vb.spriteHeight = 128.0f;
-	vb.spritesOnRow = (int)vb.spritesheetWidth / (int)vb.spriteWidth;
+	vb.spritesOnRow = floor(vb.spritesheetWidth / vb.spriteWidth);
 	
 	Camera* camera = context.camera;
 	if(!(

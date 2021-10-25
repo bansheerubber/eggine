@@ -13,7 +13,7 @@ layout(std140, binding = 0) uniform vertexBlock
 	float spritesheetHeight;
 	float spriteWidth;
 	float spriteHeight;
-	int spritesOnRow;
+	float spritesOnRow;
 } vb;
 
 out vec2 uv;
@@ -21,8 +21,8 @@ out vec2 uv;
 void main() {
 	gl_Position = vb.projection * vec4(vPosition + vOffset + vb.chunkScreenSpace, 0.0f, 1.0f);
 
-	float x = vTextureIndex % vb.spritesOnRow;
-	float y = vTextureIndex / vb.spritesOnRow;
+	float x = floor(mod(float(vTextureIndex), vb.spritesOnRow));
+	float y = floor(float(vTextureIndex) / vb.spritesOnRow);
 
 	vec2 minUV = vec2(
 		(vb.spriteWidth * x + 2.0 * x + 1.0) / vb.spritesheetWidth,

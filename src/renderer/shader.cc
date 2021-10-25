@@ -62,6 +62,11 @@ void render::Shader::load(string buffer, ShaderType type) {
 }
 
 void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
+	if(source == nullptr) {
+		printf("shader source is nullptr\n");
+		return;
+	}
+	
 	#ifdef __switch__
 	this->processUniforms(source->original->source.c_str(), source->original->source.length());
 	this->load((const char*)source->buffer, source->bufferSize, type);
