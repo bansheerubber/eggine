@@ -25,7 +25,9 @@ class Engine {
 	friend Camera;
 	friend class Shader;
 	friend class Font;
-	// friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
+	#ifndef __switch__
+	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
+	#endif
 	friend esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	

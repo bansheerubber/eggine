@@ -78,11 +78,13 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	return nullptr;
 }
 
-// void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
-// 	esEntry arguments[2];
-// 	arguments[0].type = ES_ENTRY_STRING;
-// 	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
-// 	arguments[1].type = ES_ENTRY_NUMBER;
-// 	arguments[1].numberData = action;
-// 	esCallFunction(engine->eggscript, "onKeyPress", 2, arguments);
-// }
+#ifndef __switch__
+void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
+	esEntry arguments[2];
+	arguments[0].type = ES_ENTRY_STRING;
+	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
+	arguments[1].type = ES_ENTRY_NUMBER;
+	arguments[1].numberData = action;
+	esCallFunction(engine->eggscript, "onKeyPress", 2, arguments);
+}
+#endif

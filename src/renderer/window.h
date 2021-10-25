@@ -158,6 +158,8 @@ namespace render {
 
 			void addTexture(switch_memory::Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height);
 			void bindTexture(unsigned int location, class Texture* texture);
+			#else
+			GLFWwindow* window = nullptr;
 			#endif
 
 		protected:
@@ -203,8 +205,6 @@ namespace render {
 			dk::ColorState colorState = dk::ColorState {};
 			dk::ColorWriteState colorWriteState = dk::ColorWriteState {};
 			dk::BlendState blendState = dk::BlendState {};
-			#else
-			GLFWwindow* window = nullptr;
 			#endif
 	};
 };

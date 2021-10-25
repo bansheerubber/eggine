@@ -42,6 +42,8 @@ void Engine::initialize() {
 
 	#ifdef __switch__
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".dksh")->exec());
+	#else
+	glfwSetKeyCallback(this->renderWindow.window, onKeyPress);
 	#endif
 
 	this->windowWidth = 1280;
@@ -165,6 +167,22 @@ void Engine::initialize() {
 	this->addKeybind(GLFW_KEY_MINUS, binds::Keybind {
 		"camera.zoomOut",
 	});
+
+	this->addKeybind(GLFW_KEY_W, binds::Keybind {
+		"camera.up",
+	});
+
+	this->addKeybind(GLFW_KEY_S, binds::Keybind {
+		"camera.down",
+	});
+
+	this->addKeybind(GLFW_KEY_A, binds::Keybind {
+		"camera.left",
+	});
+
+	this->addKeybind(GLFW_KEY_D, binds::Keybind {
+		"camera.right",
+	});
 	#endif
 
 	// create camera once we're done with eggscript definitions
@@ -172,8 +190,17 @@ void Engine::initialize() {
 
 	this->registerBindPress("camera.zoomIn", this->camera);
 	this->registerBindPress("camera.zoomOut", this->camera);
+	this->registerBindPress("camera.up", this->camera);
+	this->registerBindPress("camera.down", this->camera);
+	this->registerBindPress("camera.left", this->camera);
+	this->registerBindPress("camera.right", this->camera);
+
 	this->registerBindRelease("camera.zoomIn", this->camera);
 	this->registerBindRelease("camera.zoomOut", this->camera);
+	this->registerBindRelease("camera.up", this->camera);
+	this->registerBindRelease("camera.down", this->camera);
+	this->registerBindRelease("camera.left", this->camera);
+	this->registerBindRelease("camera.right", this->camera);
 
 	// pre-load all .egg files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());

@@ -32,10 +32,18 @@ class Camera : public GameObject {
 		float minZoomLevel = 2.0;
 		float maxZoomLevel = 100.0;
 		
-		int zoomInRepeating = 0;
-		int zoomOutRepeating = 0;
-		double zoomInTimer = 0;
-		double zoomOutTimer = 0;
+		struct {
+			int zoomInRepeating = 0;
+			int zoomOutRepeating = 0;
+			double zoomInTimer = 0;
+			double zoomOutTimer = 0;
+			bool up = false;
+			bool down = false;
+			bool left = false;
+			bool right = false;
+			float xAxis = 0;
+			float yAxis = 0;
+		} keyMapping;
 };
 
 namespace es {

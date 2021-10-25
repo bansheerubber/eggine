@@ -13,36 +13,32 @@ Camera::~Camera() {
 }
 
 void Camera::see(double deltaTime) {
-	this->zoomInTimer += deltaTime;
-	this->zoomOutTimer += deltaTime;
+	this->keyMapping.zoomInTimer += deltaTime;
+	this->keyMapping.zoomOutTimer += deltaTime;
 
-	if(this->zoomInRepeating == 1 && this->zoomInTimer > 0.5) {
-		this->zoomInRepeating = 2;
+	if(this->keyMapping.zoomInRepeating == 1 && this->keyMapping.zoomInTimer > 0.5) {
+		this->keyMapping.zoomInRepeating = 2;
 	}
 
-	if(this->zoomOutRepeating == 1 && this->zoomOutTimer > 0.5) {
-		this->zoomOutRepeating = 2;
+	if(this->keyMapping.zoomOutRepeating == 1 && this->keyMapping.zoomOutTimer > 0.5) {
+		this->keyMapping.zoomOutRepeating = 2;
 	}
 	
-	if(this->zoomInRepeating == 2) {
+	if(this->keyMapping.zoomInRepeating == 2) {
 		this->setZoomLevel(this->zoomLevel - deltaTime * 15.0f);
 	}
-	else if(this->zoomOutRepeating == 2) {
+	else if(this->keyMapping.zoomOutRepeating == 2) {
 		this->setZoomLevel(this->zoomLevel + deltaTime * 15.0f);
 	}
 	
 	double zoom = this->getZoom();
 
-	// handle keyboard
-	// int up = glfwGetKey(engine->window, 'W');
-	// int down = glfwGetKey(engine->window, 'S');
-	// int left = glfwGetKey(engine->window, 'A');
-	// int right = glfwGetKey(engine->window, 'D');
-	int up = 0, down = 0, left = 0, right = 0;
-
 	float speed = deltaTime * 5.0f  + 0.05f / zoom;
-	this->position.x += (float)right * speed - (float)left * speed;
-	this->position.y += (float)up * speed - (float)down * speed;
+	this->position.x += (float)this->keyMapping.right * speed - (float)this->keyMapping.left * speed;
+	this->position.y += (float)this->keyMapping.up * speed - (float)this->keyMapping.down * speed;
+
+	this->position.x += this->keyMapping.xAxis * speed;
+	this->position.y += this->keyMapping.yAxis * speed;
 
 	// handle gamepad
 	// if(engine->hasGamepad) {
@@ -77,22 +73,46 @@ void Camera::setPosition(glm::vec2 position) {
 void Camera::onBindPress(string &bind) {
 	if(bind == "camera.zoomIn") {
 		this->setZoomLevel(this->zoomLevel - 1.0f);
-		this->zoomInRepeating = 1;
-		this->zoomInTimer = 0;
+		this->keyMapping.zoomInRepeating = 1;
+		this->keyMapping.zoomInTimer = 0;
 	}
 	else if(bind == "camera.zoomOut") {
 		this->setZoomLevel(this->zoomLevel + 1.0f);
-		this->zoomOutRepeating = 1;
-		this->zoomOutTimer = 0;
+		this->keyMapping.zoomOutRepeating = 1;
+		this->keyMapping.zoomOutTimer = 0;
+	}
+	else if(bind == "camera.up") {
+		this->keyMapping.up = true;
+	}
+	else if(bind == "camera.down") {
+		this->keyMapping.down = true;
+	}
+	else if(bind == "camera.left") {
+		this->keyMapping.left = true;
+	}
+	else if(bind == "camera.right") {
+		this->keyMapping.right = true;
 	}
 }
 
 void Camera::onBindRelease(string &bind) {
 	if(bind == "camera.zoomIn") {
-		this->zoomInRepeating = 0;
+		this->keyMapping.zoomInRepeating = 0;
 	}
 	else if(bind == "camera.zoomOut") {
-		this->zoomOutRepeating = 0;
+		this->keyMapping.zoomOutRepeating = 0;
+	}
+	else if(bind == "camera.up") {
+		this->keyMapping.up = false;
+	}
+	else if(bind == "camera.down") {
+		this->keyMapping.down = false;
+	}
+	else if(bind == "camera.left") {
+		this->keyMapping.left = false;
+	}
+	else if(bind == "camera.right") {
+		this->keyMapping.right = false;
 	}
 }
 
