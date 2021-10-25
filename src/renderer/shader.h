@@ -7,6 +7,7 @@
 #endif
 
 #include <tsl/robin_map.h>
+#include "../resources/shaderSource.h"
 #include <string>
 
 #include "memory.h"
@@ -26,7 +27,9 @@ namespace render {
 			Shader(class Window* window);
 
 			void loadFromFile(string filename, ShaderType type);
-			void load(char* buffer, size_t length, ShaderType type);
+			void load(string buffer, ShaderType type);
+			void load(const char* buffer, size_t length, ShaderType type);
+			void load(resources::ShaderSource* source, ShaderType type);
 			void bind();
 
 		protected:
@@ -42,6 +45,7 @@ namespace render {
 			GLuint shader = GL_INVALID_INDEX;
 			#endif
 
+			void processUniforms(const char* buffer, size_t bufferSize);
 			void processUniforms(string filename);
 	};
 };

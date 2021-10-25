@@ -29,6 +29,76 @@ namespace render {
 	};
 
 	#ifdef __switch__
+	inline DkImageFormat channelsAndBitDepthToDkFormat(unsigned int channels, unsigned int bitDepth) {
+		switch(bitDepth) {
+			case 8: {
+				switch(channels) {
+					case 1: {
+						return DkImageFormat_R8_Unorm;
+					}
+
+					case 2: {
+						return DkImageFormat_RG8_Unorm;
+					}
+
+					case 3: {
+						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						exit(1);
+					}
+
+					case 4: {
+						return DkImageFormat_RGBA8_Unorm;
+					}
+				}
+			}
+
+			case 16: {
+				switch(channels) {
+					case 1: {
+						return DkImageFormat_R16_Unorm;
+					}
+
+					case 2: {
+						return DkImageFormat_RG16_Unorm;
+					}
+
+					case 3: {
+						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						exit(1);
+					}
+
+					case 4: {
+						return DkImageFormat_RGBA16_Unorm;
+					}
+				}
+			}
+
+			case 32: {
+				switch(channels) {
+					case 1: {
+						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						exit(1);
+					}
+
+					case 2: {
+						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						exit(1);
+					}
+
+					case 3: {
+						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						exit(1);
+					}
+
+					case 4: {
+						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						exit(1);
+					}
+				}
+			}
+		}
+	}
+	
 	inline DkFilter textureFilterToDkFilter(TextureFilter type) {
 		switch(type) {
 			case TEXTURE_FILTER_NEAREST: {
@@ -65,6 +135,42 @@ namespace render {
 		}
 	}
 	#else
+	inline GLenum channelsToGLFormat(unsigned int channels) {
+		switch(channels) {
+			case 1: {
+				return GL_RED;
+			}
+
+			case 2: {
+				return GL_RG;
+			}
+
+			case 3: {
+				return GL_RGB;
+			}
+
+			case 4: {
+				return GL_RGBA;
+			}
+		}
+	}
+
+	inline GLenum bitDepthToGLFormat(unsigned int bitDepth) {
+		switch(bitDepth) {
+			case 8: {
+				return GL_UNSIGNED_BYTE;
+			}
+
+			case 16: {
+				return GL_UNSIGNED_SHORT;
+			}
+
+			case 32: {
+				return GL_UNSIGNED_INT;
+			}
+		}
+	}
+
 	inline GLenum textureFilterToGLFilter(TextureFilter type) {
 		switch(type) {
 			case TEXTURE_FILTER_NEAREST: {
@@ -114,16 +220,22 @@ namespace render {
 			void loadPNGFromFile(string filename);
 			void loadPNG(const unsigned char* buffer, unsigned int size);
 			void bind(unsigned int location);
+			void load(
+				const unsigned char* buffer,
+				unsigned int bufferSize,
+				unsigned int width,
+				unsigned int height,
+				unsigned int bitDepth,
+				unsigned int channels
+			);
 		
 		protected:
 			Window* window;
 
-			png_uint_32 width;
-			png_uint_32 height;
-			png_byte bytesPerPixel;
-			png_byte colorType;
-			png_byte bitDepth;
-			png_byte* imageData;
+			unsigned int width;
+			unsigned int height;
+			unsigned int bitDepth;
+			unsigned int channels = 1;
 
 			TextureFilter minFilter;
 			TextureFilter magFilter;
@@ -138,10 +250,6 @@ namespace render {
 			switch_memory::Piece* memory;
 			#else
 			GLuint texture = GL_INVALID_INDEX;
-			GLenum getFormat();
-			GLenum getType();
 			#endif
-
-			void load(); // load into GL/deko3d structure
 	};
 };

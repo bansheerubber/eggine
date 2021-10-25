@@ -18,11 +18,11 @@ class Line: public RenderObject {
 		void render(double deltaTime, RenderContext &context);
 	
 	private:
-		static GLuint Shaders[];
-		static class Shader* Program;
+		// static GLuint Shaders[];
+		// static class Shader* Program;
 		
-		GLuint vertexBufferObjects[1];
-		GLuint vertexArrayObject;
+		// GLuint vertexBufferObjects[1];
+		// GLuint vertexArrayObject;
 
 		vector<glm::vec2> positions;
 

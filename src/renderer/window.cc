@@ -14,9 +14,6 @@
 // deko3d: create framebuffers/swapchains, command buffers
 void render::Window::initialize() {
 	#ifdef __switch__ // start of switch code (based on switch-examples/graphics/deko3d/deko_basic)
-	socketInitializeDefault();
-	this->nxlink = nxlinkStdio();
-
 	this->device = dk::DeviceMaker{}.create();
 	this->queue = dk::QueueMaker{this->device}.setFlags(DkQueueFlags_Graphics).create();
 
@@ -58,6 +55,13 @@ void render::Window::initialize() {
 		this->framebufferCommandLists[i] = this->staticCommandBuffer.finishList();
 	}
 
+	this->blendState.setSrcColorBlendFactor(DkBlendFactor_SrcAlpha);
+	this->blendState.setDstColorBlendFactor(DkBlendFactor_InvSrcAlpha);
+	this->blendState.setSrcAlphaBlendFactor(DkBlendFactor_SrcAlpha);
+	this->blendState.setDstAlphaBlendFactor(DkBlendFactor_InvSrcAlpha);
+
+	this->colorState.setBlendEnable(0, true);
+
 	// tell the switch that its time to disco
 	this->staticCommandBuffer.setViewports(0, { this->viewport });
 	this->staticCommandBuffer.setScissors(0, { this->scissor });
@@ -65,6 +69,7 @@ void render::Window::initialize() {
 	this->staticCommandBuffer.bindRasterizerState(this->rasterizerState);
 	this->staticCommandBuffer.bindColorState(this->colorState);
 	this->staticCommandBuffer.bindColorWriteState(this->colorWriteState);
+	this->staticCommandBuffer.bindBlendStates(0, this->blendState);
 	this->staticCommandList = this->staticCommandBuffer.finishList();
 
 	// create the dynamic command buffer
@@ -143,9 +148,6 @@ void render::Window::deinitialize() {
 	this->swapchain.destroy();
 	this->framebufferMemory.destroy();
 	this->device.destroy();
-
-	close(this->nxlink);
-	socketExit();
 	#else
 	glfwTerminate();
 	#endif
@@ -202,13 +204,13 @@ void render::Window::resize(unsigned int width, unsigned int height) {
 
 #ifdef __switch__
 void render::Window::addTexture(switch_memory::Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height) {
+	this->queue.waitIdle();
 	this->textureCommandBuffer.clear();
-	this->textureFence.wait();
 	this->textureCommandBuffer.addMemory(this->textureCommandBufferMemory, 0, 4 * 1024);
 
-	this->textureCommandBuffer.signalFence(this->textureFence);
 	this->textureCommandBuffer.copyBufferToImage({ tempMemory->gpuAddr() }, view, { 0, 0, 0, width, height, 1 });
 	this->queue.submitCommands(this->textureCommandBuffer.finishList());
+	this->queue.waitIdle(); // wait to add the texture
 	this->textureCommandBuffer.clear();
 }
 

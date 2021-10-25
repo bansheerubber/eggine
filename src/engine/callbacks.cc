@@ -1,6 +1,3 @@
-#include "../helpers.h"
-#include GLAD_HEADER
-
 #include "callbacks.h"
 
 #include <stdio.h>
@@ -13,12 +10,12 @@ void es::defineCallbacks() {
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onKeyPress, "onKeyPress", 2, keyPressArguments);
 }
 
-void onWindowResize(GLFWwindow* window, int width, int height) {
-	engine->windowWidth = width;
-	engine->windowHeight = height;
+// void onWindowResize(GLFWwindow* window, int width, int height) {
+// 	engine->windowWidth = width;
+// 	engine->windowHeight = height;
 
-	glViewport(0, 0, width, height);
-}
+// 	glViewport(0, 0, width, height);
+// }
 
 // key string, action
 esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments) {
@@ -29,6 +26,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	int key = engine->keyToScancode[string(arguments[0].stringData)];
 	int action = (int)arguments[1].numberData;
 
+	#ifndef __switch__
 	if(action == GLFW_PRESS) {
 		vector<binds::Keybind> &binds = engine->keyToKeybind[key];
 		for(auto &bind: binds) {
@@ -75,15 +73,16 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 			}
 		}
 	}
+	#endif
 
 	return nullptr;
 }
 
-void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
-	esEntry arguments[2];
-	arguments[0].type = ES_ENTRY_STRING;
-	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
-	arguments[1].type = ES_ENTRY_NUMBER;
-	arguments[1].numberData = action;
-	esCallFunction(engine->eggscript, "onKeyPress", 2, arguments);
-}
+// void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
+// 	esEntry arguments[2];
+// 	arguments[0].type = ES_ENTRY_STRING;
+// 	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
+// 	arguments[1].type = ES_ENTRY_NUMBER;
+// 	arguments[1].numberData = action;
+// 	esCallFunction(engine->eggscript, "onKeyPress", 2, arguments);
+// }

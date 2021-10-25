@@ -165,13 +165,11 @@ namespace render {
 			unsigned int width = 1280;
 			unsigned int height = 720;
 
-			glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 			unsigned long long lastRenderTime = getMicrosecondsNow();
 			
 			#ifdef __switch__
-			unsigned int nxlink = 0;
-
 			switch_memory::Piece* imageDescriptorMemory;
 			switch_memory::Piece* samplerDescriptorMemory;
 			
@@ -204,6 +202,7 @@ namespace render {
 			dk::RasterizerState rasterizerState = dk::RasterizerState {};
 			dk::ColorState colorState = dk::ColorState {};
 			dk::ColorWriteState colorWriteState = dk::ColorWriteState {};
+			dk::BlendState blendState = dk::BlendState {};
 			#else
 			GLFWwindow* window = nullptr;
 			#endif

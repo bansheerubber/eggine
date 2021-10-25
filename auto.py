@@ -24,10 +24,6 @@ def make():
 			os.system(f"make {target} -j 8")
 		else:
 			os.system(f"make -j 8")
-		
-		print("Packing carton...")
-		os.system(f"carton pack resources --output ./dist/out.carton")
-		print("Done")
 
 		print("---------------------------------------------------------------------------------")
 
@@ -39,10 +35,6 @@ if target:
 	os.system(f"make {target} -j 8")
 else:
 	os.system(f"make -j 8")
-
-print("Packing carton...")
-os.system(f"carton pack resources --output ./dist/out.carton")
-print("Done")
 
 print("---------------------------------------------------------------------------------")
 

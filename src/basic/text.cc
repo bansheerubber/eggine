@@ -1,66 +1,61 @@
-#include "../helpers.h"
-#include GLAD_HEADER
-
 #include "text.h"
 
 #include "../engine/engine.h"
-#include "shader.h"
+#include "../renderer/shader.h"
 #include "ui.h"
 
-GLuint Text::Shaders[2] = {GL_INVALID_INDEX, GL_INVALID_INDEX};
-Shader* Text::Program = nullptr;
+render::Program* Text::Program = nullptr;
 
 Text::Text(string family, int size) : RenderObject(false) {
 	this->font = Font::GetFont(family, size);
 
 	if(Text::Program == nullptr) {
-		Shader::CompileShader(
-			&Text::Shaders[0],
-			GL_VERTEX_SHADER,
-			#include "shaders/text.vert"
-		);
+		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
+		vertexShader->load(getShaderSource("shaders/text.vert"), render::SHADER_VERTEX);
 
-		Shader::CompileShader(
-			&Text::Shaders[1],
-			GL_FRAGMENT_SHADER,
-			#include "shaders/text.frag"
-		);
+		render::Shader* fragmentShader = new render::Shader(&engine->renderWindow);
+		fragmentShader->load(getShaderSource("shaders/text.frag"), render::SHADER_FRAGMENT);
 
-		Text::Program = new Shader(Text::Shaders[0], Text::Shaders[1]);
-	}
-	
-	// new code
-	glGenBuffers(2, this->vertexBufferObjects);
-	glGenVertexArrays(1, &this->vertexArrayObject);
-	glBindVertexArray(this->vertexArrayObject);
-
-	// create vertices buffer
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(0);
+		Text::Program = new render::Program(&engine->renderWindow);
+		Text::Program->addShader(vertexShader);
+		Text::Program->addShader(fragmentShader);
 	}
 
-	// create uv buffer
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[1]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_STATIC_DRAW);
+	glm::vec2 triangleVertices[] = {
+		glm::vec2(-0.5, 1.0),
+		glm::vec2(-0.5, -1.0),
+		glm::vec2(0.5, 1.0),
+		glm::vec2(0.5, -1.0),
+	};
 
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-		glEnableVertexAttribArray(1);
-	}
+	glm::vec2 triangleUVs[] = {
+		glm::vec2(0.0, 0.0),
+		glm::vec2(0.0, 1.0),
+		glm::vec2(1.0, 0.0),
+		glm::vec2(1.0, 1.0),
+	};
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	string filePrefix = "";
+	#ifdef __switch__
+	filePrefix = "romfs:/";
+	#endif
+	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexBuffers[0]->setDynamicDraw(true);
+	this->vertexBuffers[0]->setData(nullptr, sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
+
+	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexBuffers[1]->setDynamicDraw(true);
+	this->vertexBuffers[1]->setData(nullptr, sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
+
+	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
+	this->vertexAttributes->addVertexAttribute(this->vertexBuffers[0], 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
+	this->vertexAttributes->addVertexAttribute(this->vertexBuffers[1], 1, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
 
 	engine->addUIObject(this);
 }
 
 Text::~Text() {
-	glDeleteBuffers(2, this->vertexBufferObjects);
-	glDeleteBuffers(1, &this->vertexArrayObject);
+	
 }
 
 void Text::updateBuffers() {
@@ -129,14 +124,9 @@ void Text::updateBuffers() {
 			x += (ch.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
 		}
 	}
-	
-	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_DYNAMIC_DRAW); // orphan buffer
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * this->text.size() * 6, &vertices[0][0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * this->text.size() * 6, NULL, GL_DYNAMIC_DRAW); // orphan buffer
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * this->text.size() * 6, &uvs[0][0]);
+	this->vertexBuffers[0]->setData(&vertices[0][0], sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
+	this->vertexBuffers[1]->setData(&uvs[0][0], sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 }
 
 void Text::setText(string text) {
@@ -150,14 +140,24 @@ string Text::getText() {
 
 void Text::render(double deltaTime, RenderContext &context) {
 	Text::Program->bind();
-	glBindVertexArray(this->vertexArrayObject);
-	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, this->font->texture);
+	this->font->texture->bind(0);
+	Text::Program->bindTexture("textTexture", 0);
 
-	glUniformMatrix4fv(Text::Program->getUniform("projection"), 1, false, &context.ui->projectionMatrix[0][0]);
-	glUniform3fv(Text::Program->getUniform("textColor"), 1, &this->color[0]);
-	glUniform1i(Text::Program->getUniform("textTexture"), 0);
+	struct VertexBlock {
+		glm::mat4 projection;
+	} vb;
+	vb.projection = context.ui->projectionMatrix;
 
-	glDrawArrays(GL_TRIANGLES, 0, 6 * this->text.size());
+	struct FragmentBlock {
+		glm::vec3 color;
+		float padding;
+	} fb;
+	fb.color = this->color;
+
+	Text::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
+	Text::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
+
+	this->vertexAttributes->bind();
+
+	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLES, 0, 6 * this->text.size(), 0, 1);
 }

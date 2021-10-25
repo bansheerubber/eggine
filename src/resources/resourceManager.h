@@ -13,6 +13,7 @@
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 
 namespace resources {
 	class ResourceManager {
@@ -20,6 +21,7 @@ namespace resources {
 		friend void ::handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+		friend void ::handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		
 		public:
 			ResourceManager(string fileName);
@@ -32,4 +34,8 @@ namespace resources {
 			tsl::robin_set<ResourceObject*> objects;
 			tsl::robin_map<carton::Metadata*, ResourceObject*> metadataToResource;
 	};
+
+	class ShaderSource;
 };
+
+resources::ShaderSource* getShaderSource(string fileName);

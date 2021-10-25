@@ -217,3 +217,15 @@ if __name__ == "__main__":
 	
 	file.close()
 	write_file(eggscript_code_tmp, eggscript_code_contents)
+
+	# compile shaders for switch
+	for root, subdirs, files in os.walk("./resources/"):
+		for file in files:
+			regex = re.compile("(vert$)|(frag$)")
+			if regex.findall(file):
+				stage = "vert" if ".vert" in file else "frag"
+				os.system(f"uam {root}/{file} -s {stage} -o {root}/{file}.dksh")
+	
+	print("Packing carton...")
+	os.system(f"carton pack resources --output ./dist/out.carton")
+	print("Done")

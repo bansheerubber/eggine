@@ -18,8 +18,8 @@ class OverlappingTile : public RenderObject {
 	protected:
 		class ChunkContainer* container = nullptr;
 		
-		GLuint vertexBufferObjects[2];
-		GLuint vertexArrayObject;
+		// GLuint vertexBufferObjects[2];
+		// GLuint vertexArrayObject;
 		int textureIndex = 3;
 		
 		glm::uvec3 position = glm::uvec3(0, 0, 0);

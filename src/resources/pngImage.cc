@@ -1,6 +1,3 @@
-#include "../helpers.h"
-#include GLAD_HEADER
-
 #include "pngImage.h"
 
 #include <cstring>
@@ -104,49 +101,49 @@ resources::PNGImage::PNGImage(
   png_destroy_read_struct(&png, &info, NULL);
 
   // load the GL texture
-  glGenTextures(1, &this->texture);
-  glBindTexture(GL_TEXTURE_2D, this->texture);
+  // glGenTextures(1, &this->texture);
+  // glBindTexture(GL_TEXTURE_2D, this->texture);
 
-  glTexImage2D(
-    GL_TEXTURE_2D,
-    0,
-    this->getFormat(),
-    this->width,
-    this->height,
-    0,
-    this->getFormat(),
-    this->getType(),
-    this->image
-  );
+  // glTexImage2D(
+  //   GL_TEXTURE_2D,
+  //   0,
+  //   this->getFormat(),
+  //   this->width,
+  //   this->height,
+  //   0,
+  //   this->getFormat(),
+  //   this->getType(),
+  //   this->image
+  // );
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   delete this->image; // delete the image once we're done with it
 }
 
-GLenum resources::PNGImage::getFormat() {
-  if(this->colorType == PNG_COLOR_TYPE_RGB) {
-    return GL_RGB;
-  }
-  else if(this->colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
-    return GL_RGBA;
-  }
-  else {
-    return GL_INVALID_INDEX;
-  }
-}
+// GLenum resources::PNGImage::getFormat() {
+//   if(this->colorType == PNG_COLOR_TYPE_RGB) {
+//     return GL_RGB;
+//   }
+//   else if(this->colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
+//     return GL_RGBA;
+//   }
+//   else {
+//     return GL_INVALID_INDEX;
+//   }
+// }
 
-GLenum resources::PNGImage::getType() {
-  if(this->bitDepth == 8) {
-    return GL_UNSIGNED_BYTE;
-  }
-  else if(this->bitDepth == 16) {
-    return GL_UNSIGNED_SHORT;
-  }
-  else {
-    return GL_INVALID_INDEX;
-  }
-}
+// GLenum resources::PNGImage::getType() {
+//   if(this->bitDepth == 8) {
+//     return GL_UNSIGNED_BYTE;
+//   }
+//   else if(this->bitDepth == 16) {
+//     return GL_UNSIGNED_SHORT;
+//   }
+//   else {
+//     return GL_INVALID_INDEX;
+//   }
+// }

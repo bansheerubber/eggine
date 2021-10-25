@@ -56,7 +56,21 @@ void render::Shader::loadFromFile(string filename, ShaderType type) {
 	delete[] buffer;
 }
 
-void render::Shader::load(char* buffer, size_t length, ShaderType type) {
+void render::Shader::load(string buffer, ShaderType type) {
+	this->processUniforms(buffer.c_str(), buffer.length());
+	this->load(buffer.c_str(), buffer.length(), type);
+}
+
+void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
+	#ifdef __switch__
+	this->processUniforms(source->original->source.c_str(), source->original->source.length());
+	this->load((const char*)source->buffer, source->bufferSize, type);
+	#else
+	this->load(source->source, type);
+	#endif
+}
+
+void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
 	this->type = type;
 	#ifdef __switch__
 	DkshHeader header {
@@ -96,7 +110,7 @@ void render::Shader::load(char* buffer, size_t length, ShaderType type) {
 	}
 	#else
 	GLenum glType = type == SHADER_FRAGMENT ? GL_FRAGMENT_SHADER : GL_VERTEX_SHADER;
-	
+
 	GLuint shader = glCreateShader(glType);
 	int glLength = length;
 	glShaderSource(shader, 1, &buffer, &glLength);
@@ -120,6 +134,70 @@ void render::Shader::load(char* buffer, size_t length, ShaderType type) {
 		this->shader = shader;
 	}
 	#endif
+}
+
+void render::Shader::processUniforms(const char* buffer, size_t bufferSize) {
+	string line;
+	size_t index = 0;
+	while(index < bufferSize) {
+		// read a line
+		line = "";
+		for(; buffer[index] != '\n' && index < bufferSize; index++) {
+			line += buffer[index];
+		}
+		index++; // skip the newline
+
+		size_t uniformLocation = line.find("uniform");
+		if(uniformLocation != string::npos) {
+			size_t bindingLocation = line.find("binding");
+			if(bindingLocation == string::npos) {
+				printf("could not find binding for uniform\n");
+				return;
+			}
+
+			string buffer;
+			for(unsigned int i = bindingLocation; i < line.length(); i++) {
+				switch(line[i]) {
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9': {
+						buffer += line[i];
+						break;
+					}
+
+					case ',':
+					case ')': {
+						goto end;
+					}
+				}
+			}
+			
+			end:
+			unsigned int binding = stod(buffer);
+			buffer = "";
+			for(unsigned int i = uniformLocation + string("uniform ").length(); i < line.length(); i++) {
+				if(line[i] == ' ') {
+					buffer = "";
+				}
+				else if(
+					(line[i] >= 'a' && line[i] <= 'z')
+					|| (line[i] >= 'A' && line[i] <= 'Z')
+					|| (line[i] >= '0' && line[i] <= '9')
+					|| line[i] == '_'
+				) {
+					buffer += line[i];
+				}
+			}
+			this->uniformToBinding[buffer] = binding;
+		}
+	}
 }
 
 // find the uniforms and identify them so we can do some stuff magically

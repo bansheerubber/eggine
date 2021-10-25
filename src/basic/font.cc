@@ -1,6 +1,3 @@
-#include "../helpers.h"
-#include GLAD_HEADER
-
 #include "font.h"
 
 #include "../engine/engine.h"
@@ -29,17 +26,12 @@ Font::Font(string fileName, int size) {
 	FT_Set_Pixel_Sizes(this->face, 0, size);
 
 	size_t amount = 128;
-	glGenTextures(1, &this->texture);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	string name(this->face->family_name);
 	Font::Fonts[name][size] = this;
 
-	for(size_t x = 0; x < 256; x++) {
-		for(size_t y = 0; y < 256; y++) {
-			this->atlas[x][y] = 0;
-		}	
+	for(size_t i = 0; i < 256 * 256; i++) {
+		this->atlas[i] = 0;
 	}
 
 	int padding = 1;
@@ -67,7 +59,7 @@ Font::Font(string fileName, int size) {
 		for(size_t x = 0; x < this->face->glyph->bitmap.width; x++) {
 			for(size_t y = 0; y < this->face->glyph->bitmap.rows; y++) {
 				size_t index = y * this->face->glyph->bitmap.pitch + x;
-				this->atlas[y + atlasY][x + atlasX] = this->face->glyph->bitmap.buffer[index];
+				this->atlas[(y + atlasY) * 256 + (x + atlasX) % 256] = this->face->glyph->bitmap.buffer[index];
 			}
 		}
 		atlasX += this->face->glyph->bitmap.width + padding;
@@ -83,25 +75,11 @@ Font::Font(string fileName, int size) {
 		};
 	}
 
-	glBindTexture(GL_TEXTURE_2D, this->texture);
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		GL_RED,
-		256,
-		256,
-		0,
-		GL_RED,
-		GL_UNSIGNED_BYTE,
-		this->atlas
-	);
+	this->texture = new render::Texture(&engine->renderWindow);
+	this->texture->setWrap(render::TEXTURE_WRAP_CLAMP_TO_EDGE, render::TEXTURE_WRAP_CLAMP_TO_EDGE);
+	this->texture->setFilters(render::TEXTURE_FILTER_LINEAR, render::TEXTURE_FILTER_LINEAR);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // reset alignment
+	this->texture->load((unsigned char*)this->atlas, 256 * 256, 256, 256, 8, 1);
 
 	FT_Done_Face(face);
 }

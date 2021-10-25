@@ -1,6 +1,3 @@
-#include "../helpers.h"
-#include GLAD_HEADER
-
 #include "renderObject.h"
 
 #include <cstdlib>

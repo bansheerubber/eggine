@@ -1,6 +1,3 @@
-#include "../helpers.h"
-#include GLAD_HEADER
-
 #include "chunkContainer.h"
 
 #define FMT_HEADER_ONLY
@@ -11,10 +8,9 @@
 #include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "overlappingTile.h"
-#include "../basic/shader.h"
 #include "tileMath.h"
 
-Shader* ChunkContainer::Program = nullptr;
+// Shader* ChunkContainer::Program = nullptr;
 resources::SpriteSheet* ChunkContainer::Image = nullptr;
 
 void initChunk(class ChunkContainer* container, class Chunk* chunk) {
@@ -22,9 +18,9 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 }
 
 ChunkContainer::ChunkContainer() {
-	if(ChunkContainer::Program == nullptr) {
-		ChunkContainer::Program = new Shader("shaders/tile.vert", "shaders/tile.frag");
-	}
+	// if(ChunkContainer::Program == nullptr) {
+	// 	ChunkContainer::Program = new Shader("shaders/tile.vert", "shaders/tile.frag");
+	// }
 
 	if(ChunkContainer::Image == nullptr) {
 		ChunkContainer::Image = (resources::SpriteSheet*)engine->manager->metadataToResources(
@@ -60,12 +56,12 @@ size_t ChunkContainer::getChunkCount() {
 }
 
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
-	ChunkContainer::Program->bind();
+	// ChunkContainer::Program->bind();
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, ChunkContainer::Image->texture);
-	glUniform1i(ChunkContainer::Program->getUniform("spriteTexture"), 0); // bind texture	
-	glUniformMatrix4fv(ChunkContainer::Program->getUniform("projection"), 1, false, &context.camera->projectionMatrix[0][0]);
+	// glActiveTexture(GL_TEXTURE0);
+	// glBindTexture(GL_TEXTURE_2D, ChunkContainer::Image->texture);
+	// glUniform1i(ChunkContainer::Program->getUniform("spriteTexture"), 0); // bind texture	
+	// glUniformMatrix4fv(ChunkContainer::Program->getUniform("projection"), 1, false, &context.camera->projectionMatrix[0][0]);
 
 	#ifdef EGGINE_DEBUG
 	size_t chunksRendered = 0;

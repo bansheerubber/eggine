@@ -1,6 +1,3 @@
-#include "../helpers.h"
-#include GLAD_HEADER
-
 #include "engine.h"
 
 #define FMT_HEADER_ONLY
@@ -36,48 +33,21 @@ void Engine::initialize() {
 	this->eggscript = esCreateEngine(false);
 	es::eggscriptDefinitions();
 
-	if(!glfwInit()) {
-		printf("failed to initialize glfw\n");
-	}
-	else {
-		printf("initialized glfw\n");
-	}
+	this->renderWindow.initialize();
 
 	this->manager = new resources::ResourceManager(this->filePrefix + "out.carton");
+
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".frag")->exec());
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".vert")->exec());
+
+	#ifdef __switch__
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".dksh")->exec());
+	#endif
 
 	this->windowWidth = 1280;
 	this->windowHeight = 720;
 
-	#ifdef __switch__
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	#endif
-
-	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight, "eggine", NULL, NULL);
-	glfwMakeContextCurrent(window);
-
-	#ifdef __switch__
-	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-	#else
-	gladLoadGL(glfwGetProcAddress);
-	#endif
-
-	glEnable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glfwSetWindowSizeCallback(window, onWindowResize);
-	glfwSetKeyCallback(window, onKeyPress);
-
-	glfwSwapInterval(1);
-
 	#ifdef EGGINE_DEBUG
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
-	glDebugMessageCallback(glDebugOutput, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-
 	this->debugText = new Text("Arial", 12);
 	this->debugText->color[0] = 0.0;
 	this->debugText->color[1] = 1.0;
@@ -85,6 +55,7 @@ void Engine::initialize() {
 	#endif
 
 	// initialize keybinds
+	#ifndef __switch__
 	this->keyToScancode[" "] = GLFW_KEY_SPACE;
 	this->keyToScancode["'"] = GLFW_KEY_APOSTROPHE;
 	this->keyToScancode[","] = GLFW_KEY_COMMA;
@@ -194,6 +165,7 @@ void Engine::initialize() {
 	this->addKeybind(GLFW_KEY_MINUS, binds::Keybind {
 		"camera.zoomOut",
 	});
+	#endif
 
 	// create camera once we're done with eggscript definitions
 	this->camera = new Camera();
@@ -214,8 +186,9 @@ void Engine::initialize() {
 }
 
 void Engine::exit() {
-	glfwTerminate();
 	FT_Done_FreeType(ft);
+
+	this->renderWindow.deinitialize();
 
 	#ifdef __switch__
 	close(this->nxlink);
@@ -231,10 +204,10 @@ void Engine::tick() {
 	double deltaTime = (startTime - this->lastRenderTime) / 1000000.0;
 	this->lastRenderTime = getMicrosecondsNow();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	this->renderWindow.prerender();
+	
 	#ifdef EGGINE_DEBUG
-	this->debug.flushGLDebugMessages();
+	// this->debug.flushGLDebugMessages();
 	
 	this->debug.clearInfoMessages();
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
@@ -248,15 +221,13 @@ void Engine::tick() {
 		deltaTime = 0;
 	}
 
-	glfwPollEvents();
+	// this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
 
-	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
-
-	int escape = glfwGetKey(engine->window, GLFW_KEY_ESCAPE);
-	if(escape || this->gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]) {
-		this->exit();
-		return;
-	}
+	// int escape = glfwGetKey(engine->window, GLFW_KEY_ESCAPE);
+	// if(escape || this->gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]) {
+	// 	this->exit();
+	// 	return;
+	// }
 
 	// handle eggscript
 	long long esStartTime = getMicrosecondsNow();
@@ -274,9 +245,9 @@ void Engine::tick() {
 	this->camera->see(deltaTime);
 	this->ui.update();
 
-	if(glfwWindowShouldClose(this->window)) {
-		return;
-	}
+	// if(glfwWindowShouldClose(this->window)) {
+	// 	return;
+	// }
 
 	RenderContext context = {
 		camera: this->camera,
@@ -299,7 +270,7 @@ void Engine::tick() {
 
 	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
 
-	glfwSwapBuffers(window);
+	this->renderWindow.render();
 
 	goto start_tick;
 }

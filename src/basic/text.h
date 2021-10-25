@@ -1,13 +1,16 @@
 #pragma once
 
-#include <string>
-
-#include "font.h"
-#include <GLFW/glfw3.h>
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <string>
+
+#include "font.h"
+#include "../renderer/program.h"
+#include "../renderer/texture.h"
+#include "../renderer/vertexAttributes.h"
+#include "../renderer/vertexBuffer.h"
 #include "renderObject.h"
 
 using namespace std;
@@ -27,12 +30,11 @@ class Text : public RenderObject {
 	protected:
 		Font* font;
 
-		GLuint vertexBufferObjects[2];
-		GLuint vertexArrayObject;
+		render::VertexBuffer* vertexBuffers[2];
+		render::VertexAttributes* vertexAttributes;
 		string text;
 
 		void updateBuffers();
 		
-		static GLuint Shaders[2];
-		static class Shader* Program;
+		static render::Program* Program;
 };

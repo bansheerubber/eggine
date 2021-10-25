@@ -51,7 +51,7 @@ struct PNGBuffer {
 	size_t currentIndex;
 };
 
-void copyDataToPNGBuffer(png_structp png, png_bytep output, png_size_t size) {
+void copyToPNGBuffer(png_structp png, png_bytep output, png_size_t size) {
 	PNGBuffer* buffer = (PNGBuffer*)png_get_io_ptr(png);
 	if(buffer == NULL) {
 		printf("could not load PNG io pointer\n");
@@ -91,21 +91,21 @@ void render::Texture::Texture::loadPNG(const unsigned char* buffer, unsigned int
 	pngBuffer->buffer = buffer;
 	pngBuffer->currentIndex = 8;
 
-	png_set_read_fn(png, (void*)pngBuffer, &copyDataToPNGBuffer);
+	png_set_read_fn(png, (void*)pngBuffer, &copyToPNGBuffer);
 	png_set_sig_bytes(png, 8);
 
 	png_read_info(png, info);
 
-	this->width = png_get_image_width(png, info);
-	this->height = png_get_image_height(png, info);
-	this->colorType = png_get_color_type(png, info);
-	this->bitDepth = png_get_bit_depth(png, info);
+	png_uint_32 width = png_get_image_width(png, info);
+	png_uint_32 height = png_get_image_height(png, info);
+	png_byte colorType = png_get_color_type(png, info);
+	png_byte bitDepth = png_get_bit_depth(png, info);
 
 	int bytesPerPixel = 0;
-	if(this->colorType == PNG_COLOR_TYPE_RGB) {
+	if(colorType == PNG_COLOR_TYPE_RGB) {
 		bytesPerPixel = 3;
 	}
-	else if(this->colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
+	else if(colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
 		bytesPerPixel = 4;
 	}
 	else {
@@ -122,32 +122,53 @@ void render::Texture::Texture::loadPNG(const unsigned char* buffer, unsigned int
 	}
 
 	png_byte** image = (png_bytep*)malloc(sizeof(png_bytep) * height);
-	for(png_uint_32 y = 0; y < this->height; y++) {
+	for(png_uint_32 y = 0; y < height; y++) {
 		image[y] = (png_byte*)malloc(png_get_rowbytes(png, info));
 	}
 
 	png_read_image(png, image);
 
-	this->bytesPerPixel = bytesPerPixel;
-	this->imageData = new png_byte[this->width * bytesPerPixel * this->height];
+	bytesPerPixel = bytesPerPixel;
+	png_byte* imageData = new png_byte[width * bytesPerPixel * height];
 	png_uint_32 index = 0;
-	for(png_uint_32 y = 0; y < this->height; y++) {
-		for(png_uint_32 x = 0; x < this->width * bytesPerPixel; x++) {
-			this->imageData[y * this->width * bytesPerPixel + x % (this->width * bytesPerPixel)] = image[y][x];
+	for(png_uint_32 y = 0; y < height; y++) {
+		for(png_uint_32 x = 0; x < width * bytesPerPixel; x++) {
+			imageData[y * width * bytesPerPixel + x % (width * bytesPerPixel)] = image[y][x];
 		}
 	}
 
-	for(png_uint_32 y = 0; y < this->height; y++) {
+	for(png_uint_32 y = 0; y < height; y++) {
 		free(image[y]);
 	}
 	free(image);
 
 	png_destroy_read_struct(&png, &info, NULL);
 
-	this->load();
+	this->load(
+		imageData,
+		width * bytesPerPixel * height,
+		width,
+		height,
+		bitDepth,
+		colorType == PNG_COLOR_TYPE_RGB ? 3 : 4
+	);
+
+	delete[] imageData;
 }
 
-void render::Texture::load() {
+void render::Texture::load(
+	const unsigned char* buffer,
+	unsigned int bufferSize,
+	unsigned int width,
+	unsigned int height,
+	unsigned int bitDepth,
+	unsigned int channels
+) {
+	this->width = width;
+	this->height = height;
+	this->bitDepth = bitDepth;
+	this->channels = channels;
+	
 	if(this->minFilter == TEXTURE_FILTER_INVALID || this->magFilter == TEXTURE_FILTER_INVALID) {
 		printf("invalid texture filters\n");
 		return;
@@ -162,18 +183,18 @@ void render::Texture::load() {
 	// allocate memory for the image, we will be deallocating this later though
 	switch_memory::Piece* memory = this->window->memory.allocate(
 		DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached,
-		this->width * this->height * this->bytesPerPixel,
+		bufferSize,
 		DK_IMAGE_LINEAR_STRIDE_ALIGNMENT
 	);
-	memcpy(memory->cpuAddr(), this->imageData, this->width * this->height * this->bytesPerPixel);
+	memcpy(memory->cpuAddr(), buffer, bufferSize);
 
 	dk::ImageLayout layout;
 	dk::ImageLayoutMaker{this->window->device}
 		.setFlags(0)
-		.setFormat(DkImageFormat_RGBA8_Unorm)
+		.setFormat(DkImageFormat_R8_Unorm)
 		.setDimensions(this->width, this->height)
 		.initialize(layout);
-
+	
 	// // allocate the actual image that we won't get rid of
 	this->memory = this->window->memory.allocate(DkMemBlockFlags_GpuCached | DkMemBlockFlags_Image, layout.getSize(), layout.getAlignment());
 	this->image.initialize(layout, this->memory->parent->block, this->memory->start);
@@ -195,13 +216,13 @@ void render::Texture::load() {
 	glTexImage2D(
 		GL_TEXTURE_2D,
 		0,
-		this->getFormat(),
+		channelsToGLFormat(this->channels),
 		this->width,
 		this->height,
 		0,
-		this->getFormat(),
-		this->getType(),
-		this->imageData
+		channelsToGLFormat(this->channels),
+		bitDepthToGLFormat(this->bitDepth),
+		buffer
 	);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureWrapToGLWrap(this->uWrap));
@@ -209,8 +230,6 @@ void render::Texture::load() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFilterToGLFilter(this->minFilter));
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFilterToGLFilter(this->magFilter));
 	#endif
-
-	delete[] this->imageData;
 }
 
 void render::Texture::bind(unsigned int location) {
@@ -221,29 +240,3 @@ void render::Texture::bind(unsigned int location) {
 	glBindTexture(GL_TEXTURE_2D, this->texture);
 	#endif
 }
-
-#ifndef __switch__
-GLenum render::Texture::getFormat() {
-	if(this->colorType == PNG_COLOR_TYPE_RGB) {
-		return GL_RGB;
-	}
-	else if(this->colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
-		return GL_RGBA;
-	}
-	else {
-		return GL_INVALID_INDEX;
-	}
-}
-
-GLenum render::Texture::getType() {
-	if(this->bitDepth == 8) {
-		return GL_UNSIGNED_BYTE;
-	}
-	else if(this->bitDepth == 16) {
-		return GL_UNSIGNED_SHORT;
-	}
-	else {
-		return GL_INVALID_INDEX;
-	}
-}
-#endif

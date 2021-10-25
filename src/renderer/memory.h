@@ -22,6 +22,7 @@ namespace render {
 				
 				unsigned long start; // start of the chunk relative to the memory block
 				unsigned long end; // end of the chunk relative to the memory block
+				unsigned long align;
 				Page* parent = nullptr;
 
 				void print();

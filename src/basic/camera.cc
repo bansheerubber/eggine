@@ -34,20 +34,21 @@ void Camera::see(double deltaTime) {
 	double zoom = this->getZoom();
 
 	// handle keyboard
-	int up = glfwGetKey(engine->window, 'W');
-	int down = glfwGetKey(engine->window, 'S');
-	int left = glfwGetKey(engine->window, 'A');
-	int right = glfwGetKey(engine->window, 'D');
+	// int up = glfwGetKey(engine->window, 'W');
+	// int down = glfwGetKey(engine->window, 'S');
+	// int left = glfwGetKey(engine->window, 'A');
+	// int right = glfwGetKey(engine->window, 'D');
+	int up = 0, down = 0, left = 0, right = 0;
 
 	float speed = deltaTime * 5.0f  + 0.05f / zoom;
 	this->position.x += (float)right * speed - (float)left * speed;
 	this->position.y += (float)up * speed - (float)down * speed;
 
 	// handle gamepad
-	if(engine->hasGamepad) {
-		this->position.x += engine->gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X] * speed;
-		this->position.y -= engine->gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] * speed;
-	}
+	// if(engine->hasGamepad) {
+	// 	this->position.x += engine->gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X] * speed;
+	// 	this->position.y -= engine->gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] * speed;
+	// }
 	
 	double ratio = (double)engine->windowWidth / (double)engine->windowHeight;
 

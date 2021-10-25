@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include <png.h>
 #include <string>
 
@@ -18,10 +17,10 @@ namespace resources {
 			png_byte colorType;
 			png_byte bitDepth;
 
-			GLenum getFormat();
-			GLenum getType();
+			// GLenum getFormat();
+			// GLenum getType();
 
-			GLuint texture = GL_INVALID_INDEX;
+			// GLuint texture = GL_INVALID_INDEX;
 
 		protected:
 			string fileName;

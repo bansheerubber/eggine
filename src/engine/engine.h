@@ -2,7 +2,6 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <GLFW/glfw3.h>
 #include <tsl/robin_map.h>
 #include <eggscript/egg.h>
 #include <vector>
@@ -16,6 +15,7 @@
 #include "../basic/renderObject.h"
 #include "../resources/resourceManager.h"
 #include "../basic/ui.h"
+#include "../renderer/window.h"
 
 using namespace std;
 
@@ -25,7 +25,7 @@ class Engine {
 	friend Camera;
 	friend class Shader;
 	friend class Font;
-	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
+	// friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
 	friend esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	
@@ -46,16 +46,18 @@ class Engine {
 
 		void setFilePrefix(string filePrefix);
 
-		int windowWidth;
-		int windowHeight;
+		int windowWidth = 1280;
+		int windowHeight = 720;
 
 		FT_Library ft;
 		esEnginePtr eggscript = nullptr;
 
 		resources::ResourceManager* manager;
 
-		GLFWgamepadstate gamepad;
-		bool hasGamepad = false;
+		// GLFWgamepadstate gamepad;
+		// bool hasGamepad = false;
+
+		render::Window renderWindow;
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;
@@ -71,7 +73,6 @@ class Engine {
 		long long cpuRenderTime = 0;
 		long long eggscriptTickTime = 0;
 		
-		GLFWwindow* window;
 		Camera* camera = nullptr;
 		class Shader* boundShader = nullptr;
 		UI ui;

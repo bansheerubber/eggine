@@ -2,12 +2,12 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 #include <tsl/robin_map.h>
 #include <string>
 
 #include "gameObject.h"
+#include "../renderer/texture.h"
 
 using namespace std;
 
@@ -32,10 +32,10 @@ class Font : public GameObject {
 		static Font* GetFont(string &family, int size);
 
 		int size;
-		char atlas[256][256];
+		char atlas[256 * 256];
 	
 	protected:
 		FT_Face face;
-		GLuint texture;
+		render::Texture* texture;
 		FontGlyph characterToGlyph[128];
 };

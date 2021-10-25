@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
@@ -55,7 +54,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		glm::uvec2& getPosition();
 
 		static constexpr unsigned int Size = 25;
-		static GLuint Texture;
+		// static GLuint Texture;
 	
 	protected:
 		SortedArray<OverlappingTileWrapper, Chunk> overlappingTiles = SortedArray<OverlappingTileWrapper, Chunk>(this, compareOverlappingTile, initOverlappingTileWrapper, nullptr);
@@ -63,8 +62,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		glm::uvec2 position = glm::uvec2(0, 0);
 		glm::vec2 screenSpacePosition;
 		
-		GLuint vertexBufferObjects[1];
-		GLuint vertexArrayObject;
+		// GLuint vertexBufferObjects[1];
+		// GLuint vertexArrayObject;
 		class Line* debugLine = nullptr;
 		double top = 0, right = 0, bottom = 0, left = 0;
 
@@ -81,7 +80,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void defineBounds();
 
 		static glm::lowp_vec2 Offsets[];
-		static GLuint VertexBufferObjects[];
+		// static GLuint VertexBufferObjects[];
 
 		static constexpr float Vertices[8] = {
 			-0.5f,  1.0f,

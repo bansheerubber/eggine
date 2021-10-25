@@ -1,9 +1,5 @@
 #include "main.h"
 
-#include "helpers.h"
-#include GLAD_HEADER
-
-#include <GLFW/glfw3.h>
 #include <random>
 #include <stdio.h>
 #include <eggscript/egg.h>
@@ -33,14 +29,14 @@ int main(int argc, char* argv[]) {
 	engine->initialize();
 
 	// TODO do smarter loading of files
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".png")->exec());
+	// engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".png")->exec());
 
-	ChunkContainer container;
+	// ChunkContainer container;
 
-	size_t size = 5;
-	for(size_t i = 0; i < size * size; i++) {
-		container.addChunk(tilemath::indexToCoordinate(i, size));
-	}
+	// size_t size = 5;
+	// for(size_t i = 0; i < size * size; i++) {
+	// 	container.addChunk(tilemath::indexToCoordinate(i, size));
+	// }
 
 	// Character* character = new Character(&container);
 	// character->setPosition(glm::uvec3(0, 0, 10)); 

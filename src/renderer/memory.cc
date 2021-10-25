@@ -19,6 +19,7 @@ void render::switch_memory::Piece::print() {
 	printf("    prev: %p,\n", this->prev);
 	printf("    start: %ld,\n", this->start);
 	printf("    end: %ld,\n", this->end);
+	printf("    align: %ld,\n", this->align);
 	printf("    size: %ld,\n", this->end - this->start + 1);
 	printf("  };\n");
 }
@@ -47,6 +48,7 @@ render::switch_memory::Page::Page(Window* window, uint32_t flags, unsigned long 
 	this->head = new Piece(this);
 	this->head->start = 0;
 	this->head->end = size - 1;
+	this->head->align = DK_MEMBLOCK_ALIGNMENT;
 	this->flags = flags;
 
 	this->block = dk::MemBlockMaker{this->window->device, this->size}.setFlags(flags).create();
@@ -89,6 +91,7 @@ render::switch_memory::Piece* render::switch_memory::Page::allocate(unsigned lon
 		Piece* unusedSegment = new Piece(this);
 		unusedSegment->start = realStart + realSize;
 		unusedSegment->end = current->end;
+		unusedSegment->align = 0;
 
 		// add the unused alignment before the current element
 		if(realStart != current->start) {
@@ -96,6 +99,7 @@ render::switch_memory::Piece* render::switch_memory::Page::allocate(unsigned lon
 			unusedSegmentAlign->start = current->start;
 			unusedSegmentAlign->end = current->start + (realStart - current->start - 1);
 			unusedSegmentAlign->allocated = false;
+			unusedSegmentAlign->align = 0;
 			Piece* prev = current->prev;
 			if(prev != nullptr) {
 				prev->next = unusedSegmentAlign;
@@ -110,6 +114,7 @@ render::switch_memory::Piece* render::switch_memory::Page::allocate(unsigned lon
 		// adjust current's size
 		current->start = realStart;
 		current->end = realStart + realSize - 1;
+		current->align = align;
 		current->allocated = true;
 
 		// update the linked list
