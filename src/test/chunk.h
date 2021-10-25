@@ -83,10 +83,10 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		static render::VertexBuffer* VertexBuffers[];
 
 		static constexpr glm::vec2 Vertices[8] = {
-			glm::vec2(-0.5f,  1.0f),
-			glm::vec2(-0.5f, -1.0f),
-			glm::vec2(0.5f, 1.0f),
-			glm::vec2(0.5f, -1.0f)
+			glm::vec2(-0.501f,  1.001f),
+			glm::vec2(-0.501f, -1.001f),
+			glm::vec2(0.501f, 1.001f),
+			glm::vec2(0.501f, -1.001f)
 		};
 
 		static constexpr glm::vec2 UVs[8] = {
