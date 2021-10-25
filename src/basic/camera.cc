@@ -46,7 +46,7 @@ void Camera::see(double deltaTime) {
 	// 	this->position.y -= engine->gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] * speed;
 	// }
 	
-	double ratio = (double)engine->windowWidth / (double)engine->windowHeight;
+	double ratio = (double)engine->renderWindow.width / (double)engine->renderWindow.height;
 
 	double viewportWidth = 10 / zoom;
 	double viewportHeight = viewportWidth / ratio;

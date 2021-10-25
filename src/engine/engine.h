@@ -32,9 +32,6 @@ class Engine {
 	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	
 	public:
-		int windowWidth = 1280;
-		int windowHeight = 720;
-
 		FT_Library ft;
 		esEnginePtr eggscript = nullptr;
 		resources::ResourceManager* manager;

@@ -5,9 +5,9 @@
 #include "../engine/engine.h"
 
 void UI::update() {
-	double ratio = (double)engine->windowWidth / (double)engine->windowHeight;
+	double ratio = (double)engine->renderWindow.width / (double)engine->renderWindow.height;
 
-	double viewportWidth = engine->windowWidth; // render in screen-space
+	double viewportWidth = engine->renderWindow.width; // render in screen-space
 	double viewportHeight = viewportWidth / ratio;
 	
 	this->projectionMatrix = glm::ortho(

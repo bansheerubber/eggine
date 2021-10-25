@@ -7,8 +7,18 @@
 #include <unistd.h>
 
 #include "../util/align.h"
+#include "../engine/engine.h"
 #include "texture.h"
 #include "window.h"
+
+#ifndef __switch__
+void onWindowResize(GLFWwindow* window, int width, int height) {
+	engine->renderWindow.width = width;
+	engine->renderWindow.height = height;
+
+	glViewport(0, 0, width, height);
+}
+#endif
 
 // opengl: initialize GLFW, glEnables, etc
 // deko3d: create framebuffers/swapchains, command buffers
@@ -109,6 +119,8 @@ void render::Window::initialize() {
 	this->window = glfwCreateWindow(this->width, this->height, "eggine", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	gladLoadGL(glfwGetProcAddress);
+
+	glfwSetWindowSizeCallback(this->window, onWindowResize);
 
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);

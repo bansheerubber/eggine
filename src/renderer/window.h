@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef __switch__
 #include <deko3d.hpp>
 #include <switch.h>
@@ -140,6 +142,8 @@ namespace render {
 	class Window {
 		public:
 			double deltaTime = 0.0;
+			unsigned int width = 1280;
+			unsigned int height = 720;
 			
 			void initialize(); // start the graphics
 			void deinitialize(); // end the graphics
@@ -169,8 +173,6 @@ namespace render {
 
 		protected:
 			unsigned int errorCount = 0;
-			unsigned int width = 1280;
-			unsigned int height = 720;
 
 			glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 

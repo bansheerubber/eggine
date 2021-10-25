@@ -46,9 +46,6 @@ void Engine::initialize() {
 	glfwSetKeyCallback(this->renderWindow.window, onKeyPress);
 	#endif
 
-	this->windowWidth = 1280;
-	this->windowHeight = 720;
-
 	#ifdef EGGINE_DEBUG
 	this->debugText = new Text("Arial", 12);
 	this->debugText->color[0] = 0.0;
