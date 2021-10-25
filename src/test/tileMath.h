@@ -11,4 +11,11 @@ namespace tilemath {
 
 	// convert tile coordinates to screenspace
 	glm::vec2 tileToScreen(glm::vec3 coordinate);
+
+	struct TileUV {
+		glm::vec2 minimum;
+		glm::vec2 maximum;
+	};
+
+	TileUV textureIndexToUV(unsigned int index, unsigned int width, unsigned int height);
 }

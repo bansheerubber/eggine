@@ -44,3 +44,23 @@ glm::vec2 tilemath::tileToScreen(glm::vec3 coordinate) {
 		-(coordinate.x * -1.0f / 4 + coordinate.y * 1.0f / 4 - coordinate.z * 39.0 / 64.0)
 	);
 }
+
+tilemath::TileUV tilemath::textureIndexToUV(unsigned int index, unsigned int width, unsigned int height) {
+	float spriteWidth = 64.0;
+	float spriteHeight = 128.0;
+	float padding = 1;
+	int spritesOnRow = (int)width / (int)spriteWidth;
+	int x = index % spritesOnRow;
+	int y = index / spritesOnRow;
+
+	return {
+		minimum: glm::vec2(
+			(spriteWidth * float(x) + 2.0 * float(x) + 1.0) / width,
+			(spriteHeight * float(y) + 2.0 * float(y) + 1.0) / height
+		),
+		maximum: glm::vec2(
+			(spriteWidth * float(x) + 2.0 * float(x) + 1.0 + spriteWidth) / width,
+			(spriteHeight * float(y) + 2.0 * float(y) + 1.0 + spriteHeight) / height
+		),
+	};
+}

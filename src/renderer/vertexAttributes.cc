@@ -82,7 +82,7 @@ void render::VertexAttributes::buildCommandLists() {
 	
 	for(VertexAttribute &attribute: this->attributes) {
 		glBindBuffer(GL_ARRAY_BUFFER, attribute.buffer->bufferId);
-		if(attribute.type == VERTEX_ATTRIB_FLOAT || attribute.type == VERTEX_ATTRIB_DOUBLE) {
+		if(attribute.type == VERTEX_ATTRIB_HALF_FLOAT || attribute.type == VERTEX_ATTRIB_FLOAT || attribute.type == VERTEX_ATTRIB_DOUBLE) {
 			glVertexAttribPointer(attribute.attributeLocation, attribute.vectorLength, attributeTypeToGLType(attribute.type), GL_FALSE, attribute.stride, 0);
 		}
 		else {

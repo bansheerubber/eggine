@@ -20,6 +20,7 @@ namespace render {
 			
 			void setDynamicDraw(bool isDynamicDraw);
 			void setData(void* data, unsigned int size, unsigned int align);
+			void setSubData(void* data, unsigned int size, unsigned int offset);
 
 			void createBuffer(); // create a normal buffer
 			void createDynamicBuffer(); // create buffer with GL_DYNAMIC_DRAW

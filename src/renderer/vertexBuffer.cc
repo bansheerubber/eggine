@@ -4,6 +4,8 @@
 #include <glad/gl.h>
 #endif
 
+#include <stdio.h>
+
 #include "../util/align.h"
 #include "vertexBuffer.h"
 #include "window.h"
@@ -67,6 +69,34 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		#endif
 	}
+	#endif
+}
+
+void render::VertexBuffer::setSubData(void* data, unsigned int size, unsigned int offset) {
+	if(this->size != size) {
+		printf("vertex data must be subset of data in setSubData\n");
+		return;
+	}
+
+	#ifdef __switch__
+	if(this->memory == nullptr) {
+		printf("vertex data must be initialized in setSubData\n");
+		return;
+	}
+	
+	memcpy(this->memory->cpuAddr() + offset, data, size);
+	#else
+	if(this->bufferId == GL_INVALID_INDEX) {
+		printf("vertex data must be initialized in setSubData\n");
+		return;
+	}
+	
+	glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
+	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+
+	#ifdef RENDER_UNBIND_VERTEX_BUFFERS
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	#endif
 	#endif
 }
 

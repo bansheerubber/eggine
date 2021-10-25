@@ -86,7 +86,7 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[0], 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
 	}
 
-	// // load texture indices
+	// load texture indices
 	{
 		this->vertexBuffer->setData(this->textureIndices, sizeof(int) * Chunk::Size * Chunk::Size * this->height, alignof(int));
 		this->vertexAttributes->addVertexAttribute(this->vertexBuffer, 3, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 1);
@@ -150,9 +150,19 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	struct VertexBlock {
 		glm::mat4 projection;
 		glm::vec2 chunkScreenSpace;
+		float spritesheetWidth;
+		float spritesheetHeight;
+		float spriteWidth;
+		float spriteHeight;
+		int spritesOnRow;
 	} vb;
 	vb.projection = context.camera->projectionMatrix;
 	vb.chunkScreenSpace = this->screenSpacePosition;
+	vb.spritesheetWidth = 1057;
+	vb.spritesheetHeight = 391;
+	vb.spriteWidth = 64.0f;
+	vb.spriteHeight = 128.0f;
+	vb.spritesOnRow = (int)vb.spritesheetWidth / (int)vb.spriteWidth;
 	
 	Camera* camera = context.camera;
 	if(!(

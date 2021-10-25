@@ -91,8 +91,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		static constexpr glm::vec2 UVs[8] = {
 			glm::vec2(0.0f, 0.0f),
-			glm::vec2(0.0f, 128.0f / 391.0f),
-			glm::vec2(64.0f / 1057.0f, 0.0f),
-			glm::vec2(64.0f / 1057.0f, 128.0f / 391.0f)
+			glm::vec2(0.0f, 1.0),
+			glm::vec2(1.0, 0.0f),
+			glm::vec2(1.0, 1.0)
 		};
 };
