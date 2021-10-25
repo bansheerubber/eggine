@@ -8,9 +8,10 @@
 #include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "overlappingTile.h"
+#include "../renderer/shader.h"
 #include "tileMath.h"
 
-// Shader* ChunkContainer::Program = nullptr;
+render::Program* ChunkContainer::Program = nullptr;
 resources::SpriteSheet* ChunkContainer::Image = nullptr;
 
 void initChunk(class ChunkContainer* container, class Chunk* chunk) {
@@ -18,9 +19,17 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 }
 
 ChunkContainer::ChunkContainer() {
-	// if(ChunkContainer::Program == nullptr) {
-	// 	ChunkContainer::Program = new Shader("shaders/tile.vert", "shaders/tile.frag");
-	// }
+	if(ChunkContainer::Program == nullptr) {
+		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
+		vertexShader->load(getShaderSource("shaders/tile.vert"), render::SHADER_VERTEX);
+
+		render::Shader* fragmentShader = new render::Shader(&engine->renderWindow);
+		fragmentShader->load(getShaderSource("shaders/tile.frag"), render::SHADER_FRAGMENT);
+
+		ChunkContainer::Program = new render::Program(&engine->renderWindow);
+		ChunkContainer::Program->addShader(vertexShader);
+		ChunkContainer::Program->addShader(fragmentShader);
+	}
 
 	if(ChunkContainer::Image == nullptr) {
 		ChunkContainer::Image = (resources::SpriteSheet*)engine->manager->metadataToResources(
@@ -56,12 +65,10 @@ size_t ChunkContainer::getChunkCount() {
 }
 
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
-	// ChunkContainer::Program->bind();
+	ChunkContainer::Program->bind();
 
-	// glActiveTexture(GL_TEXTURE0);
-	// glBindTexture(GL_TEXTURE_2D, ChunkContainer::Image->texture);
-	// glUniform1i(ChunkContainer::Program->getUniform("spriteTexture"), 0); // bind texture	
-	// glUniformMatrix4fv(ChunkContainer::Program->getUniform("projection"), 1, false, &context.camera->projectionMatrix[0][0]);
+	ChunkContainer::Program->bindTexture("spriteTexture", 0);
+	ChunkContainer::Image->texture->bind(0);
 
 	#ifdef EGGINE_DEBUG
 	size_t chunksRendered = 0;

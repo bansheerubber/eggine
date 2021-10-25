@@ -4,6 +4,7 @@
 
 #include "chunk.h"
 #include "../util/dynamicArray.h"
+#include "../renderer/program.h"
 #include "../basic/renderObject.h"
 #include "../resources/spriteSheet.h"
 
@@ -31,6 +32,7 @@ class ChunkContainer : public RenderObject {
 		void render(double deltaTime, RenderContext &context);
 
 		// static class Shader* Program;
+		static render::Program* Program;
 		static resources::SpriteSheet* Image;
 
 		unsigned int size = 0;

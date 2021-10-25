@@ -1,14 +1,13 @@
 #include "resourceManager.h"
 
 #include "../engine/engine.h"
-#include "pngImage.h"
 #include "scriptFile.h"
 #include "shaderSource.h"
 #include "spriteSheet.h"
 
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
-	// ((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-	// 	= new resources::SpriteSheet((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::SpriteSheet((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {

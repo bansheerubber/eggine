@@ -4,6 +4,7 @@ tmp
 *.o
 *.pyc
 *.gen
+*.dksh
 __pycache__
 lib
 libnx

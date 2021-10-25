@@ -23,6 +23,6 @@ class OverlappingTile : public RenderObject {
 		int textureIndex = 3;
 		
 		glm::uvec3 position = glm::uvec3(0, 0, 0);
-		glm::lowp_vec2 screenSpacePosition = glm::vec2(0, 0);
+		glm::vec2 screenSpacePosition = glm::vec2(0, 0);
 		class Chunk* chunk = nullptr;
 };

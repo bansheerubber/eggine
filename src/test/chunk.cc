@@ -11,8 +11,8 @@
 #include "../resources/resourceManager.h"
 #include "tileMath.h"
 
-glm::lowp_vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
-// GLuint Chunk::VertexBufferObjects[3] = {GL_INVALID_INDEX, GL_INVALID_INDEX, GL_INVALID_INDEX};
+glm::vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
+render::VertexBuffer* Chunk::VertexBuffers[3] = {nullptr, nullptr, nullptr};
 
 void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper* tile) {
 	*tile = {};
@@ -34,43 +34,37 @@ int compareOverlappingTile(const void* a, const void* b) {
 }
 
 Chunk::Chunk() : InstancedRenderObjectContainer(false) {
-	// initialize dynamic static data
-	bool first = false;
-	// if(Chunk::VertexBufferObjects[0] == GL_INVALID_INDEX) {
-	// 	first = true;
-	// 	glGenBuffers(3, Chunk::VertexBufferObjects);
+	if(Chunk::VertexBuffers[0] == nullptr) {
+		// pre-calculate offsets
+		{
+			for(unsigned i = 0; i < Size * Size; i++) {
+				for(unsigned z = 0; z < 15; z++) {
+					glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
+					Chunk::Offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z));
+				}
+			}
 
-	// 	// pre-calculate offsets
-	// 	{
-	// 		for(unsigned i = 0; i < Size * Size; i++) {
-	// 			for(unsigned z = 0; z < 15; z++) {
-	// 				glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
-	// 				Chunk::Offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z));
-	// 			}
-	// 		}
+			Chunk::VertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
+			Chunk::VertexBuffers[0]->setData(&Chunk::Offsets[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * 15, alignof(glm::vec2));
+		}
 
-	// 		glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[0]);
-	// 		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::lowp_vec2) * Chunk::Size * Chunk::Size * 15, &Chunk::Offsets[0], GL_STATIC_DRAW);
-	// 	}
+		// vertices for square
+		{
+			Chunk::VertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
+			Chunk::VertexBuffers[1]->setData((glm::vec2*)&Chunk::Vertices[0], sizeof(Chunk::Vertices), alignof(glm::vec2));
+		}
 
-	// 	// vertices for square
-	// 	{
-	// 		glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[1]);
-	// 		glBufferData(GL_ARRAY_BUFFER, sizeof(Chunk::Vertices), Chunk::Vertices, GL_STATIC_DRAW);
-	// 	}
-
-	// 	// uvs for square
-	// 	{
-	// 		glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[2]);
-	// 		glBufferData(GL_ARRAY_BUFFER, sizeof(Chunk::UVs), Chunk::UVs, GL_STATIC_DRAW);
-	// 	}
-	// }
+		// uvs for square
+		{
+			Chunk::VertexBuffers[2] = new render::VertexBuffer(&engine->renderWindow);
+			Chunk::VertexBuffers[2]->setData((glm::vec2*)&Chunk::UVs[0], sizeof(Chunk::UVs), alignof(glm::vec2));
+		}
+	}
 
 	this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
 
-	// glGenBuffers(1, this->vertexBufferObjects);
-	// glGenVertexArrays(1, &this->vertexArrayObject);
-	// glBindVertexArray(this->vertexArrayObject);
+	this->vertexBuffer = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
 
 	this->textureIndices = new int[Size * Size * this->height];
 	for(unsigned i = 0; i < Size * Size * this->height; i++) {
@@ -78,46 +72,30 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	}
 	
 	// load vertices
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[1]);
-	// 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// 	glEnableVertexAttribArray(0);
-	// }
+	{
+		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[1], 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
+	}
 
 	// // load uvs
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[2]);
-	// 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// 	glEnableVertexAttribArray(1);
-	// }
+	{
+		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[2], 1, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
+	}
 
 	// // load offsets
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[0]);
-	// 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// 	glVertexAttribDivisor(2, 1);
-	// 	glEnableVertexAttribArray(2);
-	// }
+	{
+		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[0], 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
+	}
 
 	// // load texture indices
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
-	// 	glBufferData(GL_ARRAY_BUFFER, sizeof(int) * Chunk::Size * Chunk::Size * this->height, this->textureIndices, GL_STATIC_DRAW);
-
-	// 	glVertexAttribIPointer(3, 1, GL_INT, 0, 0);
-	// 	glVertexAttribDivisor(3, 1);
-	// 	glEnableVertexAttribArray(3);
-	// }
-
-	// glBindVertexArray(0); // turn off vertex array object
+	{
+		this->vertexBuffer->setData(this->textureIndices, sizeof(int) * Chunk::Size * Chunk::Size * this->height, alignof(int));
+		this->vertexAttributes->addVertexAttribute(this->vertexBuffer, 3, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 1);
+	}
 
 	this->defineBounds();
 }
 
 Chunk::~Chunk() {
-	// glDeleteBuffers(1, this->vertexBufferObjects);
-	// glDeleteVertexArrays(1, &this->vertexArrayObject);
-
 	size_t head = this->overlappingTiles.array.head;
 	this->overlappingTiles.array.head = 0; // reset to zero to prevent double deallocations
 	for(size_t i = 0; i < head; i++) {
@@ -168,6 +146,13 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	#ifdef EGGINE_DEBUG
 	this->drawCalls = 0;
 	#endif
+
+	struct VertexBlock {
+		glm::mat4 projection;
+		glm::vec2 chunkScreenSpace;
+	} vb;
+	vb.projection = context.camera->projectionMatrix;
+	vb.chunkScreenSpace = this->screenSpacePosition;
 	
 	Camera* camera = context.camera;
 	if(!(
@@ -187,9 +172,9 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 			if(lastOverlappingIndex - 1 != tile->index) {
 				// draw [last, lastOverlappingIndex - tile.index + last)
 				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
-				// glBindVertexArray(this->vertexArrayObject);
-				// glUniform2f(ChunkContainer::Program->getUniform("chunkScreenSpace"), this->screenSpacePosition.x, this->screenSpacePosition.y);
-				// glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, tile->index - lastOverlappingIndex + overlapBias, lastOverlappingIndex);
+				this->vertexAttributes->bind();
+				ChunkContainer::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
+				engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastOverlappingIndex, tile->index - lastOverlappingIndex + overlapBias);
 				#ifdef EGGINE_DEBUG
 				this->drawCalls++;
 				#endif
@@ -202,9 +187,9 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 			leftOff = i + 1;
 		}
 
-		// glBindVertexArray(this->vertexArrayObject);
-		// glUniform2f(ChunkContainer::Program->getUniform("chunkScreenSpace"), this->screenSpacePosition.x, this->screenSpacePosition.y);
-		// glDrawArraysInstancedBaseInstance(GL_TRIANGLE_STRIP, 0, 4, total - lastOverlappingIndex, lastOverlappingIndex);
+		this->vertexAttributes->bind();
+		ChunkContainer::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
+		engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastOverlappingIndex, total - lastOverlappingIndex);
 		#ifdef EGGINE_DEBUG
 		this->drawCalls++;
 		#endif

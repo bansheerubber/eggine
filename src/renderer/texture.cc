@@ -180,6 +180,10 @@ void render::Texture::load(
 	}
 
 	#ifdef __switch__
+	this->imageDescriptorMemory = this->window->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, sizeof(DkImageDescriptor), DK_IMAGE_DESCRIPTOR_ALIGNMENT);
+
+	this->samplerDescriptorMemory = this->window->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, sizeof(DkSamplerDescriptor), DK_SAMPLER_DESCRIPTOR_ALIGNMENT);
+	
 	// allocate memory for the image, we will be deallocating this later though
 	switch_memory::Piece* memory = this->window->memory.allocate(
 		DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached,
@@ -191,7 +195,7 @@ void render::Texture::load(
 	dk::ImageLayout layout;
 	dk::ImageLayoutMaker{this->window->device}
 		.setFlags(0)
-		.setFormat(DkImageFormat_R8_Unorm)
+		.setFormat(channelsAndBitDepthToDkFormat(this->channels, this->bitDepth))
 		.setDimensions(this->width, this->height)
 		.initialize(layout);
 	
@@ -234,7 +238,13 @@ void render::Texture::load(
 
 void render::Texture::bind(unsigned int location) {
 	#ifdef __switch__
-	this->window->bindTexture(location, this);
+	// this->window->bindTexture(location, this);
+
+	this->window->commandBuffer.pushData(this->imageDescriptorMemory->gpuAddr() + location * sizeof(DkImageDescriptor), &this->imageDescriptor, sizeof(DkImageDescriptor));
+	this->window->commandBuffer.pushData(this->samplerDescriptorMemory->gpuAddr() + location * sizeof(DkSamplerDescriptor), &this->samplerDescriptor, sizeof(DkSamplerDescriptor));
+
+	this->window->commandBuffer.bindImageDescriptorSet(this->imageDescriptorMemory->gpuAddr(), 1);
+	this->window->commandBuffer.bindSamplerDescriptorSet(this->samplerDescriptorMemory->gpuAddr(), 1);
 	#else
 	glActiveTexture(GL_TEXTURE0 + location);
 	glBindTexture(GL_TEXTURE_2D, this->texture);

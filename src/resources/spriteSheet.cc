@@ -1,5 +1,6 @@
 #include "spriteSheet.h"
 
+#include "../engine/engine.h"
 #include "resourceManager.h"
 
 void resources::initSpriteSheetInfo(SpriteSheet* owner, SpriteSheetInfo* wall) {
@@ -13,7 +14,12 @@ resources::SpriteSheet::SpriteSheet(
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
 	size_t bufferSize
-) : PNGImage(manager, metadata, buffer, bufferSize) {
+) : ResourceObject(manager, metadata) {
+	this->texture = new render::Texture(&engine->renderWindow);
+	this->texture->setFilters(render::TEXTURE_FILTER_NEAREST, render::TEXTURE_FILTER_NEAREST);
+	this->texture->setWrap(render::TEXTURE_WRAP_CLAMP_TO_BORDER, render::TEXTURE_WRAP_CLAMP_TO_BORDER);
+	this->texture->loadPNG(buffer, bufferSize);
+	
 	this->spriteSheetWidth = stoi(metadata->getMetadata("width"));
 	this->spriteSheetAmount = stoi(metadata->getMetadata("amount"));
 

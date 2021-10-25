@@ -62,8 +62,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		glm::uvec2 position = glm::uvec2(0, 0);
 		glm::vec2 screenSpacePosition;
 		
-		// GLuint vertexBufferObjects[1];
-		// GLuint vertexArrayObject;
+		render::VertexBuffer* vertexBuffer;
+		render::VertexAttributes* vertexAttributes;
 		class Line* debugLine = nullptr;
 		double top = 0, right = 0, bottom = 0, left = 0;
 
@@ -79,20 +79,20 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 
-		static glm::lowp_vec2 Offsets[];
-		// static GLuint VertexBufferObjects[];
+		static glm::vec2 Offsets[];
+		static render::VertexBuffer* VertexBuffers[];
 
-		static constexpr float Vertices[8] = {
-			-0.5f,  1.0f,
-			-0.5f, -1.0f,
-			0.5f, 1.0f,
-			0.5f, -1.0f
+		static constexpr glm::vec2 Vertices[8] = {
+			glm::vec2(-0.5f,  1.0f),
+			glm::vec2(-0.5f, -1.0f),
+			glm::vec2(0.5f, 1.0f),
+			glm::vec2(0.5f, -1.0f)
 		};
 
-		static constexpr float UVs[8] = {
-			0.0f, 0.0f,
-			0.0f, 1.0f,
-			1.0f, 0.0f,
-			1.0f, 1.0f
+		static constexpr glm::vec2 UVs[8] = {
+			glm::vec2(0.0f, 0.0f),
+			glm::vec2(0.0f, 128.0f / 391.0f),
+			glm::vec2(64.0f / 1057.0f, 0.0f),
+			glm::vec2(64.0f / 1057.0f, 128.0f / 391.0f)
 		};
 };

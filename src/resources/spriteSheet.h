@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../util/dynamicArray.h"
-#include "pngImage.h"
+#include "resourceObject.h"
+#include "../renderer/texture.h"
 
 namespace resources {
 	enum SpriteSheetWall {
@@ -22,14 +23,16 @@ namespace resources {
 
 	void initSpriteSheetInfo(class SpriteSheet* owner, SpriteSheetInfo* wall);
 	
-	class SpriteSheet: public PNGImage {
+	class SpriteSheet: public ResourceObject {
 		public:
 			SpriteSheet(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
+
+			render::Texture* texture = nullptr;
 
 			// whether or not the tile should be drawn ontop of a overlapping tile
 			bool drawOntopOfOverlap(size_t spriteIndex);
 		
-		protected:
+		protected:			
 			unsigned int spriteSheetWidth = 0; // number of sprites per row
 			unsigned int spriteSheetAmount = 0; // number of sprites in PNG
 			

@@ -55,6 +55,7 @@ dist/$(target): $(cpp_objects_tmp)
 	@echo -e "   CXX      $@"
 	@$(CXX) $(cpp_objects_tmp) -Wall $(LIBPATHS) $(LDFLAGS) $(LIBS) -o $@
 	@nacptool --create eggine bansheerubber 0.0.1 dist/eggine.nacp
+	@cp dist/out.carton dist/romfs/out.carton
 	@elf2nro dist/$(target) dist/$(target).nro --icon=dist/egg.png --nacp=dist/eggine.nacp --romfsdir=dist/romfs
 
 clean:

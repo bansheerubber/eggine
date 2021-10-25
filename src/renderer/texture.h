@@ -248,6 +248,9 @@ namespace render {
 			dk::Sampler sampler;
 			dk::SamplerDescriptor samplerDescriptor;
 			switch_memory::Piece* memory;
+
+			switch_memory::Piece* imageDescriptorMemory;
+			switch_memory::Piece* samplerDescriptorMemory;
 			#else
 			GLuint texture = GL_INVALID_INDEX;
 			#endif
