@@ -19,7 +19,7 @@ bool Character::move(glm::uvec3 position) {
 }
 
 bool Character::moveTest(glm::uvec3 position) {
-	esEntry arguments[2];
+	esEntry arguments[3];
 	arguments[0].type = ES_ENTRY_NUMBER;
 	arguments[0].numberData = position.x;
 	arguments[1].type = ES_ENTRY_NUMBER;

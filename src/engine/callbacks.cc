@@ -10,13 +10,6 @@ void es::defineCallbacks() {
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onKeyPress, "onKeyPress", 2, keyPressArguments);
 }
 
-// void onWindowResize(GLFWwindow* window, int width, int height) {
-// 	engine->windowWidth = width;
-// 	engine->windowHeight = height;
-
-// 	glViewport(0, 0, width, height);
-// }
-
 // key string, action
 esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments) {
 	if(argc != 2) {

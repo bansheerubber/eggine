@@ -185,6 +185,14 @@ void Engine::initialize() {
 	});
 	#endif
 
+	this->addAxis(binds::LEFT_AXIS_X, binds::Keybind {
+		"camera.xAxis"
+	});
+
+	this->addAxis(binds::LEFT_AXIS_Y, binds::Keybind {
+		"camera.yAxis"
+	});
+
 	// create camera once we're done with eggscript definitions
 	this->camera = new Camera();
 
@@ -201,6 +209,9 @@ void Engine::initialize() {
 	this->registerBindRelease("camera.down", this->camera);
 	this->registerBindRelease("camera.left", this->camera);
 	this->registerBindRelease("camera.right", this->camera);
+
+	this->registerBindAxis("camera.xAxis", this->camera);
+	this->registerBindAxis("camera.yAxis", this->camera);
 
 	// pre-load all .egg files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());
@@ -232,6 +243,41 @@ void Engine::tick() {
 	this->lastRenderTime = getMicrosecondsNow();
 
 	this->renderWindow.prerender();
+
+	#ifdef __switch__ // handle switch binds
+	int axes[4] = {binds::LEFT_AXIS_X, binds::LEFT_AXIS_Y, binds::RIGHT_AXIS_X, binds::RIGHT_AXIS_Y};
+	int values[4] = {
+		engine->renderWindow.leftStick.x,
+		engine->renderWindow.leftStick.y,
+		engine->renderWindow.rightStick.x,
+		engine->renderWindow.rightStick.y
+	};
+
+	for(int i = 0; i < 4; i++) {
+		int axis = axes[i];
+		float value = values[i];
+		auto &binds = this->axisToKeybind[axis];
+		for(binds::Keybind &bind: binds) {
+			for(GameObject* gameObject: this->bindAxisToGameObject[bind.bind]) {
+				gameObject->onAxis(bind.bind, value);
+			}
+		}
+	}
+	#else // handle GLFW gamepads
+	if(this->renderWindow.hasGamepad) {
+		int axes[4] = {binds::LEFT_AXIS_X, binds::LEFT_AXIS_Y, binds::RIGHT_AXIS_X, binds::RIGHT_AXIS_Y};
+		for(int i = 0; i < 4; i++) {
+			int axis = axes[i];
+			double value = engine->renderWindow.gamepad.axes[axis];
+			auto &binds = this->axisToKeybind[axis];
+			for(binds::Keybind &bind: binds) {
+				for(GameObject* gameObject: this->bindAxisToGameObject[bind.bind]) {
+					gameObject->onAxis(bind.bind, value);
+				}
+			}
+		}
+	}
+	#endif
 	
 	#ifdef EGGINE_DEBUG
 	// this->debug.flushGLDebugMessages();

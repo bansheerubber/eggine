@@ -89,6 +89,10 @@ void render::Window::initialize() {
 	this->imageDescriptorMemory = this->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, sizeof(DkImageDescriptor) * IMAGE_SAMPLER_DESCRIPTOR_COUNT, DK_IMAGE_DESCRIPTOR_ALIGNMENT);
 
 	this->samplerDescriptorMemory = this->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, sizeof(DkSamplerDescriptor) * IMAGE_SAMPLER_DESCRIPTOR_COUNT, DK_SAMPLER_DESCRIPTOR_ALIGNMENT);
+
+	// initialize gamepad
+	padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+	padInitializeDefault(&this->pad);
 	#else // else for ifdef __switch__
 	if(!glfwInit()) {
 		printf("failed to initialize glfw\n");
@@ -163,10 +167,18 @@ void render::Window::prerender() {
 	this->commandBuffer.clear();
 	this->commandBufferFences[this->currentCommandBuffer].wait();
 	this->commandBuffer.addMemory(this->commandBufferMemory, this->commandBufferSliceSize * this->currentCommandBuffer, this->commandBufferSliceSize);
+
+	// handle gamepad
+	padUpdate(&this->pad);
+
+	this->leftStick = padGetStickPos(&this->pad, 0);
+	this->rightStick = padGetStickPos(&this->pad, 1);
 	#else
 	glClearColor(this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glfwPollEvents();
+
+	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
 	#endif
 }
 

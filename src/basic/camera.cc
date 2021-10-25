@@ -116,6 +116,15 @@ void Camera::onBindRelease(string &bind) {
 	}
 }
 
+void Camera::onAxis(string &bind, double value) {
+	if(bind == "camera.xAxis") {
+		this->keyMapping.xAxis = value;
+	}
+	else if(bind == "camera.yAxis") {
+		this->keyMapping.yAxis = value;
+	}
+}
+
 void Camera::setZoomLevel(float zoomLevel) {
 	this->zoomLevel = min(max(zoomLevel, this->minZoomLevel), this->maxZoomLevel);
 }

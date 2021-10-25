@@ -32,6 +32,18 @@ class Engine {
 	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	
 	public:
+		int windowWidth = 1280;
+		int windowHeight = 720;
+
+		FT_Library ft;
+		esEnginePtr eggscript = nullptr;
+		resources::ResourceManager* manager;
+		render::Window renderWindow;
+
+		#ifdef EGGINE_DEBUG
+		Debug debug;
+		#endif
+		
 		void initialize();
 		void tick();
 		void exit();
@@ -43,27 +55,12 @@ class Engine {
 		void registerBindPress(string command, GameObject* gameObject);
 		void registerBindRelease(string command, GameObject* gameObject);
 		void registerBindHeld(string command, GameObject* gameObject);
+		void registerBindAxis(string command, GameObject* gameObject);
 		void addKeybind(int key, binds::Keybind keybind);
+		void addAxis(int axis, binds::Keybind keybind);
 		void registerTSKeybindCallback(string bind, string key, string callback);
 
 		void setFilePrefix(string filePrefix);
-
-		int windowWidth = 1280;
-		int windowHeight = 720;
-
-		FT_Library ft;
-		esEnginePtr eggscript = nullptr;
-
-		resources::ResourceManager* manager;
-
-		// GLFWgamepadstate gamepad;
-		// bool hasGamepad = false;
-
-		render::Window renderWindow;
-
-		#ifdef EGGINE_DEBUG
-		Debug debug;
-		#endif
 
 	private:
 		#ifdef __switch__
@@ -91,7 +88,9 @@ class Engine {
 		tsl::robin_map<string, vector<GameObject*>> bindPressToGameObject;
 		tsl::robin_map<string, vector<GameObject*>> bindReleaseToGameObject;
 		tsl::robin_map<string, vector<GameObject*>> bindHeldToGameObject;
+		tsl::robin_map<string, vector<GameObject*>> bindAxisToGameObject;
 		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;
+		tsl::robin_map<int, vector<binds::Keybind>> axisToKeybind;
 		vector<pair<GameObject*, string>> heldEvents;
 
 		tsl::robin_map<string, int> keyToScancode;

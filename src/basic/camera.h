@@ -17,6 +17,7 @@ class Camera : public GameObject {
 
 		void onBindPress(string &bind);
 		void onBindRelease(string &bind);
+		void onAxis(string &bind, double value);
 
 		void setZoomLevel(float zoomLevel);
 		float getZoom();

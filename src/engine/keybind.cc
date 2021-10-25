@@ -23,6 +23,14 @@ void Engine::registerBindHeld(string command, GameObject* gameObject) {
 	this->bindHeldToGameObject[command].push_back(gameObject);
 }
 
+void Engine::registerBindAxis(string command, GameObject* gameObject) {
+	this->bindAxisToGameObject[command].push_back(gameObject);
+}
+
 void Engine::addKeybind(int key, binds::Keybind keybind) {
 	this->keyToKeybind[key].push_back(keybind);
+}
+
+void Engine::addAxis(int axis, binds::Keybind keybind) {
+	this->axisToKeybind[axis].push_back(keybind);
 }
