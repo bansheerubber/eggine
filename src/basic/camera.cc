@@ -6,9 +6,6 @@
 
 Camera::Camera() {
 	this->reference = esCreateObject(engine->eggscript, "Camera", this);
-
-	this->position.x = 50;
-	this->setZoomLevel(40);
 }
 
 Camera::~Camera() {

@@ -2,57 +2,44 @@
 
 #include "chunk.h"
 #include "chunkContainer.h"
+#include "../engine/engine.h"
 #include "tileMath.h"
 
 OverlappingTile::OverlappingTile(ChunkContainer* container) : RenderObject(false) {
 	this->container = container;	
-	
-	// glGenBuffers(2, this->vertexBufferObjects);
-	// glGenVertexArrays(1, &this->vertexArrayObject);
-	// glBindVertexArray(this->vertexArrayObject);
 
-	// // load vertices
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[1]);
-	// 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// 	glEnableVertexAttribArray(0);
-	// }
+	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
 
-	// // load uvs
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, Chunk::VertexBufferObjects[2]);
-	// 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// 	glEnableVertexAttribArray(1);
-	// }
+	// load vertices
+	{
+		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[1], 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
+	}
 
-	// // load offsets
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
-	// 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2), NULL, GL_DYNAMIC_DRAW);
-	// 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2), &this->screenSpacePosition[0]);
+	// load uvs
+	{
+		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[2], 1, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
+	}
 
-	// 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// 	glVertexAttribDivisor(2, 1);
-	// 	glEnableVertexAttribArray(2);
-	// }
+	// load offsets
+	{
+		this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
+		this->vertexBuffers[0]->setDynamicDraw(true);
+		this->vertexBuffers[0]->setData(&this->screenSpacePosition[0], sizeof(glm::vec2), alignof(glm::vec2));
 
-	// // load texture indices
-	// {
-	// 	glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[1]);
-	// 	glBufferData(GL_ARRAY_BUFFER, sizeof(int), &this->textureIndex, GL_STATIC_DRAW);
+		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[0], 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
+	}
 
-	// 	glVertexAttribIPointer(3, 1, GL_INT, 0, 0);
-	// 	glVertexAttribDivisor(3, 1);
-	// 	glEnableVertexAttribArray(3);
-	// }
+	// load texture indices
+	{
+		this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
+		this->vertexBuffers[1]->setDynamicDraw(true);
+		this->vertexBuffers[1]->setData(&this->textureIndex, sizeof(int), alignof(int));
 
-	// glBindVertexArray(0); // turn off vertex array object
+		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[1], 3, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 1);
+	}
 }
 
 OverlappingTile::~OverlappingTile() {
-	// glDeleteBuffers(2, this->vertexBufferObjects);
-	// glDeleteVertexArrays(1, &this->vertexArrayObject);
-
 	if(this->chunk != nullptr) {
 		this->chunk->removeOverlappingTile(this);
 	}
@@ -77,10 +64,7 @@ void OverlappingTile::setPosition(glm::uvec3 position) {
 	relativePosition.y -= this->chunk->position.y * Chunk::Size;
 	this->screenSpacePosition = tilemath::tileToScreen(relativePosition);
 
-	// glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferObjects[0]);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2), NULL, GL_DYNAMIC_DRAW);
-	// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2), &this->screenSpacePosition[0]);
-	// glBindBuffer(GL_ARRAY_BUFFER, 0);
+	this->vertexBuffers[0]->setData(&this->screenSpacePosition[0], sizeof(glm::vec2), alignof(glm::vec2));
 
 	this->chunk->updateOverlappingTile(this);
 }
@@ -90,6 +74,6 @@ glm::uvec3 OverlappingTile::getPosition() {
 }
 
 void OverlappingTile::render(double deltaTime, RenderContext &context) {
-	// glBindVertexArray(this->vertexArrayObject);
-	// glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1);
+	this->vertexAttributes->bind();
+	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }
