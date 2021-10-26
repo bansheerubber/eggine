@@ -53,8 +53,9 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void setPosition(glm::uvec2 position);
 		glm::uvec2& getPosition();
 
+		void setTileTexture(glm::uvec2 position, unsigned int spritesheetIndex);
+
 		static constexpr unsigned int Size = 25;
-		// static GLuint Texture;
 	
 	protected:
 		SortedArray<OverlappingTileWrapper, Chunk> overlappingTiles = SortedArray<OverlappingTileWrapper, Chunk>(this, compareOverlappingTile, initOverlappingTileWrapper, nullptr);

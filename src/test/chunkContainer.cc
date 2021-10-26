@@ -19,6 +19,8 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 }
 
 ChunkContainer::ChunkContainer() {
+	engine->registerBindPress("chunk.selectTile", this);
+	
 	if(ChunkContainer::Program == nullptr) {
 		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
 		vertexShader->load(getShaderSource("shaders/tile.vert"), render::SHADER_VERTEX);
@@ -115,4 +117,35 @@ void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
 
 	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
 	this->renderOrder[index].addOverlappingTile(tile);
+}
+
+void ChunkContainer::onBindPress(string &bind) {
+	if(bind == "chunk.selectTile") {
+		glm::vec2 world = engine->camera->mouseToWorld(engine->mouse);
+
+		// glm::mat2 basis = glm::mat2(
+		// 	cos(atan(1/2)), sin(atan(1/2)),
+		// 	cos(atan(1/2)), -sin(atan(1/2))
+		// );
+
+		// inverse the basis and normalize the axes to get transformation matrix
+		double cosine45deg = cos(M_PI / 4.0f);
+		glm::mat2 inverseBasis = glm::mat2(
+			cosine45deg, cosine45deg,
+			-cosine45deg * 2.0f, cosine45deg * 2.0f
+		);
+		glm::ivec2 coordinates = (inverseBasis * world) * (float)cosine45deg * 2.0f;
+		
+		if(coordinates.x >= 0 && coordinates.y >= 0) {
+			this->tileSelectionSprite->setPosition(glm::uvec3(coordinates, 0));
+		}
+	}
+}
+
+void ChunkContainer::commit() {
+	if(this->tileSelectionSprite == nullptr) {
+		this->tileSelectionSprite = new OverlappingTile(this);
+		this->tileSelectionSprite->setTexture(17);
+		this->tileSelectionSprite->setPosition(glm::uvec3(0, 0, 0));
+	}
 }

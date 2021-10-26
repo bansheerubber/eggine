@@ -73,6 +73,11 @@ glm::uvec3 OverlappingTile::getPosition() {
 	return this->position;
 }
 
+void OverlappingTile::setTexture(unsigned int index) {
+	this->textureIndex = index;
+	this->vertexBuffers[1]->setData(&this->textureIndex, sizeof(int), alignof(int));
+}
+
 void OverlappingTile::render(double deltaTime, RenderContext &context) {
 	this->vertexAttributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);

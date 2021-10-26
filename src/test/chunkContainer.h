@@ -31,12 +31,17 @@ class ChunkContainer : public RenderObject {
 
 		void render(double deltaTime, RenderContext &context);
 
+		void commit();
+
+		void onBindPress(string &bind);
+
+		unsigned int size = 0;
+
 		// static class Shader* Program;
 		static render::Program* Program;
 		static resources::SpriteSheet* Image;
-
-		unsigned int size = 0;
 	
 	private:
+		class OverlappingTile* tileSelectionSprite;
 		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 8, initChunk, nullptr);
 };

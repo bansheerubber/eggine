@@ -46,7 +46,10 @@ class Camera : public GameObject {
 			bool right = false;
 			float xAxis = 0;
 			float yAxis = 0;
+			float zoomAxis = 0;
 		} keyMapping;
+
+		glm::vec2 getViewport();
 };
 
 namespace es {

@@ -15,6 +15,8 @@ class OverlappingTile : public RenderObject {
 		void setPosition(glm::uvec3 position);
 		glm::uvec3 getPosition();
 
+		void setTexture(unsigned int index);
+
 		void render(double deltaTime, RenderContext &context);
 
 	protected:

@@ -253,3 +253,10 @@ void Chunk::removeOverlappingTile(OverlappingTile* tile) {
 		});
 	}
 }
+
+void Chunk::setTileTexture(glm::uvec2 position, unsigned int spritesheetIndex) {
+	glm::uvec2 relativePosition = position - this->position * (unsigned int)Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size);
+
+	this->vertexBuffer->setSubData(&spritesheetIndex, 1, index * sizeof(unsigned int));
+}

@@ -43,6 +43,8 @@ class Engine {
 
 		glm::vec2 mouse;
 
+		Camera* camera = nullptr;
+
 		#ifdef EGGINE_DEBUG
 		Debug debug;
 		#endif
@@ -76,7 +78,6 @@ class Engine {
 		long long cpuRenderTime = 0;
 		long long eggscriptTickTime = 0;
 		
-		Camera* camera = nullptr;
 		class Shader* boundShader = nullptr;
 		UI ui;
 		long long lastRenderTime;

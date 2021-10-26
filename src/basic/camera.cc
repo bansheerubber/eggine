@@ -13,6 +13,12 @@ Camera::~Camera() {
 	esDeleteObject(this->reference);
 }
 
+glm::vec2 Camera::getViewport() {
+	double ratio = (double)engine->renderWindow.width / (double)engine->renderWindow.height;
+	double width = 10 / this->getZoom();
+	return glm::vec2(width, width / ratio);
+}
+
 void Camera::see(double deltaTime) {
 	this->keyMapping.zoomInTimer += deltaTime;
 	this->keyMapping.zoomOutTimer += deltaTime;
@@ -31,6 +37,10 @@ void Camera::see(double deltaTime) {
 	else if(this->keyMapping.zoomOutRepeating == 2) {
 		this->setZoomLevel(this->zoomLevel + deltaTime * 15.0f);
 	}
+
+	if(abs(this->keyMapping.zoomAxis) > 0.1) {
+		this->setZoomLevel(this->zoomLevel + deltaTime * 10.0f * -this->keyMapping.zoomAxis);
+	}
 	
 	double zoom = this->getZoom();
 
@@ -41,21 +51,12 @@ void Camera::see(double deltaTime) {
 	this->position.x += this->keyMapping.xAxis * speed;
 	this->position.y += this->keyMapping.yAxis * speed;
 
-	// handle gamepad
-	// if(engine->hasGamepad) {
-	// 	this->position.x += engine->gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X] * speed;
-	// 	this->position.y -= engine->gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] * speed;
-	// }
-	
-	double ratio = (double)engine->renderWindow.width / (double)engine->renderWindow.height;
+	glm::vec2 viewport = this->getViewport();
 
-	double viewportWidth = 10 / zoom;
-	double viewportHeight = viewportWidth / ratio;
-
-	this->top = viewportHeight + this->position.y;
-	this->right = viewportWidth + this->position.x;
-	this->bottom = -viewportHeight + this->position.y;
-	this->left = -viewportWidth + this->position.x;
+	this->top = viewport.y + this->position.y;
+	this->right = viewport.x + this->position.x;
+	this->bottom = -viewport.y + this->position.y;
+	this->left = -viewport.x + this->position.x;
 	
 	this->projectionMatrix = glm::ortho(
 		this->left,
@@ -72,9 +73,12 @@ void Camera::setPosition(glm::vec2 position) {
 }
 
 glm::vec2 Camera::mouseToWorld(glm::vec2 mouse) {
+	glm::vec2 viewport = this->getViewport();
+	float halfWidth = (float)engine->renderWindow.width / 2.0f;
+	float halfHeight = (float)engine->renderWindow.height / 2.0f;
 	return glm::vec2(
-		((mouse.x - (float)engine->renderWindow.width / 2.0f) / this->getZoom() + this->position.x * 64.0f + 32.0f) / 64.0f,
-		((mouse.y - (float)engine->renderWindow.height / 2.0f) / this->getZoom() - this->position.y * 64.0f - 12.0f) / 64.0f
+		(mouse.x - halfWidth) / halfWidth * viewport.x + this->position.x + 0.5f,
+		(mouse.y - halfHeight) / halfHeight * viewport.y - this->position.y - 12.0f / 64.0f
 	);
 }
 
@@ -88,23 +92,6 @@ void Camera::onBindPress(string &bind) {
 		this->setZoomLevel(this->zoomLevel + 1.0f);
 		this->keyMapping.zoomOutRepeating = 1;
 		this->keyMapping.zoomOutTimer = 0;
-	}
-	else if(bind == "camera.click") {
-		glm::vec2 world = this->mouseToWorld(engine->mouse);
-
-		// glm::mat2 basis = glm::mat2(
-		// 	cos(atan(1/2)), sin(atan(1/2)),
-		// 	cos(atan(1/2)), -sin(atan(1/2))
-		// );
-
-		// inverse the basis and normalize the axes to get transformation matrix
-		double cosine45deg = cos(M_PI / 4.0f);
-		glm::mat2 inverseBasis = glm::mat2(
-			cosine45deg, cosine45deg,
-			-cosine45deg * 2.0f, cosine45deg * 2.0f
-		);
-		glm::ivec2 coordinates = (inverseBasis * world) * (float)cosine45deg * 2.0f;
-		printf("%d %d\n", coordinates.x, coordinates.y);
 	}
 	else if(bind == "camera.up") {
 		this->keyMapping.up = true;
@@ -147,6 +134,9 @@ void Camera::onAxis(string &bind, double value) {
 	}
 	else if(bind == "camera.yAxis") {
 		this->keyMapping.yAxis = value;
+	}
+	else if(bind == "camera.zoomAxis") {
+		this->keyMapping.zoomAxis = value;
 	}
 }
 

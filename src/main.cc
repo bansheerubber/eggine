@@ -38,6 +38,8 @@ int main(int argc, char* argv[]) {
 		container.addChunk(tilemath::indexToCoordinate(i, size));
 	}
 
+	container.commit();
+
 	Character* character = new Character(&container);
 	character->setPosition(glm::uvec3(0, 0, 10)); 
 

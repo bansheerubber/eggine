@@ -73,7 +73,7 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 }
 
 void render::VertexBuffer::setSubData(void* data, unsigned int size, unsigned int offset) {
-	if(this->size != size) {
+	if(this->size <= size) {
 		printf("vertex data must be subset of data in setSubData\n");
 		return;
 	}

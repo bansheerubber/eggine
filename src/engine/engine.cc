@@ -184,7 +184,7 @@ void Engine::initialize() {
 	});
 
 	this->addMousebind(GLFW_MOUSE_BUTTON_LEFT, binds::Keybind {
-		"camera.click",
+		"chunk.selectTile",
 	});
 	#endif
 
@@ -196,6 +196,10 @@ void Engine::initialize() {
 		"camera.yAxis"
 	});
 
+	this->addAxis(binds::RIGHT_AXIS_Y, binds::Keybind {
+		"camera.zoomAxis"
+	});
+
 	// create camera once we're done with eggscript definitions
 	this->camera = new Camera();
 
@@ -205,7 +209,6 @@ void Engine::initialize() {
 	this->registerBindPress("camera.down", this->camera);
 	this->registerBindPress("camera.left", this->camera);
 	this->registerBindPress("camera.right", this->camera);
-	this->registerBindPress("camera.click", this->camera);
 
 	this->registerBindRelease("camera.zoomIn", this->camera);
 	this->registerBindRelease("camera.zoomOut", this->camera);
@@ -216,6 +219,7 @@ void Engine::initialize() {
 
 	this->registerBindAxis("camera.xAxis", this->camera);
 	this->registerBindAxis("camera.yAxis", this->camera);
+	this->registerBindAxis("camera.zoomAxis", this->camera);
 
 	// pre-load all .egg files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());
@@ -268,6 +272,15 @@ void Engine::tick() {
 		for(int i = 0; i < 4; i++) {
 			binds::Axes axis = axes[i];
 			double value = engine->renderWindow.gamepad.axes[axis];
+
+			if(axis == binds::LEFT_AXIS_Y || axis == binds::RIGHT_AXIS_Y) {
+				value = -value;
+			}
+
+			if(abs(value) < 0.07) {
+				value = 0.0;
+			}
+
 			onAxisMove(axis, value);
 		}
 	}
