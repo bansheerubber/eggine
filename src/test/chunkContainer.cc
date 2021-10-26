@@ -20,6 +20,10 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 
 ChunkContainer::ChunkContainer() {
 	engine->registerBindPress("chunk.selectTile", this);
+	engine->registerBindPress("chunk.selectTileUp", this);
+	engine->registerBindPress("chunk.selectTileDown", this);
+	engine->registerBindPress("chunk.selectTileLeft", this);
+	engine->registerBindPress("chunk.selectTileRight", this);
 	
 	if(ChunkContainer::Program == nullptr) {
 		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
@@ -138,6 +142,30 @@ void ChunkContainer::onBindPress(string &bind) {
 		
 		if(coordinates.x >= 0 && coordinates.y >= 0) {
 			this->tileSelectionSprite->setPosition(glm::uvec3(coordinates, 0));
+		}
+	}
+	else if(
+		bind == "chunk.selectTileUp"
+		|| bind == "chunk.selectTileDown"
+		|| bind == "chunk.selectTileLeft"
+		|| bind == "chunk.selectTileRight"
+	) {
+		glm::ivec3 position(this->tileSelectionSprite->getPosition());
+		if(bind == "chunk.selectTileUp") {
+			position += glm::ivec3(1, -1, 0);
+		}
+		else if(bind == "chunk.selectTileDown") {
+			position += glm::ivec3(-1, 1, 0);
+		}
+		else if(bind == "chunk.selectTileLeft") {
+			position += glm::ivec3(-1, -1, 0);
+		}
+		else if(bind == "chunk.selectTileRight") {
+			position += glm::ivec3(1, 1, 0);
+		}
+
+		if(position.x >= 0 && position.y >= 0 && position.x < this->size * Chunk::Size && position.y < this->size * Chunk::Size) {
+			this->tileSelectionSprite->setPosition(position);
 		}
 	}
 }

@@ -38,3 +38,7 @@ void Engine::addAxis(int axis, binds::Keybind keybind) {
 void Engine::addMousebind(int button, binds::Keybind keybind) {
 	this->buttonToMousebind[button].push_back(keybind);
 }
+
+void Engine::addGamepadBind(binds::GamepadButtons bind, binds::Keybind keybind) {
+	this->gamepadToBind[bind].push_back(keybind);
+}

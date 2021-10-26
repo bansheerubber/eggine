@@ -186,6 +186,22 @@ void Engine::initialize() {
 	this->addMousebind(GLFW_MOUSE_BUTTON_LEFT, binds::Keybind {
 		"chunk.selectTile",
 	});
+
+	this->addGamepadBind(binds::D_PAD_UP, binds::Keybind {
+		"chunk.selectTileUp"
+	});
+
+	this->addGamepadBind(binds::D_PAD_DOWN, binds::Keybind {
+		"chunk.selectTileDown"
+	});
+
+	this->addGamepadBind(binds::D_PAD_LEFT, binds::Keybind {
+		"chunk.selectTileLeft"
+	});
+
+	this->addGamepadBind(binds::D_PAD_RIGHT, binds::Keybind {
+		"chunk.selectTileRight"
+	});
 	#endif
 
 	this->addAxis(binds::LEFT_AXIS_X, binds::Keybind {
@@ -283,6 +299,17 @@ void Engine::tick() {
 
 			onAxisMove(axis, value);
 		}
+
+		binds::GamepadButtons buttons[12] = {binds::A_BUTTON, binds::B_BUTTON, binds::X_BUTTON, binds::Y_BUTTON, binds::D_PAD_UP, binds::D_PAD_DOWN, binds::D_PAD_LEFT, binds::D_PAD_RIGHT, binds::SPECIAL_LEFT, binds::SPECIAL_RIGHT, binds::LEFT_BUTTON, binds::RIGHT_BUTTON};
+		int glfwButtons[12] = {GLFW_GAMEPAD_BUTTON_A, GLFW_GAMEPAD_BUTTON_B, GLFW_GAMEPAD_BUTTON_X, GLFW_GAMEPAD_BUTTON_Y, GLFW_GAMEPAD_BUTTON_DPAD_UP, GLFW_GAMEPAD_BUTTON_DPAD_DOWN, GLFW_GAMEPAD_BUTTON_DPAD_LEFT, GLFW_GAMEPAD_BUTTON_DPAD_RIGHT, GLFW_GAMEPAD_BUTTON_BACK, GLFW_GAMEPAD_BUTTON_START, GLFW_GAMEPAD_BUTTON_LEFT_BUMPER, GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER};
+		for(int i = 0; i < 12; i++) {
+			unsigned char pressed = engine->renderWindow.gamepad.buttons[glfwButtons[i]];
+			if(this->lastGamepadButtons[glfwButtons[i]] != pressed) {
+				onGamepadButton(buttons[i], pressed);
+			}
+		}
+
+		memcpy(this->lastGamepadButtons, engine->renderWindow.gamepad.buttons, sizeof(engine->renderWindow.gamepad.buttons) * 15);
 	}
 	#endif
 	

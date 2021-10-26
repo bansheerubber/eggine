@@ -34,6 +34,7 @@ class Engine {
 	friend esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	friend esEntryPtr es::onMouseMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	friend esEntryPtr es::onAxisMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
+	friend esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	
 	public:
 		FT_Library ft;
@@ -64,6 +65,7 @@ class Engine {
 		void addKeybind(int key, binds::Keybind keybind);
 		void addAxis(int axis, binds::Keybind keybind);
 		void addMousebind(int button, binds::Keybind keybind);
+		void addGamepadBind(binds::GamepadButtons bind, binds::Keybind keybind);
 		void registerTSKeybindCallback(string bind, string key, string callback);
 
 		void setFilePrefix(string filePrefix);
@@ -97,10 +99,15 @@ class Engine {
 		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;
 		tsl::robin_map<int, vector<binds::Keybind>> axisToKeybind;
 		tsl::robin_map<int, vector<binds::Keybind>> buttonToMousebind;
+		tsl::robin_map<binds::GamepadButtons, vector<binds::Keybind>> gamepadToBind;
 		vector<pair<GameObject*, string>> heldEvents;
 
 		tsl::robin_map<string, int> keyToScancode;
 		tsl::robin_map<int, string> scancodeToKey;
+
+		#ifndef __switch__
+		unsigned char* lastGamepadButtons = new unsigned char[15]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		#endif
 };
 
 extern Engine* engine;

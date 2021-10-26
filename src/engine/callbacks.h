@@ -17,6 +17,7 @@ void onMouseMove(GLFWwindow* window, double x, double y);
 #endif
 
 void onAxisMove(binds::Axes axis, double value);
+void onGamepadButton(binds::GamepadButtons bind, bool pressed);
 
 namespace es {
 	void defineCallbacks();
@@ -24,4 +25,5 @@ namespace es {
 	esEntryPtr onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	esEntryPtr onMouseMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	esEntryPtr onAxisMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
+	esEntryPtr onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 };

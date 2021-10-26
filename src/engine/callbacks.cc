@@ -13,6 +13,7 @@ void es::defineCallbacks() {
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onMousePress, "onMousePress", 2, mousePressArguments);
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onMouseMove, "onMouseMove", 2, mousePressArguments);
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onAxisMove, "onAxisMove", 2, mousePressArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onGamepadButton, "onGamepadButton", 2, mousePressArguments);
 }
 
 // key string, action
@@ -164,6 +165,56 @@ esEntryPtr es::onAxisMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	return nullptr;
 }
 
+esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments) {
+	if(argc != 2) {
+		return nullptr;
+	}
+	
+	binds::GamepadButtons button = (binds::GamepadButtons)arguments[0].numberData;
+	int action = (int)arguments[1].numberData;
+
+	#ifndef __switch__
+	if(action == 1) {
+		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
+		for(auto &bind: binds) {
+			vector<GameObject*> presses = engine->bindPressToGameObject[bind.bind];
+			for(GameObject* object: presses) {
+				object->onBindPress(bind.bind);
+			}
+
+			// handle TS callbacks
+			vector<string> esPresses = engine->bindToTSCallback[bind.bind];
+			for(string &callback: esPresses) {
+				esEntry arguments[1];
+				arguments[0].type = ES_ENTRY_NUMBER;
+				arguments[0].numberData = 1;
+				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+			}
+		}
+	}
+	else if(action == 0) {
+		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
+		for(auto &bind: binds) {
+			vector<GameObject*> presses = engine->bindReleaseToGameObject[bind.bind];
+			for(GameObject* object: presses) {
+				object->onBindRelease(bind.bind);
+			}
+
+			// handle TS callbacks
+			vector<string> esPresses = engine->bindToTSCallback[bind.bind];
+			for(string &callback: esPresses) {
+				esEntry arguments[1];
+				arguments[0].type = ES_ENTRY_NUMBER;
+				arguments[0].numberData = 0;
+				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+			}
+		}
+	}
+	#endif
+
+	return nullptr;
+}
+
 #ifndef __switch__
 void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
 	esEntry arguments[2];
@@ -200,4 +251,13 @@ void onAxisMove(binds::Axes axis, double value) {
 	arguments[1].type = ES_ENTRY_NUMBER;
 	arguments[1].numberData = value;
 	esCallFunction(engine->eggscript, "onAxisMove", 2, arguments);
+}
+
+void onGamepadButton(binds::GamepadButtons bind, bool pressed) {
+	esEntry arguments[2];
+	arguments[0].type = ES_ENTRY_NUMBER;
+	arguments[0].numberData = bind;
+	arguments[1].type = ES_ENTRY_NUMBER;
+	arguments[1].numberData = pressed;
+	esCallFunction(engine->eggscript, "onGamepadButton", 2, arguments);
 }

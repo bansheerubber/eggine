@@ -11,6 +11,23 @@ namespace binds {
 		RIGHT_AXIS_X = 2,
 		RIGHT_AXIS_Y = 3,
 	};
+
+	enum GamepadButtons {
+		A_BUTTON,
+		B_BUTTON,
+		X_BUTTON,
+		Y_BUTTON,
+		D_PAD_UP,
+		D_PAD_DOWN,
+		D_PAD_LEFT,
+		D_PAD_RIGHT,
+		SPECIAL_LEFT,
+		SPECIAL_RIGHT,
+		LEFT_BUTTON,
+		RIGHT_BUTTON,
+		LEFT_TRIGGER,
+		RIGHT_TRIGGER,
+	};
 	
 	struct Keybind {
 		string bind;
