@@ -27,15 +27,21 @@ class Engine {
 	friend class Font;
 	#ifndef __switch__
 	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
+	friend void onMouseMove(GLFWwindow* window, double x, double y);
 	#endif
 	friend esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
+	friend esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
+	friend esEntryPtr es::onMouseMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
+	friend esEntryPtr es::onAxisMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	
 	public:
 		FT_Library ft;
 		esEnginePtr eggscript = nullptr;
 		resources::ResourceManager* manager;
 		render::Window renderWindow;
+
+		glm::vec2 mouse;
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;
@@ -55,6 +61,7 @@ class Engine {
 		void registerBindAxis(string command, GameObject* gameObject);
 		void addKeybind(int key, binds::Keybind keybind);
 		void addAxis(int axis, binds::Keybind keybind);
+		void addMousebind(int button, binds::Keybind keybind);
 		void registerTSKeybindCallback(string bind, string key, string callback);
 
 		void setFilePrefix(string filePrefix);
@@ -88,6 +95,7 @@ class Engine {
 		tsl::robin_map<string, vector<GameObject*>> bindAxisToGameObject;
 		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;
 		tsl::robin_map<int, vector<binds::Keybind>> axisToKeybind;
+		tsl::robin_map<int, vector<binds::Keybind>> buttonToMousebind;
 		vector<pair<GameObject*, string>> heldEvents;
 
 		tsl::robin_map<string, int> keyToScancode;

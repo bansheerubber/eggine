@@ -61,7 +61,8 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 		}
 	}
 
-	this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
+	// this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
+	this->height = 1;
 
 	this->vertexBuffer = new render::VertexBuffer(&engine->renderWindow);
 	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);

@@ -1,5 +1,6 @@
 #include "camera.h"
 
+#include <math.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../engine/engine.h"
@@ -51,10 +52,10 @@ void Camera::see(double deltaTime) {
 	double viewportWidth = 10 / zoom;
 	double viewportHeight = viewportWidth / ratio;
 
-	this->top = viewportHeight / 2.0f + this->position.y;
-	this->right = viewportWidth / 2.0f + this->position.x;
-	this->bottom = -viewportHeight / 2.0f + this->position.y;
-	this->left = -viewportWidth / 2.0f + this->position.x;
+	this->top = viewportHeight + this->position.y;
+	this->right = viewportWidth + this->position.x;
+	this->bottom = -viewportHeight + this->position.y;
+	this->left = -viewportWidth + this->position.x;
 	
 	this->projectionMatrix = glm::ortho(
 		this->left,
@@ -70,6 +71,13 @@ void Camera::setPosition(glm::vec2 position) {
 	this->position = position;
 }
 
+glm::vec2 Camera::mouseToWorld(glm::vec2 mouse) {
+	return glm::vec2(
+		((mouse.x - (float)engine->renderWindow.width / 2.0f) / this->getZoom() + this->position.x * 64.0f + 32.0f) / 64.0f,
+		((mouse.y - (float)engine->renderWindow.height / 2.0f) / this->getZoom() - this->position.y * 64.0f - 12.0f) / 64.0f
+	);
+}
+
 void Camera::onBindPress(string &bind) {
 	if(bind == "camera.zoomIn") {
 		this->setZoomLevel(this->zoomLevel - 1.0f);
@@ -80,6 +88,23 @@ void Camera::onBindPress(string &bind) {
 		this->setZoomLevel(this->zoomLevel + 1.0f);
 		this->keyMapping.zoomOutRepeating = 1;
 		this->keyMapping.zoomOutTimer = 0;
+	}
+	else if(bind == "camera.click") {
+		glm::vec2 world = this->mouseToWorld(engine->mouse);
+
+		// glm::mat2 basis = glm::mat2(
+		// 	cos(atan(1/2)), sin(atan(1/2)),
+		// 	cos(atan(1/2)), -sin(atan(1/2))
+		// );
+
+		// inverse the basis and normalize the axes to get transformation matrix
+		double cosine45deg = cos(M_PI / 4.0f);
+		glm::mat2 inverseBasis = glm::mat2(
+			cosine45deg, cosine45deg,
+			-cosine45deg * 2.0f, cosine45deg * 2.0f
+		);
+		glm::ivec2 coordinates = (inverseBasis * world) * (float)cosine45deg * 2.0f;
+		printf("%d %d\n", coordinates.x, coordinates.y);
 	}
 	else if(bind == "camera.up") {
 		this->keyMapping.up = true;

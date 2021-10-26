@@ -44,6 +44,8 @@ void Engine::initialize() {
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".dksh")->exec());
 	#else
 	glfwSetKeyCallback(this->renderWindow.window, onKeyPress);
+	glfwSetMouseButtonCallback(this->renderWindow.window, onMousePress);
+	glfwSetCursorPosCallback(this->renderWindow.window, onMouseMove);
 	#endif
 
 	#ifdef EGGINE_DEBUG
@@ -180,6 +182,10 @@ void Engine::initialize() {
 	this->addKeybind(GLFW_KEY_D, binds::Keybind {
 		"camera.right",
 	});
+
+	this->addMousebind(GLFW_MOUSE_BUTTON_LEFT, binds::Keybind {
+		"camera.click",
+	});
 	#endif
 
 	this->addAxis(binds::LEFT_AXIS_X, binds::Keybind {
@@ -199,6 +205,7 @@ void Engine::initialize() {
 	this->registerBindPress("camera.down", this->camera);
 	this->registerBindPress("camera.left", this->camera);
 	this->registerBindPress("camera.right", this->camera);
+	this->registerBindPress("camera.click", this->camera);
 
 	this->registerBindRelease("camera.zoomIn", this->camera);
 	this->registerBindRelease("camera.zoomOut", this->camera);
@@ -242,7 +249,7 @@ void Engine::tick() {
 	this->renderWindow.prerender();
 
 	#ifdef __switch__ // handle switch binds
-	int axes[4] = {binds::LEFT_AXIS_X, binds::LEFT_AXIS_Y, binds::RIGHT_AXIS_X, binds::RIGHT_AXIS_Y};
+	binds::Axes axes[4] = {binds::LEFT_AXIS_X, binds::LEFT_AXIS_Y, binds::RIGHT_AXIS_X, binds::RIGHT_AXIS_Y};
 	int values[4] = {
 		engine->renderWindow.leftStick.x,
 		engine->renderWindow.leftStick.y,
@@ -251,27 +258,17 @@ void Engine::tick() {
 	};
 
 	for(int i = 0; i < 4; i++) {
-		int axis = axes[i];
+		binds::Axes axis = axes[i];
 		float value = (float)values[i] / (float)(1 << 15);
-		auto &binds = this->axisToKeybind[axis];
-		for(binds::Keybind &bind: binds) {
-			for(GameObject* gameObject: this->bindAxisToGameObject[bind.bind]) {
-				gameObject->onAxis(bind.bind, value);
-			}
-		}
+		onAxisMove(axis, value);
 	}
 	#else // handle GLFW gamepads
 	if(this->renderWindow.hasGamepad) {
-		int axes[4] = {binds::LEFT_AXIS_X, binds::LEFT_AXIS_Y, binds::RIGHT_AXIS_X, binds::RIGHT_AXIS_Y};
+		binds::Axes axes[4] = {binds::LEFT_AXIS_X, binds::LEFT_AXIS_Y, binds::RIGHT_AXIS_X, binds::RIGHT_AXIS_Y};
 		for(int i = 0; i < 4; i++) {
-			int axis = axes[i];
+			binds::Axes axis = axes[i];
 			double value = engine->renderWindow.gamepad.axes[axis];
-			auto &binds = this->axisToKeybind[axis];
-			for(binds::Keybind &bind: binds) {
-				for(GameObject* gameObject: this->bindAxisToGameObject[bind.bind]) {
-					gameObject->onAxis(bind.bind, value);
-				}
-			}
+			onAxisMove(axis, value);
 		}
 	}
 	#endif

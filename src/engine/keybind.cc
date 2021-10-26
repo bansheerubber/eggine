@@ -34,3 +34,7 @@ void Engine::addKeybind(int key, binds::Keybind keybind) {
 void Engine::addAxis(int axis, binds::Keybind keybind) {
 	this->axisToKeybind[axis].push_back(keybind);
 }
+
+void Engine::addMousebind(int button, binds::Keybind keybind) {
+	this->buttonToMousebind[button].push_back(keybind);
+}
