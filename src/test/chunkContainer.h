@@ -34,6 +34,7 @@ class ChunkContainer : public RenderObject {
 		void commit();
 
 		void onBindPress(string &bind);
+		void onAxis(string &bind, double value);
 
 		unsigned int size = 0;
 

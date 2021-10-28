@@ -72,6 +72,10 @@ void Camera::setPosition(glm::vec2 position) {
 	this->position = position;
 }
 
+glm::vec2 Camera::getPosition() {
+	return this->position;
+}
+
 glm::vec2 Camera::mouseToWorld(glm::vec2 mouse) {
 	glm::vec2 viewport = this->getViewport();
 	float halfWidth = (float)engine->renderWindow.width / 2.0f;

@@ -23,6 +23,7 @@ class Camera : public GameObject {
 		float getZoom();
 
 		void setPosition(glm::vec2 position);
+		glm::vec2 getPosition();
 
 		glm::vec2 mouseToWorld(glm::vec2 mouse);
 

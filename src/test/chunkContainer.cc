@@ -24,6 +24,9 @@ ChunkContainer::ChunkContainer() {
 	engine->registerBindPress("chunk.selectTileDown", this);
 	engine->registerBindPress("chunk.selectTileLeft", this);
 	engine->registerBindPress("chunk.selectTileRight", this);
+
+	engine->registerBindAxis("chunk.xAxis", this);
+	engine->registerBindAxis("chunk.yAxis", this);
 	
 	if(ChunkContainer::Program == nullptr) {
 		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
@@ -166,6 +169,24 @@ void ChunkContainer::onBindPress(string &bind) {
 
 		if(position.x >= 0 && position.y >= 0 && position.x < this->size * Chunk::Size && position.y < this->size * Chunk::Size) {
 			this->tileSelectionSprite->setPosition(position);
+		}
+	}
+}
+
+void ChunkContainer::onAxis(string &bind, double value) {
+	if(bind == "chunk.xAxis" || bind == "chunk.yAxis") {
+		double cosine45deg = cos(M_PI / 4.0f);
+		glm::mat2 inverseBasis = glm::mat2(
+			cosine45deg, cosine45deg,
+			-cosine45deg * 2.0f, cosine45deg * 2.0f
+		);
+		glm::vec2 position(engine->camera->getPosition());
+		position.x += 0.5;
+		position.y = -position.y;
+		glm::ivec2 coordinates = (inverseBasis * position) * (float)cosine45deg * 2.0f;
+		
+		if(coordinates.x >= 0 && coordinates.y >= 0) {
+			this->tileSelectionSprite->setPosition(glm::uvec3(coordinates, 0));
 		}
 	}
 }
