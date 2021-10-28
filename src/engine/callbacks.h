@@ -23,7 +23,6 @@ namespace es {
 	void defineCallbacks();
 	esEntryPtr onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	esEntryPtr onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
-	esEntryPtr onMouseMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	esEntryPtr onAxisMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	esEntryPtr onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 };

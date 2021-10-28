@@ -1,7 +1,7 @@
 #include "character.h"
 
 Character::Character(ChunkContainer* chunkContainer) : OverlappingTile(chunkContainer) {
-	this->reference = esCreateObject(engine->eggscript, "Character", this);
+	this->reference = esInstantiateObject(engine->eggscript, "Character", this);
 }
 
 Character::~Character() {

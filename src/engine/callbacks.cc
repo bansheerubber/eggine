@@ -11,7 +11,6 @@ void es::defineCallbacks() {
 
 	esEntryType mousePressArguments[2] = {ES_ENTRY_NUMBER, ES_ENTRY_NUMBER};
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onMousePress, "onMousePress", 2, mousePressArguments);
-	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onMouseMove, "onMouseMove", 2, mousePressArguments);
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onAxisMove, "onAxisMove", 2, mousePressArguments);
 	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onGamepadButton, "onGamepadButton", 2, mousePressArguments);
 }
@@ -62,16 +61,6 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 			}
 		}
 	}
-	else if(action == GLFW_REPEAT) {
-		// add to engine list so it can process this during the next/current tick
-		vector<binds::Keybind> &binds = engine->keyToKeybind[key];
-		for(auto &bind: binds) {
-			vector<GameObject*> presses = engine->bindHeldToGameObject[bind.bind];
-			for(GameObject* object: presses) {
-				engine->heldEvents.push_back(pair(object, bind.bind));
-			}
-		}
-	}
 	#endif
 
 	return nullptr;
@@ -89,6 +78,7 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 	if(action == GLFW_PRESS) {
 		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
 		for(auto &bind: binds) {
+			// handle game objects
 			vector<GameObject*> presses = engine->bindPressToGameObject[bind.bind];
 			for(GameObject* object: presses) {
 				object->onBindPress(bind.bind);
@@ -105,6 +95,7 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 		}
 	}
 	else if(action == GLFW_RELEASE) {
+		// handle game objects
 		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
 		for(auto &bind: binds) {
 			vector<GameObject*> presses = engine->bindReleaseToGameObject[bind.bind];
@@ -122,28 +113,8 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 			}
 		}
 	}
-	else if(action == GLFW_REPEAT) {
-		// add to engine list so it can process this during the next/current tick
-		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
-		for(auto &bind: binds) {
-			vector<GameObject*> presses = engine->bindHeldToGameObject[bind.bind];
-			for(GameObject* object: presses) {
-				engine->heldEvents.push_back(pair(object, bind.bind));
-			}
-		}
-	}
 	#endif
 
-	return nullptr;
-}
-
-esEntryPtr es::onMouseMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments) {
-	if(argc != 2) {
-		return nullptr;
-	}
-
-	engine->mouse.x = arguments[0].numberData;
-	engine->mouse.y = arguments[1].numberData;
 	return nullptr;
 }
 
@@ -152,8 +123,15 @@ esEntryPtr es::onAxisMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 		return nullptr;
 	}
 
-	int axis = arguments[0].numberData;
+	binds::Axes axis = (binds::Axes)arguments[0].numberData;
 	double value = arguments[1].numberData;
+
+	if(axis == binds::MOUSE_AXIS_X) {
+		engine->mouse.x = value;
+	}
+	else if(axis == binds::MOUSE_AXIS_Y) {
+		engine->mouse.y = value;
+	}
 	
 	auto &binds = engine->axisToKeybind[axis];
 	for(binds::Keybind &bind: binds) {
@@ -177,6 +155,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 	if(action == 1) {
 		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
 		for(auto &bind: binds) {
+			// handle game objects
 			vector<GameObject*> presses = engine->bindPressToGameObject[bind.bind];
 			for(GameObject* object: presses) {
 				object->onBindPress(bind.bind);
@@ -195,6 +174,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 	else if(action == 0) {
 		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
 		for(auto &bind: binds) {
+			// handle game objects
 			vector<GameObject*> presses = engine->bindReleaseToGameObject[bind.bind];
 			for(GameObject* object: presses) {
 				object->onBindRelease(bind.bind);
@@ -235,12 +215,19 @@ void onMousePress(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void onMouseMove(GLFWwindow* window, double x, double y) {
-	esEntry arguments[2];
-	arguments[0].type = ES_ENTRY_NUMBER;
-	arguments[0].numberData = x;
-	arguments[1].type = ES_ENTRY_NUMBER;
-	arguments[1].numberData = y;
-	esCallFunction(engine->eggscript, "onMouseMove", 2, arguments);
+	esEntry arguments1[2];
+	arguments1[0].type = ES_ENTRY_NUMBER;
+	arguments1[0].numberData = binds::MOUSE_AXIS_X;
+	arguments1[1].type = ES_ENTRY_NUMBER;
+	arguments1[1].numberData = x;
+	esCallFunction(engine->eggscript, "onAxisMove", 2, arguments1);
+
+	esEntry arguments2[2];
+	arguments2[0].type = ES_ENTRY_NUMBER;
+	arguments2[0].numberData = binds::MOUSE_AXIS_Y;
+	arguments2[1].type = ES_ENTRY_NUMBER;
+	arguments2[1].numberData = y;
+	esCallFunction(engine->eggscript, "onAxisMove", 2, arguments2);
 }
 #endif
 

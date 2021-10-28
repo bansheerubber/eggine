@@ -3,7 +3,7 @@
 #include "../engine/engine.h"
 
 TileSet::TileSet() {
-	this->reference = esCreateObject(engine->eggscript, "TileSet", this);
+	this->reference = esInstantiateObject(engine->eggscript, "TileSet", this);
 }
 
 TileSet::~TileSet() {

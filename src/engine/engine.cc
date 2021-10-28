@@ -349,14 +349,6 @@ void Engine::tick() {
 	esTick(this->eggscript);
 	this->eggscriptTickTime = getMicrosecondsNow() - esStartTime;
 
-	// handle keybinds before we do anything else
-	if(this->heldEvents.size() > 0) {
-		for(auto &event: this->heldEvents) {
-			event.first->onBindHeld(event.second, deltaTime);
-		}
-		this->heldEvents.clear();
-	}
-
 	this->camera->see(deltaTime);
 	this->ui.update();
 

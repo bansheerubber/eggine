@@ -32,7 +32,6 @@ class Engine {
 	friend esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	friend esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
-	friend esEntryPtr es::onMouseMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	friend esEntryPtr es::onAxisMove(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	friend esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 	
@@ -60,10 +59,9 @@ class Engine {
 		// handle keybinds
 		void registerBindPress(string command, GameObject* gameObject);
 		void registerBindRelease(string command, GameObject* gameObject);
-		void registerBindHeld(string command, GameObject* gameObject);
 		void registerBindAxis(string command, GameObject* gameObject);
 		void addKeybind(int key, binds::Keybind keybind);
-		void addAxis(int axis, binds::Keybind keybind);
+		void addAxis(binds::Axes axis, binds::Keybind keybind);
 		void addMousebind(int button, binds::Keybind keybind);
 		void addGamepadBind(binds::GamepadButtons bind, binds::Keybind keybind);
 		void registerTSKeybindCallback(string bind, string key, string callback);
@@ -94,13 +92,12 @@ class Engine {
 		tsl::robin_map<string, vector<string>> bindToTSCallback;
 		tsl::robin_map<string, vector<GameObject*>> bindPressToGameObject;
 		tsl::robin_map<string, vector<GameObject*>> bindReleaseToGameObject;
-		tsl::robin_map<string, vector<GameObject*>> bindHeldToGameObject;
 		tsl::robin_map<string, vector<GameObject*>> bindAxisToGameObject;
+
 		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;
-		tsl::robin_map<int, vector<binds::Keybind>> axisToKeybind;
+		tsl::robin_map<binds::Axes, vector<binds::Keybind>> axisToKeybind;
 		tsl::robin_map<int, vector<binds::Keybind>> buttonToMousebind;
 		tsl::robin_map<binds::GamepadButtons, vector<binds::Keybind>> gamepadToBind;
-		vector<pair<GameObject*, string>> heldEvents;
 
 		tsl::robin_map<string, int> keyToScancode;
 		tsl::robin_map<int, string> scancodeToKey;

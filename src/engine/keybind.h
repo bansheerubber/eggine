@@ -10,6 +10,8 @@ namespace binds {
 		LEFT_AXIS_Y = 1,
 		RIGHT_AXIS_X = 2,
 		RIGHT_AXIS_Y = 3,
+		MOUSE_AXIS_X = 4,
+		MOUSE_AXIS_Y = 5,
 	};
 
 	enum GamepadButtons {
