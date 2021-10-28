@@ -6,7 +6,7 @@
 #include "../engine/engine.h"
 
 Camera::Camera() {
-	this->reference = esCreateObject(engine->eggscript, "Camera", this);
+	this->reference = esInstantiateObject(engine->eggscript, "Camera", this);
 }
 
 Camera::~Camera() {
@@ -158,15 +158,16 @@ void es::defineCamera() {
 	esNamespaceInherit(engine->eggscript, "SimObject", "Camera");
 
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getActiveCamera, "getActiveCamera", 0, nullptr);
+
 	esEntryType setPositionArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Camera__setPosition, "Camera", "setPosition", 3, setPositionArguments);
+
+	esEntryType getPositionArguments[3] = {ES_ENTRY_OBJECT};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::Camera__getPosition, "Camera", "getPosition", 1, getPositionArguments);
 }
 
 esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
-	esEntryPtr entry = new esEntry();
-	entry->type = ES_ENTRY_OBJECT;
-	entry->objectData = engine->camera->reference;
-	return entry;
+	return esCreateObject(esCloneObjectReference(engine->camera->reference));
 }
 
 esEntryPtr es::Camera__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -174,5 +175,14 @@ esEntryPtr es::Camera__setPosition(esEnginePtr esEngine, unsigned int argc, esEn
 		((Camera*)args[0].objectData->objectWrapper->data)->setPosition(glm::vec2(args[1].numberData, args[2].numberData));
 	}
 	
+	return nullptr;
+}
+
+esEntryPtr es::Camera__getPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Camera")) {
+		glm::vec2 position = ((Camera*)args[0].objectData->objectWrapper->data)->getPosition();
+		return esCreateVector(2, (double)position.x, (double)position.y);
+	}
+
 	return nullptr;
 }

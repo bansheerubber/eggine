@@ -57,4 +57,5 @@ namespace es {
 	void defineCamera();
 	esEntryPtr getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Camera__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Camera__getPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 }
