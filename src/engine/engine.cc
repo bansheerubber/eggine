@@ -227,24 +227,6 @@ void Engine::initialize() {
 	// create camera once we're done with eggscript definitions
 	this->camera = new Camera();
 
-	this->registerBindPress("camera.zoomIn", this->camera);
-	this->registerBindPress("camera.zoomOut", this->camera);
-	this->registerBindPress("camera.up", this->camera);
-	this->registerBindPress("camera.down", this->camera);
-	this->registerBindPress("camera.left", this->camera);
-	this->registerBindPress("camera.right", this->camera);
-
-	this->registerBindRelease("camera.zoomIn", this->camera);
-	this->registerBindRelease("camera.zoomOut", this->camera);
-	this->registerBindRelease("camera.up", this->camera);
-	this->registerBindRelease("camera.down", this->camera);
-	this->registerBindRelease("camera.left", this->camera);
-	this->registerBindRelease("camera.right", this->camera);
-
-	this->registerBindAxis("camera.xAxis", this->camera);
-	this->registerBindAxis("camera.yAxis", this->camera);
-	this->registerBindAxis("camera.zoomAxis", this->camera);
-
 	// pre-load all .egg files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());
 

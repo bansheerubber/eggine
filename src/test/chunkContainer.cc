@@ -19,11 +19,11 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 }
 
 ChunkContainer::ChunkContainer() {
-	engine->registerBindPress("chunk.selectTile", this);
-	engine->registerBindPress("chunk.selectTileUp", this);
-	engine->registerBindPress("chunk.selectTileDown", this);
-	engine->registerBindPress("chunk.selectTileLeft", this);
-	engine->registerBindPress("chunk.selectTileRight", this);
+	engine->registerBind("chunk.selectTile", this);
+	engine->registerBind("chunk.selectTileUp", this);
+	engine->registerBind("chunk.selectTileDown", this);
+	engine->registerBind("chunk.selectTileLeft", this);
+	engine->registerBind("chunk.selectTileRight", this);
 
 	engine->registerBindAxis("chunk.xAxis", this);
 	engine->registerBindAxis("chunk.yAxis", this);
@@ -126,8 +126,8 @@ void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
 	this->renderOrder[index].addOverlappingTile(tile);
 }
 
-void ChunkContainer::onBindPress(string &bind) {
-	if(bind == "chunk.selectTile") {
+void ChunkContainer::onBind(string &bind, binds::Action action) {
+	if(bind == "chunk.selectTile" && action == binds::PRESS) {
 		glm::vec2 world = engine->camera->mouseToWorld(engine->mouse);
 
 		// glm::mat2 basis = glm::mat2(
@@ -148,10 +148,12 @@ void ChunkContainer::onBindPress(string &bind) {
 		}
 	}
 	else if(
-		bind == "chunk.selectTileUp"
-		|| bind == "chunk.selectTileDown"
-		|| bind == "chunk.selectTileLeft"
-		|| bind == "chunk.selectTileRight"
+		(
+			bind == "chunk.selectTileUp"
+			|| bind == "chunk.selectTileDown"
+			|| bind == "chunk.selectTileLeft"
+			|| bind == "chunk.selectTileRight"
+		) && action == binds::PRESS
 	) {
 		glm::ivec3 position(this->tileSelectionSprite->getPosition());
 		if(bind == "chunk.selectTileUp") {

@@ -30,6 +30,11 @@ namespace binds {
 		LEFT_TRIGGER,
 		RIGHT_TRIGGER,
 	};
+
+	enum Action {
+		PRESS,
+		RELEASE,
+	};
 	
 	struct Keybind {
 		string bind;

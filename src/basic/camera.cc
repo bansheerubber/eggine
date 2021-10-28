@@ -7,6 +7,17 @@
 
 Camera::Camera() {
 	this->reference = esInstantiateObject(engine->eggscript, "Camera", this);
+
+	engine->registerBind("camera.zoomIn", this);
+	engine->registerBind("camera.zoomOut", this);
+	engine->registerBind("camera.up", this);
+	engine->registerBind("camera.down", this);
+	engine->registerBind("camera.left", this);
+	engine->registerBind("camera.right", this);
+
+	engine->registerBindAxis("camera.xAxis", this);
+	engine->registerBindAxis("camera.yAxis", this);
+	engine->registerBindAxis("camera.zoomAxis", this);
 }
 
 Camera::~Camera() {
@@ -86,49 +97,38 @@ glm::vec2 Camera::mouseToWorld(glm::vec2 mouse) {
 	);
 }
 
-void Camera::onBindPress(string &bind) {
+void Camera::onBind(string &bind, binds::Action action) {
 	if(bind == "camera.zoomIn") {
-		this->setZoomLevel(this->zoomLevel - 1.0f);
-		this->keyMapping.zoomInRepeating = 1;
-		this->keyMapping.zoomInTimer = 0;
+		if(action == binds::PRESS) {
+			this->setZoomLevel(this->zoomLevel - 1.0f);
+			this->keyMapping.zoomInRepeating = 1;
+			this->keyMapping.zoomInTimer = 0;
+		}
+		else {
+			this->keyMapping.zoomInRepeating = 0;
+		}
 	}
 	else if(bind == "camera.zoomOut") {
-		this->setZoomLevel(this->zoomLevel + 1.0f);
-		this->keyMapping.zoomOutRepeating = 1;
-		this->keyMapping.zoomOutTimer = 0;
+		if(action == binds::PRESS) {
+			this->setZoomLevel(this->zoomLevel + 1.0f);
+			this->keyMapping.zoomOutRepeating = 1;
+			this->keyMapping.zoomOutTimer = 0;
+		}
+		else {
+			this->keyMapping.zoomOutRepeating = 0;
+		}
 	}
 	else if(bind == "camera.up") {
-		this->keyMapping.up = true;
+		this->keyMapping.up = action == binds::PRESS;
 	}
 	else if(bind == "camera.down") {
-		this->keyMapping.down = true;
+		this->keyMapping.down = action == binds::PRESS;
 	}
 	else if(bind == "camera.left") {
-		this->keyMapping.left = true;
+		this->keyMapping.left = action == binds::PRESS;
 	}
 	else if(bind == "camera.right") {
-		this->keyMapping.right = true;
-	}
-}
-
-void Camera::onBindRelease(string &bind) {
-	if(bind == "camera.zoomIn") {
-		this->keyMapping.zoomInRepeating = 0;
-	}
-	else if(bind == "camera.zoomOut") {
-		this->keyMapping.zoomOutRepeating = 0;
-	}
-	else if(bind == "camera.up") {
-		this->keyMapping.up = false;
-	}
-	else if(bind == "camera.down") {
-		this->keyMapping.down = false;
-	}
-	else if(bind == "camera.left") {
-		this->keyMapping.left = false;
-	}
-	else if(bind == "camera.right") {
-		this->keyMapping.right = false;
+		this->keyMapping.right = action == binds::PRESS;
 	}
 }
 

@@ -5,6 +5,7 @@
 #include <string>
 
 #include "gameObject.h.gen"
+#include "../engine/keybind.h"
 
 using namespace std;
 
@@ -16,8 +17,7 @@ class GameObject {
 			return INVALID;
 		}
 
-		virtual void onBindPress(string &bind) {}
-		virtual void onBindRelease(string &bind) {}
+		virtual void onBind(string &bind, binds::Action action) {}
 		virtual void onAxis(string &bind, double axis) {};
 
 		int operator==(const GameObject &other) {

@@ -33,7 +33,7 @@ class ChunkContainer : public RenderObject {
 
 		void commit();
 
-		void onBindPress(string &bind);
+		void onBind(string &bind, binds::Action action);
 		void onAxis(string &bind, double value);
 
 		unsigned int size = 0;

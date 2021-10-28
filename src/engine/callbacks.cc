@@ -28,9 +28,9 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	if(action == GLFW_PRESS) {
 		vector<binds::Keybind> &binds = engine->keyToKeybind[key];
 		for(auto &bind: binds) {
-			vector<GameObject*> presses = engine->bindPressToGameObject[bind.bind];
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
-				object->onBindPress(bind.bind);
+				object->onBind(bind.bind, binds::PRESS);
 			}
 
 			// handle TS callbacks
@@ -46,9 +46,9 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	else if(action == GLFW_RELEASE) {
 		vector<binds::Keybind> &binds = engine->keyToKeybind[key];
 		for(auto &bind: binds) {
-			vector<GameObject*> presses = engine->bindReleaseToGameObject[bind.bind];
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
-				object->onBindRelease(bind.bind);
+				object->onBind(bind.bind, binds::RELEASE);
 			}
 
 			// handle TS callbacks
@@ -79,9 +79,9 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
 		for(auto &bind: binds) {
 			// handle game objects
-			vector<GameObject*> presses = engine->bindPressToGameObject[bind.bind];
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
-				object->onBindPress(bind.bind);
+				object->onBind(bind.bind, binds::PRESS);
 			}
 
 			// handle TS callbacks
@@ -98,9 +98,9 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 		// handle game objects
 		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
 		for(auto &bind: binds) {
-			vector<GameObject*> presses = engine->bindReleaseToGameObject[bind.bind];
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
-				object->onBindRelease(bind.bind);
+				object->onBind(bind.bind, binds::RELEASE);
 			}
 
 			// handle TS callbacks
@@ -156,9 +156,9 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
 		for(auto &bind: binds) {
 			// handle game objects
-			vector<GameObject*> presses = engine->bindPressToGameObject[bind.bind];
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
-				object->onBindPress(bind.bind);
+				object->onBind(bind.bind, binds::PRESS);
 			}
 
 			// handle TS callbacks
@@ -175,9 +175,9 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
 		for(auto &bind: binds) {
 			// handle game objects
-			vector<GameObject*> presses = engine->bindReleaseToGameObject[bind.bind];
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
-				object->onBindRelease(bind.bind);
+				object->onBind(bind.bind, binds::RELEASE);
 			}
 
 			// handle TS callbacks

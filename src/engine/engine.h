@@ -57,14 +57,13 @@ class Engine {
 		void addUIObject(RenderObject* renderable);
 
 		// handle keybinds
-		void registerBindPress(string command, GameObject* gameObject);
-		void registerBindRelease(string command, GameObject* gameObject);
+		void registerTSKeybindCallback(string bind, string key, string callback);
+		void registerBind(string command, GameObject* gameObject);
 		void registerBindAxis(string command, GameObject* gameObject);
 		void addKeybind(int key, binds::Keybind keybind);
 		void addAxis(binds::Axes axis, binds::Keybind keybind);
 		void addMousebind(int button, binds::Keybind keybind);
 		void addGamepadBind(binds::GamepadButtons bind, binds::Keybind keybind);
-		void registerTSKeybindCallback(string bind, string key, string callback);
 
 		void setFilePrefix(string filePrefix);
 
@@ -90,8 +89,7 @@ class Engine {
 		DynamicArray<RenderObject*, Engine> renderableUIs = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 
 		tsl::robin_map<string, vector<string>> bindToTSCallback;
-		tsl::robin_map<string, vector<GameObject*>> bindPressToGameObject;
-		tsl::robin_map<string, vector<GameObject*>> bindReleaseToGameObject;
+		tsl::robin_map<string, vector<GameObject*>> bindToGameObject;
 		tsl::robin_map<string, vector<GameObject*>> bindAxisToGameObject;
 
 		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;

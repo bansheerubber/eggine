@@ -11,12 +11,8 @@ void Engine::registerTSKeybindCallback(string bind, string key, string callback)
 	}
 }
 
-void Engine::registerBindPress(string command, GameObject* gameObject) {
-	this->bindPressToGameObject[command].push_back(gameObject);
-}
-
-void Engine::registerBindRelease(string command, GameObject* gameObject) {
-	this->bindReleaseToGameObject[command].push_back(gameObject);
+void Engine::registerBind(string command, GameObject* gameObject) {
+	this->bindToGameObject[command].push_back(gameObject);
 }
 
 void Engine::registerBindAxis(string command, GameObject* gameObject) {
