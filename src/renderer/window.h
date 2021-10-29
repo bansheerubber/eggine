@@ -162,6 +162,7 @@ namespace render {
 
 			HidAnalogStickState leftStick;
 			HidAnalogStickState rightStick;
+			unsigned long buttons;
 
 			void addTexture(switch_memory::Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height);
 			void bindTexture(unsigned int location, class Texture* texture);

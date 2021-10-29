@@ -271,6 +271,15 @@ void Engine::tick() {
 		binds::Axes axis = axes[i];
 		float value = (float)values[i] / (float)(1 << 15);
 		onAxisMove(axis, value);
+
+		binds::GamepadButtons buttons[16] = {binds::A_BUTTON, binds::B_BUTTON, binds::X_BUTTON, binds::Y_BUTTON, binds::INVALID_BUTTON, binds::INVALID_BUTTON, binds::LEFT_BUTTON, binds::RIGHT_BUTTON, binds::LEFT_TRIGGER, binds::RIGHT_TRIGGER, binds::SPECIAL_RIGHT, binds::SPECIAL_LEFT, binds::D_PAD_LEFT, binds::D_PAD_UP, binds::D_PAD_RIGHT, binds::D_PAD_DOWN};
+		for(unsigned long i = 0; i < 16; i++) {
+			bool pressed = (this->renderWindow.buttons >> i) & 1;
+			if(buttons[i] != binds::INVALID_BUTTON && ((this->lastGamepadButtons >> i) & 1) != pressed) {
+				onGamepadButton(buttons[i], pressed);
+			}
+		}
+		this->lastGamepadButtons = this->renderWindow.buttons;
 	}
 	#else // handle GLFW gamepads
 	if(this->renderWindow.hasGamepad) {

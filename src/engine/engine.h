@@ -100,7 +100,9 @@ class Engine {
 		tsl::robin_map<string, int> keyToScancode;
 		tsl::robin_map<int, string> scancodeToKey;
 
-		#ifndef __switch__
+		#ifdef __switch__
+		unsigned long lastGamepadButtons = 0;
+		#else
 		unsigned char* lastGamepadButtons = new unsigned char[15]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		#endif
 };

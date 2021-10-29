@@ -1,1 +1,9 @@
 // echo("new carton");
+
+package test {
+	function onGamepadButton(%button, %state) {
+		Parent::onGamepadButton(%button, %state);
+
+		echo(%button);
+	}
+};

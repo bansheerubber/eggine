@@ -15,6 +15,7 @@ namespace binds {
 	};
 
 	enum GamepadButtons {
+		INVALID_BUTTON,
 		A_BUTTON,
 		B_BUTTON,
 		X_BUTTON,

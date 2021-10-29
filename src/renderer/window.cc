@@ -185,6 +185,7 @@ void render::Window::prerender() {
 
 	this->leftStick = padGetStickPos(&this->pad, 0);
 	this->rightStick = padGetStickPos(&this->pad, 1);
+	this->buttons = padGetButtons(&this->pad);
 	#else
 	glClearColor(this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
