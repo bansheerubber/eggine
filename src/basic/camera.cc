@@ -159,10 +159,10 @@ void es::defineCamera() {
 
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getActiveCamera, "getActiveCamera", 0, nullptr);
 
-	esEntryType setPositionArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Camera__setPosition, "Camera", "setPosition", 3, setPositionArguments);
+	esEntryType setPositionArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Camera__setPosition, "Camera", "setPosition", 2, setPositionArguments);
 
-	esEntryType getPositionArguments[3] = {ES_ENTRY_OBJECT};
+	esEntryType getPositionArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::Camera__getPosition, "Camera", "getPosition", 1, getPositionArguments);
 }
 
@@ -171,8 +171,10 @@ esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry*
 }
 
 esEntryPtr es::Camera__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
-	if(argc == 3 && esCompareNamespaceToObject(args[0].objectData, "Camera")) {
-		((Camera*)args[0].objectData->objectWrapper->data)->setPosition(glm::vec2(args[1].numberData, args[2].numberData));
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Camera") && args[1].matrixData->rows == 2 && args[1].matrixData->columns == 1) {
+		((Camera*)args[0].objectData->objectWrapper->data)->setPosition(
+			glm::vec2(args[1].matrixData->data[0][0].numberData, args[1].matrixData->data[1][0].numberData)
+		);
 	}
 	
 	return nullptr;

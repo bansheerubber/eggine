@@ -143,7 +143,7 @@ void ChunkContainer::onBind(string &bind, binds::Action action) {
 		);
 		glm::ivec2 coordinates = (inverseBasis * world) * (float)cosine45deg * 2.0f;
 		
-		if(coordinates.x >= 0 && coordinates.y >= 0) {
+		if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < this->size * Chunk::Size && coordinates.y < this->size * Chunk::Size) {
 			this->tileSelectionSprite->setPosition(glm::uvec3(coordinates, 0));
 		}
 	}
@@ -187,7 +187,7 @@ void ChunkContainer::onAxis(string &bind, double value) {
 		position.y = -position.y;
 		glm::ivec2 coordinates = (inverseBasis * position) * (float)cosine45deg * 2.0f;
 		
-		if(coordinates.x >= 0 && coordinates.y >= 0) {
+		if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < this->size * Chunk::Size && coordinates.y < this->size * Chunk::Size) {
 			this->tileSelectionSprite->setPosition(glm::uvec3(coordinates, 0));
 		}
 	}

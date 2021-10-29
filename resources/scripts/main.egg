@@ -1,10 +1,1 @@
-echo("new carton");
-
-package frog {
-	function onKeyPress(%command, %state) {
-		Parent::onKeyPress(%command, %state);
-
-		%position = getActiveCamera().getPosition();
-		echo(%position[0] SPC %position[1]);
-	}
-};
+// echo("new carton");
