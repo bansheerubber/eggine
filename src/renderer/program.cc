@@ -111,13 +111,16 @@ void render::Program::bindUniform(string uniformName, void* data, unsigned int s
 		}
 	}
 	#else
-	if(this->uniformToBuffer.find(uniformName) == this->uniformToBuffer.end()) {
+	auto found = this->uniformToBuffer.find(uniformName);
+	if(found == this->uniformToBuffer.end()) {
 		this->createUniformBuffer(uniformName, size);
+		found = this->uniformToBuffer.find(uniformName);
 	}
 
-	glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[uniformName]);
+	glBindBuffer(GL_UNIFORM_BUFFER, found.value());
+	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW); // orphan the buffer
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
-	glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding[uniformName], this->uniformToBuffer[uniformName]);
+	glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), found.value());
 	#endif
 }
 

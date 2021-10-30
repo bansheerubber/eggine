@@ -164,6 +164,11 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	vb.spriteWidth = 64.0f;
 	vb.spriteHeight = 128.0f;
 	vb.spritesOnRow = floor(vb.spritesheetWidth / vb.spriteWidth);
+
+	struct FragmentBlock {
+		glm::vec4 color;
+	} fb;
+	fb.color = glm::vec4(1, 1, 1, 1);
 	
 	Camera* camera = context.camera;
 	if(!(
@@ -185,6 +190,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
 				this->vertexAttributes->bind();
 				ChunkContainer::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
+				ChunkContainer::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
 				engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastOverlappingIndex, tile->index - lastOverlappingIndex + overlapBias);
 				#ifdef EGGINE_DEBUG
 				this->drawCalls++;
@@ -200,6 +206,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 		this->vertexAttributes->bind();
 		ChunkContainer::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
+		ChunkContainer::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
 		engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastOverlappingIndex, total - lastOverlappingIndex);
 		#ifdef EGGINE_DEBUG
 		this->drawCalls++;

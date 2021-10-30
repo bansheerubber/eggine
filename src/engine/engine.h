@@ -44,6 +44,7 @@ class Engine {
 		glm::vec2 mouse;
 
 		Camera* camera = nullptr;
+		class ChunkContainer* chunkContainer = nullptr;
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;

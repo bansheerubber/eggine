@@ -184,7 +184,7 @@ void Engine::initialize() {
 	});
 
 	this->addMousebind(GLFW_MOUSE_BUTTON_LEFT, binds::Keybind {
-		"chunk.selectTile",
+		"chunk.mouseSelectTile",
 	});
 
 	this->addGamepadBind(binds::D_PAD_UP, binds::Keybind {
@@ -203,6 +203,10 @@ void Engine::initialize() {
 		"chunk.selectTileRight"
 	});
 	#endif
+
+	this->addGamepadBind(binds::A_BUTTON, binds::Keybind {
+		"chunk.selectTile"
+	});
 
 	this->addAxis(binds::LEFT_AXIS_X, binds::Keybind {
 		"camera.xAxis"

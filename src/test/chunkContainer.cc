@@ -4,6 +4,7 @@
 #include <fmt/format.h>
 
 #include "../basic/camera.h"
+#include "character.h"
 #include "chunk.h"
 #include "../engine/debug.h"
 #include "../engine/engine.h"
@@ -20,6 +21,7 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 
 ChunkContainer::ChunkContainer() {
 	engine->registerBind("chunk.selectTile", this);
+	engine->registerBind("chunk.selectTileMouse", this);
 	engine->registerBind("chunk.selectTileUp", this);
 	engine->registerBind("chunk.selectTileDown", this);
 	engine->registerBind("chunk.selectTileLeft", this);
@@ -45,6 +47,9 @@ ChunkContainer::ChunkContainer() {
 			engine->manager->carton->database.get()->equals("extension", ".png")->exec()
 		)[0];
 	}
+
+	// create torquescript object
+	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);
 }
 
 ChunkContainer::~ChunkContainer() {
@@ -126,8 +131,43 @@ void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
 	this->renderOrder[index].addOverlappingTile(tile);
 }
 
+void ChunkContainer::selectCharacter(Character* character) {
+	this->selectedCharacter = character;
+
+	glm::uvec3 position = character->getPosition();
+	if(position.z != 0) {
+		position.z -= 1;
+	}
+
+	this->characterSelectionSprite->setPosition(position);
+}
+
+// called by the selected character when the characters position/etc changes
+void ChunkContainer::updateCharacterPosition(Character* character, glm::uvec3 newPosition) {
+	this->positionToCharacter.erase(character->getPosition());
+	this->positionToCharacter[newPosition] = character;
+	
+	if(this->selectedCharacter == character) {
+		if(newPosition.z != 0) {
+			newPosition.z -= 1;
+		}
+
+		this->characterSelectionSprite->setPosition(newPosition);
+	}
+}
+
+void ChunkContainer::selectTile(glm::uvec3 position, bool browsing) {
+	this->tileSelectionSprite->setPosition(position);
+
+	esEntry arguments[2];
+	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
+	esCreateNumberAt(&arguments[1], browsing);
+	esCallFunction(engine->eggscript, "onSelectTile", 2, arguments);
+}
+
 void ChunkContainer::onBind(string &bind, binds::Action action) {
-	if(bind == "chunk.selectTile" && action == binds::PRESS) {
+	printf("%s\n", bind.c_str());
+	if(bind == "chunk.mouseSelectTile" && action == binds::PRESS) {
 		glm::vec2 world = engine->camera->mouseToWorld(engine->mouse);
 
 		// glm::mat2 basis = glm::mat2(
@@ -144,8 +184,11 @@ void ChunkContainer::onBind(string &bind, binds::Action action) {
 		glm::ivec2 coordinates = (inverseBasis * world) * (float)cosine45deg * 2.0f;
 		
 		if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < this->size * Chunk::Size && coordinates.y < this->size * Chunk::Size) {
-			this->tileSelectionSprite->setPosition(glm::uvec3(coordinates, 0));
+			this->selectTile(glm::uvec3(coordinates, 0), false);
 		}
+	}
+	else if(bind == "chunk.selectTile" && action == binds::PRESS) {
+		this->selectTile(this->tileSelectionSprite->getPosition(), false);
 	}
 	else if(
 		(
@@ -170,7 +213,7 @@ void ChunkContainer::onBind(string &bind, binds::Action action) {
 		}
 
 		if(position.x >= 0 && position.y >= 0 && position.x < this->size * Chunk::Size && position.y < this->size * Chunk::Size) {
-			this->tileSelectionSprite->setPosition(position);
+			this->selectTile(position, true);
 		}
 	}
 }
@@ -188,7 +231,7 @@ void ChunkContainer::onAxis(string &bind, double value) {
 		glm::ivec2 coordinates = (inverseBasis * position) * (float)cosine45deg * 2.0f;
 		
 		if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < this->size * Chunk::Size && coordinates.y < this->size * Chunk::Size) {
-			this->tileSelectionSprite->setPosition(glm::uvec3(coordinates, 0));
+			this->selectTile(glm::uvec3(coordinates, 0), true);
 		}
 	}
 }
@@ -199,4 +242,57 @@ void ChunkContainer::commit() {
 		this->tileSelectionSprite->setTexture(17);
 		this->tileSelectionSprite->setPosition(glm::uvec3(0, 0, 0));
 	}
+
+	if(this->characterSelectionSprite == nullptr) {
+		this->characterSelectionSprite = new OverlappingTile(this);
+		this->characterSelectionSprite->setTexture(17);
+		this->characterSelectionSprite->setColor(glm::vec4(0.0, 0.55, 1.0, 1.0));
+		this->characterSelectionSprite->setPosition(glm::uvec3(0, 0, 0));
+	}
+}
+
+void es::defineChunkContainer() {
+	esRegisterNamespace(engine->eggscript, "ChunkContainer");
+	esNamespaceInherit(engine->eggscript, "SimObject", "ChunkContainer");
+
+	esEntryType getCharacterArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getCharacter, "ChunkContainer", "getCharacter", 2, getCharacterArguments);
+
+	esEntryType selectCharacterArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_OBJECT};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__selectCharacter, "ChunkContainer", "selectCharacter", 2, selectCharacterArguments);
+
+	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getChunkContainer, "getChunkContainer", 0, nullptr);
+}
+
+esEntryPtr es::getChunkContainer(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(engine->chunkContainer != nullptr) {
+		return esCreateObject(engine->chunkContainer->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		glm::uvec3 position(
+			args[1].matrixData->data[0][0].numberData,
+			args[1].matrixData->data[1][0].numberData,
+			args[1].matrixData->data[2][0].numberData
+		);
+
+		auto found = container->positionToCharacter.find(position);
+		if(found != container->positionToCharacter.end()) {
+			return esCreateObject(found.value()->reference);
+		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObject(args[1].objectData, "Character")) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		Character* character = (Character*)args[1].objectData->objectWrapper->data;
+		container->selectCharacter(character);
+	}
+	return nullptr;
 }

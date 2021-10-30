@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".png")->exec());
 
 	ChunkContainer container;
+	engine->chunkContainer = &container;
 
 	size_t size = 5;
 	for(size_t i = 0; i < size * size; i++) {

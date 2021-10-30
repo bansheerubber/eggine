@@ -1,9 +1,49 @@
-// echo("new carton");
+addKeybind("character.goUp", "up", "goUp");
+addKeybind("character.goDown", "down", "goDown");
+addKeybind("character.goLeft", "left", "goLeft");
+addKeybind("character.goRight", "right", "goRight");
 
-package test {
-	function onGamepadButton(%button, %state) {
-		Parent::onGamepadButton(%button, %state);
-
-		echo(%button);
+function goUp(%state) {
+	if(%state) {
+		%position = $character.getPosition();
+		$character.setPosition({%position[0]; %position[1] - 1; %position[2]});
 	}
-};
+}
+
+function goDown(%state) {
+	if(%state) {
+		%position = $character.getPosition();
+		$character.setPosition({%position[0]; %position[1] + 1; %position[2]});
+	}
+}
+
+function goLeft(%state) {
+	if(%state) {
+		%position = $character.getPosition();
+		$character.setPosition({%position[0] - 1; %position[1]; %position[2]});
+	}
+}
+
+function goRight(%state) {
+	if(%state) {
+		%position = $character.getPosition();
+		$character.setPosition({%position[0] + 1; %position[1]; %position[2]});
+	}
+}
+
+function onSelectTile(%position, %browsing) {
+	if(!%browsing) {
+		%position = {%position[0]; %position[1]; %position[2] + 1};
+		%character = getChunkContainer().getCharacter(%position);
+		if(isObject(%character)) {
+			getChunkContainer().selectCharacter(%character);
+		}
+	}
+}
+
+function main() {
+	$character = getChunkContainer().getCharacter({0; 0; 10});
+	$character.setPosition({5; 5; 1});
+}
+
+schedule(100, "main");

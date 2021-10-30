@@ -151,7 +151,6 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 	binds::GamepadButtons button = (binds::GamepadButtons)arguments[0].numberData;
 	int action = (int)arguments[1].numberData;
 
-	#ifndef __switch__
 	if(action == 1) {
 		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
 		for(auto &bind: binds) {
@@ -190,7 +189,6 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 			}
 		}
 	}
-	#endif
 
 	return nullptr;
 }

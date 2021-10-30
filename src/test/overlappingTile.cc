@@ -78,7 +78,17 @@ void OverlappingTile::setTexture(unsigned int index) {
 	this->vertexBuffers[1]->setData(&this->textureIndex, sizeof(int), alignof(int));
 }
 
+void OverlappingTile::setColor(glm::vec4 color) {
+	this->color = color;
+}
+
 void OverlappingTile::render(double deltaTime, RenderContext &context) {
+	struct FragmentBlock {
+		glm::vec4 color;
+	} fb;
+	fb.color = this->color;
+	
 	this->vertexAttributes->bind();
+	ChunkContainer::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }
