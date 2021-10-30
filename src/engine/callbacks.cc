@@ -25,30 +25,32 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	int action = (int)arguments[1].numberData;
 
 	#ifndef __switch__
-	vector<binds::Keybind> &binds = engine->keyToKeybind[key];
-	for(auto &bind: binds) {
-		vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
-		for(GameObject* object: presses) {
-			object->onBind(bind.bind, action == GLFW_RELEASE ? binds::RELEASE : binds::PRESS);
-		}
+	if(action != GLFW_REPEAT) {
+		vector<binds::Keybind> &binds = engine->keyToKeybind[key];
+		for(auto &bind: binds) {
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
+			for(GameObject* object: presses) {
+				object->onBind(bind.bind, action == GLFW_RELEASE ? binds::RELEASE : binds::PRESS);
+			}
 
-		// handle TS callbacks
-		vector<string> esPresses = engine->bindToTSCallback[bind.bind];
-		for(string &callback: esPresses) {
-			esEntry arguments[1];
-			arguments[0].type = ES_ENTRY_NUMBER;
-			arguments[0].numberData = action;
-			esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
-		}
+			// handle TS callbacks
+			vector<string> esPresses = engine->bindToTSCallback[bind.bind];
+			for(string &callback: esPresses) {
+				esEntry arguments[1];
+				arguments[0].type = ES_ENTRY_NUMBER;
+				arguments[0].numberData = action;
+				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+			}
 
-		// handle TS object callbacks
-		vector<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
-		for(auto &[object, callback]: esObjectPresses) {
-			if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
-				esEntry arguments[2];
-				esCreateObjectAt(&arguments[0], object);
-				esCreateNumberAt(&arguments[1], action);
-				esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+			// handle TS object callbacks
+			vector<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
+			for(auto &[object, callback]: esObjectPresses) {
+				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
+					esEntry arguments[2];
+					esCreateObjectAt(&arguments[0], object);
+					esCreateNumberAt(&arguments[1], action);
+					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+				}
 			}
 		}
 	}
@@ -66,31 +68,33 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 	int action = (int)arguments[1].numberData;
 
 	#ifndef __switch__
-	// handle game objects
-	vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
-	for(auto &bind: binds) {
-		vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
-		for(GameObject* object: presses) {
-			object->onBind(bind.bind, action == GLFW_RELEASE ? binds::RELEASE : binds::PRESS);
-		}
+	if(action != GLFW_REPEAT) {
+		// handle game objects
+		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
+		for(auto &bind: binds) {
+			vector<GameObject*> presses = engine->bindToGameObject[bind.bind];
+			for(GameObject* object: presses) {
+				object->onBind(bind.bind, action == GLFW_RELEASE ? binds::RELEASE : binds::PRESS);
+			}
 
-		// handle TS callbacks
-		vector<string> esPresses = engine->bindToTSCallback[bind.bind];
-		for(string &callback: esPresses) {
-			esEntry arguments[1];
-			arguments[0].type = ES_ENTRY_NUMBER;
-			arguments[0].numberData = action;
-			esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
-		}
+			// handle TS callbacks
+			vector<string> esPresses = engine->bindToTSCallback[bind.bind];
+			for(string &callback: esPresses) {
+				esEntry arguments[1];
+				arguments[0].type = ES_ENTRY_NUMBER;
+				arguments[0].numberData = action;
+				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+			}
 
-		// handle TS object callbacks
-		vector<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
-		for(auto &[object, callback]: esObjectPresses) {
-			if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
-				esEntry arguments[2];
-				esCreateObjectAt(&arguments[0], object);
-				esCreateNumberAt(&arguments[1], action);
-				esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+			// handle TS object callbacks
+			vector<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
+			for(auto &[object, callback]: esObjectPresses) {
+				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
+					esEntry arguments[2];
+					esCreateObjectAt(&arguments[0], object);
+					esCreateNumberAt(&arguments[1], action);
+					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+				}
 			}
 		}
 	}

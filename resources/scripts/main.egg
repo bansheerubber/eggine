@@ -1,3 +1,25 @@
+// team.egg
+function Team::selectNextCharacter(%this, %state) {
+	if(!%state) {
+		return;
+	}
+	
+	%this.selectedIndex = (%this.selectedIndex + 1) % %this.size();
+	getChunkContainer().selectCharacter(%this.get(%this.selectedIndex));
+}
+
+function Team::selectPreviousCharacter(%this, %state) {
+	if(!%state) {
+		return;
+	}
+	
+	%this.selectedIndex--;
+	if(%this.selectedIndex < 0) {
+		%this.selectedIndex = %this.size() - 1;
+	}
+	getChunkContainer().selectCharacter(%this.get(%this.selectedIndex));
+}
+
 function Character::goUp(%this, %state) {
 	if(%state) {
 		%position = $character.getPosition();
@@ -37,12 +59,16 @@ function onSelectTile(%position, %browsing) {
 }
 
 function main() {
-	$character = getChunkContainer().getCharacter({0; 0; 10});
+	$character = getChunkContainer().getCharacter({0; 0; 1});
 	$character.setPosition({5; 5; 1});
 	$character.addKeybind("character.goUp", "up", "goUp");
 	$character.addKeybind("character.goDown", "down", "goDown");
 	$character.addKeybind("character.goLeft", "left", "goLeft");
 	$character.addKeybind("character.goRight", "right", "goRight");
+
+	$team = getChunkContainer().getPlayerTeam();
+	$team.addKeybind("team.selectNextCharacter", "l", "selectNextCharacter");
+	$team.addKeybind("team.selectPreviousCharacter", "k", "selectPreviousCharacter");
 }
 
 schedule(100, "main");

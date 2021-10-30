@@ -1,0 +1,10 @@
+function Team::selectNextCharacter(%this, %state) {
+	%this.selectedIndex = (%this.selectedIndex + 1) % %this.getTeamSize();
+}
+
+function Team::selectPreviousCharacter(%this, %state) {
+	%this.selectedIndex--;
+	if(%this.selectedIndex < 0) {
+		%this.selectedIndex = %this.getTeamSize() - 1;
+	}
+}

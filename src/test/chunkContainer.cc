@@ -10,6 +10,7 @@
 #include "../engine/engine.h"
 #include "overlappingTile.h"
 #include "../renderer/shader.h"
+#include "team.h"
 #include "tileMath.h"
 
 render::Program* ChunkContainer::Program = nullptr;
@@ -50,6 +51,8 @@ ChunkContainer::ChunkContainer() {
 
 	// create torquescript object
 	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);
+
+	this->playerTeam = new Team();
 }
 
 ChunkContainer::~ChunkContainer() {
@@ -252,6 +255,10 @@ void ChunkContainer::commit() {
 	}
 }
 
+Team* ChunkContainer::getPlayerTeam() {
+	return this->playerTeam;
+}
+
 void es::defineChunkContainer() {
 	esRegisterNamespace(engine->eggscript, "ChunkContainer");
 	esNamespaceInherit(engine->eggscript, "SimObject", "ChunkContainer");
@@ -262,7 +269,11 @@ void es::defineChunkContainer() {
 	esEntryType selectCharacterArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__selectCharacter, "ChunkContainer", "selectCharacter", 2, selectCharacterArguments);
 
+	esEntryType getPlayerTeamArguments[1] = {ES_ENTRY_OBJECT};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getPlayerTeam, "ChunkContainer", "getPlayerTeam", 1, getPlayerTeamArguments);
+
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getChunkContainer, "getChunkContainer", 0, nullptr);
+
 }
 
 esEntryPtr es::getChunkContainer(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -294,6 +305,14 @@ esEntryPtr es::ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned in
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
 		Character* character = (Character*)args[1].objectData->objectWrapper->data;
 		container->selectCharacter(character);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		return esCreateObject(container->getPlayerTeam()->reference);
 	}
 	return nullptr;
 }

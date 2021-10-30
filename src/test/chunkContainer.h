@@ -22,11 +22,13 @@ namespace es {
 	esEntryPtr getChunkContainer(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 };
 
 class ChunkContainer : public RenderObject {
 	friend class Character;
 	friend esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend class Engine;
 	
 	public:
@@ -53,6 +55,8 @@ class ChunkContainer : public RenderObject {
 		void onBind(string &bind, binds::Action action);
 		void onAxis(string &bind, double value);
 
+		class Team* getPlayerTeam();
+
 		unsigned int size = 0;
 
 		// static class Shader* Program;
@@ -63,6 +67,7 @@ class ChunkContainer : public RenderObject {
 		class OverlappingTile* tileSelectionSprite;
 		class OverlappingTile* characterSelectionSprite;
 		class Character* selectedCharacter;
+		class Team* playerTeam;
 		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 8, initChunk, nullptr);
 		
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
