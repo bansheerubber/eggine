@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "../util/align.h"
+#include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "texture.h"
 #include "window.h"
@@ -128,14 +129,12 @@ void render::Window::initialize() {
 
 	glfwSwapInterval(1);
 
-	/* TODO enable during copy/paste into eggine
 	#ifdef EGGINE_DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
 	glDebugMessageCallback(glDebugOutput, nullptr);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	#endif
-	*/
 
 	#endif // end for ifdef __switch__
 }

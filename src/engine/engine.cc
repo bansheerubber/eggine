@@ -317,7 +317,9 @@ void Engine::tick() {
 	#endif
 	
 	#ifdef EGGINE_DEBUG
-	// this->debug.flushGLDebugMessages();
+	#ifndef __switch__
+	this->debug.flushGLDebugMessages();
+	#endif
 	
 	this->debug.clearInfoMessages();
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
