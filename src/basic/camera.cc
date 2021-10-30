@@ -167,7 +167,7 @@ void es::defineCamera() {
 }
 
 esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
-	return esCreateObject(esCloneObjectReference(engine->camera->reference));
+	return esCreateObject(engine->camera->reference);
 }
 
 esEntryPtr es::Camera__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args) {

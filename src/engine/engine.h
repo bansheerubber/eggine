@@ -59,6 +59,7 @@ class Engine {
 
 		// handle keybinds
 		void registerTSKeybindCallback(string bind, string key, string callback);
+		void registerTSKeybindObjectCallback(esObjectReferencePtr object, string bind, string key, string callback);
 		void registerBind(string command, GameObject* gameObject);
 		void registerBindAxis(string command, GameObject* gameObject);
 		void addKeybind(int key, binds::Keybind keybind);
@@ -90,6 +91,7 @@ class Engine {
 		DynamicArray<RenderObject*, Engine> renderableUIs = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 
 		tsl::robin_map<string, vector<string>> bindToTSCallback;
+		tsl::robin_map<string, vector<pair<esObjectReferencePtr, string>>> bindToTSObjectCallback;
 		tsl::robin_map<string, vector<GameObject*>> bindToGameObject;
 		tsl::robin_map<string, vector<GameObject*>> bindAxisToGameObject;
 

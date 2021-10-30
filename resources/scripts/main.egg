@@ -1,30 +1,25 @@
-addKeybind("character.goUp", "up", "goUp");
-addKeybind("character.goDown", "down", "goDown");
-addKeybind("character.goLeft", "left", "goLeft");
-addKeybind("character.goRight", "right", "goRight");
-
-function goUp(%state) {
+function Character::goUp(%this, %state) {
 	if(%state) {
 		%position = $character.getPosition();
 		$character.setPosition({%position[0]; %position[1] - 1; %position[2]});
 	}
 }
 
-function goDown(%state) {
+function Character::goDown(%this, %state) {
 	if(%state) {
 		%position = $character.getPosition();
 		$character.setPosition({%position[0]; %position[1] + 1; %position[2]});
 	}
 }
 
-function goLeft(%state) {
+function Character::goLeft(%this, %state) {
 	if(%state) {
 		%position = $character.getPosition();
 		$character.setPosition({%position[0] - 1; %position[1]; %position[2]});
 	}
 }
 
-function goRight(%state) {
+function Character::goRight(%this, %state) {
 	if(%state) {
 		%position = $character.getPosition();
 		$character.setPosition({%position[0] + 1; %position[1]; %position[2]});
@@ -44,6 +39,10 @@ function onSelectTile(%position, %browsing) {
 function main() {
 	$character = getChunkContainer().getCharacter({0; 0; 10});
 	$character.setPosition({5; 5; 1});
+	$character.addKeybind("character.goUp", "up", "goUp");
+	$character.addKeybind("character.goDown", "down", "goDown");
+	$character.addKeybind("character.goLeft", "left", "goLeft");
+	$character.addKeybind("character.goRight", "right", "goRight");
 }
 
 schedule(100, "main");

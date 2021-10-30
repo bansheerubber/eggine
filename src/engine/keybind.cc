@@ -11,6 +11,16 @@ void Engine::registerTSKeybindCallback(string bind, string key, string callback)
 	}
 }
 
+void Engine::registerTSKeybindObjectCallback(esObjectReferencePtr object, string bind, string key, string callback) {
+	if(this->keyToScancode.find(key) != this->keyToScancode.end()) {
+		this->addKeybind(this->keyToScancode[key], {
+			bind: bind,
+		});
+
+		this->bindToTSObjectCallback[bind].emplace_back(esCloneObjectReference(object), callback);
+	}
+}
+
 void Engine::registerBind(string command, GameObject* gameObject) {
 	this->bindToGameObject[command].push_back(gameObject);
 }

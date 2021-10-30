@@ -33,8 +33,8 @@ namespace binds {
 	};
 
 	enum Action {
-		PRESS,
 		RELEASE,
+		PRESS,
 	};
 	
 	struct Keybind {
