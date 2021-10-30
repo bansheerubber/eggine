@@ -55,12 +55,19 @@ void Camera::see(double deltaTime) {
 	
 	double zoom = this->getZoom();
 
-	float speed = deltaTime * 5.0f  + 0.05f / zoom;
-	this->position.x += (float)this->keyMapping.right * speed - (float)this->keyMapping.left * speed;
-	this->position.y += (float)this->keyMapping.up * speed - (float)this->keyMapping.down * speed;
+	if(this->interpolation.elapsed < this->interpolation.time) {
+		float percent = -pow(((this->interpolation.elapsed / this->interpolation.time) - 1.0), 2.0) + 1.0;
+		this->position = this->interpolation.start * (1 - percent) + this->interpolation.end * percent;
+		this->interpolation.elapsed += deltaTime;
+	}
+	else {
+		float speed = deltaTime * 5.0f  + 0.05f / zoom;
+		this->position.x += (float)this->keyMapping.right * speed - (float)this->keyMapping.left * speed;
+		this->position.y += (float)this->keyMapping.up * speed - (float)this->keyMapping.down * speed;
 
-	this->position.x += this->keyMapping.xAxis * speed;
-	this->position.y += this->keyMapping.yAxis * speed;
+		this->position.x += this->keyMapping.xAxis * speed;
+		this->position.y += this->keyMapping.yAxis * speed;
+	}
 
 	glm::vec2 viewport = this->getViewport();
 
@@ -85,6 +92,13 @@ void Camera::setPosition(glm::vec2 position) {
 
 glm::vec2 Camera::getPosition() {
 	return this->position;
+}
+
+void Camera::pan(glm::vec2 start, glm::vec2 end, double time) {
+	this->interpolation.start = start;
+	this->interpolation.end = end;
+	this->interpolation.time = time;
+	this->interpolation.elapsed = 0.0;
 }
 
 glm::vec2 Camera::mouseToWorld(glm::vec2 mouse) {
@@ -164,6 +178,9 @@ void es::defineCamera() {
 
 	esEntryType getPositionArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::Camera__getPosition, "Camera", "getPosition", 1, getPositionArguments);
+
+	esEntryType panArguments[4] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX, ES_ENTRY_MATRIX, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Camera__pan, "Camera", "pan", 4, panArguments);
 }
 
 esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -186,5 +203,21 @@ esEntryPtr es::Camera__getPosition(esEnginePtr esEngine, unsigned int argc, esEn
 		return esCreateVector(2, (double)position.x, (double)position.y);
 	}
 
+	return nullptr;
+}
+
+esEntryPtr es::Camera__pan(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(
+		argc == 4
+		&& esCompareNamespaceToObject(args[0].objectData, "Camera")
+		&& args[1].matrixData->rows == 2 && args[1].matrixData->columns == 1
+		&& args[2].matrixData->rows == 2 && args[2].matrixData->columns == 1
+	) {
+		((Camera*)args[0].objectData->objectWrapper->data)->pan(
+			glm::vec2(args[1].matrixData->data[0][0].numberData, args[1].matrixData->data[1][0].numberData),
+			glm::vec2(args[2].matrixData->data[0][0].numberData, args[2].matrixData->data[1][0].numberData),
+			args[3].numberData
+		);
+	}
 	return nullptr;
 }

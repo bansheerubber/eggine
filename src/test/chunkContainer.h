@@ -23,6 +23,7 @@ namespace es {
 	esEntryPtr ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
 class ChunkContainer : public RenderObject {

@@ -274,6 +274,8 @@ void es::defineChunkContainer() {
 
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getChunkContainer, "getChunkContainer", 0, nullptr);
 
+	esEntryType tileToScreenArguments[1] = {ES_ENTRY_MATRIX};
+	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::tileToScreen, "tileToScreen", 1, tileToScreenArguments);
 }
 
 esEntryPtr es::getChunkContainer(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -313,6 +315,18 @@ esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int 
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
 		return esCreateObject(container->getPlayerTeam()->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(args[0].matrixData->rows == 3 && args[0].matrixData->columns == 1) {
+		glm::vec2 position = tilemath::tileToScreen(glm::vec3(
+			args[0].matrixData->data[0][0].numberData,
+			args[0].matrixData->data[1][0].numberData,
+			args[0].matrixData->data[2][0].numberData
+		));
+		return esCreateVector(2, (double)position.x, (double)position.y);
 	}
 	return nullptr;
 }

@@ -5,7 +5,10 @@ function Team::selectNextCharacter(%this, %state) {
 	}
 	
 	%this.selectedIndex = (%this.selectedIndex + 1) % %this.size();
-	getChunkContainer().selectCharacter(%this.get(%this.selectedIndex));
+	
+	%character = %this.get(%this.selectedIndex);
+	getChunkContainer().selectCharacter(%character);
+	getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%character.getPosition()), 0.2);
 }
 
 function Team::selectPreviousCharacter(%this, %state) {
@@ -17,7 +20,10 @@ function Team::selectPreviousCharacter(%this, %state) {
 	if(%this.selectedIndex < 0) {
 		%this.selectedIndex = %this.size() - 1;
 	}
-	getChunkContainer().selectCharacter(%this.get(%this.selectedIndex));
+
+	%character = %this.get(%this.selectedIndex);
+	getChunkContainer().selectCharacter(%character);
+	getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%character.getPosition()), 0.2);
 }
 
 function Character::goUp(%this, %state) {

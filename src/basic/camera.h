@@ -24,6 +24,8 @@ class Camera : public GameObject {
 		void setPosition(glm::vec2 position);
 		glm::vec2 getPosition();
 
+		void pan(glm::vec2 start, glm::vec2 end, double time);
+
 		glm::vec2 mouseToWorld(glm::vec2 mouse);
 
 		// keep track of view area bounds
@@ -49,6 +51,13 @@ class Camera : public GameObject {
 			float zoomAxis = 0;
 		} keyMapping;
 
+		struct {
+			glm::vec2 start;
+			glm::vec2 end;
+			double elapsed;
+			double time;
+		} interpolation;
+
 		glm::vec2 getViewport();
 };
 
@@ -57,4 +66,5 @@ namespace es {
 	esEntryPtr getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Camera__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Camera__getPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Camera__pan(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 }
