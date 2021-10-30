@@ -21,7 +21,7 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 
 ChunkContainer::ChunkContainer() {
 	engine->registerBind("chunk.selectTile", this);
-	engine->registerBind("chunk.selectTileMouse", this);
+	engine->registerBind("chunk.mouseSelectTile", this);
 	engine->registerBind("chunk.selectTileUp", this);
 	engine->registerBind("chunk.selectTileDown", this);
 	engine->registerBind("chunk.selectTileLeft", this);
@@ -166,7 +166,6 @@ void ChunkContainer::selectTile(glm::uvec3 position, bool browsing) {
 }
 
 void ChunkContainer::onBind(string &bind, binds::Action action) {
-	printf("%s\n", bind.c_str());
 	if(bind == "chunk.mouseSelectTile" && action == binds::PRESS) {
 		glm::vec2 world = engine->camera->mouseToWorld(engine->mouse);
 
@@ -238,16 +237,18 @@ void ChunkContainer::onAxis(string &bind, double value) {
 
 void ChunkContainer::commit() {
 	if(this->tileSelectionSprite == nullptr) {
-		this->tileSelectionSprite = new OverlappingTile(this);
-		this->tileSelectionSprite->setTexture(17);
-		this->tileSelectionSprite->setPosition(glm::uvec3(0, 0, 0));
+		this->tileSelectionSprite = (new OverlappingTile(this))
+			->setTexture(17)
+			->setPosition(glm::uvec3(0, 0, 0))
+			->setZIndex(1);
 	}
 
 	if(this->characterSelectionSprite == nullptr) {
-		this->characterSelectionSprite = new OverlappingTile(this);
-		this->characterSelectionSprite->setTexture(17);
-		this->characterSelectionSprite->setColor(glm::vec4(0.0, 0.55, 1.0, 1.0));
-		this->characterSelectionSprite->setPosition(glm::uvec3(0, 0, 0));
+		this->characterSelectionSprite = (new OverlappingTile(this))
+			->setTexture(17)
+			->setColor(glm::vec4(0.0, 0.55, 1.0, 1.0))
+			->setPosition(glm::uvec3(0, 0, 0))
+			->setZIndex(100);
 	}
 }
 

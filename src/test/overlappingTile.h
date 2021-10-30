@@ -13,11 +13,14 @@ class OverlappingTile : public RenderObject {
 		OverlappingTile(class ChunkContainer* container);
 		~OverlappingTile();
 
-		void setPosition(glm::uvec3 position);
+		OverlappingTile* setPosition(glm::uvec3 position);
 		glm::uvec3 getPosition();
 
-		void setTexture(unsigned int index);
-		void setColor(glm::vec4 color);
+		OverlappingTile* setTexture(unsigned int index);
+		OverlappingTile* setColor(glm::vec4 color);
+		glm::vec4 getColor();
+		OverlappingTile* setZIndex(unsigned int zIndex);
+		unsigned int getZIndex();
 
 		void render(double deltaTime, RenderContext &context);
 
@@ -28,6 +31,7 @@ class OverlappingTile : public RenderObject {
 		render::VertexAttributes* vertexAttributes;
 		int textureIndex = 3;
 		glm::vec4 color = glm::vec4(1, 1, 1, 1);
+		unsigned int zIndex = 0;
 		
 		glm::uvec3 position = glm::uvec3(0, 0, 0);
 		glm::vec2 screenSpacePosition = glm::vec2(0, 0);

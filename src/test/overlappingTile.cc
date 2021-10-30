@@ -45,7 +45,7 @@ OverlappingTile::~OverlappingTile() {
 	}
 }
 
-void OverlappingTile::setPosition(glm::uvec3 position) {
+OverlappingTile* OverlappingTile::setPosition(glm::uvec3 position) {
 	this->position = position;
 
 	glm::uvec2 chunkPosition(position.x / Chunk::Size, position.y / Chunk::Size);
@@ -67,19 +67,35 @@ void OverlappingTile::setPosition(glm::uvec3 position) {
 	this->vertexBuffers[0]->setData(&this->screenSpacePosition[0], sizeof(glm::vec2), alignof(glm::vec2));
 
 	this->chunk->updateOverlappingTile(this);
+	return this;
 }
 
 glm::uvec3 OverlappingTile::getPosition() {
 	return this->position;
 }
 
-void OverlappingTile::setTexture(unsigned int index) {
+OverlappingTile* OverlappingTile::setTexture(unsigned int index) {
 	this->textureIndex = index;
 	this->vertexBuffers[1]->setData(&this->textureIndex, sizeof(int), alignof(int));
+	return this;
 }
 
-void OverlappingTile::setColor(glm::vec4 color) {
+OverlappingTile* OverlappingTile::setColor(glm::vec4 color) {
 	this->color = color;
+	return this;
+}
+
+glm::vec4 OverlappingTile::getColor() {
+	return this->color;
+}
+
+OverlappingTile* OverlappingTile::setZIndex(unsigned int zIndex) {
+	this->zIndex = zIndex;
+	return this;
+}
+
+unsigned int OverlappingTile::getZIndex() {
+	return this->zIndex;	
 }
 
 void OverlappingTile::render(double deltaTime, RenderContext &context) {

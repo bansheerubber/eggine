@@ -16,13 +16,20 @@ class Tile;
 
 struct OverlappingTileWrapper {
 	unsigned int index;
+	unsigned int zIndex; // html-like zindex
 	class OverlappingTile* tile;
 
 	bool operator<(const OverlappingTileWrapper &other) {
+		if(this->index == other.index) {
+			return this->zIndex < other.zIndex;
+		}
 		return this->index < other.index;
 	}
 
 	bool operator>(const OverlappingTileWrapper &other) {
+		if(this->index == other.index) {
+			return this->zIndex > other.zIndex;
+		}
 		return this->index > other.index;
 	}
 

@@ -22,10 +22,10 @@ int compareOverlappingTile(const void* a, const void* b) {
 	OverlappingTileWrapper* a2 = (OverlappingTileWrapper*)a;
 	OverlappingTileWrapper* b2 = (OverlappingTileWrapper*)b;
 
-	if(a2->index > b2->index) {
+	if(*a2 > *b2) {
 		return 1;
 	}
-	else if(a2->index < b2->index) {
+	else if(*a2 < *b2) {
 		return -1;
 	}
 	else {
@@ -234,6 +234,7 @@ void Chunk::addOverlappingTile(OverlappingTile* tile) {
 
 	this->overlappingTiles.insert(OverlappingTileWrapper {
 		index: index,
+		zIndex: tile->getZIndex(),
 		tile: tile,
 	});
 }
@@ -246,6 +247,7 @@ void Chunk::updateOverlappingTile(OverlappingTile* tile) {
 	for(size_t i = 0; i < this->overlappingTiles.array.head; i++) {
 		if(this->overlappingTiles.array[i].tile == tile) {
 			this->overlappingTiles.array[i].index = index;
+			this->overlappingTiles.array[i].zIndex = tile->getZIndex();
 		}
 	}
 
@@ -256,6 +258,7 @@ void Chunk::removeOverlappingTile(OverlappingTile* tile) {
 	if(this->overlappingTiles.array.head != 0) { // signifies that the array has been deallocated
 		this->overlappingTiles.remove(OverlappingTileWrapper {
 			index: 0,
+			zIndex: tile->getZIndex(),
 			tile: tile,
 		});
 	}
