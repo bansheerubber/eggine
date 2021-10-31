@@ -55,10 +55,16 @@ void Camera::see(double deltaTime) {
 	
 	double zoom = this->getZoom();
 
-	if(this->interpolation.elapsed < this->interpolation.time) {
-		float percent = -pow(((this->interpolation.elapsed / this->interpolation.time) - 1.0), 2.0) + 1.0;
-		this->position = this->interpolation.start * (1 - percent) + this->interpolation.end * percent;
-		this->interpolation.elapsed += deltaTime;
+	if(this->interpolation.enabled) {
+		if(this->interpolation.elapsed < this->interpolation.time) {
+			float percent = -pow(((this->interpolation.elapsed / this->interpolation.time) - 1.0), 2.0) + 1.0;
+			this->position = this->interpolation.start * (1 - percent) + this->interpolation.end * percent;
+			this->interpolation.elapsed += deltaTime;
+		}
+		else {
+			this->position = this->interpolation.end;
+			this->interpolation.enabled = false;
+		}
 	}
 	else {
 		float speed = deltaTime * 5.0f  + 0.05f / zoom;
@@ -99,6 +105,7 @@ void Camera::pan(glm::vec2 start, glm::vec2 end, double time) {
 	this->interpolation.end = end;
 	this->interpolation.time = time;
 	this->interpolation.elapsed = 0.0;
+	this->interpolation.enabled = true;
 }
 
 glm::vec2 Camera::mouseToWorld(glm::vec2 mouse) {

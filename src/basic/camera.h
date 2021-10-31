@@ -56,6 +56,7 @@ class Camera : public GameObject {
 			glm::vec2 end;
 			double elapsed;
 			double time;
+			bool enabled = false;
 		} interpolation;
 
 		glm::vec2 getViewport();
