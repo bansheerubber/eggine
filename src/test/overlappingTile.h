@@ -22,6 +22,8 @@ class OverlappingTile : public RenderObject {
 		OverlappingTile* setZIndex(unsigned int zIndex);
 		unsigned int getZIndex();
 
+		class ChunkContainer* getContainer();
+
 		void render(double deltaTime, RenderContext &context);
 
 	protected:

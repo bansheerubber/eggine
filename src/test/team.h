@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "../basic/gameObject.h"
+#include "../util/sortedArray.h"
 
 using namespace std;
 
@@ -11,6 +12,8 @@ namespace es {
 	esEntryPtr Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Team__get(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
+
+int teamCharacterSort(class Character** character1, class Character** character2);
 
 class Team: public GameObject {
 	friend esEntryPtr es::Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -22,5 +25,5 @@ class Team: public GameObject {
 		void add(class Character* character);
 	
 	private:
-		vector<class Character*> characters;
+		SortedArray<class Character*> characters = SortedArray<class Character*>(teamCharacterSort, nullptr, nullptr);
 };

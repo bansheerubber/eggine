@@ -18,7 +18,7 @@ void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper* tile) {
 	*tile = {};
 }
 
-int compareOverlappingTile(const void* a, const void* b) {
+int compareOverlappingTile(OverlappingTileWrapper* a, OverlappingTileWrapper* b) {
 	OverlappingTileWrapper* a2 = (OverlappingTileWrapper*)a;
 	OverlappingTileWrapper* b2 = (OverlappingTileWrapper*)b;
 

@@ -2,18 +2,27 @@
 
 #include "dynamicArray.h"
 
-template <typename T, typename S>
+template <typename T, typename S = void>
 class SortedArray {
 	public:
 		SortedArray() {
 
 		}
+
+		SortedArray(
+			int (*compare) (T* a, T* b),
+			void (*init) (S* parent, T* location) = nullptr,
+			void (*onRealloc) (S* parent) = nullptr
+		) {
+			this->compare = compare;
+			new((void*)&this->array) DynamicArray<T, S>(4, init, onRealloc);
+		}
 		
 		SortedArray(
 			S* parent,
-			int (*compare) (const void* a, const void* b),
-			void (*init) (S* parent, T* location),
-			void (*onRealloc) (S* parent)
+			int (*compare) (T* a, T* b),
+			void (*init) (S* parent, T* location) = nullptr,
+			void (*onRealloc) (S* parent) = nullptr
 		) {
 			this->compare = compare;
 			new((void*)&this->array) DynamicArray<T, S>(parent, 4, init, onRealloc);
@@ -62,13 +71,13 @@ class SortedArray {
 		}
 
 		void sort() {
-			qsort(&this->array[0], this->array.head, sizeof(T), this->compare);
+			qsort(&this->array[0], this->array.head, sizeof(T), (int (*)(const void*, const void*))this->compare);
 		}
 	
 		DynamicArray<T, S> array;
 	
 	private:
-		int (*compare) (const void* a, const void* b);
+		int (*compare) (T* a, T* b);
 
 		void swap(size_t index1, size_t index2) {
 			T temp = this->array[index1];

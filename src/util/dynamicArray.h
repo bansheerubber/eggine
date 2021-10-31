@@ -30,6 +30,20 @@ class DynamicArray {
 		}
 
 		DynamicArray(
+			size_t size,
+			void (*init) (S* parent, T* location),
+			void (*onRealloc) (S* parent)
+		) {
+			this->init = init;
+			this->onRealloc = onRealloc;
+
+			this->head = 0;
+			this->size = size;
+
+			this->constructArray();
+		}
+
+		DynamicArray(
 			S* parent,
 			size_t size,
 			void (*init) (S* parent, T* location),

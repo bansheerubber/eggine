@@ -38,7 +38,7 @@ struct OverlappingTileWrapper {
 	}
 };
 
-int compareOverlappingTile(const void* a, const void* b);
+int compareOverlappingTile(OverlappingTileWrapper* a, OverlappingTileWrapper* b);
 void initOverlappingTileWrapper(class Chunk* chunk, OverlappingTileWrapper* tile);
 
 class Chunk : public InstancedRenderObjectContainer<Tile> {

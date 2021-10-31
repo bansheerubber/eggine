@@ -98,6 +98,10 @@ unsigned int OverlappingTile::getZIndex() {
 	return this->zIndex;	
 }
 
+ChunkContainer* OverlappingTile::getContainer() {
+	return this->container;
+}
+
 void OverlappingTile::render(double deltaTime, RenderContext &context) {
 	struct FragmentBlock {
 		glm::vec4 color;
