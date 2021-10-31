@@ -4,6 +4,7 @@
 #include FT_FREETYPE_H
 #include <tsl/robin_map.h>
 #include <eggscript/egg.h>
+#include <set>
 #include <vector>
 
 #include "../basic/camera.h"
@@ -20,6 +21,40 @@
 using namespace std;
 
 void engineInitRenderables(class Engine*, RenderObject** object);
+
+namespace std {
+	template<>
+	struct hash<pair<esObjectReferencePtr, string>> {
+		size_t operator()(pair<esObjectReferencePtr, string> const& source) const noexcept {
+			size_t result = hash<esObjectWrapperPtr>{}(source.first->objectWrapper);
+			return result ^ (hash<string>{}(source.second) + 0x9e3779b9 + (result << 6) + (result >> 2));
+    }
+	};
+
+	template<>
+	struct equal_to<pair<esObjectReferencePtr, string>> {
+		bool operator()(const pair<esObjectReferencePtr, string>& x, const pair<esObjectReferencePtr, string>& y) const {
+			return x.first->objectWrapper == y.first->objectWrapper && x.second == y.second;
+		}
+	};
+	
+	template<>
+	struct hash<esObjectReferencePtr> {
+		size_t operator()(esObjectReferencePtr const& source) const noexcept {
+			return hash<esObjectWrapperPtr>{}(source->objectWrapper);
+    }
+	};
+	
+	template<> // specialization
+	inline bool equal<esObjectReferencePtr, esObjectReferencePtr>(esObjectReferencePtr first1, esObjectReferencePtr last1, esObjectReferencePtr first2) noexcept {
+		for(; first1 != last1; ++first1, ++first2) {
+			if(!(first1->objectWrapper == first2->objectWrapper)) {
+				return false;
+			}
+		}
+    return true;
+	}
+};
 
 class Engine {
 	friend Camera;
@@ -90,10 +125,10 @@ class Engine {
 		DynamicArray<RenderObject*, Engine> renderables = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 		DynamicArray<RenderObject*, Engine> renderableUIs = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
 
-		tsl::robin_map<string, vector<string>> bindToTSCallback;
-		tsl::robin_map<string, vector<pair<esObjectReferencePtr, string>>> bindToTSObjectCallback;
-		tsl::robin_map<string, vector<GameObject*>> bindToGameObject;
-		tsl::robin_map<string, vector<GameObject*>> bindAxisToGameObject;
+		tsl::robin_map<string, tsl::robin_set<string>> bindToTSCallback;
+		tsl::robin_map<string, tsl::robin_set<pair<esObjectReferencePtr, string>>> bindToTSObjectCallback;
+		tsl::robin_map<string, tsl::robin_set<GameObject*>> bindToGameObject;
+		tsl::robin_map<string, tsl::robin_set<GameObject*>> bindAxisToGameObject;
 
 		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;
 		tsl::robin_map<binds::Axes, vector<binds::Keybind>> axisToKeybind;

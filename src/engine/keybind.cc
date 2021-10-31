@@ -7,28 +7,28 @@ void Engine::registerTSKeybindCallback(string bind, string key, string callback)
 			bind: bind,
 		});
 
-		this->bindToTSCallback[bind].push_back(callback);
+		this->bindToTSCallback[bind].emplace(callback);
 	}
 	else if(this->gamepadToEnum.find(key) != this->gamepadToEnum.end()) {
 		this->addGamepadBind(this->gamepadToEnum[key], {
 			bind: bind,
 		});
 
-		this->bindToTSCallback[bind].push_back(callback);
+		this->bindToTSCallback[bind].emplace(callback);
 	}
 	else if(this->axesToEnum.find(key) != this->axesToEnum.end()) {
 		this->addAxis(this->axesToEnum[key], {
 			bind: bind,
 		});
 
-		this->bindToTSCallback[bind].push_back(callback);
+		this->bindToTSCallback[bind].emplace(callback);
 	}
 	else if(this->mouseToEnum.find(key) != this->mouseToEnum.end()) {
 		this->addMousebind(this->mouseToEnum[key], {
 			bind: bind,
 		});
 
-		this->bindToTSCallback[bind].push_back(callback);
+		this->bindToTSCallback[bind].emplace(callback);
 	}
 }
 
@@ -38,37 +38,45 @@ void Engine::registerTSKeybindObjectCallback(esObjectReferencePtr object, string
 			bind: bind,
 		});
 
-		this->bindToTSObjectCallback[bind].emplace_back(esCloneObjectReference(object), callback);
+		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
+		}
 	}
 	else if(this->gamepadToEnum.find(key) != this->gamepadToEnum.end()) {
 		this->addGamepadBind(this->gamepadToEnum[key], {
 			bind: bind,
 		});
 
-		this->bindToTSObjectCallback[bind].emplace_back(esCloneObjectReference(object), callback);
+		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
+		}
 	}
 	else if(this->axesToEnum.find(key) != this->axesToEnum.end()) {
 		this->addAxis(this->axesToEnum[key], {
 			bind: bind,
 		});
 
-		this->bindToTSObjectCallback[bind].emplace_back(esCloneObjectReference(object), callback);
+		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
+		}
 	}
 	else if(this->mouseToEnum.find(key) != this->mouseToEnum.end()) {
 		this->addMousebind(this->mouseToEnum[key], {
 			bind: bind,
 		});
 
-		this->bindToTSObjectCallback[bind].emplace_back(esCloneObjectReference(object), callback);
+		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
+		}
 	}
 }
 
 void Engine::registerBind(string command, GameObject* gameObject) {
-	this->bindToGameObject[command].push_back(gameObject);
+	this->bindToGameObject[command].emplace(gameObject);
 }
 
 void Engine::registerBindAxis(string command, GameObject* gameObject) {
-	this->bindAxisToGameObject[command].push_back(gameObject);
+	this->bindAxisToGameObject[command].emplace(gameObject);
 }
 
 void Engine::addKeybind(int key, binds::Keybind keybind) {
