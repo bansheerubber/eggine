@@ -75,6 +75,8 @@ function main() {
 	$team = getChunkContainer().getPlayerTeam();
 	$team.addKeybind("team.selectNextCharacter", "l", "selectNextCharacter");
 	$team.addKeybind("team.selectPreviousCharacter", "k", "selectPreviousCharacter");
+	$team.addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
+	$team.addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
 }
 
 schedule(100, "main");

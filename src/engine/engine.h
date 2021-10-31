@@ -103,6 +103,10 @@ class Engine {
 		tsl::robin_map<string, int> keyToScancode;
 		tsl::robin_map<int, string> scancodeToKey;
 
+		tsl::robin_map<string, binds::GamepadButtons> gamepadToEnum;
+		tsl::robin_map<string, binds::Axes> axesToEnum;
+		tsl::robin_map<string, int> mouseToEnum;
+
 		#ifdef __switch__
 		unsigned long lastGamepadButtons = 0;
 		#else

@@ -202,7 +202,33 @@ void Engine::initialize() {
 	this->addGamepadBind(binds::D_PAD_RIGHT, binds::Keybind {
 		"chunk.selectTileRight"
 	});
+
+	this->mouseToEnum["left-mouse-button"] = GLFW_MOUSE_BUTTON_LEFT;
+	this->mouseToEnum["right-mouse-button"] = GLFW_MOUSE_BUTTON_RIGHT;
+	this->mouseToEnum["middle-mouse-button"] = GLFW_MOUSE_BUTTON_MIDDLE;
 	#endif
+
+	this->gamepadToEnum["a-button"] = binds::A_BUTTON;
+	this->gamepadToEnum["b-button"] = binds::B_BUTTON;
+	this->gamepadToEnum["x-button"] = binds::X_BUTTON;
+	this->gamepadToEnum["y-button"] = binds::Y_BUTTON;
+	this->gamepadToEnum["d-pad-up"] = binds::D_PAD_UP;
+	this->gamepadToEnum["d-pad-down"] = binds::D_PAD_DOWN;
+	this->gamepadToEnum["d-pad-left"] = binds::D_PAD_LEFT;
+	this->gamepadToEnum["d-pad-right"] = binds::D_PAD_RIGHT;
+	this->gamepadToEnum["special-left"] = binds::SPECIAL_LEFT;
+	this->gamepadToEnum["special-right"] = binds::SPECIAL_RIGHT;
+	this->gamepadToEnum["left-button"] = binds::LEFT_BUTTON;
+	this->gamepadToEnum["right-button"] = binds::RIGHT_BUTTON;
+	this->gamepadToEnum["left-trigger"] = binds::LEFT_TRIGGER;
+	this->gamepadToEnum["right-trigger"] = binds::RIGHT_TRIGGER;
+
+	this->axesToEnum["left-axis-x"] = binds::LEFT_AXIS_X;
+	this->axesToEnum["left-axis-y"] = binds::LEFT_AXIS_Y;
+	this->axesToEnum["right-axis-y"] = binds::RIGHT_AXIS_X;
+	this->axesToEnum["right-axis-y"] = binds::RIGHT_AXIS_Y;
+	this->axesToEnum["mouse-axis-y"] = binds::MOUSE_AXIS_X;
+	this->axesToEnum["mouse-axis-y"] = binds::MOUSE_AXIS_Y;
 
 	this->addGamepadBind(binds::A_BUTTON, binds::Keybind {
 		"chunk.selectTile"

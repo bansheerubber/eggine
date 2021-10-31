@@ -153,6 +153,17 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 				arguments[0].numberData = 1;
 				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
 			}
+
+			// handle TS object callbacks
+			vector<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
+			for(auto &[object, callback]: esObjectPresses) {
+				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
+					esEntry arguments[2];
+					esCreateObjectAt(&arguments[0], object);
+					esCreateNumberAt(&arguments[1], action);
+					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+				}
+			}
 		}
 	}
 	else if(action == 0) {
@@ -171,6 +182,17 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = 0;
 				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+			}
+
+			// handle TS object callbacks
+			vector<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
+			for(auto &[object, callback]: esObjectPresses) {
+				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
+					esEntry arguments[2];
+					esCreateObjectAt(&arguments[0], object);
+					esCreateNumberAt(&arguments[1], action);
+					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+				}
 			}
 		}
 	}
