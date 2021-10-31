@@ -1,10 +1,36 @@
 function Team::selectNextCharacter(%this, %state) {
-	%this.selectedIndex = (%this.selectedIndex + 1) % %this.getTeamSize();
+	if(!%state) {
+		return;
+	}
+	
+	%this.selectedIndex = (%this.selectedIndex + 1) % %this.size();
+	
+	%character = %this.get(%this.selectedIndex);
+	getChunkContainer().selectCharacter(%character);
+	getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%character.getPosition()), 0.2);
 }
 
 function Team::selectPreviousCharacter(%this, %state) {
+	if(!%state) {
+		return;
+	}
+	
 	%this.selectedIndex--;
 	if(%this.selectedIndex < 0) {
-		%this.selectedIndex = %this.getTeamSize() - 1;
+		%this.selectedIndex = %this.size() - 1;
 	}
+
+	%character = %this.get(%this.selectedIndex);
+	getChunkContainer().selectCharacter(%character);
+	getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%character.getPosition()), 0.2);
 }
+
+function team() {
+	$team = getChunkContainer().getPlayerTeam();
+	$team.addKeybind("team.selectNextCharacter", "l", "selectNextCharacter");
+	$team.addKeybind("team.selectPreviousCharacter", "k", "selectPreviousCharacter");
+	$team.addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
+	$team.addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
+}
+
+schedule(100, "team");

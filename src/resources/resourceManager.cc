@@ -65,6 +65,7 @@ DynamicArray<resources::ResourceObject*> resources::ResourceManager::loadResourc
 
 DynamicArray<resources::ResourceObject*> resources::ResourceManager::metadataToResources(DynamicArray<carton::Metadata*> resources) {
 	DynamicArray<ResourceObject*> output(resources.head);
+	output[0] = nullptr;
 	for(size_t i = 0; i < resources.head; i++) {
 		output[i] = this->metadataToResource[resources[i]];
 	}
