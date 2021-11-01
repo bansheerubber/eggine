@@ -13,7 +13,7 @@ namespace es {
 	esEntryPtr Team__get(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
-int teamCharacterSort(class Character** character1, class Character** character2);
+int teamUnitSort(class Unit** character1, class Unit** character2);
 
 class Team: public GameObject {
 	friend esEntryPtr es::Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -22,8 +22,8 @@ class Team: public GameObject {
 	public:
 		Team();
 
-		void add(class Character* character);
+		void add(class Unit* character);
 	
 	private:
-		SortedArray<class Character*> characters = SortedArray<class Character*>(teamCharacterSort, nullptr, nullptr);
+		SortedArray<class Unit*> units = SortedArray<class Unit*>(teamUnitSort, nullptr, nullptr);
 };

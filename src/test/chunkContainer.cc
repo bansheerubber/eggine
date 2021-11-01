@@ -303,7 +303,7 @@ esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int a
 }
 
 esEntryPtr es::ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
-	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObject(args[1].objectData, "Character")) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObjectParents(args[1].objectData, "Character")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
 		Character* character = (Character*)args[1].objectData->objectWrapper->data;
 		container->selectCharacter(character);

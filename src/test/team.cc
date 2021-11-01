@@ -1,23 +1,23 @@
 #include "team.h"
 
-#include "character.h"
 #include "chunkContainer.h"
 #include "../engine/engine.h"
 #include "tileMath.h"
+#include "unit.h"
 
 Team::Team() {
 	// create torquescript object
 	this->reference = esInstantiateObject(engine->eggscript, "Team", this);
 }
 
-void Team::add(Character* character) {
-	this->characters.insert(character);
-	this->characters.sort();
+void Team::add(Unit* unit) {
+	this->units.insert(unit);
+	this->units.sort();
 }
 
-int teamCharacterSort(Character** character1, Character** character2) {
-	glm::vec2 screen1 = tilemath::tileToScreen((*character1)->getPosition());
-	glm::vec2 screen2 = tilemath::tileToScreen((*character2)->getPosition());
+int teamUnitSort(Unit** unit1, Unit** unit2) {
+	glm::vec2 screen1 = tilemath::tileToScreen((*unit1)->getPosition());
+	glm::vec2 screen2 = tilemath::tileToScreen((*unit2)->getPosition());
 	
 	if(screen1.x > screen2.x) {
 		return 1;
@@ -44,7 +44,7 @@ void es::defineTeam() {
 esEntryPtr es::Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
 		Team* team = (Team*)args[0].objectData->objectWrapper->data;
-		return esCreateNumber(team->characters.array.head);
+		return esCreateNumber(team->units.array.head);
 	}
 	return nullptr;
 }
@@ -53,12 +53,12 @@ esEntryPtr es::Team__get(esEnginePtr esEngine, unsigned int argc, esEntry* args)
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
 		Team* team = (Team*)args[0].objectData->objectWrapper->data;
 		int index = args[1].numberData;
-		team->characters.sort();
+		team->units.sort();
 
-		if(index >= team->characters.array.head || index < 0) {
+		if(index >= team->units.array.head || index < 0) {
 			return nullptr;
 		}
-		return esCreateObject(team->characters.array[index]->reference);
+		return esCreateObject(team->units.array[index]->reference);
 	}
 	return nullptr;
 }

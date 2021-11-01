@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <eggscript/egg.h>
 
-#include "test/character.h"
 #include "test/chunk.h"
 #include "test/chunkContainer.h"
 #include "engine/engine.h"
@@ -16,6 +15,7 @@
 #include "test/team.h"
 #include "basic/text.h"
 #include "test/tileMath.h"
+#include "test/unit.h"
 
 #ifdef __switch__
 #include <switch.h>
@@ -50,9 +50,9 @@ int main(int argc, char* argv[]) {
 	};
 
 	for(unsigned int i = 0; i < positionsSize; i++) {
-		Character* character = new Character(&container);
-		character->setPosition(positions[i]);
-		container.getPlayerTeam()->add(character);
+		Unit* unit = new Unit(&container);
+		unit->setPosition(positions[i]);
+		container.getPlayerTeam()->add(unit);
 	}
 
 	engine->tick();
