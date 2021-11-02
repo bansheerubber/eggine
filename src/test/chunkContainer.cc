@@ -122,6 +122,13 @@ void ChunkContainer::addOverlappingTile(OverlappingTile* tile) {
 	this->setOverlappingTileChunk(tile);
 }
 
+bool ChunkContainer::isValidTilePosition(glm::uvec3 position) {
+	if(position.x >= this->size * Chunk::Size || position.y >= this->size * Chunk::Size) {
+		return false;
+	}
+	return true;
+}
+
 void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
 	glm::uvec2 chunkPosition = tile->getPosition() / (unsigned int)Chunk::Size;
 
@@ -272,6 +279,8 @@ void es::defineChunkContainer() {
 	esEntryType getPlayerTeamArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getPlayerTeam, "ChunkContainer", "getPlayerTeam", 1, getPlayerTeamArguments);
 
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getSelectedCharacter, "ChunkContainer", "getSelectedCharacter", 1, getPlayerTeamArguments);
+
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getChunkContainer, "getChunkContainer", 0, nullptr);
 
 	esEntryType tileToScreenArguments[1] = {ES_ENTRY_MATRIX};
@@ -315,6 +324,17 @@ esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int 
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
 		return esCreateObject(container->getPlayerTeam()->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		if(container->selectedCharacter == nullptr) {
+			return nullptr;
+		}
+		return esCreateObject(container->selectedCharacter->reference);
 	}
 	return nullptr;
 }

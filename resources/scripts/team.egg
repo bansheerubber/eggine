@@ -1,3 +1,15 @@
+package destinations {
+	function ChunkContainer::selectCharacter(%this, %character) {
+		%test = getChunkContainer().getSelectedCharacter();
+		if(isObject(%test)) {
+			%test.getDestinations().hideBorder();
+		}
+		
+		Parent::selectCharacter(%this, %character);
+		%character.getDestinations().showBorder();
+	}
+};
+
 function Team::selectNextCharacter(%this, %state) {
 	if(!%state) {
 		return;
