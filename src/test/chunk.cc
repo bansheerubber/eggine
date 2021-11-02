@@ -243,9 +243,19 @@ Layer* Chunk::getLayer(unsigned int z) {
 	return found.value();
 }
 
-void Chunk::setTileTexture(glm::uvec2 position, unsigned int spritesheetIndex) {
-	glm::uvec2 relativePosition = position - this->position * (unsigned int)Chunk::Size;
-	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size);
+void Chunk::setTileTexture(glm::uvec3 position, unsigned int spritesheetIndex) {
+	glm::uvec2 relativePosition = glm::uvec2(position.x, position.y) - this->position * (unsigned int)Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + position.z * Chunk::Size * Chunk::Size;
 
 	this->vertexBuffer->setSubData(&spritesheetIndex, 1, index * sizeof(unsigned int));
+}
+
+int Chunk::getTileTexture(glm::uvec3 position) {
+	glm::uvec2 relativePosition = glm::uvec2(position.x, position.y) - this->position * (unsigned int)Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + position.z * Chunk::Size * Chunk::Size;
+
+	if(index > Chunk::Size * Chunk::Size * this->height) {
+		return 99;
+	}
+	return this->textureIndices[index];
 }

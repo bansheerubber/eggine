@@ -36,7 +36,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		class Layer* getLayer(unsigned int z);
 
-		void setTileTexture(glm::uvec2 position, unsigned int spritesheetIndex);
+		void setTileTexture(glm::uvec3 position, unsigned int spritesheetIndex);
+		int getTileTexture(glm::uvec3 position);
 
 		static constexpr unsigned int Size = 25;
 	

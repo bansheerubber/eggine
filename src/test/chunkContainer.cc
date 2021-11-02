@@ -125,7 +125,7 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 			chunksRendered++;
 			tilesRendered += Chunk::Size * Chunk::Size * chunk.height;
 			drawCalls += chunk.drawCalls;
-			overlappingCalls += chunk.overlappingTiles.size();
+			overlappingCalls += chunk.layers.size();
 		}
 		
 		tiles += Chunk::Size * Chunk::Size * chunk.height;
@@ -139,27 +139,17 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	#endif
 }
 
-void ChunkContainer::addOverlappingTile(OverlappingTile* tile) {
-	this->setOverlappingTileChunk(tile);
-}
-
-bool ChunkContainer::isValidTilePosition(glm::uvec3 position) {
-	if(position.x >= this->size * Chunk::Size || position.y >= this->size * Chunk::Size) {
+bool ChunkContainer::isValidTilePosition(glm::ivec3 position) {
+	if(
+		position.x >= this->size * Chunk::Size 
+		|| position.x < 0
+		|| position.y >= this->size * Chunk::Size
+		|| position.y < 0
+		|| position.z < 0
+	) {
 		return false;
 	}
 	return true;
-}
-
-void ChunkContainer::setOverlappingTileChunk(OverlappingTile* tile) {
-	glm::uvec2 chunkPosition = tile->getPosition() / (unsigned int)Chunk::Size;
-
-	if(chunkPosition.x >= this->size || chunkPosition.y >= this->size) {
-		printf("ChunkContainer::setOverlappingTileChunk(): chunk position out of bounds\n");
-		exit(1);
-	}
-
-	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
-	this->renderOrder[index].addOverlappingTile(tile);
 }
 
 void ChunkContainer::selectCharacter(Character* character) {
@@ -187,7 +177,21 @@ void ChunkContainer::updateCharacterPosition(Character* character, glm::uvec3 ne
 	}
 }
 
-void ChunkContainer::selectTile(glm::uvec3 position, bool browsing) {
+int ChunkContainer::getTile(glm::ivec3 position) {
+	if(!this->isValidTilePosition(position)) {
+		return 99;
+	}
+
+	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
+	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
+	return this->renderOrder[index].getTileTexture(position);
+}
+
+void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
+	if(!this->isValidTilePosition(position)) {
+		return;
+	}
+	
 	this->tileSelectionSprite->setPosition(position);
 
 	esEntry arguments[2];
@@ -196,26 +200,36 @@ void ChunkContainer::selectTile(glm::uvec3 position, bool browsing) {
 	esCallFunction(engine->eggscript, "onSelectTile", 2, arguments);
 }
 
+glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
+	// glm::mat2 basis = glm::mat2(
+	// 	cos(atan(1/2)), sin(atan(1/2)),
+	// 	cos(atan(1/2)), -sin(atan(1/2))
+	// );
+
+	// inverse the basis and normalize the axes to get transformation matrix
+	double cosine45deg = cos(M_PI / 4.0f);
+	glm::mat2 inverseBasis = glm::mat2(
+		cosine45deg, cosine45deg,
+		-cosine45deg * 2.0f, cosine45deg * 2.0f
+	);
+	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f, 0);
+	glm::ivec3 coordinates(floor(_.x), floor(_.y), _.z);
+
+	coordinates.x -= 50;
+	coordinates.y += 50;
+	coordinates.z += 49;
+	for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 99; i++) {
+		coordinates.x += 1;
+		coordinates.y -= 1;
+		coordinates.z -= 1;
+	}
+
+	return coordinates;
+}
+
 void ChunkContainer::onBind(string &bind, binds::Action action) {
 	if(bind == "chunk.mouseSelectTile" && action == binds::PRESS) {
-		glm::vec2 world = engine->camera->mouseToWorld(engine->mouse);
-
-		// glm::mat2 basis = glm::mat2(
-		// 	cos(atan(1/2)), sin(atan(1/2)),
-		// 	cos(atan(1/2)), -sin(atan(1/2))
-		// );
-
-		// inverse the basis and normalize the axes to get transformation matrix
-		double cosine45deg = cos(M_PI / 4.0f);
-		glm::mat2 inverseBasis = glm::mat2(
-			cosine45deg, cosine45deg,
-			-cosine45deg * 2.0f, cosine45deg * 2.0f
-		);
-		glm::ivec2 coordinates = (inverseBasis * world) * (float)cosine45deg * 2.0f;
-		
-		if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < this->size * Chunk::Size && coordinates.y < this->size * Chunk::Size) {
-			this->selectTile(glm::uvec3(coordinates, 0), false);
-		}
+		this->selectTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)), false);
 	}
 	else if(bind == "chunk.selectTile" && action == binds::PRESS) {
 		this->selectTile(this->tileSelectionSprite->getPosition(), false);
@@ -250,19 +264,10 @@ void ChunkContainer::onBind(string &bind, binds::Action action) {
 
 void ChunkContainer::onAxis(string &bind, double value) {
 	if(bind == "chunk.xAxis" || bind == "chunk.yAxis") {
-		double cosine45deg = cos(M_PI / 4.0f);
-		glm::mat2 inverseBasis = glm::mat2(
-			cosine45deg, cosine45deg,
-			-cosine45deg * 2.0f, cosine45deg * 2.0f
-		);
-		glm::vec2 position(engine->camera->getPosition());
+		glm::vec2 position = engine->camera->getPosition();
 		position.x += 0.5;
-		position.y = -position.y;
-		glm::ivec2 coordinates = (inverseBasis * position) * (float)cosine45deg * 2.0f;
-		
-		if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < this->size * Chunk::Size && coordinates.y < this->size * Chunk::Size) {
-			this->selectTile(glm::uvec3(coordinates, 0), true);
-		}
+		position.y = -position.y + 0.5;
+		this->selectTile(this->findCandidateSelectedTile(position), true);
 	}
 }
 

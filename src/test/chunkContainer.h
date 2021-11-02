@@ -39,13 +39,10 @@ class ChunkContainer : public RenderObject {
 		~ChunkContainer();
 
 		// ## game_object_definitions ChunkContainer
-
-		void addOverlappingTile(class OverlappingTile* tile);
-		void removeOverlappingTile(class OverlappingTile* tile);
-		void setOverlappingTileChunk(OverlappingTile* tile);
+		unsigned int size = 0;
 
 		void selectCharacter(class Character* character);
-		void selectTile(glm::uvec3 position, bool browsing);
+		void selectTile(glm::ivec3 position, bool browsing);
 		
 		void addChunk(glm::uvec2 position);
 		Chunk& getChunk(size_t index);
@@ -60,9 +57,9 @@ class ChunkContainer : public RenderObject {
 
 		class Team* getPlayerTeam();
 
-		bool isValidTilePosition(glm::uvec3 position);
+		bool isValidTilePosition(glm::ivec3 position);
 
-		unsigned int size = 0;
+		int getTile(glm::ivec3 position);
 
 		// static class Shader* Program;
 		static render::Program* Program;
@@ -82,6 +79,7 @@ class ChunkContainer : public RenderObject {
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
 
 		void updateCharacterPosition(class Character* character, glm::uvec3 newPosition);
+		glm::ivec3 findCandidateSelectedTile(glm::vec2 screenSpace);
 
 		static constexpr glm::vec2 VerticesSource[4] = {
 			glm::vec2(-0.501f,  1.001f),

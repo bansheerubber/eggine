@@ -92,18 +92,20 @@ void Layer::add(OverlappingTile* tile) {
 }
 
 void Layer::update(OverlappingTile* tile) {
-	for(size_t i = 0; i < this->tiles.array.head; i++) {
-		OverlappingTile* found = this->tiles.array[i];
-		if(found == tile) {
-			this->offsets[i] = tile->screenSpacePosition;
-			this->textureIndices[i] = tile->getTexture();
-			this->colors[i] = tile->getColor();
+	// for(size_t i = 0; i < this->tiles.array.head; i++) {
+	// 	OverlappingTile* found = this->tiles.array[i];
+	// 	if(found == tile) {
+	// 		this->offsets[i] = tile->screenSpacePosition;
+	// 		this->textureIndices[i] = tile->getTexture();
+	// 		this->colors[i] = tile->getColor();
 
-			this->buffers[0]->setSubData(&this->offsets[i], sizeof(glm::vec2), i * sizeof(glm::vec2));
-			this->buffers[1]->setSubData(&this->textureIndices[i], sizeof(int), i * sizeof(int));
-			this->buffers[2]->setSubData(&this->colors[i], sizeof(glm::vec4), i * sizeof(glm::vec4));
-		}
-	}
+	// 		this->buffers[0]->setSubData(&this->offsets[i], sizeof(glm::vec2), i * sizeof(glm::vec2));
+	// 		this->buffers[1]->setSubData(&this->textureIndices[i], sizeof(int), i * sizeof(int));
+	// 		this->buffers[2]->setSubData(&this->colors[i], sizeof(glm::vec4), i * sizeof(glm::vec4));
+	// 	}
+	// }
+	this->tiles.sort();
+	this->rebuildBuffers();
 }
 
 void Layer::remove(OverlappingTile* tile) {
