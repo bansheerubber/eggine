@@ -43,10 +43,10 @@ int main(int argc, char* argv[]) {
 
 	unsigned int positionsSize = 4;
 	glm::uvec3 positions[positionsSize] = {
-		glm::uvec3(0, 0, 1),
-		glm::uvec3(2, 0, 1),
-		glm::uvec3(3, 4, 1),
-		glm::uvec3(7, 8, 1),
+		glm::uvec3(0, 0, 5),
+		glm::uvec3(2, 0, 5),
+		glm::uvec3(3, 4, 5),
+		glm::uvec3(7, 8, 5),
 	};
 
 	for(unsigned int i = 0; i < positionsSize; i++) {

@@ -84,6 +84,10 @@ class DynamicArray {
 		}
 
 		void allocate(size_t amount) {
+			if(amount < this->size) {
+				return;
+			}
+			
 			if(amount * 2 > DYNAMIC_ARRAY_MAX_SIZE) {
 				printf("stack overflow\n");
 				exit(1);

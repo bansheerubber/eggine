@@ -67,15 +67,40 @@ class ChunkContainer : public RenderObject {
 		// static class Shader* Program;
 		static render::Program* Program;
 		static resources::SpriteSheet* Image;
+
+		static render::VertexBuffer* Vertices;
+		static render::VertexBuffer* UVs;
+		static render::VertexBuffer* Colors;
 	
 	private:
 		class OverlappingTile* tileSelectionSprite;
 		class OverlappingTile* characterSelectionSprite;
 		class Character* selectedCharacter;
 		class Team* playerTeam;
-		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 8, initChunk, nullptr);
+		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 0, initChunk, nullptr);
 		
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
 
 		void updateCharacterPosition(class Character* character, glm::uvec3 newPosition);
+
+		static constexpr glm::vec2 VerticesSource[4] = {
+			glm::vec2(-0.501f,  1.001f),
+			glm::vec2(-0.501f, -1.001f),
+			glm::vec2(0.501f, 1.001f),
+			glm::vec2(0.501f, -1.001f)
+		};
+
+		static constexpr glm::vec2 UVsSource[4] = {
+			glm::vec2(0.0f, 0.0f),
+			glm::vec2(0.0f, 1.0),
+			glm::vec2(1.0, 0.0f),
+			glm::vec2(1.0, 1.0)
+		};
+
+		static constexpr glm::vec4 ColorsSource[4] = {
+			glm::vec4(1, 1, 1, 1),
+			glm::vec4(1, 1, 1, 1),
+			glm::vec4(1, 1, 1, 1),
+			glm::vec4(1, 1, 1, 1)
+		};
 };

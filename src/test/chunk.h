@@ -4,6 +4,7 @@
 #include <glm/vec3.hpp>
 
 #include <tsl/robin_map.h>
+#include <tsl/robin_set.h>
 
 #include "../engine/debug.h"
 #include "../basic/instancedRenderObjectContainer.h"
@@ -14,39 +15,12 @@
 
 class Tile;
 
-struct OverlappingTileWrapper {
-	unsigned int index;
-	unsigned int zIndex; // html-like zindex
-	class OverlappingTile* tile;
-
-	bool operator<(const OverlappingTileWrapper &other) {
-		if(this->index == other.index) {
-			return this->zIndex < other.zIndex;
-		}
-		return this->index < other.index;
-	}
-
-	bool operator>(const OverlappingTileWrapper &other) {
-		if(this->index == other.index) {
-			return this->zIndex > other.zIndex;
-		}
-		return this->index > other.index;
-	}
-
-	bool operator==(const OverlappingTileWrapper &other) {
-		return this->tile == other.tile;
-	}
-};
-
-int compareOverlappingTile(OverlappingTileWrapper* a, OverlappingTileWrapper* b);
-void initOverlappingTileWrapper(class Chunk* chunk, OverlappingTileWrapper* tile);
-
 class Chunk : public InstancedRenderObjectContainer<Tile> {
 	friend class ChunkContainer;
 	friend class OverlappingTile;
 	
 	public:
-		Chunk();
+		Chunk(class ChunkContainer* container);
 		~Chunk();
 
 		// ## game_object_definitions Chunk
@@ -60,12 +34,18 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void setPosition(glm::uvec2 position);
 		glm::uvec2& getPosition();
 
+		class Layer* getLayer(unsigned int z);
+
 		void setTileTexture(glm::uvec2 position, unsigned int spritesheetIndex);
 
 		static constexpr unsigned int Size = 25;
 	
 	protected:
-		SortedArray<OverlappingTileWrapper, Chunk> overlappingTiles = SortedArray<OverlappingTileWrapper, Chunk>(this, compareOverlappingTile, initOverlappingTileWrapper, nullptr);
+		class ChunkContainer* container;
+
+		tsl::robin_set<class OverlappingTile*> overlappingTiles;
+		tsl::robin_map<unsigned int, class Layer*> layers;
+		unsigned int maxLayer = 0;
 
 		glm::uvec2 position = glm::uvec2(0, 0);
 		glm::vec2 screenSpacePosition;
@@ -87,20 +67,6 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 
-		static glm::vec2 Offsets[];
-		static render::VertexBuffer* VertexBuffers[];
-
-		static constexpr glm::vec2 Vertices[8] = {
-			glm::vec2(-0.501f,  1.001f),
-			glm::vec2(-0.501f, -1.001f),
-			glm::vec2(0.501f, 1.001f),
-			glm::vec2(0.501f, -1.001f)
-		};
-
-		static constexpr glm::vec2 UVs[8] = {
-			glm::vec2(0.0f, 0.0f),
-			glm::vec2(0.0f, 1.0),
-			glm::vec2(1.0, 0.0f),
-			glm::vec2(1.0, 1.0)
-		};
+		static glm::vec2 OffsetsSource[];
+		static render::VertexBuffer* Offsets;
 };

@@ -15,9 +15,12 @@
 
 render::Program* ChunkContainer::Program = nullptr;
 resources::SpriteSheet* ChunkContainer::Image = nullptr;
+render::VertexBuffer* ChunkContainer::Vertices = nullptr;
+render::VertexBuffer* ChunkContainer::UVs = nullptr;
+render::VertexBuffer* ChunkContainer::Colors = nullptr;
 
 void initChunk(class ChunkContainer* container, class Chunk* chunk) {
-	new((void*)chunk) Chunk();
+	new((void*)chunk) Chunk(container);
 }
 
 ChunkContainer::ChunkContainer() {
@@ -48,6 +51,24 @@ ChunkContainer::ChunkContainer() {
 			engine->manager->carton->database.get()->equals("extension", ".png")->exec()
 		)[0];
 	}
+
+	if(ChunkContainer::Vertices == nullptr) { // vertices for square
+		ChunkContainer::Vertices = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::Vertices->setData((glm::vec2*)&ChunkContainer::VerticesSource[0], sizeof(ChunkContainer::VerticesSource), alignof(glm::vec2));
+	}
+
+	
+	if(ChunkContainer::UVs == nullptr) { // uvs for square
+		ChunkContainer::UVs = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::UVs->setData((glm::vec2*)&ChunkContainer::UVsSource[0], sizeof(ChunkContainer::UVsSource), alignof(glm::vec2));
+	}
+
+	if(ChunkContainer::Colors == nullptr) { // uvs for square
+		ChunkContainer::Colors = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::Colors->setData((glm::vec4*)&ChunkContainer::ColorsSource[0], sizeof(ChunkContainer::ColorsSource), alignof(glm::vec4));
+	}
+
+	this->renderOrder.allocate(8);
 
 	// create torquescript object
 	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);
@@ -104,7 +125,7 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 			chunksRendered++;
 			tilesRendered += Chunk::Size * Chunk::Size * chunk.height;
 			drawCalls += chunk.drawCalls;
-			overlappingCalls += chunk.overlappingTiles.array.head;
+			overlappingCalls += chunk.overlappingTiles.size();
 		}
 		
 		tiles += Chunk::Size * Chunk::Size * chunk.height;

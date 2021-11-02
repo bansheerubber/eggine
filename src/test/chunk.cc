@@ -6,63 +6,35 @@
 #include "chunkContainer.h"
 #include "../util/doubleDimension.h"
 #include "../engine/engine.h"
+#include "layer.h"
 #include "../basic/line.h"
 #include "overlappingTile.h"
 #include "../resources/resourceManager.h"
 #include "tileMath.h"
 
-glm::vec2 Chunk::Offsets[Chunk::Size * Chunk::Size * 15];
-render::VertexBuffer* Chunk::VertexBuffers[3] = {nullptr, nullptr, nullptr};
+glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * 15];
+render::VertexBuffer* Chunk::Offsets = nullptr;
 
-void initOverlappingTileWrapper(Chunk* chunk, OverlappingTileWrapper* tile) {
-	*tile = {};
-}
-
-int compareOverlappingTile(OverlappingTileWrapper* a, OverlappingTileWrapper* b) {
-	OverlappingTileWrapper* a2 = (OverlappingTileWrapper*)a;
-	OverlappingTileWrapper* b2 = (OverlappingTileWrapper*)b;
-
-	if(*a2 > *b2) {
-		return 1;
-	}
-	else if(*a2 < *b2) {
-		return -1;
-	}
-	else {
-		return 0;
-	}
-}
-
-Chunk::Chunk() : InstancedRenderObjectContainer(false) {
-	if(Chunk::VertexBuffers[0] == nullptr) {
+Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) {
+	this->container = container;
+	
+	if(Chunk::Offsets == nullptr) {
 		// pre-calculate offsets
 		{
 			for(unsigned i = 0; i < Size * Size; i++) {
 				for(unsigned z = 0; z < 15; z++) {
 					glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
-					Chunk::Offsets[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z));
+					Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z));
 				}
 			}
 
-			Chunk::VertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
-			Chunk::VertexBuffers[0]->setData(&Chunk::Offsets[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * 15, alignof(glm::vec2));
-		}
-
-		// vertices for square
-		{
-			Chunk::VertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
-			Chunk::VertexBuffers[1]->setData((glm::vec2*)&Chunk::Vertices[0], sizeof(Chunk::Vertices), alignof(glm::vec2));
-		}
-
-		// uvs for square
-		{
-			Chunk::VertexBuffers[2] = new render::VertexBuffer(&engine->renderWindow);
-			Chunk::VertexBuffers[2]->setData((glm::vec2*)&Chunk::UVs[0], sizeof(Chunk::UVs), alignof(glm::vec2));
+			Chunk::Offsets = new render::VertexBuffer(&engine->renderWindow);
+			Chunk::Offsets->setData(&Chunk::OffsetsSource[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * 15, alignof(glm::vec2));
 		}
 	}
 
 	// this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
-	this->height = 1;
+	this->height = 5;
 
 	this->vertexBuffer = new render::VertexBuffer(&engine->renderWindow);
 	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
@@ -74,17 +46,17 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 	
 	// load vertices
 	{
-		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[1], 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
+		this->vertexAttributes->addVertexAttribute(ChunkContainer::Vertices, 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
 	}
 
-	// // load uvs
+	// load uvs
 	{
-		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[2], 1, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
+		this->vertexAttributes->addVertexAttribute(ChunkContainer::UVs, 1, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
 	}
 
-	// // load offsets
+	// load offsets
 	{
-		this->vertexAttributes->addVertexAttribute(Chunk::VertexBuffers[0], 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
+		this->vertexAttributes->addVertexAttribute(Chunk::Offsets, 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
 	}
 
 	// load texture indices
@@ -93,16 +65,15 @@ Chunk::Chunk() : InstancedRenderObjectContainer(false) {
 		this->vertexAttributes->addVertexAttribute(this->vertexBuffer, 3, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 1);
 	}
 
+	// load colors
+	{
+		this->vertexAttributes->addVertexAttribute(ChunkContainer::Colors, 4, 4, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec4), 0);
+	}
+
 	this->defineBounds();
 }
 
 Chunk::~Chunk() {
-	size_t head = this->overlappingTiles.array.head;
-	this->overlappingTiles.array.head = 0; // reset to zero to prevent double deallocations
-	for(size_t i = 0; i < head; i++) {
-		delete this->overlappingTiles.array[i].tile;
-	}
-
 	delete this->textureIndices;
 	if(this->debugLine != nullptr) {
 		delete this->debugLine;
@@ -179,42 +150,42 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		|| camera->top < this->bottom
 		|| camera->bottom > this->top
 	)) {
-		unsigned int total = Chunk::Size * Chunk::Size * this->height;
-		unsigned int lastOverlappingIndex = 0;
-		size_t leftOff = 0;
-		OverlappingTileWrapper* tile = nullptr;
+		// try to draw as many layers at once as we can
+		unsigned int start = 0;
+		unsigned int end = 0;
+		bool rendered = false;
+		for(unsigned int i = 0; i < this->height; i++) {
+			end = i + 1;
+			rendered = false;
 
-		// handle overlapping tiles
-		for(size_t i = 0; i < this->overlappingTiles.array.head && (tile = &this->overlappingTiles.array[i])->index < total; i++) { // go through overlapping tiles			
-			int overlapBias = ChunkContainer::Image->drawOntopOfOverlap(this->textureIndices[tile->index]) ? 0 : 1;
-			if(lastOverlappingIndex - 1 != tile->index) {
-				// draw [last, lastOverlappingIndex - tile.index + last)
-				// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
+			if(this->getLayer(i) != nullptr) { // check if we need to stop and render the layer
 				this->vertexAttributes->bind();
-				ChunkContainer::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
-				engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastOverlappingIndex, tile->index - lastOverlappingIndex + overlapBias);
+				engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start) * Chunk::Size * Chunk::Size);
 				#ifdef EGGINE_DEBUG
 				this->drawCalls++;
 				#endif
+
+				this->getLayer(i)->render(deltaTime, context);
+
+				start = i;
+				end = i + 1;
+				rendered = true;
 			}
-
-			tile->tile->render(deltaTime, context);
-
-			lastOverlappingIndex = tile->index + overlapBias;
-
-			leftOff = i + 1;
 		}
 
-		this->vertexAttributes->bind();
-		ChunkContainer::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
-		engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastOverlappingIndex, total - lastOverlappingIndex);
-		#ifdef EGGINE_DEBUG
-		this->drawCalls++;
-		#endif
+		if(!rendered) { // render remaining tiles at top of the chunk
+			this->vertexAttributes->bind();
+			engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start) * Chunk::Size * Chunk::Size);
+			#ifdef EGGINE_DEBUG
+			this->drawCalls++;
+			#endif
+		}
 
-		// draw overlapping tiles above the height of the chunk
-		for(size_t i = leftOff; i < this->overlappingTiles.array.head; i++) {
-			this->overlappingTiles.array[i].tile->render(deltaTime, context);
+		// render remaining overlapping tiles
+		for(unsigned int i = end - 1; i <= this->maxLayer; i++) {
+			if(this->getLayer(i) != nullptr) {
+				this->getLayer(i)->render(deltaTime, context);
+			}
 		}
 
 		#ifdef EGGINE_DEBUG
@@ -229,39 +200,47 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 }
 
 void Chunk::addOverlappingTile(OverlappingTile* tile) {
-	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
-	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+	Layer* found = this->getLayer(tile->getPosition().z);
+	if(found == nullptr) {
+		found = this->layers[tile->getPosition().z] = new Layer(this);
+		this->maxLayer = max(tile->getPosition().z, this->maxLayer);
+	}
 
-	this->overlappingTiles.insert(OverlappingTileWrapper {
-		index: index,
-		zIndex: tile->getZIndex(),
-		tile: tile,
-	});
+	this->overlappingTiles.insert(tile);
+
+	found->add(tile);
 }
 
 void Chunk::updateOverlappingTile(OverlappingTile* tile) {
-	// find the tile and update its index
-	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
-	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
-
-	for(size_t i = 0; i < this->overlappingTiles.array.head; i++) {
-		if(this->overlappingTiles.array[i].tile == tile) {
-			this->overlappingTiles.array[i].index = index;
-			this->overlappingTiles.array[i].zIndex = tile->getZIndex();
-		}
+	Layer* found = this->getLayer(tile->getPosition().z);
+	if(found == nullptr) {
+		found = this->layers[tile->getPosition().z] = new Layer(this);
+		this->maxLayer = max(tile->getPosition().z, this->maxLayer);
 	}
-
-	this->overlappingTiles.sort();
+	
+	if(found != tile->getLayer()) {
+		tile->getLayer()->remove(tile);
+		found->add(tile);
+	}
+	else {
+		found->update(tile);
+	}
 }
 	
 void Chunk::removeOverlappingTile(OverlappingTile* tile) {
-	if(this->overlappingTiles.array.head != 0) { // signifies that the array has been deallocated
-		this->overlappingTiles.remove(OverlappingTileWrapper {
-			index: 0,
-			zIndex: tile->getZIndex(),
-			tile: tile,
-		});
+	if(tile->getLayer() != nullptr) {
+		tile->getLayer()->remove(tile);
 	}
+
+	this->overlappingTiles.erase(tile);
+}
+
+Layer* Chunk::getLayer(unsigned int z) {
+	auto found = this->layers.find(z);
+	if(found == this->layers.end()) {
+		return nullptr;
+	}
+	return found.value();
 }
 
 void Chunk::setTileTexture(glm::uvec2 position, unsigned int spritesheetIndex) {

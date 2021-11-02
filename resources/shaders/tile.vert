@@ -4,6 +4,7 @@ layout(location = 0) in vec2 vPosition;
 layout(location = 1) in vec2 vUV;
 layout(location = 2) in vec2 vOffset;
 layout(location = 3) in int vTextureIndex;
+layout(location = 4) in vec4 vColor;
 
 layout(std140, binding = 0) uniform vertexBlock
 {
@@ -17,6 +18,7 @@ layout(std140, binding = 0) uniform vertexBlock
 } vb;
 
 out vec2 uv;
+out vec4 tileColor;
 
 void main() {
 	gl_Position = vb.projection * vec4(vPosition + vOffset + vb.chunkScreenSpace, 0.0f, 1.0f);
@@ -35,4 +37,5 @@ void main() {
 	);
 
 	uv = mix(minUV, maxUV, vUV);
+	tileColor = vColor;
 }
