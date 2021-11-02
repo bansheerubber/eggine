@@ -1,4 +1,5 @@
 exec("team.egg");
+exec("unit.egg");
 
 function Character::goUp(%this, %state) {
 	if(%state) {
@@ -30,21 +31,21 @@ function Character::goRight(%this, %state) {
 
 function onSelectTile(%position, %browsing) {
 	if(!%browsing) {
-		%position = {%position[0]; %position[1]; %position[2] + 1};
-		%character = getChunkContainer().getCharacter(%position);
+		%character = getChunkContainer().getCharacter({%position[0]; %position[1]; %position[2] + 1});
 		if(isObject(%character)) {
 			getChunkContainer().selectCharacter(%character);
+
+			if(%character.maxMoves == "") {
+				%character.maxMoves = 5;
+				%character.moves = 5;
+			}
 		}
 	}
 }
 
-function main() {
-	$character = getChunkContainer().getCharacter({0; 0; 1});
-	$character.setPosition({5; 5; 1});
-	$character.addKeybind("character.goUp", "up", "goUp");
-	$character.addKeybind("character.goDown", "down", "goDown");
-	$character.addKeybind("character.goLeft", "left", "goLeft");
-	$character.addKeybind("character.goRight", "right", "goRight");
+function onRightClickTile(%position) {
+	if(isObject(getChunkContainer().getSelectedCharacter())) {
+		%character = getChunkContainer().getSelectedCharacter();
+		%character.move(%position);
+	}
 }
-
-schedule(100, "main");

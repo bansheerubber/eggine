@@ -80,6 +80,7 @@ class ChunkContainer : public RenderObject {
 
 		void updateCharacterPosition(class Character* character, glm::uvec3 newPosition);
 		glm::ivec3 findCandidateSelectedTile(glm::vec2 screenSpace);
+		void rightClickTile(glm::ivec3 position);
 
 		static constexpr glm::vec2 VerticesSource[4] = {
 			glm::vec2(-0.501f,  1.001f),

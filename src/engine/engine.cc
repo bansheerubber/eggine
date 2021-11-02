@@ -187,6 +187,10 @@ void Engine::initialize() {
 		"chunk.mouseSelectTile",
 	});
 
+	this->addMousebind(GLFW_MOUSE_BUTTON_RIGHT, binds::Keybind {
+		"chunk.mouseRightClickTile",
+	});
+
 	this->addGamepadBind(binds::D_PAD_UP, binds::Keybind {
 		"chunk.selectTileUp"
 	});

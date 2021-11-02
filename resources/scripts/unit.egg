@@ -1,0 +1,29 @@
+function Unit::move(%this, %position) {
+	%unitPosition = %this.getPosition();
+	%distance = mAbs(%unitPosition[0] - %position[0]) + mAbs(%unitPosition[1] - %position[1]) + mAbs((%unitPosition[2] - 1) - %position[2]);
+	
+	if(%this.getDestinations().has(%position) && %this.moves >= %distance) {
+		%this.setMoves(%this.moves - %distance);
+		%this.moves -= %distance;
+
+		%this.setPosition({%position[0]; %position[1]; %position[2] + 1});
+	}
+}
+
+package unit {
+	function Unit::setMoves(%this, %moves) {
+		Parent::setMoves(%this, %moves);
+
+		if(%this == getChunkContainer().getSelectedCharacter()) {
+			%this.getDestinations().showBorder(); // re-render border if we move
+		}
+	}
+
+	function Unit::setPosition(%this, %position) {
+		Parent::setPosition(%this, %position);
+
+		if(%this == getChunkContainer().getSelectedCharacter()) {
+			%this.getDestinations().showBorder(); // re-render border if we move
+		}
+	}
+};

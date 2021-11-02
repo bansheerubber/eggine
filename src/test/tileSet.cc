@@ -124,12 +124,11 @@ esEntryPtr es::TileSet__remove(esEnginePtr esEngine, unsigned int argc, esEntry*
 
 esEntryPtr es::TileSet__has(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "TileSet") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
-		esEntryPtr entry = new esEntry();
-		entry->type = ES_ENTRY_NUMBER;
-		entry->numberData = ((TileSet*)args[0].objectData->objectWrapper->data)->has(
-			glm::uvec3(args[1].matrixData->data[0][0].numberData, args[1].matrixData->data[1][0].numberData, args[1].matrixData->data[2][0].numberData)
+		return esCreateNumber(
+			((TileSet*)args[0].objectData->objectWrapper->data)->has(
+				glm::uvec3(args[1].matrixData->data[0][0].numberData, args[1].matrixData->data[1][0].numberData, args[1].matrixData->data[2][0].numberData)
+			)	
 		);
-		return entry;
 	}
 
 	return nullptr;

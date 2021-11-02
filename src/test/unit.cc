@@ -14,6 +14,12 @@ Unit::~Unit() {
 	esDeleteObject(this->reference);
 }
 
+void Unit::move(glm::ivec3 position) {
+	if(this->container->isValidTilePosition(position) && this->destinations.has(position)) {
+		this->setPosition(position);
+	}
+}
+
 struct DijkstraEntry {
 	glm::ivec3 position;
 	unsigned int moves = 0;
@@ -23,8 +29,11 @@ struct DijkstraEntry {
 	}
 };
 
-void Unit::calculateDestinations(glm::ivec3 tilePosition, unsigned int move) {
+void Unit::calculateDestinations() {
 	this->destinations.clear();
+
+	this->lastDestinationsCalculation.moves = this->moves;
+	this->lastDestinationsCalculation.position = this->getPosition(); // different than start
 
 	glm::ivec3 start = this->getPosition();
 	if(start.z > 0) {
@@ -61,7 +70,7 @@ void Unit::calculateDestinations(glm::ivec3 tilePosition, unsigned int move) {
 
 			unsigned int test = distances[entry.position] + 1;
 			auto found = distances.find(neighbor);
-			if(test < this->moves && (found == distances.end() || test < found.value())) {
+			if(test <= this->moves && (found == distances.end() || test < found.value())) {
 				distances[neighbor] = test;
 				queue.push(DijkstraEntry {
 					position: neighbor,
@@ -79,12 +88,26 @@ void es::defineUnit() {
 
 	esEntryType destinationArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getDestinations, "Unit", "getDestinations", 1, destinationArguments);
+
+	esEntryType setMovesArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Unit__setMoves, "Unit", "setMoves", 2, setMovesArguments);
+}
+
+esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		unit->moves = args[1].numberData;
+	}
+	return nullptr;
 }
 
 esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
-		unit->calculateDestinations();
+		if(unit->getPosition() != unit->lastDestinationsCalculation.position || unit->moves != unit->lastDestinationsCalculation.moves) {
+			unit->calculateDestinations();
+		}
+
 		return esCreateObject(unit->destinations.reference);
 	}
 	return nullptr;

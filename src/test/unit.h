@@ -11,18 +11,27 @@
 namespace es {
 	void defineUnit();
 	esEntryPtr Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
 class Unit: public Character {
 	friend esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	
 	public:
 		Unit(class ChunkContainer* container);
 		~Unit();
 
+		void move(glm::ivec3 position);
+
 	private:
 		TileSet destinations;
 		unsigned int moves = 5;
 
-		void calculateDestinations(glm::ivec3 tilePosition = glm::ivec3(-1, -1, -1), unsigned int move = 0);
+		struct {
+			unsigned int moves;
+			glm::uvec3 position;
+		} lastDestinationsCalculation;
+
+		void calculateDestinations();
 };

@@ -26,6 +26,7 @@ void initChunk(class ChunkContainer* container, class Chunk* chunk) {
 ChunkContainer::ChunkContainer() {
 	engine->registerBind("chunk.selectTile", this);
 	engine->registerBind("chunk.mouseSelectTile", this);
+	engine->registerBind("chunk.mouseRightClickTile", this);
 	engine->registerBind("chunk.selectTileUp", this);
 	engine->registerBind("chunk.selectTileDown", this);
 	engine->registerBind("chunk.selectTileLeft", this);
@@ -200,6 +201,12 @@ void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
 	esCallFunction(engine->eggscript, "onSelectTile", 2, arguments);
 }
 
+void ChunkContainer::rightClickTile(glm::ivec3 position) {
+	esEntry arguments[1];
+	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
+	esCallFunction(engine->eggscript, "onRightClickTile", 1, arguments);
+}
+
 glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 	// glm::mat2 basis = glm::mat2(
 	// 	cos(atan(1/2)), sin(atan(1/2)),
@@ -230,6 +237,9 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 void ChunkContainer::onBind(string &bind, binds::Action action) {
 	if(bind == "chunk.mouseSelectTile" && action == binds::PRESS) {
 		this->selectTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)), false);
+	}
+	else if(bind == "chunk.mouseRightClickTile" && action == binds::PRESS) {
+		this->rightClickTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)));
 	}
 	else if(bind == "chunk.selectTile" && action == binds::PRESS) {
 		this->selectTile(this->tileSelectionSprite->getPosition(), false);
