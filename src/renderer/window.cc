@@ -216,7 +216,12 @@ void render::Window::draw(PrimitiveType type, unsigned int firstVertex, unsigned
 	#ifdef __switch__
 	this->commandBuffer.draw(primitiveToDkPrimitive(type), vertexCount, instanceCount, firstVertex, firstInstance);
 	#else
-	glDrawArraysInstancedBaseInstance(primitiveToGLPrimitive(type), firstVertex, vertexCount, instanceCount, firstInstance);
+	if(firstInstance == 0 && instanceCount == 1) {
+		glDrawArrays(primitiveToGLPrimitive(type), firstVertex, vertexCount);
+	}
+	else {
+		glDrawArraysInstancedBaseInstance(primitiveToGLPrimitive(type), firstVertex, vertexCount, instanceCount, firstInstance);
+	}
 	#endif
 }
 
