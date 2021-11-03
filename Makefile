@@ -1,16 +1,16 @@
 target = game
 cclibs = -lpthread -lGL -lglfw3 -ldl -lpng -lfreetype -leggscript -lfmt -lz
-ccinclude = -Iinclude/pc/glm/ -Iinclude/common/ -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ -Iinclude/pc/ -Llib
+ccinclude = -Iinclude/pc/glm/ -Iinclude/common/ -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ -Iinclude/pc/ -Iimgui -Llib
 CC = g++
 CPPFLAGS = -g -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
 soflags =
 ldflags =
 
-cpp_source = $(shell find src -type f -name "*.cc" ! -path "src/include*")
+cpp_source = $(shell find imgui -type f -name "*.cc") $(shell find src -type f -name "*.cc" ! -path "src/include*")
 cpp_source_tmp = $(subst src, tmp, $(cpp_source))
 cpp_source_without = $(subst src\/, , $(cpp_source))
 
-cpp_headers = $(shell find src -type f -name "*.h" ! -path "src/include*")
+cpp_headers = $(shell find imgui -type f -name "*.h") $(shell find src -type f -name "*.h" ! -path "src/include*") 
 cpp_headers_tmp = $(subst src, tmp, $(cpp_headers))
 
 cpp_objects = $(patsubst %.cc, %.o, $(cpp_source))
@@ -32,7 +32,6 @@ glad/gl.o: glad/gl.c
 	@echo -e "   CC      $@"
 	@$(CC) $(CPPFLAGS) $(soflags) $(ccinclude) -c $< -o $@
 
-$(cpp_objects_tmp) : %.o : %.h
 $(cpp_objects_tmp) : %.o : %.cc
 	@mkdir -p $(dir $@)
 	@echo -e "   CC      $<"

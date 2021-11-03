@@ -51,7 +51,7 @@ git clone https://github.com/freetype/freetype
 cd ..
 rm -Rf include/pc/freetype
 rm include/pc/ft2build.h
-mv -v tmp-setup/freetype/include/* include/pc/
+mv -v tmp-setup/freetype/include/* include/common/
 echo -e "\033[0;32mFinished freetype"
 tput sgr0
 
@@ -88,6 +88,29 @@ mkdir -p src/carton
 mv -v tmp-setup/eggine-carton/src/carton/* src/carton/
 echo -e "\033[0;32mFinished eggine-carton"
 tput sgr0
+
+# configure imgui
+mkdir -p imgui
+pushd .
+cd tmp-setup
+git clone https://github.com/ocornut/imgui
+cd imgui
+cp -v imgui.cpp ../../imgui/imgui.cc
+cp -v imgui.h ../../imgui/imgui.h
+cp -v imgui_draw.cpp ../../imgui/imgui_draw.cc
+cp -v imgui_tables.cpp ../../imgui/imgui_tables.cc
+cp -v imgui_widgets.cpp ../../imgui/imgui_widgets.cc
+cp -v imgui_internal.h ../../imgui/imgui_internal.h
+cp -v imstb_rectpack.h ../../imgui/imstb_rectpack.h
+cp -v imstb_textedit.h ../../imgui/imstb_textedit.h
+cp -v imstb_truetype.h ../../imgui/imstb_truetype.h
+cp -v imconfig.h ../../imgui/imconfig.h
+cp -v backends/imgui_impl_glfw.cpp ../../imgui/imgui_impl_glfw.cc
+cp -v backends/imgui_impl_glfw.h ../../imgui/imgui_impl_glfw.h
+cp -v backends/imgui_impl_opengl3.cpp ../../imgui/imgui_impl_opengl3.cc
+cp -v backends/imgui_impl_opengl3.h ../../imgui/imgui_impl_opengl3.h
+cp -v backends/imgui_impl_opengl3_loader.h ../../imgui/imgui_impl_opengl3_loader.h
+popd
 
 # delete tmp-setup
 rm -Rf tmp-setup
