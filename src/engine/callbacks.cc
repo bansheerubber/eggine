@@ -1,5 +1,7 @@
 #include "callbacks.h"
 
+#include "../engine/developer.h"
+
 #include <stdio.h>
 
 #include "engine.h"
@@ -25,6 +27,12 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	int action = (int)arguments[1].numberData;
 
 	#ifndef __switch__
+	#ifdef EGGINE_DEVELOPER_MODE
+	if(ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow)) {
+		return nullptr;
+	}
+	#endif
+
 	if(action != GLFW_REPEAT) {
 		vector<binds::Keybind> &binds = engine->keyToKeybind[key];
 		for(auto &bind: binds) {
@@ -68,6 +76,12 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 	int action = (int)arguments[1].numberData;
 
 	#ifndef __switch__
+	#ifdef EGGINE_DEVELOPER_MODE
+	if(ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow) || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
+		return nullptr;
+	}
+	#endif
+
 	if(action != GLFW_REPEAT) {
 		// handle game objects
 		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];

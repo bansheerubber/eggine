@@ -2,6 +2,8 @@
 #include <glad/gl.h>
 #endif
 
+#include "../engine/developer.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -136,6 +138,16 @@ void render::Window::initialize() {
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	#endif
 
+	#ifdef EGGINE_DEVELOPER_MODE
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(this->window, true);
+	ImGui_ImplOpenGL3_Init("#version 150");
+	#endif
+
 	#endif // end for ifdef __switch__
 }
 
@@ -190,6 +202,12 @@ void render::Window::prerender() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glfwPollEvents();
 
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	#endif
+
 	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
 	#endif
 }
@@ -208,6 +226,11 @@ void render::Window::render() {
 
 	this->queue.presentImage(this->swapchain, index);
 	#else
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	#endif
+	
 	glfwSwapBuffers(this->window);
 	#endif
 }
