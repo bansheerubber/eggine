@@ -1,0 +1,142 @@
+$Editor::GhostTile = "";
+$Editor::GhostLine = new Array();
+$Editor::MouseDown = false;
+
+$Editor::LastStart = "";
+$Editor::LastEnd = "";
+$Editor::LastDirection = "";
+$Editor::LastAxis  = "";
+
+function onEditorMouseDown(%state) {
+	$Editor::MouseDown = %state;
+
+	if(%state) {
+		$Editor::MouseDownPosition = $Editor::CurrentHoverPosition;
+	}
+	else {
+		for(%i = 0; %i < $Editor::GhostLine.size(); %i++) {
+			%position = $Editor::GhostLine[%i].getPosition();
+			getChunkContainer().setTile(%position, 3);
+		}
+		
+		deleteEditorGhostLine();
+		$Editor::LastDirection = "";
+		$Editor::LastAxis = "";
+	}
+}
+
+function deleteEditorGhostLine() {
+	for(%i = $Editor::GhostLine.size() - 1; %i >= 0; %i--) {
+		$Editor::GhostLine[%i].delete();
+		// $Editor::GhostLine.remove(%i);
+	}
+	$Editor::GhostLine = new Array();
+}
+
+function onHoverTile(%position) {
+	$Editor::CurrentHoverPosition = %position;
+	
+	if($Editor::GhostTile $= "") {
+		// echo("should create tile at " SPC %position[0] SPC %position[1] SPC %position[2]);
+		$Editor::GhostTile = new OverlappingTile();
+		$Editor::GhostTile.setPosition({2; 2; 5});
+		$Editor::GhostTile.setTexture(2);
+		$Editor::GhostTile.setZIndex(50);
+		$Editor::GhostTile.setColor({1; 1; 1; 0.8});
+		$Editor::GhostTile.opacity = 1;
+		$Editor::GhostTile.opacityDirection = -1;
+		$Editor::GhostTile.blink();
+	}
+
+	$Editor::GhostTile.setPosition({%position[0]; %position[1]; %position[2] + 1});
+
+	if($Editor::MouseDown) {
+		%startX = $Editor::MouseDownPosition[0];
+		%endX = $Editor::CurrentHoverPosition[0];
+		if($Editor::CurrentHoverPosition[0] > $Editor::MouseDownPosition[0]) {
+			%directionX = 1;
+		}
+		else {
+			%directionX = -1;
+		}
+
+		%startY = $Editor::MouseDownPosition[1];
+		%endY = $Editor::CurrentHoverPosition[1];
+		if($Editor::CurrentHoverPosition[1] > $Editor::MouseDownPosition[1]) {
+			%directionY = 1;
+		}
+		else {
+			%directionY = -1;
+		}
+
+		if(mAbs(%startY - %endY) > mAbs(%startX - %endX)) {
+			%axis = "y";
+			%start = %startY;
+			%end = %endY;
+			%direction = %directionY;
+		}
+		else {
+			%axis = "x";
+			%start = %startX;
+			%end = %endX;
+			%direction = %directionX;
+		}
+
+		if(%start == %end) {
+			return;
+		}
+
+		// clear out the whole array
+		if($Editor::LastAxis !$= %axis || $Editor::LastDirection != %direction) {
+			deleteEditorGhostLine();
+			$Editor::LastStart = %start;
+			$Editor::LastEnd = %start;
+		}
+
+		%axisVector = %axis $= "x" ? {1; 0} : {0; 1};
+
+		if(mAbs($Editor::LastStart - $Editor::LastEnd) < mAbs(%start - %end)) {
+			for(%i = $Editor::LastEnd; %i != %end; %i += %direction) {
+				// convert the %i into an array index
+				%index = mAbs(%start - %i);
+				%tile = new OverlappingTile();
+				%tile.setZIndex(50);
+				%tile.setColor({1; 1; 1; 0.8});
+				%tile.setPosition({
+					$Editor::MouseDownPosition[0] + %index * %direction * %axisVector[0];
+					$Editor::MouseDownPosition[1] + %index * %direction * %axisVector[1];
+					$Editor::MouseDownPosition[2] + 1
+				});
+				%tile.setTexture(2);
+				$Editor::GhostLine.push(%tile);
+			}
+		}
+		else if(mAbs($Editor::LastStart - $Editor::LastEnd) > mAbs(%start - %end)) {
+			for(%i = $Editor::LastEnd; %i != %end; %i -= %direction) {
+				%index = mAbs(%start - %i) - 1;
+				$Editor::GhostLine[%index].delete();
+				$Editor::GhostLine.remove(%index);
+			}
+		}
+
+		$Editor::LastStart = %start;
+		$Editor::LastEnd = %end;
+		$Editor::LastDirection = %direction;
+		$Editor::LastAxis = %axis;
+	}
+}
+
+function OverlappingTile::blink(%this) {
+	if(%this.opacity < 0.5) {
+		%this.opacityDirection = 1;
+	}
+	else if(%this.opacity > 0.9) {
+		%this.opacityDirection = -1;
+	}
+	%this.opacity += %this.opacityDirection * 0.02;
+
+	%this.setColor({1; 1; 1; %this.opacity});
+	%this.schedule(16, "blink");
+}
+
+addKeybind("editor.mouseDown", "left-mouse-button", "onEditorMouseDown");

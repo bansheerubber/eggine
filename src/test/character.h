@@ -9,7 +9,7 @@
 
 class Character: public OverlappingTile {
 	public:
-		Character(class ChunkContainer* container);
+		Character(class ChunkContainer* container, bool createReference = true);
 		~Character();
 
 		void setPosition(glm::uvec3 position);
@@ -17,7 +17,7 @@ class Character: public OverlappingTile {
 		bool moveTest(glm::uvec3 position);
 };
 
-namespace es {
+namespace es { // order = 2
 	void defineCharacter();
 	esEntryPtr Character__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Character__getPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);

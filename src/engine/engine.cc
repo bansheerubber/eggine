@@ -254,6 +254,14 @@ void Engine::initialize() {
 		"chunk.yAxis"
 	});
 
+	this->addAxis(binds::MOUSE_AXIS_X, binds::Keybind {
+		"chunk.mouseXAxis"
+	});
+
+	this->addAxis(binds::MOUSE_AXIS_Y, binds::Keybind {
+		"chunk.mouseYAxis"
+	});
+
 	this->addAxis(binds::RIGHT_AXIS_Y, binds::Keybind {
 		"camera.zoomAxis"
 	});

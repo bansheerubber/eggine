@@ -12,7 +12,7 @@
 #include "../resources/resourceManager.h"
 #include "tileMath.h"
 
-glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * 15];
+glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
 
 Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) {
@@ -22,14 +22,14 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 		// pre-calculate offsets
 		{
 			for(unsigned i = 0; i < Size * Size; i++) {
-				for(unsigned z = 0; z < 15; z++) {
+				for(unsigned z = 0; z < Chunk::MaxHeight; z++) {
 					glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
 					Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z));
 				}
 			}
 
 			Chunk::Offsets = new render::VertexBuffer(&engine->renderWindow);
-			Chunk::Offsets->setData(&Chunk::OffsetsSource[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * 15, alignof(glm::vec2));
+			Chunk::Offsets->setData(&Chunk::OffsetsSource[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(glm::vec2));
 		}
 	}
 
@@ -39,9 +39,13 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 	this->vertexBuffer = new render::VertexBuffer(&engine->renderWindow);
 	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
 
-	this->textureIndices = new int[Size * Size * this->height];
+	this->textureIndices = new int[Size * Size * Chunk::MaxHeight];
+	for(unsigned i = 0; i < Size * Size * Chunk::MaxHeight; i++) {
+		this->textureIndices[i] = 0;
+	}
+
 	for(unsigned i = 0; i < Size * Size * this->height; i++) {
-		this->textureIndices[i] = 2;
+		this->textureIndices[i] = 3;
 	}
 	
 	// load vertices
@@ -61,7 +65,7 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 
 	// load texture indices
 	{
-		this->vertexBuffer->setData(this->textureIndices, sizeof(int) * Chunk::Size * Chunk::Size * this->height, alignof(int));
+		this->vertexBuffer->setData(this->textureIndices, sizeof(int) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(int));
 		this->vertexAttributes->addVertexAttribute(this->vertexBuffer, 3, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 1);
 	}
 
@@ -155,34 +159,34 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		unsigned int end = 0;
 		bool rendered = false;
 		for(unsigned int i = 0; i < this->height; i++) {
-			end = i + 1;
+			end = i;
 			rendered = false;
 
 			if(this->getLayer(i) != nullptr) { // check if we need to stop and render the layer
 				this->vertexAttributes->bind();
-				engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start) * Chunk::Size * Chunk::Size);
+				engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
 				#ifdef EGGINE_DEBUG
 				this->drawCalls++;
 				#endif
 
 				this->getLayer(i)->render(deltaTime, context);
 
-				start = i;
-				end = i + 1;
+				start = i + 1;
+				end = i;
 				rendered = true;
 			}
 		}
 
 		if(!rendered) { // render remaining tiles at top of the chunk
 			this->vertexAttributes->bind();
-			engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start) * Chunk::Size * Chunk::Size);
+			engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
 			#ifdef EGGINE_DEBUG
 			this->drawCalls++;
 			#endif
 		}
 
 		// render remaining overlapping tiles
-		for(unsigned int i = end - 1; i <= this->maxLayer; i++) {
+		for(unsigned int i = end; i <= this->maxLayer; i++) {
 			if(this->getLayer(i) != nullptr) {
 				this->getLayer(i)->render(deltaTime, context);
 			}
@@ -248,14 +252,17 @@ void Chunk::setTileTexture(glm::uvec3 position, unsigned int spritesheetIndex) {
 	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + position.z * Chunk::Size * Chunk::Size;
 
 	this->vertexBuffer->setSubData(&spritesheetIndex, 1, index * sizeof(unsigned int));
+	this->textureIndices[index] = spritesheetIndex;
+
+	this->height = max(this->height, position.z + 1);
 }
 
 int Chunk::getTileTexture(glm::uvec3 position) {
 	glm::uvec2 relativePosition = glm::uvec2(position.x, position.y) - this->position * (unsigned int)Chunk::Size;
 	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + position.z * Chunk::Size * Chunk::Size;
 
-	if(index > Chunk::Size * Chunk::Size * this->height) {
-		return 99;
+	if(index > Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
+		return 0;
 	}
 	return this->textureIndices[index];
 }

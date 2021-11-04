@@ -6,8 +6,10 @@
 #include "../util/manhattan.h"
 #include "../util/minHeap.h"
 
-Unit::Unit(ChunkContainer* chunkContainer) : Character(chunkContainer) {
-	this->reference = esInstantiateObject(engine->eggscript, "Unit", this);
+Unit::Unit(ChunkContainer* chunkContainer, bool createReference) : Character(chunkContainer, false) {
+	if(createReference) {
+		this->reference = esInstantiateObject(engine->eggscript, "Unit", this);
+	}
 }
 
 Unit::~Unit() {

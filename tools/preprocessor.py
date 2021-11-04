@@ -47,10 +47,17 @@ def handle_headers(filename, contents):
 	for line in contents:
 		if "namespace es" in line:
 			read_namespace = True
+			order = re.compile(r"// order = (\d+)").search(line.strip())
 		elif read_namespace:
 			if "void define" in line:
 				es_definition_headers.append(filename)
-				es_definition_functions.append(re.compile(r"^void ([\w]+)").match(line.strip()).group(1))
+
+				if order == None:
+					order = 0
+				else:
+					order = int(order.group(1))
+
+				es_definition_functions.append((re.compile(r"^void ([\w]+)").match(line.strip()).group(1), order))
 				read_namespace = False
 		
 		if match := re.match(command_pattern, line):
@@ -204,6 +211,7 @@ if __name__ == "__main__":
 	write_file(eggscript_header_tmp, eggscript_header_contents)
 
 	# handle eggscript.cc
+	es_definition_functions.sort(key=lambda item: item[1])
 	eggscript_code = "./src/engine/eggscript.cc"
 	eggscript_code_tmp = "./tmp/engine/eggscript.cc"
 	eggscript_code_contents = []
@@ -212,7 +220,7 @@ if __name__ == "__main__":
 		eggscript_code_contents.append(line)
 
 		if "eggscriptDefinitions" in line:
-			for function in es_definition_functions:
+			for function, _ in es_definition_functions:
 				eggscript_code_contents.append(f"es::{function}();\n")
 	
 	file.close()

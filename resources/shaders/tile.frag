@@ -8,5 +8,5 @@ in vec4 tileColor;
 layout(binding = 0) uniform sampler2D spriteTexture;
 
 void main() {
-	color = texture(spriteTexture, uv) * vec4(tileColor.rgb, 1);
+	color = texture(spriteTexture, uv) * tileColor;
 }

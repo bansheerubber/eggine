@@ -40,6 +40,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		int getTileTexture(glm::uvec3 position);
 
 		static constexpr unsigned int Size = 25;
+		static constexpr unsigned int MaxHeight = 15;
 	
 	protected:
 		class ChunkContainer* container;

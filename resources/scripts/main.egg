@@ -1,39 +1,14 @@
 exec("team.egg");
 exec("unit.egg");
-
-function Character::goUp(%this, %state) {
-	if(%state) {
-		%position = $character.getPosition();
-		$character.setPosition({%position[0]; %position[1] - 1; %position[2]});
-	}
-}
-
-function Character::goDown(%this, %state) {
-	if(%state) {
-		%position = $character.getPosition();
-		$character.setPosition({%position[0]; %position[1] + 1; %position[2]});
-	}
-}
-
-function Character::goLeft(%this, %state) {
-	if(%state) {
-		%position = $character.getPosition();
-		$character.setPosition({%position[0] - 1; %position[1]; %position[2]});
-	}
-}
-
-function Character::goRight(%this, %state) {
-	if(%state) {
-		%position = $character.getPosition();
-		$character.setPosition({%position[0] + 1; %position[1]; %position[2]});
-	}
-}
+exec("editor.egg");
 
 function onSelectTile(%position, %browsing) {
 	if(!%browsing) {
 		%character = getChunkContainer().getCharacter({%position[0]; %position[1]; %position[2] + 1});
 		if(isObject(%character)) {
 			getChunkContainer().selectCharacter(%character);
+			%color = %character.getColor();
+			echo(%color[0] SPC %color[1] SPC %color[2] SPC %color[3]);
 
 			if(%character.maxMoves == "") {
 				%character.maxMoves = 5;

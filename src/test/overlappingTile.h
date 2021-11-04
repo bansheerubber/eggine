@@ -8,11 +8,25 @@
 #include "../renderer/vertexAttributes.h"
 #include "../renderer/vertexBuffer.h"
 
+namespace es { // order = 1
+	void defineOverlappingTile();
+	void OverlappingTile__constructor(esObjectWrapperPtr wrapper);
+	void OverlappingTile__deconstructor(esObjectWrapperPtr wrapper);
+	esEntryPtr OverlappingTile__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__getPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__setTexture(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__getTexture(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__setColor(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__getColor(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__setZIndex(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__getZIndex(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+};
+
 class OverlappingTile : public GameObject {	
 	friend class Layer;
 	
 	public:
-		OverlappingTile(class ChunkContainer* container);
+		OverlappingTile(class ChunkContainer* container, bool createReference = true);
 		~OverlappingTile();
 
 		OverlappingTile* setPosition(glm::uvec3 position);
@@ -31,7 +45,7 @@ class OverlappingTile : public GameObject {
 	protected:
 		class ChunkContainer* container = nullptr;
 		
-		int textureIndex = 3;
+		int textureIndex = 4;
 		glm::vec4 color = glm::vec4(1, 1, 1, 1);
 		unsigned int zIndex = 0;
 		

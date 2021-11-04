@@ -2,8 +2,10 @@
 
 #include "chunkContainer.h"
 
-Character::Character(ChunkContainer* chunkContainer) : OverlappingTile(chunkContainer) {
-	this->reference = esInstantiateObject(engine->eggscript, "Character", this);
+Character::Character(ChunkContainer* chunkContainer, bool createReference) : OverlappingTile(chunkContainer, false) {
+	if(createReference) {
+		this->reference = esInstantiateObject(engine->eggscript, "Character", this);
+	}
 }
 
 Character::~Character() {
@@ -15,34 +17,9 @@ void Character::setPosition(glm::uvec3 position) {
 	OverlappingTile::setPosition(position);
 }
 
-bool Character::move(glm::uvec3 position) {
-	if(this->moveTest(position)) {
-		this->setPosition(position);
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-bool Character::moveTest(glm::uvec3 position) {
-	esEntry arguments[3];
-	arguments[0].type = ES_ENTRY_NUMBER;
-	arguments[0].numberData = position.x;
-	arguments[1].type = ES_ENTRY_NUMBER;
-	arguments[1].numberData = position.y;
-	arguments[2].type = ES_ENTRY_NUMBER;
-	arguments[2].numberData = position.z;
-
-	esEntryPtr result = esCallMethod(engine->eggscript, this->reference, "moveTest", 3, arguments);
-	bool output = result->numberData == 1.0;
-	delete result;
-	return output;
-}
-
 void es::defineCharacter() {
 	esRegisterNamespace(engine->eggscript, "Character");
-	esNamespaceInherit(engine->eggscript, "SimObject", "Character");
+	esNamespaceInherit(engine->eggscript, "OverlappingTile", "Character");
 
 	esEntryType setPositionArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Character__setPosition, "Character", "setPosition", 2, setPositionArguments);

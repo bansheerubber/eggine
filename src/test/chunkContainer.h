@@ -24,6 +24,7 @@ namespace es {
 	esEntryPtr ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
@@ -32,6 +33,7 @@ class ChunkContainer : public RenderObject {
 	friend esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	friend esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend class Engine;
 	
 	public:
@@ -59,6 +61,7 @@ class ChunkContainer : public RenderObject {
 
 		bool isValidTilePosition(glm::ivec3 position);
 
+		void setTile(glm::ivec3 position, int texture);
 		int getTile(glm::ivec3 position);
 
 		// static class Shader* Program;
@@ -81,6 +84,7 @@ class ChunkContainer : public RenderObject {
 		void updateCharacterPosition(class Character* character, glm::uvec3 newPosition);
 		glm::ivec3 findCandidateSelectedTile(glm::vec2 screenSpace);
 		void rightClickTile(glm::ivec3 position);
+		void hoverTile(glm::ivec3 position);
 
 		static constexpr glm::vec2 VerticesSource[4] = {
 			glm::vec2(-0.501f,  1.001f),

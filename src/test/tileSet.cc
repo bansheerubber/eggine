@@ -36,7 +36,7 @@ void TileSet::clear() {
 }
 
 void TileSet::showBorder() {
-	unsigned int tiles[4] = {18, 15, 11, 33};
+	unsigned int tiles[4] = {19, 16, 12, 34};
 	AdjacencyBit masks[4] = {ADJACENT_NORTH, ADJACENT_EAST, ADJACENT_SOUTH, ADJACENT_WEST};
 	
 	this->hideBorder();

@@ -34,6 +34,8 @@ ChunkContainer::ChunkContainer() {
 
 	engine->registerBindAxis("chunk.xAxis", this);
 	engine->registerBindAxis("chunk.yAxis", this);
+	engine->registerBindAxis("chunk.mouseXAxis", this);
+	engine->registerBindAxis("chunk.mouseYAxis", this);
 	
 	if(ChunkContainer::Program == nullptr) {
 		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
@@ -178,9 +180,19 @@ void ChunkContainer::updateCharacterPosition(Character* character, glm::uvec3 ne
 	}
 }
 
+void ChunkContainer::setTile(glm::ivec3 position, int texture) {
+	if(!this->isValidTilePosition(position)) {
+		return;
+	}
+
+	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
+	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
+	this->renderOrder[index].setTileTexture(position, texture);
+}
+
 int ChunkContainer::getTile(glm::ivec3 position) {
 	if(!this->isValidTilePosition(position)) {
-		return 99;
+		return 0;
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
@@ -207,6 +219,12 @@ void ChunkContainer::rightClickTile(glm::ivec3 position) {
 	esCallFunction(engine->eggscript, "onRightClickTile", 1, arguments);
 }
 
+void ChunkContainer::hoverTile(glm::ivec3 position) {
+	esEntry arguments[1];
+	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
+	esCallFunction(engine->eggscript, "onHoverTile", 1, arguments);
+}
+
 glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 	// glm::mat2 basis = glm::mat2(
 	// 	cos(atan(1/2)), sin(atan(1/2)),
@@ -225,7 +243,7 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 	coordinates.x -= 50;
 	coordinates.y += 50;
 	coordinates.z += 49;
-	for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 99; i++) {
+	for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 0; i++) {
 		coordinates.x += 1;
 		coordinates.y -= 1;
 		coordinates.z -= 1;
@@ -279,19 +297,22 @@ void ChunkContainer::onAxis(string &bind, double value) {
 		position.y = -position.y + 0.5;
 		this->selectTile(this->findCandidateSelectedTile(position), true);
 	}
+	else if(bind == "chunk.mouseXAxis" || bind == "chunk.mouseYAxis") {
+		this->hoverTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)));
+	}
 }
 
 void ChunkContainer::commit() {
 	if(this->tileSelectionSprite == nullptr) {
 		this->tileSelectionSprite = (new OverlappingTile(this))
-			->setTexture(17)
+			->setTexture(18)
 			->setPosition(glm::uvec3(0, 0, 0))
 			->setZIndex(1);
 	}
 
 	if(this->characterSelectionSprite == nullptr) {
 		this->characterSelectionSprite = (new OverlappingTile(this))
-			->setTexture(17)
+			->setTexture(18)
 			->setColor(glm::vec4(0.0, 0.55, 1.0, 1.0))
 			->setPosition(glm::uvec3(0, 0, 0))
 			->setZIndex(100);
@@ -318,6 +339,9 @@ void es::defineChunkContainer() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getSelectedCharacter, "ChunkContainer", "getSelectedCharacter", 1, getPlayerTeamArguments);
 
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getChunkContainer, "getChunkContainer", 0, nullptr);
+
+	esEntryType setTileArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setTile, "ChunkContainer", "setTile", 3, setTileArguments);
 
 	esEntryType tileToScreenArguments[1] = {ES_ENTRY_MATRIX};
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::tileToScreen, "tileToScreen", 1, tileToScreenArguments);
@@ -371,6 +395,20 @@ esEntryPtr es::ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsign
 			return nullptr;
 		}
 		return esCreateObject(container->selectedCharacter->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 3 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		glm::ivec3 position(
+			args[1].matrixData->data[0][0].numberData,
+			args[1].matrixData->data[1][0].numberData,
+			args[1].matrixData->data[2][0].numberData
+		);
+
+		container->setTile(position, args[2].numberData);
 	}
 	return nullptr;
 }

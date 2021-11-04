@@ -8,7 +8,7 @@
 #include "character.h"
 #include "tileSet.h"
 
-namespace es {
+namespace es { // order = 3
 	void defineUnit();
 	esEntryPtr Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -19,7 +19,7 @@ class Unit: public Character {
 	friend esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	
 	public:
-		Unit(class ChunkContainer* container);
+		Unit(class ChunkContainer* container, bool createReference = true);
 		~Unit();
 
 		void move(glm::ivec3 position);
