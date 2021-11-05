@@ -27,10 +27,6 @@ ChunkContainer::ChunkContainer() {
 	engine->registerBind("chunk.selectTile", this);
 	engine->registerBind("chunk.mouseSelectTile", this);
 	engine->registerBind("chunk.mouseRightClickTile", this);
-	engine->registerBind("chunk.selectTileUp", this);
-	engine->registerBind("chunk.selectTileDown", this);
-	engine->registerBind("chunk.selectTileLeft", this);
-	engine->registerBind("chunk.selectTileRight", this);
 
 	engine->registerBindAxis("chunk.xAxis", this);
 	engine->registerBindAxis("chunk.yAxis", this);
@@ -262,39 +258,13 @@ void ChunkContainer::onBind(string &bind, binds::Action action) {
 	else if(bind == "chunk.selectTile" && action == binds::PRESS) {
 		this->selectTile(this->tileSelectionSprite->getPosition(), false);
 	}
-	else if(
-		(
-			bind == "chunk.selectTileUp"
-			|| bind == "chunk.selectTileDown"
-			|| bind == "chunk.selectTileLeft"
-			|| bind == "chunk.selectTileRight"
-		) && action == binds::PRESS
-	) {
-		glm::ivec3 position(this->tileSelectionSprite->getPosition());
-		if(bind == "chunk.selectTileUp") {
-			position += glm::ivec3(1, -1, 0);
-		}
-		else if(bind == "chunk.selectTileDown") {
-			position += glm::ivec3(-1, 1, 0);
-		}
-		else if(bind == "chunk.selectTileLeft") {
-			position += glm::ivec3(-1, -1, 0);
-		}
-		else if(bind == "chunk.selectTileRight") {
-			position += glm::ivec3(1, 1, 0);
-		}
-
-		if(position.x >= 0 && position.y >= 0 && position.x < this->size * Chunk::Size && position.y < this->size * Chunk::Size) {
-			this->selectTile(position, true);
-		}
-	}
 }
 
 void ChunkContainer::onAxis(string &bind, double value) {
-	if(bind == "chunk.xAxis" || bind == "chunk.yAxis") {
+	if((bind == "chunk.xAxis" || bind == "chunk.yAxis") && value != 0.0) {
 		glm::vec2 position = engine->camera->getPosition();
 		position.x += 0.5;
-		position.y = -position.y + 0.5;
+		position.y = -position.y;
 		this->selectTile(this->findCandidateSelectedTile(position), true);
 	}
 	else if(bind == "chunk.mouseXAxis" || bind == "chunk.mouseYAxis") {

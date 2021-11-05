@@ -191,22 +191,6 @@ void Engine::initialize() {
 		"chunk.mouseRightClickTile",
 	});
 
-	this->addGamepadBind(binds::D_PAD_UP, binds::Keybind {
-		"chunk.selectTileUp"
-	});
-
-	this->addGamepadBind(binds::D_PAD_DOWN, binds::Keybind {
-		"chunk.selectTileDown"
-	});
-
-	this->addGamepadBind(binds::D_PAD_LEFT, binds::Keybind {
-		"chunk.selectTileLeft"
-	});
-
-	this->addGamepadBind(binds::D_PAD_RIGHT, binds::Keybind {
-		"chunk.selectTileRight"
-	});
-
 	this->mouseToEnum["left-mouse-button"] = GLFW_MOUSE_BUTTON_LEFT;
 	this->mouseToEnum["right-mouse-button"] = GLFW_MOUSE_BUTTON_RIGHT;
 	this->mouseToEnum["middle-mouse-button"] = GLFW_MOUSE_BUTTON_MIDDLE;

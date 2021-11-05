@@ -2,18 +2,39 @@ exec("team.egg");
 exec("unit.egg");
 exec("editor.egg");
 
+$Unit::HoveredTile = "";
+
+function isTileSelectable(%position) {
+	%character = getChunkContainer().getCharacter({%position[0]; %position[1]; %position[2] + 1});
+	if(isObject(%character)) {
+		return %character;
+	}
+	return 0;
+}
+
+addKeybind("unit.gamepadPressTile", "b-button", "onGamepadPressTile");
+function onGamepadPressTile(%state) {
+	if(!%state) {
+		return;
+	}
+
+	%position = $Unit::HoveredTile;
+	if(!isTileSelectable(%position)) {
+		%selectedCharacter = getChunkContainer().getSelectedCharacter();
+		if(isObject(%selectedCharacter) && %selectedCharacter.getDestinations().has(%position)) {
+			%selectedCharacter.move(%position);
+		}
+	}
+}
+
 function onSelectTile(%position, %browsing) {
-	if(!%browsing) {
-		%character = getChunkContainer().getCharacter({%position[0]; %position[1]; %position[2] + 1});
+	if(%browsing) {
+		$Unit::HoveredTile = %position;
+	}
+	else {
+		%character = isTileSelectable(%position);
 		if(isObject(%character)) {
 			getChunkContainer().selectCharacter(%character);
-			%color = %character.getColor();
-			echo(%color[0] SPC %color[1] SPC %color[2] SPC %color[3]);
-
-			if(%character.maxMoves == "") {
-				%character.maxMoves = 5;
-				%character.moves = 5;
-			}
 		}
 	}
 }

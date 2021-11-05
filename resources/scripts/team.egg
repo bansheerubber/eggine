@@ -6,6 +6,12 @@ package destinations {
 		}
 		
 		Parent::selectCharacter(%this, %character);
+
+		if(%character.maxMoves == "") {
+			%character.maxMoves = 5;
+			%character.moves = 5;
+		}
+
 		%character.getDestinations().showBorder();
 	}
 };
@@ -38,11 +44,11 @@ function Team::selectPreviousCharacter(%this, %state) {
 }
 
 function team() {
-	$team = getChunkContainer().getPlayerTeam();
-	$team.addKeybind("team.selectNextCharacter", "l", "selectNextCharacter");
-	$team.addKeybind("team.selectPreviousCharacter", "k", "selectPreviousCharacter");
-	$team.addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
-	$team.addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
+	%team = getChunkContainer().getPlayerTeam();
+	%team.addKeybind("team.selectPreviousCharacter", "[", "selectPreviousCharacter");
+	%team.addKeybind("team.selectNextCharacter", "]", "selectNextCharacter");
+	%team.addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
+	%team.addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
 }
 
 schedule(100, "team");
