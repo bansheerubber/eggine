@@ -29,14 +29,14 @@ class OverlappingTile : public GameObject {
 		OverlappingTile(class ChunkContainer* container, bool createReference = true);
 		~OverlappingTile();
 
-		OverlappingTile* setPosition(glm::uvec3 position);
+		virtual OverlappingTile* setPosition(glm::uvec3 position);
 		glm::uvec3 getPosition();
 
-		OverlappingTile* setTexture(unsigned int index);
+		virtual OverlappingTile* setTexture(unsigned int index);
 		int getTexture();
-		OverlappingTile* setColor(glm::vec4 color);
+		virtual OverlappingTile* setColor(glm::vec4 color);
 		glm::vec4 getColor();
-		OverlappingTile* setZIndex(unsigned int zIndex);
+		virtual OverlappingTile* setZIndex(unsigned int zIndex);
 		unsigned int getZIndex();
 
 		class ChunkContainer* getContainer();

@@ -2,7 +2,7 @@
 
 #include "chunkContainer.h"
 
-Character::Character(ChunkContainer* chunkContainer, bool createReference) : OverlappingTile(chunkContainer, false) {
+Character::Character(ChunkContainer* chunkContainer, bool createReference) : InterweavedTile(chunkContainer, false) {
 	if(createReference) {
 		this->reference = esInstantiateObject(engine->eggscript, "Character", this);
 	}
@@ -12,9 +12,9 @@ Character::~Character() {
 	esDeleteObject(this->reference);
 }
 
-void Character::setPosition(glm::uvec3 position) {
+OverlappingTile* Character::setPosition(glm::uvec3 position) {
 	this->container->updateCharacterPosition(this, position);
-	OverlappingTile::setPosition(position);
+	return InterweavedTile::setPosition(position);
 }
 
 void es::defineCharacter() {

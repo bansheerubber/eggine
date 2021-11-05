@@ -6,6 +6,7 @@
 #include "chunkContainer.h"
 #include "../util/doubleDimension.h"
 #include "../engine/engine.h"
+#include "interweavedTile.h"
 #include "layer.h"
 #include "../basic/line.h"
 #include "overlappingTile.h"
@@ -14,6 +15,25 @@
 
 glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
+
+void initInterweavedTileWrapper(Chunk* chunk, InterweavedTileWrapper* tile) {
+	*tile = {};
+}
+
+int compareInterweavedTile(InterweavedTileWrapper* a, InterweavedTileWrapper* b) {
+	InterweavedTileWrapper* a2 = (InterweavedTileWrapper*)a;
+	InterweavedTileWrapper* b2 = (InterweavedTileWrapper*)b;
+
+	if(*a2 > *b2) {
+		return 1;
+	}
+	else if(*a2 < *b2) {
+		return -1;
+	}
+	else {
+		return 0;
+	}
+}
 
 Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) {
 	this->container = container;
@@ -118,10 +138,51 @@ void Chunk::buildDebugLines() {
 	this->debugLine->commit();
 }
 
+size_t Chunk::renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context) {
+	unsigned int total = Chunk::Size * Chunk::Size * this->height;
+	unsigned int lastIndex = startIndex;
+	size_t leftOff = startInterweavedIndex;
+	size_t limit = startIndex + amount;
+	InterweavedTileWrapper* tile = nullptr;
+
+	for(
+		size_t i = startInterweavedIndex;
+		i < this->interweavedTiles.array.head && (tile = &this->interweavedTiles.array[i])->index < limit;
+		i++
+	) { // go through interweaved tiles
+		int overlapBias = ChunkContainer::Image->drawOntopOfOverlap(this->textureIndices[tile->index]) ? 0 : 1;
+		if(lastIndex - 1 != tile->index) {
+			// draw [last, lastInterweavedIndex - tile.index + last)
+			// we need to reset the pipeline since we could have drawn an overlapping tile before this batch
+			this->vertexAttributes->bind();
+			engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastIndex, tile->index - lastIndex + overlapBias);
+			#ifdef EGGINE_DEBUG
+			this->drawCalls++;
+			#endif
+		}
+
+		tile->tile->render(deltaTime, context);
+
+		lastIndex = tile->index + overlapBias;
+
+		leftOff = i + 1;
+	}
+
+	this->vertexAttributes->bind();
+	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastIndex, limit - lastIndex);
+	#ifdef EGGINE_DEBUG
+	this->drawCalls++;
+	#endif
+
+	return leftOff;
+}
+
 void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	#ifdef EGGINE_DEBUG
 	this->drawCalls = 0;
 	#endif
+
+	int interweavedIndex = 0;
 
 	struct VertexBlock {
 		glm::mat4 projection;
@@ -157,6 +218,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		// try to draw as many layers at once as we can
 		unsigned int start = 0;
 		unsigned int end = 0;
+		size_t interweavedIndex = 0;
 		bool rendered = false;
 		for(unsigned int i = 0; i < this->height; i++) {
 			end = i;
@@ -164,10 +226,8 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 			if(this->getLayer(i) != nullptr) { // check if we need to stop and render the layer
 				this->vertexAttributes->bind();
-				engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
-				#ifdef EGGINE_DEBUG
-				this->drawCalls++;
-				#endif
+				// engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
+				interweavedIndex = this->renderWithInterweavedTiles(interweavedIndex, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size, deltaTime, context);
 
 				this->getLayer(i)->render(deltaTime, context);
 
@@ -179,10 +239,8 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 		if(!rendered) { // render remaining tiles at top of the chunk
 			this->vertexAttributes->bind();
-			engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
-			#ifdef EGGINE_DEBUG
-			this->drawCalls++;
-			#endif
+			// engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
+			interweavedIndex = this->renderWithInterweavedTiles(interweavedIndex, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size, deltaTime, context);
 		}
 
 		// render remaining overlapping tiles
@@ -190,6 +248,11 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 			if(this->getLayer(i) != nullptr) {
 				this->getLayer(i)->render(deltaTime, context);
 			}
+		}
+
+		// draw overlapping tiles above the height of the chunk
+		for(size_t i = interweavedIndex; i < this->interweavedTiles.array.head; i++) {
+			this->interweavedTiles.array[i].tile->render(deltaTime, context);
 		}
 
 		#ifdef EGGINE_DEBUG
@@ -239,6 +302,39 @@ void Chunk::removeOverlappingTile(OverlappingTile* tile) {
 	this->overlappingTiles.erase(tile);
 }
 
+void Chunk::addInterweavedTile(InterweavedTile* tile) {
+	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+
+	this->interweavedTiles.insert(InterweavedTileWrapper {
+		index: index,
+		tile: tile,
+	});
+}
+
+void Chunk::updateInterweavedTile(InterweavedTile* tile) {
+	// find the tile and update its index
+	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+
+	for(size_t i = 0; i < this->interweavedTiles.array.head; i++) {
+		if(this->interweavedTiles.array[i].tile == tile) {
+			this->interweavedTiles.array[i].index = index;
+		}
+	}
+
+	this->interweavedTiles.sort();
+}
+
+void Chunk::removeInterweavedTile(InterweavedTile* tile) {
+	if(this->interweavedTiles.array.head != 0) { // signifies that the array has been deallocated
+		this->interweavedTiles.remove(InterweavedTileWrapper {
+			index: 0,
+			tile: tile,
+		});
+	}	
+}
+
 Layer* Chunk::getLayer(unsigned int z) {
 	auto found = this->layers.find(z);
 	if(found == this->layers.end()) {
@@ -265,4 +361,22 @@ int Chunk::getTileTexture(glm::uvec3 position) {
 		return 0;
 	}
 	return this->textureIndices[index];
+}
+
+bool InterweavedTileWrapper::operator<(const InterweavedTileWrapper &other) {
+	if(this->index == other.index) {
+		return this->tile->getZIndex() < other.tile->getZIndex();
+	}
+	return this->index < other.index;
+}
+
+bool InterweavedTileWrapper::operator>(const InterweavedTileWrapper &other) {
+	if(this->index == other.index) {
+		return this->tile->getZIndex() > other.tile->getZIndex();
+	}
+	return this->index > other.index;
+}
+
+bool InterweavedTileWrapper::operator==(const InterweavedTileWrapper &other) {
+	return this->tile == other.tile;
 }

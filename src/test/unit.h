@@ -8,7 +8,7 @@
 #include "character.h"
 #include "tileSet.h"
 
-namespace es { // order = 3
+namespace es { // order = 4
 	void defineUnit();
 	esEntryPtr Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);

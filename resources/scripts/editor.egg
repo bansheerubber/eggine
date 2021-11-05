@@ -38,7 +38,7 @@ function onHoverTile(%position) {
 	
 	if($Editor::GhostTile $= "") {
 		// echo("should create tile at " SPC %position[0] SPC %position[1] SPC %position[2]);
-		$Editor::GhostTile = new OverlappingTile();
+		$Editor::GhostTile = new InterweavedTile();
 		$Editor::GhostTile.setPosition({2; 2; 5});
 		$Editor::GhostTile.setTexture(2);
 		$Editor::GhostTile.setZIndex(50);
@@ -99,7 +99,7 @@ function onHoverTile(%position) {
 			for(%i = $Editor::LastEnd; %i != %end; %i += %direction) {
 				// convert the %i into an array index
 				%index = mAbs(%start - %i);
-				%tile = new OverlappingTile();
+				%tile = new InterweavedTile();
 				%tile.setZIndex(50);
 				%tile.setColor({1; 1; 1; 0.8});
 				%tile.setPosition({

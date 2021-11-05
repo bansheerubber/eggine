@@ -15,8 +15,21 @@
 
 class Tile;
 
+struct InterweavedTileWrapper {
+	unsigned int index;
+	class InterweavedTile* tile;
+
+	bool operator<(const InterweavedTileWrapper &other);
+	bool operator>(const InterweavedTileWrapper &other);
+	bool operator==(const InterweavedTileWrapper &other);
+};
+
+int compareInterweavedTile(InterweavedTileWrapper* a, InterweavedTileWrapper* b);
+void initInterweavedTileWrapper(class Chunk* chunk, InterweavedTileWrapper* tile);
+
 class Chunk : public InstancedRenderObjectContainer<Tile> {
 	friend class ChunkContainer;
+	friend class InterweavedTile;
 	friend class OverlappingTile;
 	
 	public:
@@ -45,6 +58,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	protected:
 		class ChunkContainer* container;
 
+		SortedArray<InterweavedTileWrapper, Chunk> interweavedTiles = SortedArray<InterweavedTileWrapper, Chunk>(this, compareInterweavedTile, initInterweavedTileWrapper, nullptr);
 		tsl::robin_set<class OverlappingTile*> overlappingTiles;
 		tsl::robin_map<unsigned int, class Layer*> layers;
 		unsigned int maxLayer = 0;
@@ -62,9 +76,15 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		int drawCalls = 0;
 		#endif
 
+		size_t renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context);
+
 		void addOverlappingTile(class OverlappingTile* tile);
 		void updateOverlappingTile(class OverlappingTile* tile);
 		void removeOverlappingTile(class OverlappingTile* tile);
+
+		void addInterweavedTile(class InterweavedTile* tile);
+		void updateInterweavedTile(class InterweavedTile* tile);
+		void removeInterweavedTile(class InterweavedTile* tile);
 		
 		void buildDebugLines();
 		void defineBounds();
