@@ -1,21 +1,3 @@
-package destinations {
-	function ChunkContainer::selectCharacter(%this, %character) {
-		%test = getChunkContainer().getSelectedCharacter();
-		if(isObject(%test)) {
-			%test.getDestinations().hideBorder();
-		}
-		
-		Parent::selectCharacter(%this, %character);
-
-		if(%character.maxMoves == "") {
-			%character.maxMoves = 5;
-			%character.moves = 5;
-		}
-
-		%character.getDestinations().showBorder();
-	}
-};
-
 function Team::selectNextCharacter(%this, %state) {
 	if(!%state) {
 		return;

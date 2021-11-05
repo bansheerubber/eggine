@@ -30,6 +30,13 @@ function onGamepadPressTile(%state) {
 function onSelectTile(%position, %browsing) {
 	if(%browsing) {
 		$Unit::HoveredTile = %position;
+		%character = getChunkContainer().getSelectedCharacter();
+		if(isObject(%character)) {
+			%path = %character.getPath(%position);
+			if(isObject(%path)) {
+				%path.showDots();
+			}
+		}
 	}
 	else {
 		%character = isTileSelectable(%position);

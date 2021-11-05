@@ -34,7 +34,16 @@ function deleteEditorGhostLine() {
 }
 
 function onHoverTile(%position) {
+	%character = getChunkContainer().getSelectedCharacter();
+	if(isObject(%character)) {
+		%path = %character.getPath(%position);
+		if(isObject(%path)) {
+			%path.showDots();
+		}
+	}
+	
 	$Editor::CurrentHoverPosition = %position;
+	$Unit::HoveredTile = %position;
 	
 	if($Editor::GhostTile $= "") {
 		// echo("should create tile at " SPC %position[0] SPC %position[1] SPC %position[2]);

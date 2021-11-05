@@ -11,11 +11,13 @@
 namespace es { // order = 4
 	void defineUnit();
 	esEntryPtr Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Unit__getPath(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
 class Unit: public Character {
 	friend esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend esEntryPtr es::Unit__getPath(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	
 	public:
@@ -26,6 +28,7 @@ class Unit: public Character {
 
 	private:
 		TileSet destinations;
+		TileSet* path = nullptr;
 		unsigned int moves = 5;
 
 		struct {
@@ -34,4 +37,5 @@ class Unit: public Character {
 		} lastDestinationsCalculation;
 
 		void calculateDestinations();
+		TileSet* getPath(glm::ivec3 end);
 };

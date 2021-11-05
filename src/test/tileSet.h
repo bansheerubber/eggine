@@ -27,8 +27,10 @@ class TileSet: public GameObject {
 		void clear();
 		bool has(glm::uvec3 position);
 		AdjacencyBitmask adjacency(glm::ivec3 position);
+		void showDots();
 		void showBorder();
 		void hideBorder();
+		TileSet* pathfind(glm::ivec3 start, glm::ivec3 end);
 	
 	protected:
 		tsl::robin_set<glm::uvec3> set;
@@ -42,5 +44,6 @@ namespace es {
 	esEntryPtr TileSet__clear(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr TileSet__has(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr TileSet__showBorder(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr TileSet__showDots(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr TileSet__hideBorder(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };

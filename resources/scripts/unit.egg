@@ -16,6 +16,10 @@ package unit {
 
 		if(%this == getChunkContainer().getSelectedCharacter()) {
 			%this.getDestinations().showBorder(); // re-render border if we move
+			%path = %this.getPath($Unit::HoveredTile);
+			if(isObject(%path)) {
+				%path.showDots();
+			}
 		}
 	}
 
@@ -24,6 +28,27 @@ package unit {
 
 		if(%this == getChunkContainer().getSelectedCharacter()) {
 			%this.getDestinations().showBorder(); // re-render border if we move
+			%path = %this.getPath($Unit::HoveredTile);
+			if(isObject(%path)) {
+				%path.showDots();
+			}
 		}
+	}
+
+	function ChunkContainer::selectCharacter(%this, %character) {
+		%test = getChunkContainer().getSelectedCharacter();
+		if(isObject(%test)) {
+			%test.getDestinations().hideBorder();
+			%test.getPath($Unit::HoveredTile);
+		}
+		
+		Parent::selectCharacter(%this, %character);
+
+		if(%character.maxMoves == "") {
+			%character.maxMoves = 5;
+			%character.moves = 5;
+		}
+
+		%character.getDestinations().showBorder();
 	}
 };
