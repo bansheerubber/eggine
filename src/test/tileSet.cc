@@ -2,6 +2,7 @@
 
 #include <queue>
 
+#include "chunkContainer.h"
 #include "../engine/engine.h"
 #include "../util/manhattan.h"
 #include "overlappingTile.h"
@@ -122,9 +123,8 @@ TileSet* TileSet::pathfind(glm::ivec3 start, glm::ivec3 end) {
 			return output;
 		}
 
-		// TODO generalize neighbor test for unit movement and pathfinding
-		for(unsigned int i = 0; i < 4; i++) {
-			glm::ivec3 neighbor = entry.position + offsets[i];
+		for(auto it = engine->chunkContainer->getNeighbors(entry.position); !it.atEnd(); ++it) {
+			glm::ivec3 neighbor = it.value();
 			if(!this->has(neighbor)) {
 				continue;
 			}

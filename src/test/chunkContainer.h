@@ -9,6 +9,7 @@
 
 #include "chunk.h"
 #include "../util/dynamicArray.h"
+#include "neighbors.h"
 #include "../renderer/program.h"
 #include "../basic/renderObject.h"
 #include "../resources/spriteSheet.h"
@@ -30,6 +31,7 @@ namespace es {
 
 class ChunkContainer : public RenderObject {
 	friend class Character;
+	friend TileNeighborIterator;
 	friend esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
@@ -63,6 +65,7 @@ class ChunkContainer : public RenderObject {
 
 		void setTile(glm::ivec3 position, int texture);
 		int getTile(glm::ivec3 position);
+		TileNeighborIterator getNeighbors(glm::ivec3 position);
 
 		// static class Shader* Program;
 		static render::Program* Program;

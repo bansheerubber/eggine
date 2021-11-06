@@ -66,8 +66,9 @@ void Unit::calculateDestinations() {
 	while(queue.size() != 0) {
 		DijkstraEntry entry = queue.top();
 		queue.pop();
-		for(unsigned int i = 0; i < 4; i++) {
-			glm::ivec3 neighbor = entry.position + offsets[i];
+
+		for(auto it = this->container->getNeighbors(entry.position); !it.atEnd(); ++it) {
+			glm::ivec3 neighbor = it.value();
 			if(!this->container->isValidTilePosition(neighbor)) {
 				continue;
 			}

@@ -209,6 +209,10 @@ void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
 	esCallFunction(engine->eggscript, "onSelectTile", 2, arguments);
 }
 
+TileNeighborIterator ChunkContainer::getNeighbors(glm::ivec3 position) {
+	return TileNeighborIterator(this, position);
+}
+
 void ChunkContainer::rightClickTile(glm::ivec3 position) {
 	esEntry arguments[1];
 	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
