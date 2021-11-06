@@ -196,6 +196,10 @@ int ChunkContainer::getTile(glm::ivec3 position) {
 	return this->renderOrder[index].getTileTexture(position);
 }
 
+resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position) {
+	return ChunkContainer::Image->getSpriteInfo(this->getTile(position));
+}
+
 void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
 	if(!this->isValidTilePosition(position)) {
 		return;

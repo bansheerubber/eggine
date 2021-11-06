@@ -2,6 +2,14 @@
 
 #include <glm/vec3.hpp>
 
+enum NeighborDirection {
+	INVALID_DIRECTION = 0,
+	DIRECTION_NORTH,
+	DIRECTION_EAST,
+	DIRECTION_SOUTH,
+	DIRECTION_WEST
+};
+
 class TileNeighborIterator {
 	public:
 		TileNeighborIterator(class ChunkContainer* container, glm::ivec3 position);
@@ -18,5 +26,5 @@ class TileNeighborIterator {
 		class ChunkContainer* container;
 
 		void iterateTile();
-		bool testTile(glm::ivec3);
+		bool testTile(glm::ivec3 position, NeighborDirection direction);
 };

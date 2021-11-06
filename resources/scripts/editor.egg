@@ -22,6 +22,15 @@ function onEditorMouseDown(%state) {
 		deleteEditorGhostLine();
 		$Editor::LastDirection = "";
 		$Editor::LastAxis = "";
+
+		getChunkContainer().setTile(
+			{
+				$Editor::CurrentHoverPosition[0];
+				$Editor::CurrentHoverPosition[1];
+				$Editor::CurrentHoverPosition[2] + 1
+			},
+			$Editor::GhostTile.getTexture()
+		);
 	}
 }
 

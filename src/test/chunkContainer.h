@@ -65,6 +65,7 @@ class ChunkContainer : public RenderObject {
 
 		void setTile(glm::ivec3 position, int texture);
 		int getTile(glm::ivec3 position);
+		resources::SpriteSheetInfo getSpriteInfo(glm::ivec3 position);
 		TileNeighborIterator getNeighbors(glm::ivec3 position);
 
 		// static class Shader* Program;

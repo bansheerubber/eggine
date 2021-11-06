@@ -56,13 +56,6 @@ void Unit::calculateDestinations() {
 		moves: 5,
 	});
 
-	glm::ivec3 offsets[4] = {
-		glm::ivec3(1, 0, 0),
-		glm::ivec3(-1, 0, 0),
-		glm::ivec3(0, 1, 0),
-		glm::ivec3(0, -1, 0),
-	};
-
 	while(queue.size() != 0) {
 		DijkstraEntry entry = queue.top();
 		queue.pop();

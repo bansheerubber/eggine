@@ -28,6 +28,7 @@ resources::SpriteSheet::SpriteSheet(
 
 	for(size_t i = 0; i < this->spriteSheetAmount; i++) {
 		string info = metadata->getMetadata("sprite" + to_string(i));
+		this->spriteInfo[i].wall = NO_WALL;
 		if(info.size()) {
 			do {
 				size_t position = info.find(' ');
@@ -65,7 +66,18 @@ resources::SpriteSheet::SpriteSheet(
 			}
 			while(info.size() > 0);
 		}
+		this->spriteInfo.pushed();
 	}
+}
+
+resources::SpriteSheetInfo resources::SpriteSheet::getSpriteInfo(size_t index) {
+	if(index < this->spriteInfo.head) {
+		return this->spriteInfo[index];
+	}
+
+	return {
+		wall: NO_WALL,
+	};
 }
 
 bool resources::SpriteSheet::drawOntopOfOverlap(size_t spriteIndex) {
