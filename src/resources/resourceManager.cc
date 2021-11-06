@@ -2,6 +2,7 @@
 
 #include "../engine/developer.h"
 
+#include "../test/developerGui.h"
 #include "../engine/engine.h"
 #include "../util/png.h"
 #include "../util/crop.h"
@@ -17,17 +18,17 @@ void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t buff
 
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(file->getFileName() == "spritesheets/spritesheet.png") {
-		engine->renderWindow.spritesheet = loadPng((unsigned char*)buffer, bufferSize);
+		engine->developerGui->spritesheet = loadPng((unsigned char*)buffer, bufferSize);
 		for(unsigned int i = 0; i < stoi(file->metadata->getMetadata("amount")); i++) {
 			glm::ivec2 start = tilemath::textureIndexToXY(i, 1057, 391);
-			cropped result = crop(engine->renderWindow.spritesheet, start.x, start.y, 64, 128);
+			cropped result = crop(engine->developerGui->spritesheet, start.x, start.y, 64, 128);
 
 			render::Texture* texture = new render::Texture(&engine->renderWindow);
 			texture->setFilters(render::TEXTURE_FILTER_NEAREST, render::TEXTURE_FILTER_NEAREST);
 			texture->setWrap(render::TEXTURE_WRAP_CLAMP_TO_BORDER, render::TEXTURE_WRAP_CLAMP_TO_BORDER);
 			texture->load(result.buffer, result.bufferSize, result.width, result.height, result.source.bitDepth, result.source.channels);
 
-			engine->renderWindow.spritesheetImages.push_back(texture);
+			engine->developerGui->spritesheetImages.push_back(texture);
 
 			delete[] result.buffer;
 		}

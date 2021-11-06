@@ -12,6 +12,8 @@
 
 using namespace std;
 
+class DeveloperGui;
+
 namespace render {
 	enum TextureFilter {
 		TEXTURE_FILTER_INVALID,
@@ -209,6 +211,7 @@ namespace render {
 	#endif
 	
 	class Texture {
+		friend DeveloperGui;
 		friend class Window;
 		
 		public:

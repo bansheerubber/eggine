@@ -178,11 +178,6 @@ namespace render {
 			GLFWwindow* window = nullptr;
 			GLFWgamepadstate gamepad;
 			bool hasGamepad;
-
-			#ifdef EGGINE_DEVELOPER_MODE
-			png spritesheet;
-			vector<render::Texture*> spritesheetImages;
-			#endif
 			#endif
 
 		protected:

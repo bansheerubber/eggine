@@ -16,7 +16,7 @@ function onEditorMouseDown(%state) {
 	else {
 		for(%i = 0; %i < $Editor::GhostLine.size(); %i++) {
 			%position = $Editor::GhostLine[%i].getPosition();
-			getChunkContainer().setTile(%position, 3);
+			getChunkContainer().setTile(%position, $Editor::GhostTile.getTexture());
 		}
 		
 		deleteEditorGhostLine();
@@ -31,6 +31,10 @@ function deleteEditorGhostLine() {
 		// $Editor::GhostLine.remove(%i);
 	}
 	$Editor::GhostLine = new Array();
+}
+
+function onDevTextureSwitch(%texture) {
+	$Editor::GhostTile.setTexture(%texture);
 }
 
 function onHoverTile(%position) {
@@ -116,7 +120,7 @@ function onHoverTile(%position) {
 					$Editor::MouseDownPosition[1] + %index * %direction * %axisVector[1];
 					$Editor::MouseDownPosition[2] + 1
 				});
-				%tile.setTexture(2);
+				%tile.setTexture($Editor::GhostTile.getTexture());
 				$Editor::GhostLine.push(%tile);
 			}
 		}

@@ -9,10 +9,11 @@
 #endif
 
 #include "callbacks.h"
+#include "../test/developerGui.h"
+#include "eggscript.h"
 #include "../basic/renderContext.h"
 #include "../resources/scriptFile.h"
 #include "../util/time.h"
-#include "eggscript.h"
 
 Engine* engine = new Engine();
 
@@ -261,6 +262,10 @@ void Engine::initialize() {
 		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
 	)[0];
 	esExecFileFromContents(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	this->developerGui = new DeveloperGui();
+	#endif
 }
 
 void Engine::exit() {
@@ -283,6 +288,10 @@ void Engine::tick() {
 	this->lastRenderTime = getMicrosecondsNow();
 
 	this->renderWindow.prerender();
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	this->developerGui->prerender();
+	#endif
 
 	#ifdef __switch__ // handle switch binds
 	binds::Axes axes[4] = {binds::LEFT_AXIS_X, binds::LEFT_AXIS_Y, binds::RIGHT_AXIS_X, binds::RIGHT_AXIS_Y};
@@ -393,6 +402,10 @@ void Engine::tick() {
 	for(size_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
 	}
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	this->developerGui->render();
+	#endif
 
 	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
 

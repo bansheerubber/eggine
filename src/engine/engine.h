@@ -1,5 +1,7 @@
 #pragma once
 
+#include "developer.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <tsl/robin_map.h>
@@ -83,6 +85,10 @@ class Engine {
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;
+		#endif
+
+		#ifdef EGGINE_DEVELOPER_MODE
+		class DeveloperGui* developerGui;
 		#endif
 		
 		void initialize();
