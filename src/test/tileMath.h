@@ -17,5 +17,6 @@ namespace tilemath {
 		glm::vec2 maximum;
 	};
 
+	glm::ivec2 textureIndexToXY(unsigned int index, unsigned int width, unsigned int height);
 	TileUV textureIndexToUV(unsigned int index, unsigned int width, unsigned int height);
 }

@@ -7,10 +7,18 @@
 #include <GLFW/glfw3.h>
 #endif
 
-#include <glm/vec4.hpp>
+#include "../engine/developer.h"
 
+#include <glm/vec4.hpp>
+#include <vector>
+
+#include "../util/crop.h"
 #include "memory.h"
+#include "../util/png.h"
+#include "../renderer/texture.h"
 #include "../util/time.h"
+
+using namespace std;
 
 namespace render {
 	enum PrimitiveType {
@@ -170,6 +178,11 @@ namespace render {
 			GLFWwindow* window = nullptr;
 			GLFWgamepadstate gamepad;
 			bool hasGamepad;
+
+			#ifdef EGGINE_DEVELOPER_MODE
+			png spritesheet;
+			vector<render::Texture*> spritesheetImages;
+			#endif
 			#endif
 
 		protected:

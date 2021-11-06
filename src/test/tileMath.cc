@@ -45,6 +45,17 @@ glm::vec2 tilemath::tileToScreen(glm::vec3 coordinate) {
 	);
 }
 
+glm::ivec2 tilemath::textureIndexToXY(unsigned int index, unsigned int width, unsigned int height) {
+	int spriteWidth = 64.0;
+	int spriteHeight = 128.0;
+	float padding = 1;
+	int spritesOnRow = (int)width / (int)spriteWidth;
+	int x = index % spritesOnRow;
+	int y = index / spritesOnRow;
+
+	return glm::ivec2(spriteWidth * x + 2 * x + 1, spriteHeight * y + 2 * y + 1);
+}
+
 tilemath::TileUV tilemath::textureIndexToUV(unsigned int index, unsigned int width, unsigned int height) {
 	float spriteWidth = 64.0;
 	float spriteHeight = 128.0;
