@@ -84,7 +84,7 @@ void render::Program::bind() {
 	#endif
 }
 
-void render::Program::bindUniform(string uniformName, void* data, unsigned int size) {
+void render::Program::bindUniform(string uniformName, void* data, unsigned int size, size_t cacheIndex, bool setOnce) {
 	#ifdef __switch__
 	if(this->uniformToPiece.find(uniformName) == this->uniformToPiece.end()) {
 		this->createUniformMemory(uniformName, size);
@@ -111,15 +111,21 @@ void render::Program::bindUniform(string uniformName, void* data, unsigned int s
 		}
 	}
 	#else
-	auto found = this->uniformToBuffer.find(uniformName);
+	auto found = this->uniformToBuffer.find(pair<string, size_t>(uniformName, cacheIndex));
+	bool created = false;
 	if(found == this->uniformToBuffer.end()) {
-		this->createUniformBuffer(uniformName, size);
-		found = this->uniformToBuffer.find(uniformName);
+		this->createUniformBuffer(uniformName, size, cacheIndex);
+		found = this->uniformToBuffer.find(pair<string, size_t>(uniformName, cacheIndex));
+		created = true;
 	}
 
 	glBindBuffer(GL_UNIFORM_BUFFER, found.value());
-	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW); // orphan the buffer
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+
+	if(created || !setOnce) { // only update the buffer if we really need to
+		glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW); // orphan the buffer
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+	}
+
 	glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), found.value());
 	#endif
 }
@@ -141,12 +147,12 @@ void render::Program::createUniformMemory(string uniformName, unsigned int size)
 	);
 }
 #else
-void render::Program::createUniformBuffer(string uniformName, unsigned int size) {
+void render::Program::createUniformBuffer(string uniformName, unsigned int size, size_t cacheIndex) {
 	GLuint bufferId;
 	glGenBuffers(1, &bufferId);
-	this->uniformToBuffer[uniformName] = bufferId;
+	this->uniformToBuffer[pair<string, size_t>(uniformName, cacheIndex)] = bufferId;
 
-	glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[uniformName]);
+	glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[pair<string, size_t>(uniformName, cacheIndex)]);
 	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 }
 #endif
