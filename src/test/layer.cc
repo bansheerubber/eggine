@@ -7,8 +7,8 @@
 #include "tileMath.h"
 
 int layerTilesCompare(class OverlappingTile** a, class OverlappingTile** b) {
-	unsigned int indexA = tilemath::coordinateToIndex((*a)->getPosition(), Chunk::Size);
-	unsigned int indexB = tilemath::coordinateToIndex((*b)->getPosition(), Chunk::Size);
+	unsigned int indexA = tilemath::coordinateToIndex((*a)->getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
+	unsigned int indexB = tilemath::coordinateToIndex((*b)->getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
 	if(indexA > indexB) {
 		return 1;
 	}

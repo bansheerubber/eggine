@@ -16,8 +16,8 @@ void Team::add(Unit* unit) {
 }
 
 int teamUnitSort(Unit** unit1, Unit** unit2) {
-	glm::vec2 screen1 = tilemath::tileToScreen((*unit1)->getPosition());
-	glm::vec2 screen2 = tilemath::tileToScreen((*unit2)->getPosition());
+	glm::vec2 screen1 = tilemath::tileToScreen((*unit1)->getPosition(), engine->chunkContainer->getRotation());
+	glm::vec2 screen2 = tilemath::tileToScreen((*unit2)->getPosition(), engine->chunkContainer->getRotation());
 	
 	if(screen1.x > screen2.x) {
 		return 1;

@@ -31,12 +31,12 @@ OverlappingTile* OverlappingTile::setPosition(glm::uvec3 position) {
 	this->position = position;
 
 	glm::uvec2 chunkPosition(position.x / Chunk::Size, position.y / Chunk::Size);
-	Chunk &chunk = this->container->getChunk(tilemath::coordinateToIndex(chunkPosition, this->container->size));
+	Chunk &chunk = this->container->getChunk(tilemath::coordinateToIndex(chunkPosition, this->container->getSize(), this->container->getRotation()));
 
 	glm::uvec3 relativePosition = this->position;
 	relativePosition.x -= chunk.position.x * Chunk::Size; // we add the chunk position to the tile in the shader
 	relativePosition.y -= chunk.position.y * Chunk::Size;
-	this->screenSpacePosition = tilemath::tileToScreen(relativePosition);
+	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, this->container->getRotation());
 
 	bool initialized = false;
 	if(this->chunk != &chunk) {

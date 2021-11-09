@@ -14,6 +14,7 @@
 #include "../renderer/program.h"
 #include "../basic/renderObject.h"
 #include "../resources/spriteSheet.h"
+#include "tileMath.h"
 
 using namespace std;
 
@@ -44,11 +45,16 @@ class ChunkContainer : public RenderObject {
 		~ChunkContainer();
 
 		// ## game_object_definitions ChunkContainer
-		unsigned int size = 0;
 		Map map = Map(this);
 
 		void selectCharacter(class Character* character);
 		void selectTile(glm::ivec3 position, bool browsing);
+
+		void setSize(unsigned int size);
+		unsigned int getSize();
+
+		void setRotation(tilemath::Rotation rotation);
+		tilemath::Rotation getRotation();
 		
 		Chunk& addChunk(glm::uvec2 position);
 		Chunk& getChunk(size_t index);
@@ -78,6 +84,9 @@ class ChunkContainer : public RenderObject {
 		static render::VertexBuffer* Colors;
 	
 	private:
+		unsigned int size = 0;
+		tilemath::Rotation rotation = tilemath::ROTATION_0_DEG;
+		
 		class OverlappingTile* tileSelectionSprite = nullptr;
 		class OverlappingTile* characterSelectionSprite = nullptr;
 		class Character* selectedCharacter = nullptr;

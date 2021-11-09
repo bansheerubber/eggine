@@ -60,8 +60,13 @@ void TileSet::showBorder() {
 		AdjacencyBitmask bitmask = this->adjacency(position);
 		for(unsigned int i = 0; i < 4; i++) {
 			if(~bitmask & masks[i]) {
+				int textureIndex = i - engine->chunkContainer->getRotation();
+				if(textureIndex < 0) {
+					textureIndex += 4;
+				}
+
 				OverlappingTile* tile = (new OverlappingTile(engine->chunkContainer))
-					->setTexture(tiles[i])
+					->setTexture(tiles[textureIndex])
 					->setPosition(position)
 					->setZIndex(1);
 				this->border.insert(tile);

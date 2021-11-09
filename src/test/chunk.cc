@@ -43,8 +43,8 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 		{
 			for(unsigned i = 0; i < Size * Size; i++) {
 				for(unsigned z = 0; z < Chunk::MaxHeight; z++) {
-					glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size);
-					Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z));
+					glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size, this->container->getRotation());
+					Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z), this->container->getRotation());
 				}
 			}
 
@@ -102,7 +102,7 @@ Chunk::~Chunk() {
 
 void Chunk::setPosition(glm::uvec2 position) {
 	this->position = position;
-	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0));
+	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0), this->container->getRotation());
 	this->defineBounds();
 }
 
@@ -111,17 +111,73 @@ glm::uvec2& Chunk::getPosition() {
 }
 
 void Chunk::defineBounds() {
-	glm::vec2 bias(-0.5, -(32.0 / 2.0 + 39.0 * 2.0 + 2) / 128.0);
+	tilemath::Rotation rotation = this->container->getRotation();
+	int topHeight = 0, rightHeight = 0, bottomHeight = 0, leftHeight = 0;
+	glm::vec2 bias;
+	switch(rotation) {
+		case tilemath::ROTATION_0_DEG: {
+			bias = glm::vec2(-0.5, -(32.0 / 2.0 + 39.0 * 2.0 + 2) / 128.0);
+			topHeight = this->height;
+			break;
+		}
 
-	glm::vec2 top = tilemath::tileToScreen(glm::vec3(Size, 0, this->height)) + this->screenSpacePosition + bias;
-	glm::vec2 right = tilemath::tileToScreen(glm::vec3(Size, Size, 0)) + this->screenSpacePosition + bias;
-	glm::vec2 bottom = tilemath::tileToScreen(glm::vec3(0, Size, 0)) + this->screenSpacePosition + bias;
-	glm::vec2 left = tilemath::tileToScreen(glm::vec3(0, 0, 0)) + this->screenSpacePosition + bias;
+		case tilemath::ROTATION_90_DEG: {
+			bias = glm::vec2(0, -(32.0 + 39.0 * 2.0 + 16) / 128.0);
+			rightHeight = this->height;
+			break;
+		}
 
-	this->left = left.x;
-	this->right = right.x;
-	this->top = top.y;
-	this->bottom = bottom.y;
+		case tilemath::ROTATION_180_DEG: {
+			bias = glm::vec2(0.5, -(32.0 / 2.0 + 39.0 * 2.0 + 2) / 128.0);
+			bottomHeight = this->height;
+			break;
+		}
+
+		case tilemath::ROTATION_270_DEG: {
+			bias = glm::vec2(0, -(39.0 * 2.0 + 2 - 16) / 128.0);
+			leftHeight = this->height;
+			break;
+		}
+	}
+
+	glm::vec2 top = tilemath::tileToScreen(glm::vec3(Size, 0, topHeight), rotation) + this->screenSpacePosition + bias;
+	glm::vec2 right = tilemath::tileToScreen(glm::vec3(Size, Size, rightHeight), rotation) + this->screenSpacePosition + bias;
+	glm::vec2 bottom = tilemath::tileToScreen(glm::vec3(0, Size, bottomHeight), rotation) + this->screenSpacePosition + bias;
+	glm::vec2 left = tilemath::tileToScreen(glm::vec3(0, 0, leftHeight), rotation) + this->screenSpacePosition + bias;
+
+	switch(rotation) {
+		case tilemath::ROTATION_0_DEG: {
+			this->left = left.x;
+			this->right = right.x;
+			this->top = top.y;
+			this->bottom = bottom.y;
+			break;
+		}
+
+		case tilemath::ROTATION_90_DEG: {
+			this->left = top.x;
+			this->right = bottom.x;
+			this->top = right.y;
+			this->bottom = left.y;
+			break;
+		}
+
+		case tilemath::ROTATION_180_DEG: {
+			this->left = right.x;
+			this->right = left.x;
+			this->top = bottom.y;
+			this->bottom = top.y;
+			break;
+		}
+		
+		case tilemath::ROTATION_270_DEG: {
+			this->left = bottom.x;
+			this->right = top.x;
+			this->top = left.y;
+			this->bottom = right.y;
+			break;
+		}
+	}
 }
 
 void Chunk::buildDebugLines() {
@@ -300,7 +356,7 @@ void Chunk::removeOverlappingTile(OverlappingTile* tile) {
 
 void Chunk::addInterweavedTile(InterweavedTile* tile) {
 	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
-	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, this->container->getRotation()) + Chunk::Size * Chunk::Size * tile->getPosition().z;
 
 	this->interweavedTiles.insert(InterweavedTileWrapper {
 		index: index,
@@ -311,7 +367,7 @@ void Chunk::addInterweavedTile(InterweavedTile* tile) {
 void Chunk::updateInterweavedTile(InterweavedTile* tile) {
 	// find the tile and update its index
 	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
-	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, this->container->getRotation()) + Chunk::Size * Chunk::Size * tile->getPosition().z;
 
 	for(size_t i = 0; i < this->interweavedTiles.array.head; i++) {
 		if(this->interweavedTiles.array[i].tile == tile) {
@@ -341,7 +397,7 @@ Layer* Chunk::getLayer(unsigned int z) {
 
 void Chunk::setTileTexture(glm::uvec3 position, unsigned int spritesheetIndex) {
 	glm::uvec2 relativePosition = glm::uvec2(position.x, position.y) - this->position * (unsigned int)Chunk::Size;
-	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + position.z * Chunk::Size * Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, this->container->getRotation()) + position.z * Chunk::Size * Chunk::Size;
 
 	this->vertexBuffer->setSubData(&spritesheetIndex, 1, index * sizeof(unsigned int));
 	this->textureIndices[index] = spritesheetIndex;
@@ -351,7 +407,7 @@ void Chunk::setTileTexture(glm::uvec3 position, unsigned int spritesheetIndex) {
 
 int Chunk::getTileTexture(glm::uvec3 position) {
 	glm::uvec2 relativePosition = glm::uvec2(position.x, position.y) - this->position * (unsigned int)Chunk::Size;
-	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size) + position.z * Chunk::Size * Chunk::Size;
+	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, this->container->getRotation()) + position.z * Chunk::Size * Chunk::Size;
 
 	if(index > Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
 		return 0;

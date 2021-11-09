@@ -81,13 +81,28 @@ ChunkContainer::~ChunkContainer() {
 	}
 }
 
+void ChunkContainer::setSize(unsigned int size) {
+	this->renderOrder.allocate(size * size);
+	this->renderOrder.head = size * size;
+	this->size = size;
+}
+
+unsigned int ChunkContainer::getSize() {
+	return this->size;
+}
+
+void ChunkContainer::setRotation(tilemath::Rotation rotation) {
+	this->rotation = rotation;
+}
+
+tilemath::Rotation ChunkContainer::getRotation() {
+	return this->rotation;
+}
+
 Chunk& ChunkContainer::addChunk(glm::uvec2 position) {
-	this->renderOrder[this->renderOrder.head].setPosition(position);
-	this->renderOrder.pushed();
-
-	this->size = ceil(sqrt(this->renderOrder.head));
-
-	return this->renderOrder[this->renderOrder.head - 1];
+	long index = tilemath::coordinateToIndex(position, this->size, this->getRotation());
+	this->renderOrder[index].setPosition(position);
+	return this->renderOrder[index];
 }
 
 Chunk& ChunkContainer::getChunk(size_t index) {
@@ -184,7 +199,7 @@ void ChunkContainer::setTile(glm::ivec3 position, int texture) {
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
-	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
+	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
 	this->renderOrder[index].setTileTexture(position, texture);
 }
 
@@ -194,7 +209,7 @@ int ChunkContainer::getTile(glm::ivec3 position) {
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
-	long index = tilemath::coordinateToIndex(chunkPosition, this->size);
+	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
 	return this->renderOrder[index].getTileTexture(position);
 }
 
@@ -244,15 +259,42 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 		-cosine45deg * 2.0f, cosine45deg * 2.0f
 	);
 	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f, 0);
-	glm::ivec3 coordinates(floor(_.x), floor(_.y), _.z);
+	glm::ivec3 coordinates;
+	glm::ivec3 directionTowardsCamera;
+	switch(this->getRotation()) {
+		case tilemath::ROTATION_0_DEG: {
+			coordinates = glm::ivec3(floor(_.x), floor(_.y), _.z);
+			directionTowardsCamera = glm::ivec3(-1, 1, 1);
+			break;
+		}
 
-	coordinates.x -= 50;
-	coordinates.y += 50;
-	coordinates.z += 49;
+		case tilemath::ROTATION_90_DEG: {
+			coordinates = glm::ivec3(floor(-_.y + 1.0), floor(_.x), _.z);
+			directionTowardsCamera = glm::ivec3(1, -1, 1);
+			break;
+		}
+
+		case tilemath::ROTATION_180_DEG: {
+			coordinates = glm::ivec3(floor(-_.x + 1.0), floor(-_.y + 1.0), _.z);
+			directionTowardsCamera = glm::ivec3(-1, -1, 1);
+			break;
+		}
+
+		case tilemath::ROTATION_270_DEG: {
+			coordinates = glm::ivec3(floor(_.y), floor(-_.x + 1.0), _.z);
+			directionTowardsCamera = glm::ivec3(-1, 1, 1);
+			break;
+		}
+	}
+
+	coordinates.x -= directionTowardsCamera.x * 50;
+	coordinates.y += directionTowardsCamera.y * 50;
+	coordinates.z += directionTowardsCamera.z * 49;
+
 	for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 0; i++) {
-		coordinates.x += 1;
-		coordinates.y -= 1;
-		coordinates.z -= 1;
+		coordinates.x += directionTowardsCamera.x;
+		coordinates.y -= directionTowardsCamera.y;
+		coordinates.z -= directionTowardsCamera.z;
 	}
 
 	return coordinates;
@@ -399,7 +441,7 @@ esEntryPtr es::tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* ar
 			args[0].matrixData->data[0][0].numberData,
 			args[0].matrixData->data[1][0].numberData,
 			args[0].matrixData->data[2][0].numberData
-		));
+		), engine->chunkContainer->getRotation());
 		return esCreateVector(2, (double)position.x, (double)position.y);
 	}
 	return nullptr;

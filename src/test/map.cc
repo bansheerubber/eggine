@@ -69,6 +69,7 @@ void Map::load(unsigned char* buffer, unsigned long size) {
 
 			case MAP_SIZE: {
 				uint16_t size = this->readNumber<uint16_t>(&buffer[index], &index);
+				this->container->setSize(size);
 				chunkSize = this->readNumber<uint16_t>(&buffer[index], &index);
 				break;
 			}
@@ -90,7 +91,7 @@ void Map::save(string filename) {
 
 	// map size command
 	this->writeNumber<short>(file, MAP_SIZE);
-	this->writeNumber<short>(file, this->container->size);
+	this->writeNumber<short>(file, this->container->getSize());
 	this->writeNumber<short>(file, Chunk::Size);
 
 	for(unsigned int i = 0; i < this->container->getChunkCount(); i++) {
