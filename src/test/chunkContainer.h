@@ -10,6 +10,7 @@
 #include "chunk.h"
 #include "../util/dynamicArray.h"
 #include "neighbors.h"
+#include "map.h"
 #include "../renderer/program.h"
 #include "../basic/renderObject.h"
 #include "../resources/spriteSheet.h"
@@ -44,11 +45,12 @@ class ChunkContainer : public RenderObject {
 
 		// ## game_object_definitions ChunkContainer
 		unsigned int size = 0;
+		Map map = Map(this);
 
 		void selectCharacter(class Character* character);
 		void selectTile(glm::ivec3 position, bool browsing);
 		
-		void addChunk(glm::uvec2 position);
+		Chunk& addChunk(glm::uvec2 position);
 		Chunk& getChunk(size_t index);
 		size_t getChunkCount();
 
@@ -68,7 +70,6 @@ class ChunkContainer : public RenderObject {
 		resources::SpriteSheetInfo getSpriteInfo(glm::ivec3 position);
 		TileNeighborIterator getNeighbors(glm::ivec3 position);
 
-		// static class Shader* Program;
 		static render::Program* Program;
 		static resources::SpriteSheet* Image;
 
@@ -77,12 +78,12 @@ class ChunkContainer : public RenderObject {
 		static render::VertexBuffer* Colors;
 	
 	private:
-		class OverlappingTile* tileSelectionSprite;
-		class OverlappingTile* characterSelectionSprite;
-		class Character* selectedCharacter;
-		class Team* playerTeam;
+		class OverlappingTile* tileSelectionSprite = nullptr;
+		class OverlappingTile* characterSelectionSprite = nullptr;
+		class Character* selectedCharacter = nullptr;
+		class Team* playerTeam = nullptr;
 		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 0, initChunk, nullptr);
-		
+
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
 
 		void updateCharacterPosition(class Character* character, glm::uvec3 newPosition);

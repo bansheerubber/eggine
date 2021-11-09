@@ -1,6 +1,7 @@
 #include "developerGui.h"
 
 #ifdef EGGINE_DEVELOPER_MODE
+#include "chunkContainer.h"
 #include "../engine/engine.h"
 
 void DeveloperGui::render() {
@@ -37,6 +38,13 @@ void DeveloperGui::render() {
 	}
 	ImGui::PopStyleVar(1);
 	ImGui::EndChild();
+
+	ImGui::BeginChild("save", ImVec2(0, 20), false);
+	if(ImGui::Button("Save map", ImVec2(150, 0))) {
+		engine->chunkContainer->map.save("test.map");
+	}
+	ImGui::EndChild();
+
 	ImGui::End();
 
 	ImGui::Render();

@@ -17,7 +17,9 @@ enum MapCommand {
 class Map {
 	public:
 		Map(class ChunkContainer* container);
+		void loadFromFile(string filename);
 		void load(unsigned char* buffer, unsigned long size);
+		void save(string filename);
 	
 	private:
 		class ChunkContainer* container;

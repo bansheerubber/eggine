@@ -81,11 +81,13 @@ ChunkContainer::~ChunkContainer() {
 	}
 }
 
-void ChunkContainer::addChunk(glm::uvec2 position) {
+Chunk& ChunkContainer::addChunk(glm::uvec2 position) {
 	this->renderOrder[this->renderOrder.head].setPosition(position);
 	this->renderOrder.pushed();
 
 	this->size = ceil(sqrt(this->renderOrder.head));
+
+	return this->renderOrder[this->renderOrder.head - 1];
 }
 
 Chunk& ChunkContainer::getChunk(size_t index) {

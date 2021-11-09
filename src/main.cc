@@ -10,6 +10,7 @@
 #include "basic/gameObject.h"
 #include "basic/line.h"
 #include "test/overlappingTile.h"
+#include "resources/mapSource.h"
 #include "carton/metadata/queryList.h"
 #include "resources/resourceManager.h"
 #include "test/team.h"
@@ -34,11 +35,8 @@ int main(int argc, char* argv[]) {
 	ChunkContainer container;
 	engine->chunkContainer = &container;
 
-	size_t size = 5;
-	for(size_t i = 0; i < size * size; i++) {
-		container.addChunk(tilemath::indexToCoordinate(i, size));
-	}
-
+	resources::MapSource* map = (resources::MapSource*)engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".map")->exec())[0];
+	map->loadIntoMap(&container.map);
 	container.commit();
 
 	unsigned int positionsSize = 4;

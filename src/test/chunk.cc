@@ -64,10 +64,6 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 		this->textureIndices[i] = 0;
 	}
 
-	for(unsigned i = 0; i < Size * Size * this->height; i++) {
-		this->textureIndices[i] = 3;
-	}
-	
 	// load vertices
 	{
 		this->vertexAttributes->addVertexAttribute(ChunkContainer::Vertices, 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
@@ -361,6 +357,22 @@ int Chunk::getTileTexture(glm::uvec3 position) {
 		return 0;
 	}
 	return this->textureIndices[index];
+}
+
+void Chunk::setTileTextureByIndex(size_t index, unsigned int spritesheetIndex) {
+	if(index < Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
+		unsigned int height = index / (Chunk::Size * Chunk::Size);
+		this->height = max(this->height, height + 1);
+		this->vertexBuffer->setSubData(&spritesheetIndex, 1, index * sizeof(unsigned int)); // TODO improve efficiency
+		this->textureIndices[index] = spritesheetIndex;
+	}
+}
+
+int Chunk::getTileTextureByIndex(size_t index) {
+	if(index < Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
+		return this->textureIndices[index];
+	}
+	return -1;
 }
 
 bool InterweavedTileWrapper::operator<(const InterweavedTileWrapper &other) {

@@ -1,7 +1,30 @@
 #include "map.h"
 
+#include "chunkContainer.h"
+#include "tileMath.h"
+
 Map::Map(ChunkContainer* container) {
 	this->container = container;
+}
+
+void Map::loadFromFile(string filename) {
+	ifstream file(filename);
+
+	if(file.bad() || file.fail()) {
+		printf("failed to open file for map %s\n", filename.c_str());
+		file.close();
+		return;
+  }
+
+	file.seekg(0, file.end);
+	unsigned long length = file.tellg();
+	file.seekg(0, file.beg);
+	char* buffer = new char[length];
+	file.read((char*)buffer, length);
+	file.close();
+
+	this->load((unsigned char*)buffer, length);
+	delete[] buffer;
 }
 
 void Map::load(unsigned char* buffer, unsigned long size) {
@@ -20,6 +43,7 @@ void Map::load(unsigned char* buffer, unsigned long size) {
 		exit(1);
 	}
 	
+	uint16_t chunkSize;
 	while((index + sizeof(uint16_t)) < size) {
 		MapCommand command = (MapCommand)this->readNumber<uint16_t>(&buffer[index], &index);
 		switch(command) {
@@ -33,16 +57,19 @@ void Map::load(unsigned char* buffer, unsigned long size) {
 			case MAP_CHUNK: {
 				uint16_t x = this->readNumber<uint16_t>(&buffer[index], &index);
 				uint16_t y = this->readNumber<uint16_t>(&buffer[index], &index);
-				uint16_t size = this->readNumber<uint16_t>(&buffer[index], &index);
 				uint16_t height = this->readNumber<uint16_t>(&buffer[index], &index);
-				for(unsigned int i = 0; i < size * size * height; i++) {
+
+				Chunk &chunk = this->container->addChunk(glm::uvec2(x, y));
+				for(unsigned int i = 0; i < (unsigned int)chunkSize * (unsigned int)chunkSize * (unsigned int)height; i++) {
 					uint16_t tile = this->readNumber<uint16_t>(&buffer[index], &index);
+					chunk.setTileTextureByIndex(i, tile);
 				}
 				break;
 			}
 
 			case MAP_SIZE: {
 				uint16_t size = this->readNumber<uint16_t>(&buffer[index], &index);
+				chunkSize = this->readNumber<uint16_t>(&buffer[index], &index);
 				break;
 			}
 
@@ -52,4 +79,32 @@ void Map::load(unsigned char* buffer, unsigned long size) {
 			}
 		}
 	}
+}
+
+void Map::save(string filename) {
+	ofstream file(filename);
+
+	file.write("XMAP", 4);
+
+	this->writeNumber<uint64_t>(file, Version);
+
+	// map size command
+	this->writeNumber<short>(file, MAP_SIZE);
+	this->writeNumber<short>(file, this->container->size);
+	this->writeNumber<short>(file, Chunk::Size);
+
+	for(unsigned int i = 0; i < this->container->getChunkCount(); i++) {
+		Chunk &chunk = this->container->getChunk(i);
+
+		// map chunk command
+		this->writeNumber<short>(file, MAP_CHUNK);
+		this->writeNumber<short>(file, chunk.getPosition().x);
+		this->writeNumber<short>(file, chunk.getPosition().y);
+		this->writeNumber<short>(file, chunk.height);
+		for(unsigned int i = 0; i < Chunk::Size * Chunk::Size * chunk.height; i++) {
+			this->writeNumber<short>(file, chunk.getTileTextureByIndex(i));
+		}
+	}
+
+	file.close();
 }

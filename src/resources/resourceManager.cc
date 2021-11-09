@@ -6,6 +6,7 @@
 #include "../engine/engine.h"
 #include "../util/png.h"
 #include "../util/crop.h"
+#include "mapSource.h"
 #include "scriptFile.h"
 #include "shaderSource.h"
 #include "spriteSheet.h"
@@ -60,6 +61,11 @@ void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size
 	((resources::ShaderSource*)(((resources::ResourceManager*)owner)->metadataToResource[file->metadata]))->original = original;
 }
 
+void handleMaps(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::MapSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+}
+
 resources::ShaderSource* getShaderSource(string fileName) {
 	#ifdef __switch__
 	fileName += ".dksh";
@@ -77,6 +83,7 @@ resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton->addExtensionHandler(".vert", handleShaders, this);
 	this->carton->addExtensionHandler(".frag", handleShaders, this);
 	this->carton->addExtensionHandler(".dksh", handleDKSHShaders, this);
+	this->carton->addExtensionHandler(".map", handleMaps, this);
 	this->carton->read(fileName);
 }
 
