@@ -6,6 +6,7 @@
 #include "../basic/gameObject.h"
 #include "../basic/renderContext.h"
 #include "../util/sortedArray.h"
+#include "tileMath.h"
 #include "../renderer/vertexAttributes.h"
 #include "../renderer/vertexBuffer.h"
 
@@ -33,4 +34,5 @@ class Layer : public GameObject {
 		render::VertexAttributes* attributes;
 
 		void rebuildBuffers();
+		void updateRotation(tilemath::Rotation rotation);
 };

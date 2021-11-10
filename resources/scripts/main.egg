@@ -12,6 +12,24 @@ function isTileSelectable(%position) {
 	return 0;
 }
 
+addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
+function onRotateClockwise(%state) {
+	if(%state) {
+		getChunkContainer().setRotation((getChunkContainer().getRotation() + 1) % 4);
+	}
+}
+
+addKeybind("chunk.rotateCounterClockwise", "e", "onRotateCounterClockwise");
+function onRotateCounterClockwise(%state) {
+	if(%state) {
+		%rotation = getChunkContainer().getRotation() - 1;
+		if(%rotation < 0) {
+			%rotation = 3;
+		}
+		getChunkContainer().setRotation(%rotation);
+	}
+}
+
 addKeybind("unit.gamepadPressTile", "b-button", "onGamepadPressTile");
 function onGamepadPressTile(%state) {
 	if(!%state) {

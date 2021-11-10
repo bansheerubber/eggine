@@ -12,8 +12,25 @@
 #include "../basic/renderObject.h"
 #include "../util/sortedArray.h"
 #include "../resources/spriteSheet.h"
+#include "tileMath.h"
 
 class Tile;
+
+namespace std {
+	template<>
+	struct hash<pair<tilemath::Rotation, tilemath::Rotation>> {
+		size_t operator()(pair<tilemath::Rotation, tilemath::Rotation> const& source) const noexcept {
+			return source.first ^ (source.second + 0x9e3779b9 + (source.first << 6) + (source.first >> 2));
+    }
+	};
+
+	template<>
+	struct equal_to<pair<tilemath::Rotation, tilemath::Rotation>> {
+		bool operator()(const pair<tilemath::Rotation, tilemath::Rotation>& x, const pair<tilemath::Rotation, tilemath::Rotation>& y) const {
+			return x.first == y.first && x.second == y.second;
+		}
+	};
+};
 
 struct InterweavedTileWrapper {
 	unsigned int index;
@@ -57,6 +74,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		static constexpr unsigned int Size = 25;
 		static constexpr unsigned int MaxHeight = 15;
+		static void BuildOffsets(tilemath::Rotation rotaton);
 	
 	protected:
 		class ChunkContainer* container;
@@ -74,12 +92,16 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		class Line* debugLine = nullptr;
 		double top = 0, right = 0, bottom = 0, left = 0;
 
+		tilemath::Rotation oldRotation = tilemath::ROTATION_0_DEG;
+
 		#ifdef EGGINE_DEBUG
 		bool isCulled = false;
 		int drawCalls = 0;
 		#endif
 
 		size_t renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context);
+
+		void updateRotation(tilemath::Rotation rotation);
 
 		void addOverlappingTile(class OverlappingTile* tile);
 		void updateOverlappingTile(class OverlappingTile* tile);
@@ -94,4 +116,5 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		static glm::vec2 OffsetsSource[];
 		static render::VertexBuffer* Offsets;
+		static tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>> Rotations;
 };

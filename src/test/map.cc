@@ -59,10 +59,10 @@ void Map::load(unsigned char* buffer, unsigned long size) {
 				uint16_t y = this->readNumber<uint16_t>(&buffer[index], &index);
 				uint16_t height = this->readNumber<uint16_t>(&buffer[index], &index);
 
-				Chunk &chunk = this->container->addChunk(glm::uvec2(x, y));
+				Chunk* chunk = this->container->addChunk(glm::uvec2(x, y));
 				for(unsigned int i = 0; i < (unsigned int)chunkSize * (unsigned int)chunkSize * (unsigned int)height; i++) {
 					uint16_t tile = this->readNumber<uint16_t>(&buffer[index], &index);
-					chunk.setTileTextureByIndex(i, tile);
+					chunk->setTileTextureByIndex(i, tile);
 				}
 				break;
 			}
@@ -95,15 +95,15 @@ void Map::save(string filename) {
 	this->writeNumber<short>(file, Chunk::Size);
 
 	for(unsigned int i = 0; i < this->container->getChunkCount(); i++) {
-		Chunk &chunk = this->container->getChunk(i);
+		Chunk* chunk = this->container->getChunk(i);
 
 		// map chunk command
 		this->writeNumber<short>(file, MAP_CHUNK);
-		this->writeNumber<short>(file, chunk.getPosition().x);
-		this->writeNumber<short>(file, chunk.getPosition().y);
-		this->writeNumber<short>(file, chunk.height);
-		for(unsigned int i = 0; i < Chunk::Size * Chunk::Size * chunk.height; i++) {
-			this->writeNumber<short>(file, chunk.getTileTextureByIndex(i));
+		this->writeNumber<short>(file, chunk->getPosition().x);
+		this->writeNumber<short>(file, chunk->getPosition().y);
+		this->writeNumber<short>(file, chunk->height);
+		for(unsigned int i = 0; i < Chunk::Size * Chunk::Size * chunk->height; i++) {
+			this->writeNumber<short>(file, chunk->getTileTextureByIndex(i));
 		}
 	}
 

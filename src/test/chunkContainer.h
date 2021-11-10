@@ -18,7 +18,7 @@
 
 using namespace std;
 
-void initChunk(class ChunkContainer* container, class Chunk* chunk);
+void initChunk(class ChunkContainer* container, class Chunk** chunk);
 
 namespace es {
 	void defineChunkContainer();
@@ -28,6 +28,8 @@ namespace es {
 	esEntryPtr ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__setRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__getRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
@@ -56,8 +58,8 @@ class ChunkContainer : public RenderObject {
 		void setRotation(tilemath::Rotation rotation);
 		tilemath::Rotation getRotation();
 		
-		Chunk& addChunk(glm::uvec2 position);
-		Chunk& getChunk(size_t index);
+		Chunk* addChunk(glm::uvec2 position);
+		Chunk* getChunk(size_t index);
 		size_t getChunkCount();
 
 		void render(double deltaTime, RenderContext &context);
@@ -91,7 +93,7 @@ class ChunkContainer : public RenderObject {
 		class OverlappingTile* characterSelectionSprite = nullptr;
 		class Character* selectedCharacter = nullptr;
 		class Team* playerTeam = nullptr;
-		DynamicArray<Chunk, ChunkContainer> renderOrder = DynamicArray<Chunk, ChunkContainer>(this, 0, initChunk, nullptr);
+		DynamicArray<Chunk*, ChunkContainer> renderOrder = DynamicArray<Chunk*, ChunkContainer>(this, 0, initChunk, nullptr);
 
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
 

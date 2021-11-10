@@ -3,6 +3,7 @@
 #include "overlappingTile.h"
 #include "../basic/renderContext.h"
 #include "../basic/renderObject.h"
+#include "tileMath.h"
 
 namespace es { // order = 2
 	void defineInterweavedTile();
@@ -11,6 +12,8 @@ namespace es { // order = 2
 };
 
 class InterweavedTile: public OverlappingTile {
+	friend class Chunk;
+
 	public:
 		InterweavedTile(class ChunkContainer* container, bool createReference = true);
 		~InterweavedTile();
@@ -25,4 +28,6 @@ class InterweavedTile: public OverlappingTile {
 	protected:
 		render::VertexBuffer* vertexBuffers[3];
 		render::VertexAttributes* vertexAttributes;
+
+		void updateRotation(tilemath::Rotation rotation);
 };

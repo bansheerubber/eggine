@@ -62,22 +62,22 @@ OverlappingTile* InterweavedTile::setPosition(glm::uvec3 position) {
 	this->position = position;
 
 	glm::uvec2 chunkPosition(position.x / Chunk::Size, position.y / Chunk::Size);
-	Chunk &chunk = this->container->getChunk(tilemath::coordinateToIndex(chunkPosition, this->container->getSize(), this->container->getRotation()));
+	Chunk* chunk = this->container->getChunk(tilemath::coordinateToIndex(chunkPosition, this->container->getSize(), this->container->getRotation()));
 
 	glm::uvec3 relativePosition = this->position;
-	relativePosition.x -= chunk.position.x * Chunk::Size; // we add the chunk position to the tile in the shader
-	relativePosition.y -= chunk.position.y * Chunk::Size;
+	relativePosition.x -= chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
+	relativePosition.y -= chunk->position.y * Chunk::Size;
 	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, this->container->getRotation());
 
 	bool initialized = false;
-	if(this->chunk != &chunk) {
+	if(this->chunk != chunk) {
 		if(this->chunk != nullptr) {
 			this->chunk->removeInterweavedTile(this);
 		}
-		chunk.addInterweavedTile(this);
+		chunk->addInterweavedTile(this);
 		initialized = true;
 	}
-	this->chunk = &chunk;
+	this->chunk = chunk;
 
 	if(!initialized) {
 		this->chunk->updateInterweavedTile(this);
@@ -88,6 +88,14 @@ OverlappingTile* InterweavedTile::setPosition(glm::uvec3 position) {
 	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->position), sizeof(this->position));
 
 	return this;
+}
+
+void InterweavedTile::updateRotation(tilemath::Rotation rotation) {
+	glm::uvec3 relativePosition = this->position;
+	relativePosition.x -= chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
+	relativePosition.y -= chunk->position.y * Chunk::Size;
+	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, this->container->getRotation());
+	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->position), sizeof(this->position));
 }
 
 OverlappingTile* InterweavedTile::setTexture(unsigned int index) {

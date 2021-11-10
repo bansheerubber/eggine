@@ -19,8 +19,8 @@ render::VertexBuffer* ChunkContainer::Vertices = nullptr;
 render::VertexBuffer* ChunkContainer::UVs = nullptr;
 render::VertexBuffer* ChunkContainer::Colors = nullptr;
 
-void initChunk(class ChunkContainer* container, class Chunk* chunk) {
-	new((void*)chunk) Chunk(container);
+void initChunk(class ChunkContainer* container, class Chunk** chunk) {
+	*chunk = nullptr;
 }
 
 ChunkContainer::ChunkContainer() {
@@ -77,7 +77,7 @@ ChunkContainer::ChunkContainer() {
 
 ChunkContainer::~ChunkContainer() {
 	for(size_t i = 0; i < this->renderOrder.head; i++) {
-		this->renderOrder[i].~Chunk(); // because of how dynamic array reallocs we have to do this bullshit
+		delete this->renderOrder[i];
 	}
 }
 
@@ -92,20 +92,50 @@ unsigned int ChunkContainer::getSize() {
 }
 
 void ChunkContainer::setRotation(tilemath::Rotation rotation) {
+	unsigned int direction = rotation - this->rotation;
+	glm::mat2 rotationMatrix = glm::mat2(
+		cos(M_PI / 2.0f * direction), sin(M_PI / 2.0f * direction),
+		-sin(M_PI / 2.0f * direction), cos(M_PI / 2.0f * direction)
+	);
+
+	engine->camera->setPosition(rotationMatrix * engine->camera->getPosition());
+	
 	this->rotation = rotation;
+
+	Chunk::BuildOffsets(rotation);
+
+	// move the chunks into a new render order
+	Chunk** newOrder = new Chunk*[this->renderOrder.head];
+	for(unsigned int i = 0; i < this->renderOrder.head; i++) {
+		Chunk* chunk = this->renderOrder[i];
+		unsigned int index = tilemath::coordinateToIndex(chunk->getPosition(), this->size, this->getRotation());
+		newOrder[index] = chunk;
+		chunk->setPosition(tilemath::indexToCoordinate(index, this->size, this->getRotation()));
+	}
+
+	// copy new order into current render order
+	for(unsigned int i = 0; i < this->renderOrder.head; i++) {
+		this->renderOrder[i] = newOrder[i];
+		newOrder[i]->updateRotation(rotation);
+	}
+
+	delete[] newOrder;
 }
 
 tilemath::Rotation ChunkContainer::getRotation() {
 	return this->rotation;
 }
 
-Chunk& ChunkContainer::addChunk(glm::uvec2 position) {
+Chunk* ChunkContainer::addChunk(glm::uvec2 position) {
 	long index = tilemath::coordinateToIndex(position, this->size, this->getRotation());
-	this->renderOrder[index].setPosition(position);
+	if(this->renderOrder[index] == nullptr) {
+		this->renderOrder[index] = new Chunk(this);
+	}
+	this->renderOrder[index]->setPosition(position);
 	return this->renderOrder[index];
 }
 
-Chunk& ChunkContainer::getChunk(size_t index) {
+Chunk* ChunkContainer::getChunk(size_t index) {
 	if(index >= this->size * this->size) {
 		printf("ChunkContainer::getChunk(): chunk index out of bounds\n");
 		exit(1);
@@ -133,18 +163,18 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	#endif
 
 	for(size_t i = 0; i < this->renderOrder.head; i++) {
-		Chunk &chunk = this->renderOrder[i];
-		chunk.renderChunk(deltaTime, context);
+		Chunk* chunk = this->renderOrder[i];
+		chunk->renderChunk(deltaTime, context);
 
 		#ifdef EGGINE_DEBUG
-		if(!chunk.isCulled) {
+		if(!chunk->isCulled) {
 			chunksRendered++;
-			tilesRendered += Chunk::Size * Chunk::Size * chunk.height;
-			drawCalls += chunk.drawCalls;
-			overlappingCalls += chunk.layers.size();
+			tilesRendered += Chunk::Size * Chunk::Size * chunk->height;
+			drawCalls += chunk->drawCalls;
+			overlappingCalls += chunk->layers.size();
 		}
 		
-		tiles += Chunk::Size * Chunk::Size * chunk.height;
+		tiles += Chunk::Size * Chunk::Size * chunk->height;
 		#endif
 	}
 
@@ -200,7 +230,7 @@ void ChunkContainer::setTile(glm::ivec3 position, int texture) {
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
 	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
-	this->renderOrder[index].setTileTexture(position, texture);
+	this->renderOrder[index]->setTileTexture(position, texture);
 }
 
 int ChunkContainer::getTile(glm::ivec3 position) {
@@ -210,7 +240,7 @@ int ChunkContainer::getTile(glm::ivec3 position) {
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
 	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
-	return this->renderOrder[index].getTileTexture(position);
+	return this->renderOrder[index]->getTileTexture(position);
 }
 
 resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position) {
@@ -270,29 +300,29 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 
 		case tilemath::ROTATION_90_DEG: {
 			coordinates = glm::ivec3(floor(-_.y + 1.0), floor(_.x), _.z);
-			directionTowardsCamera = glm::ivec3(1, -1, 1);
+			directionTowardsCamera = glm::ivec3(-1, -1, 1);
 			break;
 		}
 
 		case tilemath::ROTATION_180_DEG: {
 			coordinates = glm::ivec3(floor(-_.x + 1.0), floor(-_.y + 1.0), _.z);
-			directionTowardsCamera = glm::ivec3(-1, -1, 1);
+			directionTowardsCamera = glm::ivec3(1, -1, 1);
 			break;
 		}
 
 		case tilemath::ROTATION_270_DEG: {
 			coordinates = glm::ivec3(floor(_.y), floor(-_.x + 1.0), _.z);
-			directionTowardsCamera = glm::ivec3(-1, 1, 1);
+			directionTowardsCamera = glm::ivec3(1, 1, 1);
 			break;
 		}
 	}
 
-	coordinates.x -= directionTowardsCamera.x * 50;
+	coordinates.x += directionTowardsCamera.x * 50;
 	coordinates.y += directionTowardsCamera.y * 50;
 	coordinates.z += directionTowardsCamera.z * 49;
 
 	for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 0; i++) {
-		coordinates.x += directionTowardsCamera.x;
+		coordinates.x -= directionTowardsCamera.x;
 		coordinates.y -= directionTowardsCamera.y;
 		coordinates.z -= directionTowardsCamera.z;
 	}
@@ -365,6 +395,10 @@ void es::defineChunkContainer() {
 	esEntryType setTileArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setTile, "ChunkContainer", "setTile", 3, setTileArguments);
 
+	esEntryType setRotationArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setRotation, "ChunkContainer", "setRotation", 2, setRotationArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::ChunkContainer__getRotation, "ChunkContainer", "getRotation", 1, getPlayerTeamArguments);
+
 	esEntryType tileToScreenArguments[1] = {ES_ENTRY_MATRIX};
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::tileToScreen, "tileToScreen", 1, tileToScreenArguments);
 }
@@ -431,6 +465,22 @@ esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, 
 		);
 
 		container->setTile(position, args[2].numberData);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__setRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		container->setRotation((tilemath::Rotation)(unsigned int)args[1].numberData);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		return esCreateNumber(container->getRotation());
 	}
 	return nullptr;
 }

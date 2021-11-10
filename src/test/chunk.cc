@@ -15,6 +15,7 @@
 
 glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
+tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>>();
 
 void initInterweavedTileWrapper(Chunk* chunk, InterweavedTileWrapper* tile) {
 	*tile = {};
@@ -39,17 +40,22 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 	this->container = container;
 	
 	if(Chunk::Offsets == nullptr) {
-		// pre-calculate offsets
-		{
-			for(unsigned i = 0; i < Size * Size; i++) {
-				for(unsigned z = 0; z < Chunk::MaxHeight; z++) {
-					glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size, this->container->getRotation());
-					Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z), this->container->getRotation());
+		Chunk::BuildOffsets(container->getRotation());
+	}
+
+	if(Chunk::Rotations.size() == 0) {
+		for(int a = 0; a < 4; a++) {
+			for(int b = 0; b < 4; b++) {
+				if(a != b) {
+					auto rotationPair = pair((tilemath::Rotation)a, (tilemath::Rotation)b);
+					Chunk::Rotations[rotationPair].resize(Chunk::Size * Chunk::Size);
+					for(unsigned int oldIndex = 0; oldIndex < Chunk::Size * Chunk::Size; oldIndex++) {
+						glm::ivec2 intermediatePosition = tilemath::indexToCoordinate(oldIndex, Chunk::Size, (tilemath::Rotation)a);
+						long newIndex = tilemath::coordinateToIndex(intermediatePosition, Chunk::Size, (tilemath::Rotation)b);
+						Chunk::Rotations[rotationPair][oldIndex] = newIndex;
+					}
 				}
 			}
-
-			Chunk::Offsets = new render::VertexBuffer(&engine->renderWindow);
-			Chunk::Offsets->setData(&Chunk::OffsetsSource[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(glm::vec2));
 		}
 	}
 
@@ -98,6 +104,21 @@ Chunk::~Chunk() {
 	if(this->debugLine != nullptr) {
 		delete this->debugLine;
 	}
+}
+
+void Chunk::BuildOffsets(tilemath::Rotation rotation) {
+	// pre-calculate offsets
+	for(unsigned i = 0; i < Size * Size; i++) {
+		for(unsigned z = 0; z < Chunk::MaxHeight; z++) {
+			glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size, rotation);
+			Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z), rotation);
+		}
+	}
+
+	if(Chunk::Offsets == nullptr) {
+		Chunk::Offsets = new render::VertexBuffer(&engine->renderWindow);
+	}
+	Chunk::Offsets->setData(&Chunk::OffsetsSource[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(glm::vec2));
 }
 
 void Chunk::setPosition(glm::uvec2 position) {
@@ -188,6 +209,34 @@ void Chunk::buildDebugLines() {
 	this->debugLine->addPosition(glm::vec2(this->left, this->top));
 	this->debugLine->addPosition(glm::vec2(this->left, this->bottom));
 	this->debugLine->commit();
+}
+
+void Chunk::updateRotation(tilemath::Rotation rotation) {
+	int* newTextureIndices = (int*)calloc(Chunk::Size * Chunk::Size * Chunk::MaxHeight, sizeof(int)); // this is slightly faster than new
+	for(unsigned int i = 0;  i < Chunk::Size * Chunk::Size * Chunk::MaxHeight; i++) {
+		unsigned int height = i / (Chunk::Size * Chunk::Size);
+		long newIndex = Chunk::Rotations[pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
+		newTextureIndices[newIndex + height * Chunk::Size * Chunk::Size] = this->textureIndices[i];
+	}
+
+	delete[] this->textureIndices;
+	this->textureIndices = newTextureIndices;
+	this->vertexBuffer->setData(this->textureIndices, sizeof(int) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(int));
+	
+	this->oldRotation = rotation;
+
+	this->defineBounds();
+
+	for(unsigned int i = 0; i <= this->maxLayer; i++) {
+		if(this->layers[i] != nullptr) {
+			this->layers[i]->updateRotation(rotation);
+		}
+	}
+
+	this->interweavedTiles.sort();
+	for(unsigned int i = 0; i < this->interweavedTiles.array.head; i++) {
+		this->interweavedTiles.array[i].tile->updateRotation(rotation);
+	}
 }
 
 size_t Chunk::renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context) {

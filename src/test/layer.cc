@@ -113,6 +113,14 @@ void Layer::remove(OverlappingTile* tile) {
 	this->rebuildBuffers();
 }
 
+void Layer::updateRotation(tilemath::Rotation rotation) {
+	this->tiles.sort();
+	for(size_t i = 0; i < this->tiles.array.head; i++) {
+		this->tiles.array[i]->updateRotation(rotation);
+	}
+	this->rebuildBuffers();
+}
+
 void Layer::render(double deltaTime, RenderContext &context) {
 	struct FragmentBlock {
 		glm::vec4 color;

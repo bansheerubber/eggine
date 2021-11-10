@@ -5,6 +5,7 @@
 #include <glm/vec4.hpp>
 
 #include "../basic/gameObject.h"
+#include "tileMath.h"
 #include "../renderer/vertexAttributes.h"
 #include "../renderer/vertexBuffer.h"
 
@@ -53,4 +54,6 @@ class OverlappingTile : public GameObject {
 		glm::vec2 screenSpacePosition = glm::vec2(0, 0);
 		class Layer* layer =  nullptr;
 		class Chunk* chunk = nullptr;
+
+		void updateRotation(tilemath::Rotation rotation);
 };
