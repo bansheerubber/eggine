@@ -5,6 +5,9 @@
 
 void resources::initSpriteSheetInfo(SpriteSheet* owner, SpriteSheetInfo* wall) {
 	*wall = {
+		facingsMap: nullptr,
+		facing: FACING_INVALID,
+		index: 0,
 		wall: NO_WALL,
 	};
 }
@@ -62,6 +65,34 @@ resources::SpriteSheet::SpriteSheet(
 				}
 				else if(word == "cornerNorthWest") {
 					this->spriteInfo[i].wall = CORNER_NORTH_WEST;
+				}
+
+				if(word == "north") {
+					this->spriteInfo[i].facing = FACING_NORTH;
+				}
+				else if(word == "east") {
+					this->spriteInfo[i].facing = FACING_EAST;
+				}
+				else if(word == "south") {
+					this->spriteInfo[i].facing = FACING_SOUTH;
+				}
+				else if(word == "west") {
+					this->spriteInfo[i].facing = FACING_WEST;
+				}
+
+				// handle spritesheet roots/facing
+				size_t rootPos = 0;
+				if((rootPos = word.find("root")) != string::npos) {
+					unsigned int root = stoi(word.substr(0, rootPos));
+					if(this->spriteFacingInfo.find(root) == this->spriteFacingInfo.end()) {
+						this->spriteFacingInfo[root] = new SpriteFacingInfo {
+							facings: tsl::robin_map<SpriteFacing, unsigned int>(),
+							root: root,
+						};
+					}
+
+					this->spriteInfo[i].facingsMap = this->spriteFacingInfo[root];
+					this->spriteInfo[i].facingsMap->facings[this->spriteInfo[i].facing] = i;
 				}
 			}
 			while(info.size() > 0);

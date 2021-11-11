@@ -243,8 +243,22 @@ int ChunkContainer::getTile(glm::ivec3 position) {
 	return this->renderOrder[index]->getTileTexture(position);
 }
 
-resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position) {
-	return ChunkContainer::Image->getSpriteInfo(this->getTile(position));
+resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position, bool original) {
+	int texture = this->getTile(position);
+	if(original) {
+		resources::SpriteSheetInfo info = ChunkContainer::Image->getSpriteInfo(texture);
+		if(info.facing == resources::FACING_INVALID) {
+			return info;
+		}
+		else {
+			return ChunkContainer::Image->getSpriteInfo(
+				info.facingsMap->rotateFacing(info.facing, this->getRotation(), tilemath::ROTATION_0_DEG)
+			);
+		}
+	}
+	else {
+		return ChunkContainer::Image->getSpriteInfo(original);
+	}
 }
 
 void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {

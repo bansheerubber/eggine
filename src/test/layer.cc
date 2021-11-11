@@ -113,10 +113,10 @@ void Layer::remove(OverlappingTile* tile) {
 	this->rebuildBuffers();
 }
 
-void Layer::updateRotation(tilemath::Rotation rotation) {
+void Layer::updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation) {
 	this->tiles.sort();
 	for(size_t i = 0; i < this->tiles.array.head; i++) {
-		this->tiles.array[i]->updateRotation(rotation);
+		this->tiles.array[i]->updateRotation(oldRotation, newRotation);
 	}
 	this->rebuildBuffers();
 }

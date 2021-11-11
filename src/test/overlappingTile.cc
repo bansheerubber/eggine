@@ -57,11 +57,16 @@ OverlappingTile* OverlappingTile::setPosition(glm::uvec3 position) {
 	return this;
 }
 
-void OverlappingTile::updateRotation(tilemath::Rotation rotation) {
+void OverlappingTile::updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation) {
 	glm::uvec3 relativePosition = this->position;
 	relativePosition.x -= chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
 	relativePosition.y -= chunk->position.y * Chunk::Size;
-	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, this->container->getRotation());
+	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, newRotation);
+
+	resources::SpriteFacingInfo* facingsMap;
+	if((facingsMap = ChunkContainer::Image->getSpriteInfo(this->textureIndex).facingsMap) != nullptr) {
+		this->textureIndex = facingsMap->rotateFacing(ChunkContainer::Image->getSpriteInfo(this->textureIndex).facing, oldRotation, newRotation);
+	}
 }
 
 glm::uvec3 OverlappingTile::getPosition() {

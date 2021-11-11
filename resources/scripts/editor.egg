@@ -13,7 +13,7 @@ function onEditorMouseDown(%state) {
 	if(%state) {
 		$Editor::MouseDownPosition = $Editor::CurrentHoverPosition;
 	}
-	else {
+	else if(isObject($Editor::GhostTile)) {
 		for(%i = 0; %i < $Editor::GhostLine.size(); %i++) {
 			%position = $Editor::GhostLine[%i].getPosition();
 			getChunkContainer().setTile(%position, $Editor::GhostTile.getTexture());

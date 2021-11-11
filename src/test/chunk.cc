@@ -11,6 +11,7 @@
 #include "../basic/line.h"
 #include "overlappingTile.h"
 #include "../resources/resourceManager.h"
+#include "../resources/spriteSheet.h"
 #include "tileMath.h"
 
 glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
@@ -216,27 +217,37 @@ void Chunk::updateRotation(tilemath::Rotation rotation) {
 	for(unsigned int i = 0;  i < Chunk::Size * Chunk::Size * Chunk::MaxHeight; i++) {
 		unsigned int height = i / (Chunk::Size * Chunk::Size);
 		long newIndex = Chunk::Rotations[pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
-		newTextureIndices[newIndex + height * Chunk::Size * Chunk::Size] = this->textureIndices[i];
+
+		resources::SpriteFacingInfo* facingsMap;
+		if((facingsMap = ChunkContainer::Image->getSpriteInfo(this->textureIndices[i]).facingsMap) != nullptr) {
+			newTextureIndices[newIndex + height * Chunk::Size * Chunk::Size] = facingsMap->rotateFacing(ChunkContainer::Image->getSpriteInfo(this->textureIndices[i]).facing, this->oldRotation, rotation);
+		}
+		else {
+			newTextureIndices[newIndex + height * Chunk::Size * Chunk::Size] = this->textureIndices[i];
+		}
 	}
 
 	delete[] this->textureIndices;
 	this->textureIndices = newTextureIndices;
 	this->vertexBuffer->setData(this->textureIndices, sizeof(int) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(int));
-	
-	this->oldRotation = rotation;
 
 	this->defineBounds();
 
 	for(unsigned int i = 0; i <= this->maxLayer; i++) {
 		if(this->layers[i] != nullptr) {
-			this->layers[i]->updateRotation(rotation);
+			this->layers[i]->updateRotation(this->oldRotation, rotation);
 		}
 	}
 
-	this->interweavedTiles.sort();
 	for(unsigned int i = 0; i < this->interweavedTiles.array.head; i++) {
-		this->interweavedTiles.array[i].tile->updateRotation(rotation);
+		InterweavedTile* tile = this->interweavedTiles.array[i].tile;
+		glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
+		this->interweavedTiles.array[i].index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, rotation) + Chunk::Size * Chunk::Size * tile->getPosition().z;
+		tile->updateRotation(this->oldRotation, rotation);
 	}
+	this->interweavedTiles.sort();
+
+	this->oldRotation = rotation;
 }
 
 size_t Chunk::renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context) {

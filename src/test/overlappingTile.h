@@ -55,5 +55,5 @@ class OverlappingTile : public GameObject {
 		class Layer* layer =  nullptr;
 		class Chunk* chunk = nullptr;
 
-		void updateRotation(tilemath::Rotation rotation);
+		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);
 };

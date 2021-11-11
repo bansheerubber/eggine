@@ -45,7 +45,7 @@ void TileNeighborIterator::iterateTile() {
 		{DIRECTION_EAST, DIRECTION_SOUTH, INVALID_DIRECTION}, // north-west corner wall neighbors
 	};
 
-	resources::SpriteSheetInfo info = this->container->getSpriteInfo(this->position + glm::ivec3(0, 0, 1));
+	resources::SpriteSheetInfo info = this->container->getSpriteInfo(this->position + glm::ivec3(0, 0, 1), true);
 	if(info.wall != resources::NO_WALL) {
 		for(; this->index < 3; this->index++) {
 			NeighborDirection direction = directionsForWall[lsb(info.wall)][this->index];

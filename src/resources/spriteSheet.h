@@ -1,8 +1,11 @@
 #pragma once
 
+#include <tsl/robin_map.h>
+
 #include "../util/dynamicArray.h"
 #include "resourceObject.h"
 #include "../renderer/texture.h"
+#include "../test/tileMath.h"
 
 namespace resources {
 	enum SpriteSheetWall {
@@ -16,9 +19,37 @@ namespace resources {
 		CORNER_SOUTH_WEST	= 0b01000000,
 		CORNER_NORTH_WEST	= 0b10000000,
 	};
-	
+
+	enum SpriteFacing {
+		FACING_INVALID = 0,
+		FACING_NORTH,
+		FACING_EAST,
+		FACING_SOUTH,
+		FACING_WEST,
+	};
+
 	struct SpriteSheetInfo {
+		struct SpriteFacingInfo* facingsMap;
+		SpriteFacing facing;
+		unsigned int index;
 		SpriteSheetWall wall;
+	};
+
+	struct SpriteFacingInfo { // records all sprite facings for a particular root sprite
+		tsl::robin_map<SpriteFacing, unsigned int> facings;
+		unsigned int root;
+
+		unsigned int rotateFacing(SpriteFacing facing, tilemath::Rotation oldRotation, tilemath::Rotation newRotation) {
+			int delta = (int)newRotation - (int)oldRotation;
+			int newFacing = ((int)facing - 1) - delta;
+			if(newFacing < 0) {
+				newFacing += 4;
+			}
+			else {
+				newFacing = newFacing % 4;
+			}
+			return this->facings[(SpriteFacing)(newFacing + 1)];
+		}
 	};
 
 	void initSpriteSheetInfo(class SpriteSheet* owner, SpriteSheetInfo* wall);
@@ -38,5 +69,6 @@ namespace resources {
 			unsigned int spriteSheetAmount = 0; // number of sprites in PNG
 			
 			DynamicArray<SpriteSheetInfo, SpriteSheet> spriteInfo = DynamicArray<SpriteSheetInfo, SpriteSheet>(this, 8, initSpriteSheetInfo, nullptr);
+			tsl::robin_map<unsigned int, SpriteFacingInfo*> spriteFacingInfo; // root sprite to facing object
 	};
 };

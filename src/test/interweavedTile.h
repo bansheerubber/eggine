@@ -29,5 +29,5 @@ class InterweavedTile: public OverlappingTile {
 		render::VertexBuffer* vertexBuffers[3];
 		render::VertexAttributes* vertexAttributes;
 
-		void updateRotation(tilemath::Rotation rotation);
+		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);
 };

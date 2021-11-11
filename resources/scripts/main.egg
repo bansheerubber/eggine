@@ -13,6 +13,7 @@ function isTileSelectable(%position) {
 }
 
 addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
+addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");
 function onRotateClockwise(%state) {
 	if(%state) {
 		getChunkContainer().setRotation((getChunkContainer().getRotation() + 1) % 4);
@@ -20,11 +21,12 @@ function onRotateClockwise(%state) {
 }
 
 addKeybind("chunk.rotateCounterClockwise", "e", "onRotateCounterClockwise");
+addKeybind("chunk.rotateCounterClockwise", "d-pad-right", "onRotateCounterClockwise");
 function onRotateCounterClockwise(%state) {
 	if(%state) {
 		%rotation = getChunkContainer().getRotation() - 1;
 		if(%rotation < 0) {
-			%rotation = 3;
+			%rotation += 4;
 		}
 		getChunkContainer().setRotation(%rotation);
 	}
