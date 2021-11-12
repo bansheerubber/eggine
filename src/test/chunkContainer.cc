@@ -257,7 +257,7 @@ resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position, bo
 		}
 	}
 	else {
-		return ChunkContainer::Image->getSpriteInfo(original);
+		return ChunkContainer::Image->getSpriteInfo(texture);
 	}
 }
 

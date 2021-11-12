@@ -88,7 +88,7 @@ bool TileNeighborIterator::testTile(glm::ivec3 position, NeighborDirection direc
 		{DIRECTION_SOUTH, DIRECTION_EAST}, // north-west corner wall
 	};
 	
-	resources::SpriteSheetInfo info = this->container->getSpriteInfo(position + glm::ivec3(0, 0, 1));
+	resources::SpriteSheetInfo info = this->container->getSpriteInfo(position + glm::ivec3(0, 0, 1), true);
 	if(
 		(
 			this->container->getTile(position + glm::ivec3(0, 0, 1)) != 0
