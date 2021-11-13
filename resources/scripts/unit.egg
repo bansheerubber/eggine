@@ -1,8 +1,6 @@
 function Unit::move(%this, %position) {
 	%unitPosition = %this.getPosition();
-	%distance = mAbs(%unitPosition[0] - %position[0]) + mAbs(%unitPosition[1] - %position[1]) + mAbs((%unitPosition[2] - 1) - %position[2]);
-	
-	if(%this.getDestinations().has(%position) && %this.moves >= %distance) {
+	if(%this.getDestinations().has(%position) && isObject(%this.path) && %this.moves >= (%distance = (%this.path.size() - 1))) {
 		%this.setMoves(%this.moves - %distance);
 		%this.moves -= %distance;
 
@@ -49,6 +47,6 @@ package unit {
 			%character.moves = 5;
 		}
 
-		%character.getDestinations().showBorder();
+		%character.getDestinations(true).showBorder();
 	}
 };

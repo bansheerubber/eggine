@@ -97,9 +97,11 @@ void es::defineUnit() {
 	esRegisterNamespace(engine->eggscript, "Unit");
 	esNamespaceInherit(engine->eggscript, "Character", "Unit");
 
-	esEntryType destinationArguments[1] = {ES_ENTRY_OBJECT};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getDestinations, "Unit", "getDestinations", 1, destinationArguments);
-	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getPath, "Unit", "getPath", 1, destinationArguments);
+	esEntryType destinationArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getDestinations, "Unit", "getDestinations", 2, destinationArguments);
+
+	esEntryType getPathArguments[1] = {ES_ENTRY_OBJECT};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getPath, "Unit", "getPath", 1, getPathArguments);
 
 	esEntryType setMovesArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Unit__setMoves, "Unit", "setMoves", 2, setMovesArguments);
@@ -114,9 +116,9 @@ esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* 
 }
 
 esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
-	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+	if(argc >= 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
-		if(unit->getPosition() != unit->lastDestinationsCalculation.position || unit->moves != unit->lastDestinationsCalculation.moves) {
+		if(args[1].numberData == 1 || unit->getPosition() != unit->lastDestinationsCalculation.position || unit->moves != unit->lastDestinationsCalculation.moves) {
 			unit->calculateDestinations();
 		}
 

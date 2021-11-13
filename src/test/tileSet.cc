@@ -36,6 +36,10 @@ bool TileSet::has(glm::uvec3 position) {
 	return this->set.find(position) != this->set.end();
 }
 
+unsigned int TileSet::size() {
+	return this->set.size();
+}
+
 void TileSet::clear() {
 	this->set.clear();
 }
@@ -180,6 +184,7 @@ void es::defineTileSet() {
 
 	esEntryType clearArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__clear, "TileSet", "clear", 1, clearArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::TileSet__size, "TileSet", "size", 1, clearArguments);
 
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__showDots, "TileSet", "showDots", 1, clearArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__showBorder, "TileSet", "showBorder", 1, clearArguments);
@@ -219,6 +224,14 @@ esEntryPtr es::TileSet__has(esEnginePtr esEngine, unsigned int argc, esEntry* ar
 				glm::uvec3(args[1].matrixData->data[0][0].numberData, args[1].matrixData->data[1][0].numberData, args[1].matrixData->data[2][0].numberData)
 			)	
 		);
+	}
+
+	return nullptr;
+}
+
+esEntryPtr es::TileSet__size(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "TileSet")) {
+		return esCreateNumber(((TileSet*)args[0].objectData->objectWrapper->data)->size());
 	}
 
 	return nullptr;

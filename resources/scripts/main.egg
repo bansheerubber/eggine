@@ -53,6 +53,7 @@ function onSelectTile(%position, %browsing) {
 		%character = getChunkContainer().getSelectedCharacter();
 		if(isObject(%character)) {
 			%path = %character.getPath(%position);
+			%character.path = %path;
 			if(isObject(%path)) {
 				%path.showDots();
 			}
