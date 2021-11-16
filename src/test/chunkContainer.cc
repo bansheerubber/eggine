@@ -73,6 +73,7 @@ ChunkContainer::ChunkContainer() {
 	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);
 
 	this->playerTeam = new Team();
+	this->enemyTeam = new Team();
 }
 
 ChunkContainer::~ChunkContainer() {
@@ -389,6 +390,10 @@ Team* ChunkContainer::getPlayerTeam() {
 	return this->playerTeam;
 }
 
+Team* ChunkContainer::getEnemyTeam() {
+	return this->enemyTeam;
+}
+
 void es::defineChunkContainer() {
 	esRegisterNamespace(engine->eggscript, "ChunkContainer");
 	esNamespaceInherit(engine->eggscript, "SimObject", "ChunkContainer");
@@ -401,6 +406,7 @@ void es::defineChunkContainer() {
 
 	esEntryType getPlayerTeamArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getPlayerTeam, "ChunkContainer", "getPlayerTeam", 1, getPlayerTeamArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getEnemyTeam, "ChunkContainer", "getEnemyTeam", 1, getPlayerTeamArguments);
 
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getSelectedCharacter, "ChunkContainer", "getSelectedCharacter", 1, getPlayerTeamArguments);
 
@@ -454,6 +460,14 @@ esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int 
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
 		return esCreateObject(container->getPlayerTeam()->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		return esCreateObject(container->getEnemyTeam()->reference);
 	}
 	return nullptr;
 }

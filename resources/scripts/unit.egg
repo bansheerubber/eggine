@@ -14,9 +14,9 @@ package unit {
 
 		if(%this == getChunkContainer().getSelectedCharacter()) {
 			%this.getDestinations().showBorder(); // re-render border if we move
-			%path = %this.getPath($Unit::HoveredTile);
-			if(isObject(%path)) {
-				%path.showDots();
+			%this.path = %this.getPath($Unit::HoveredTile);
+			if(isObject(%this.path)) {
+				%this.path.showDots();
 			}
 		}
 	}
@@ -26,18 +26,20 @@ package unit {
 
 		if(%this == getChunkContainer().getSelectedCharacter()) {
 			%this.getDestinations().showBorder(); // re-render border if we move
-			%path = %this.getPath($Unit::HoveredTile);
-			if(isObject(%path)) {
-				%path.showDots();
+			%this.path = %this.getPath($Unit::HoveredTile);
+			if(isObject(%this.path)) {
+				%this.path.showDots();
 			}
 		}
 	}
 
 	function ChunkContainer::selectCharacter(%this, %character) {
+		selectTarget(""); // reset target selection
+		
 		%test = getChunkContainer().getSelectedCharacter();
 		if(isObject(%test)) {
 			%test.getDestinations().hideBorder();
-			%test.getPath($Unit::HoveredTile);
+			%test.path = %test.getPath($Unit::HoveredTile);
 		}
 		
 		Parent::selectCharacter(%this, %character);

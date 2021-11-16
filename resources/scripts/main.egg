@@ -1,6 +1,7 @@
 exec("team.egg");
 exec("unit.egg");
 exec("editor.egg");
+exec("targetting.egg");
 
 $Unit::HoveredTile = "";
 
@@ -62,7 +63,12 @@ function onSelectTile(%position, %browsing) {
 	else {
 		%character = isTileSelectable(%position);
 		if(isObject(%character)) {
-			getChunkContainer().selectCharacter(%character);
+			if(getChunkContainer().getPlayerTeam().has(%character)) {
+				getChunkContainer().selectCharacter(%character);
+			}
+			else if(getChunkContainer().getEnemyTeam().has(%character)) {
+				selectTarget(%character);
+			}
 		}
 	}
 }

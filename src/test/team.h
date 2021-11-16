@@ -11,6 +11,7 @@ namespace es {
 	void defineTeam();
 	esEntryPtr Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Team__get(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Team__has(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
 int teamUnitSort(class Unit** character1, class Unit** character2);
@@ -18,6 +19,7 @@ int teamUnitSort(class Unit** character1, class Unit** character2);
 class Team: public GameObject {
 	friend esEntryPtr es::Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Team__get(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend esEntryPtr es::Team__has(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	
 	public:
 		Team();

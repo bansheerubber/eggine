@@ -26,6 +26,7 @@ namespace es {
 	esEntryPtr ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__getEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
@@ -38,6 +39,7 @@ class ChunkContainer : public RenderObject {
 	friend TileNeighborIterator;
 	friend esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	friend esEntryPtr es::ChunkContainer__getEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend class Engine;
@@ -70,6 +72,7 @@ class ChunkContainer : public RenderObject {
 		void onAxis(string &bind, double value);
 
 		class Team* getPlayerTeam();
+		class Team* getEnemyTeam();
 
 		bool isValidTilePosition(glm::ivec3 position);
 
@@ -93,6 +96,7 @@ class ChunkContainer : public RenderObject {
 		class OverlappingTile* characterSelectionSprite = nullptr;
 		class Character* selectedCharacter = nullptr;
 		class Team* playerTeam = nullptr;
+		class Team* enemyTeam = nullptr;
 		DynamicArray<Chunk*, ChunkContainer> renderOrder = DynamicArray<Chunk*, ChunkContainer>(this, 0, initChunk, nullptr);
 
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;

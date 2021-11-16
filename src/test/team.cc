@@ -39,6 +39,9 @@ void es::defineTeam() {
 
 	esEntryType getArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Team__get, "Team", "get", 2, getArguments);
+
+	esEntryType hasArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_OBJECT};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Team__has, "Team", "has", 2, hasArguments);
 }
 
 esEntryPtr es::Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -59,6 +62,19 @@ esEntryPtr es::Team__get(esEnginePtr esEngine, unsigned int argc, esEntry* args)
 			return nullptr;
 		}
 		return esCreateObject(team->units.array[index]->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Team__has(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
+		Team* team = (Team*)args[0].objectData->objectWrapper->data;
+		Unit* unit = (Unit*)args[1].objectData->objectWrapper->data;
+		for(size_t i = 0; i < team->units.array.head; i++) {
+			if(team->units.array[i] == unit) {
+				return esCreateNumber(1);
+			}
+		}
 	}
 	return nullptr;
 }

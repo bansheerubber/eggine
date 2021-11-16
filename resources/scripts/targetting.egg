@@ -1,0 +1,19 @@
+$Unit::TargetSprite = "";
+$Unit::SelectedTarget = "";
+
+function selectTarget(%target) {
+	if(!isObject(%target)) {
+		$Unit::TargetSprite.delete();
+		$Unit::SelectedTarget = "";
+	}
+	else {
+		if(!isObject($Unit::TargetSprite)) {
+			$Unit::TargetSprite = new InterweavedTile();
+			$Unit::TargetSprite.setZIndex(50);
+			$Unit::TargetSprite.setTexture(8);
+		}
+
+		$Unit::TargetSprite.setPosition(%target.getPosition());
+		$Unit::SelectedTarget = %target;
+	}
+}

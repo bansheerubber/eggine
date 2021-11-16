@@ -49,8 +49,24 @@ int main(int argc, char* argv[]) {
 
 	for(unsigned int i = 0; i < positionsSize; i++) {
 		Unit* unit = new Unit(&container);
+		unit->setTexture(5);
 		unit->setPosition(positions[i]);
 		container.getPlayerTeam()->add(unit);
+	}
+
+	// enemies
+	unsigned int enemyPositionsSize = 4;
+	glm::uvec3 enemyPositions[enemyPositionsSize] = {
+		glm::uvec3(2, 10, 5),
+		glm::uvec3(4, 6, 5),
+		glm::uvec3(3, 8, 5),
+		glm::uvec3(1, 9, 5),
+	};
+
+	for(unsigned int i = 0; i < enemyPositionsSize; i++) {
+		Unit* unit = new Unit(&container);
+		unit->setPosition(enemyPositions[i]);
+		container.getEnemyTeam()->add(unit);
 	}
 
 	engine->tick();

@@ -1,3 +1,5 @@
+$Editor::Enabled = false;
+
 $Editor::GhostTile = "";
 $Editor::GhostLine = new Array();
 $Editor::MouseDown = false;
@@ -13,7 +15,7 @@ function onEditorMouseDown(%state) {
 	if(%state) {
 		$Editor::MouseDownPosition = $Editor::CurrentHoverPosition;
 	}
-	else if(isObject($Editor::GhostTile)) {
+	else if(isObject($Editor::GhostTile) && $Editor::Enabled) {
 		for(%i = 0; %i < $Editor::GhostLine.size(); %i++) {
 			%position = $Editor::GhostLine[%i].getPosition();
 			getChunkContainer().setTile(%position, $Editor::GhostTile.getTexture());
@@ -49,14 +51,18 @@ function onDevTextureSwitch(%texture) {
 function onHoverTile(%position) {
 	%character = getChunkContainer().getSelectedCharacter();
 	if(isObject(%character)) {
-		%path = %character.getPath(%position);
-		if(isObject(%path)) {
-			%path.showDots();
+		%character.path = %character.getPath(%position);
+		if(isObject(%character.path)) {
+			%character.path.showDots();
 		}
 	}
 	
 	$Editor::CurrentHoverPosition = %position;
 	$Unit::HoveredTile = %position;
+
+	if(!$Editor::Enabled) {
+		return;
+	}
 	
 	if($Editor::GhostTile $= "") {
 		// echo("should create tile at " SPC %position[0] SPC %position[1] SPC %position[2]);
