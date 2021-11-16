@@ -36,17 +36,31 @@ RaycastMarcher& RaycastMarcher::operator++() {
 	if(this->finished()) {
 		return *this;
 	}
+
+	const glm::ivec3 offset(0, 0, -1);
 	
 	if(!engine->chunkContainer->isValidTilePosition(this->position)) {
 		this->_finished = true;
 		this->result.hit = false;
 		this->result.position = glm::ivec3();
 		this->result.normal = glm::vec3();
+		return *this;
 	}
 	else if(engine->chunkContainer->getTile(this->position) != 0) {
 		this->_finished = true;
 		this->result.hit = true;
 		this->result.position = position;
+		return *this;
+	}
+	else if(
+		engine->chunkContainer->isValidTilePosition(this->position + offset)
+		&& engine->chunkContainer->getSpriteInfo(this->position).wall != resources::NO_WALL
+		&& engine->chunkContainer->getTile(this->position + offset) != 0
+	) { // check for walls
+		this->_finished = true;
+		this->result.hit = true;
+		this->result.position = position + offset;
+		return *this;
 	}
 
 	if(this->bounds.x < this->bounds.y && this->bounds.x < this->bounds.z) {
