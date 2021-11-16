@@ -18,6 +18,8 @@ class Layer : public GameObject {
 	public:
 		Layer(class Chunk* chunk);
 
+		// ## game_object_definitions Layer
+
 		void render(double deltaTime, RenderContext &context);
 		void add(OverlappingTile* tile);
 		void update(OverlappingTile* tile);

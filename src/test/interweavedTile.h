@@ -18,6 +18,8 @@ class InterweavedTile: public OverlappingTile {
 		InterweavedTile(class ChunkContainer* container, bool createReference = true);
 		~InterweavedTile();
 
+		// ## game_object_definitions InterweavedTile
+
 		OverlappingTile* setPosition(glm::uvec3 position);
 		OverlappingTile* setTexture(unsigned int index);
 		OverlappingTile* setColor(glm::vec4 color);

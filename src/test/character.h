@@ -12,6 +12,8 @@ class Character: public InterweavedTile {
 		Character(class ChunkContainer* container, bool createReference = true);
 		~Character();
 
+		// ## game_object_definitions Character
+
 		OverlappingTile* setPosition(glm::uvec3 position);
 		bool move(glm::uvec3 position);
 		bool moveTest(glm::uvec3 position);

@@ -24,6 +24,8 @@ class Unit: public Character {
 		Unit(class ChunkContainer* container, bool createReference = true);
 		~Unit();
 
+		// ## game_object_definitions Unit
+
 		void move(glm::ivec3 position);
 
 	private:

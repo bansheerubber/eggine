@@ -22,6 +22,8 @@ class Team: public GameObject {
 	public:
 		Team();
 
+		// ## game_object_definitions Team
+
 		void add(class Unit* character);
 	
 	private:

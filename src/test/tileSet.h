@@ -21,6 +21,8 @@ class TileSet: public GameObject {
 	public:
 		TileSet();
 		~TileSet();
+
+		// ## game_object_definitions TileSet
 		
 		bool add(glm::uvec3 position);
 		bool remove(glm::uvec3 position);

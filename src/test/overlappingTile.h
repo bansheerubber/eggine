@@ -30,6 +30,8 @@ class OverlappingTile : public GameObject {
 		OverlappingTile(class ChunkContainer* container, bool createReference = true);
 		~OverlappingTile();
 
+		// ## game_object_definitions OverlappingTile
+
 		virtual OverlappingTile* setPosition(glm::uvec3 position);
 		glm::uvec3 getPosition();
 
