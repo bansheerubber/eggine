@@ -101,7 +101,7 @@ void render::Texture::load(
 
 	dk::ImageLayout layout;
 	dk::ImageLayoutMaker{this->window->device}
-		.setFlags(0)
+		.setFlags(DkImageFlags_BlockLinear)
 		.setFormat(channelsAndBitDepthToDkFormat(this->channels, this->bitDepth))
 		.setDimensions(this->width, this->height)
 		.initialize(layout);
