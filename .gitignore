@@ -15,6 +15,9 @@ include/pc/GLFW
 include/common/freetype
 include/common/ft2build.h
 include/common/eggscript
+include/common/litehtml
+include/common/litehtml.h
+include/common/master.css
 tmp-setup
 src/carton
 resources/spritesheets

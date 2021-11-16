@@ -112,5 +112,18 @@ cp -v backends/imgui_impl_opengl3.h ../../imgui/imgui_impl_opengl3.h
 cp -v backends/imgui_impl_opengl3_loader.h ../../imgui/imgui_impl_opengl3_loader.h
 popd
 
+# configure litehtml
+pushd .
+cd tmp-setup
+git clone https://github.com/bansheerubber/litehtml
+cd litehtml
+mkdir build
+cd build
+cmake ..
+cmake --build .
+popd
+cp -v tmp-setup/litehtml/build/liblitehtml.a lib
+mv -v tmp-setup/litehtml/include/* include/common/
+
 # delete tmp-setup
 rm -Rf tmp-setup
