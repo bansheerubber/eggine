@@ -18,6 +18,9 @@
 #include "test/tileMath.h"
 #include "test/unit.h"
 
+#include <litehtml.h>
+#include "container/container_test.h"
+
 #ifdef __switch__
 #include <switch.h>
 #endif
@@ -68,6 +71,11 @@ int main(int argc, char* argv[]) {
 		unit->setPosition(enemyPositions[i]);
 		container.getEnemyTeam()->add(unit);
 	}
+
+	litehtml::context html_context;
+	container_test html_container;
+
+	litehtml::document::createFromString("<html><body>oh, frog to meet you</body></html>", &html_container, &html_context)->draw(0, 0, 0, nullptr);
 
 	engine->tick();
 
