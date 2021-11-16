@@ -125,5 +125,16 @@ popd
 cp -v tmp-setup/litehtml/build/liblitehtml.a lib
 mv -v tmp-setup/litehtml/include/* include/common/
 
+# configure gumbo parser
+pushd .
+cd tmp-setup
+git clone https://github.com/google/gumbo-parser
+cd gumbo-parser
+./autogen.sh
+./configure
+make
+popd
+cp tmp-setup/gumbo-parser/.libs/libgumbo.a lib
+
 # delete tmp-setup
 rm -Rf tmp-setup

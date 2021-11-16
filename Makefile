@@ -1,5 +1,5 @@
 target = game
-cclibs = -lpthread -llitehtml -lGL -lglfw3 -ldl -lpng -lfreetype -leggscript -lfmt -lz
+cclibs = -lpthread -llitehtml -lgumbo -lGL -lglfw3 -ldl -lpng -lfreetype -leggscript -lfmt -lz
 ccinclude = -Iinclude/pc/glm/ -Iinclude/common/ -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ -Iinclude/pc/ -Iimgui -Llib
 CC = g++
 CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
