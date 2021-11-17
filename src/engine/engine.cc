@@ -404,16 +404,16 @@ void Engine::tick() {
 		this->renderableUIs[i]->render(deltaTime, context);
 	}
 
+	litehtml::position clip;
+	this->renderWindow.htmlContainer->get_client_rect(clip);
+	this->renderWindow.htmlDocument->render(clip.width);
+	this->renderWindow.htmlDocument->draw(0, 0, 0, nullptr);
+
 	#ifdef EGGINE_DEVELOPER_MODE
 	this->developerGui->render();
 	#endif
 
 	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
-
-	litehtml::position clip;
-	this->renderWindow.htmlContainer->get_client_rect(clip);
-	this->renderWindow.htmlDocument->render(clip.width);
-	this->renderWindow.htmlDocument->draw(0, 0, 0, nullptr);
 
 	this->renderWindow.render();
 

@@ -203,6 +203,7 @@ namespace render {
 			unsigned int commandBufferCount = COMMAND_BUFFER_SLICE_COUNT;
 			unsigned int commandBufferSliceSize = this->commandBufferSize / COMMAND_BUFFER_SLICE_COUNT;
 			unsigned int currentCommandBuffer = 0;
+			unsigned int signaledFence = 0;
 			dk::Fence commandBufferFences[COMMAND_BUFFER_SLICE_COUNT];
 			
 			unsigned int staticCommandBufferSize = 16 * 1024; // 16 KB

@@ -53,7 +53,6 @@ void render::LiteHTMLContainer::draw_text(
   litehtml::web_color color,
   const litehtml::position& pos
 ) {
-  // printf("%d\n", pos.top());
   this->text.font = (Font*)hFont;
   this->text.position.x = pos.left();
   this->text.position.y = pos.top();

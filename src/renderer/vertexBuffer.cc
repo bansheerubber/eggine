@@ -18,6 +18,12 @@ render::VertexBuffer::~VertexBuffer() {
 	this->destroyBuffer();
 }
 
+void render::VertexBuffer::reallocate() {
+	#ifdef __switch__
+	this->forceReallocate = true;
+	#endif
+}
+
 void render::VertexBuffer::setDynamicDraw(bool isDynamicDraw) {
 	#ifndef __switch__
 	this->usage = isDynamicDraw ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
@@ -30,7 +36,7 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 	#ifdef __switch__
 	this->align = align;
 	
-	if(!this->memoryAllocated || alignTo(size, align) != this->memory->size()) {
+	if(!this->memoryAllocated || alignTo(size, align) != this->memory->size() || this->forceReallocate) {
 		if(this->memory != nullptr) {
 			this->memory->requestDeallocate(); // deallocate memory
 		}

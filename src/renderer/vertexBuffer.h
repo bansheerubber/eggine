@@ -18,6 +18,7 @@ namespace render {
 			VertexBuffer(class Window* window);
 			~VertexBuffer();
 			
+			void reallocate(); // force a reallocation, useful for nintendo switch
 			void setDynamicDraw(bool isDynamicDraw);
 			void setData(void* data, unsigned int size, unsigned int align);
 			void setSubData(void* data, unsigned int size, unsigned int offset);
@@ -35,6 +36,8 @@ namespace render {
 			#endif
 		
 		protected:
+			bool forceReallocate = false;
+			
 			#ifdef __switch__
 			bool memoryAllocated = false;
 			switch_memory::Piece* memory = nullptr;

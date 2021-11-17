@@ -129,6 +129,9 @@ void Text::updateBuffers() {
 		}
 	}
 
+	this->vertexBuffers[0]->reallocate();
+	this->vertexBuffers[1]->reallocate();
+
 	this->vertexBuffers[0]->setData(&vertices[0][0], sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 	this->vertexBuffers[1]->setData(&uvs[0][0], sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 }

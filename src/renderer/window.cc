@@ -187,13 +187,13 @@ void render::Window::prerender() {
 	this->lastRenderTime = getMicrosecondsNow();
 	
 	#ifdef __switch__
-	// handle deallocated memory at the beginning of each frame
-	this->memory.processDeallocationLists();
-	
 	// do dynamic command buffer magic
 	this->commandBuffer.clear();
-	this->commandBufferFences[this->currentCommandBuffer].wait();
+	this->commandBufferFences[this->signaledFence].wait();
 	this->commandBuffer.addMemory(this->commandBufferMemory, this->commandBufferSliceSize * this->currentCommandBuffer, this->commandBufferSliceSize);
+
+	// handle deallocated memory at the beginning of each frame
+	this->memory.processDeallocationLists();
 
 	// handle gamepad
 	padUpdate(&this->pad);
@@ -217,6 +217,7 @@ void render::Window::render() {
 
 	// do dynamic command buffer magic
 	this->commandBuffer.signalFence(this->commandBufferFences[this->currentCommandBuffer]);
+	this->signaledFence = this->currentCommandBuffer;
 	this->queue.submitCommands(this->commandBuffer.finishList());
 
 	this->currentCommandBuffer = (this->currentCommandBuffer + 1) % this->commandBufferCount;
