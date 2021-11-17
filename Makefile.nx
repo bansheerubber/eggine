@@ -11,12 +11,12 @@ LIBNX	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 SWITCH = -ffunction-sections -fno-rtti
 
 ARCH = -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft
-LIBS = -ldeko3d -ldrm_nouveau -lnx -lm -lglad -lpng -lfreetype -leggscript -lz -lbz2
+LIBS = -ldeko3d -ldrm_nouveau -lnx -lm -lglad -lpng -lfreetype -leggscript -lz -lbz2 -llitehtml -lgumbo
 INCLUDE = -Iinclude/common -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ $(INCLUDENX)
 LIBPATHS = $(LIBNX) -Llibnx
 
-CPPFLAGS = -O2 -D__switch__ -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -fPIE --static -fno-semantic-interposition $(ARCH) $(SWITCH)
-LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -g -fPIE -fPIC
+CPPFLAGS = -O2 -D__switch__ -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -fPIC --static -fno-semantic-interposition $(ARCH) $(SWITCH)
+LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -g -fPIE
 
 cpp_source = $(shell find src -type f -name "*.cc" ! -path "src/include*")
 cpp_source_tmp = $(subst src, tmp, $(cpp_source))
