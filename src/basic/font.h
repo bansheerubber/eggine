@@ -29,13 +29,16 @@ class Font : public GameObject {
 		string fileName;
 
 		static tsl::robin_map<string, tsl::robin_map<int, Font*>> Fonts;
-		static Font* GetFont(string &family, int size);
+		static Font* GetFont(string family, int size);
 
 		int size;
 		char atlas[256 * 256];
+		int ascent;
+		int descent;
+		int x_height;
+		FontGlyph characterToGlyph[128];
 	
 	protected:
 		FT_Face face;
-		render::Texture* texture;
-		FontGlyph characterToGlyph[128];
+		render::Texture* texture = nullptr;
 };

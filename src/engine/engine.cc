@@ -34,16 +34,17 @@ void Engine::initialize() {
 	this->eggscript = esCreateEngine(false);
 	es::eggscriptDefinitions();
 
-	this->renderWindow.initialize();
-
 	this->manager = new resources::ResourceManager(this->filePrefix + "out.carton");
 
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".frag")->exec());
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".vert")->exec());
-
 	#ifdef __switch__
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".dksh")->exec());
-	#else
+	#endif
+
+	this->renderWindow.initialize();
+
+	#ifndef __switch__
 	glfwSetKeyCallback(this->renderWindow.window, onKeyPress);
 	glfwSetMouseButtonCallback(this->renderWindow.window, onMousePress);
 	glfwSetCursorPosCallback(this->renderWindow.window, onMouseMove);
@@ -408,6 +409,11 @@ void Engine::tick() {
 	#endif
 
 	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
+
+	litehtml::position clip;
+	this->renderWindow.htmlContainer->get_client_rect(clip);
+	this->renderWindow.htmlDocument->render(clip.width);
+	this->renderWindow.htmlDocument->draw(0, 0, 0, nullptr);
 
 	this->renderWindow.render();
 

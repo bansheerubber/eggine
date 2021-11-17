@@ -82,6 +82,7 @@ class Engine {
 
 		Camera* camera = nullptr;
 		class ChunkContainer* chunkContainer = nullptr;
+		UI ui;
 
 		#ifdef EGGINE_DEBUG
 		Debug debug;
@@ -121,7 +122,6 @@ class Engine {
 		long long eggscriptTickTime = 0;
 		
 		class Shader* boundShader = nullptr;
-		UI ui;
 		long long lastRenderTime;
 
 		#ifdef EGGINE_DEBUG

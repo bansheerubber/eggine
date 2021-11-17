@@ -17,18 +17,19 @@ using namespace std;
 
 class Text : public RenderObject {
 	public:
-		Text(string family, int size);
+		Text(bool addToUiList = true);
+		Text(string family, int size, bool addToUiList = true);
 		~Text();
 
 		glm::vec3 color = glm::vec3(1, 1, 1);
 		glm::vec2 position = glm::vec2(0, 0);
+		Font* font = nullptr;
 
 		void render(double deltaTime, RenderContext &context);
 		void setText(string text);
 		string getText();
 	
 	protected:
-		Font* font;
 
 		render::VertexBuffer* vertexBuffers[2];
 		render::VertexAttributes* vertexAttributes;

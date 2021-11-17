@@ -4,7 +4,7 @@
 
 tsl::robin_map<string, tsl::robin_map<int, Font*>> Font::Fonts;
 
-Font* Font::GetFont(string &family, int size) {
+Font* Font::GetFont(string family, int size) {
 	if(Font::Fonts[family][size] == nullptr) {
 		// TODO load this from the carton
 		#ifdef __switch__
@@ -73,7 +73,21 @@ Font::Font(string fileName, int size) {
 			minUV: minUV,
 			maxUV: maxUV,
 		};
+
+		if(c == 'z' || c == 'w' || c == 'v' || c == 'x') {
+			this->x_height += this->face->glyph->bitmap_top;
+		}
+
+		if(this->characterToGlyph[c].top > this->ascent) {
+			this->ascent = this->characterToGlyph[c].top;
+		}
+
+		if((this->face->glyph->metrics.height >> 6) - this->characterToGlyph[c].top > this->descent) {
+			this->descent = (this->face->glyph->metrics.height >> 6) - this->characterToGlyph[c].top;
+		}
 	}
+
+	this->x_height /= 4;
 
 	this->texture = new render::Texture(&engine->renderWindow);
 	this->texture->setWrap(render::TEXTURE_WRAP_CLAMP_TO_EDGE, render::TEXTURE_WRAP_CLAMP_TO_EDGE);

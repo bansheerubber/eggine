@@ -1,13 +1,15 @@
 #include "main.h"
 
+#include <eggscript/egg.h>
+#include <litehtml.h>
 #include <random>
 #include <stdio.h>
-#include <eggscript/egg.h>
 
 #include "test/chunk.h"
 #include "test/chunkContainer.h"
 #include "engine/engine.h"
 #include "basic/gameObject.h"
+#include "renderer/litehtmlContainer.h"
 #include "basic/line.h"
 #include "test/overlappingTile.h"
 #include "resources/mapSource.h"
@@ -17,9 +19,6 @@
 #include "basic/text.h"
 #include "test/tileMath.h"
 #include "test/unit.h"
-
-#include <litehtml.h>
-#include "container/container_test.h"
 
 #ifdef __switch__
 #include <switch.h>
@@ -71,11 +70,6 @@ int main(int argc, char* argv[]) {
 		unit->setPosition(enemyPositions[i]);
 		container.getEnemyTeam()->add(unit);
 	}
-
-	litehtml::context html_context;
-	container_test html_container;
-
-	litehtml::document::createFromString("<html><body>oh, frog to meet you</body></html>", &html_container, &html_context)->draw(0, 0, 0, nullptr);
 
 	engine->tick();
 

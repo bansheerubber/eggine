@@ -9,10 +9,12 @@
 
 #include "../engine/developer.h"
 
+#include <litehtml.h>
 #include <glm/vec4.hpp>
 #include <vector>
 
 #include "../util/crop.h"
+#include "../renderer/litehtmlContainer.h"
 #include "memory.h"
 #include "../util/png.h"
 #include "../renderer/texture.h"
@@ -152,6 +154,9 @@ namespace render {
 			double deltaTime = 0.0;
 			unsigned int width = 1280;
 			unsigned int height = 720;
+
+			shared_ptr<litehtml::document> htmlDocument = nullptr;
+			render::LiteHTMLContainer* htmlContainer = nullptr;
 			
 			void initialize(); // start the graphics
 			void deinitialize(); // end the graphics
@@ -186,6 +191,8 @@ namespace render {
 			glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 			unsigned long long lastRenderTime = getMicrosecondsNow();
+
+			litehtml::context htmlContext;
 			
 			#ifdef __switch__
 			switch_memory::Piece* imageDescriptorMemory;

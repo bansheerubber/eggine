@@ -6,9 +6,7 @@
 
 render::Program* Text::Program = nullptr;
 
-Text::Text(string family, int size) : RenderObject(false) {
-	this->font = Font::GetFont(family, size);
-
+Text::Text(bool addToUiList) : RenderObject(false) {
 	if(Text::Program == nullptr) {
 		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
 		vertexShader->load(getShaderSource("shaders/text.vert"), render::SHADER_VERTEX);
@@ -51,7 +49,13 @@ Text::Text(string family, int size) : RenderObject(false) {
 	this->vertexAttributes->addVertexAttribute(this->vertexBuffers[0], 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
 	this->vertexAttributes->addVertexAttribute(this->vertexBuffers[1], 1, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
 
-	engine->addUIObject(this);
+	if(addToUiList) {
+		engine->addUIObject(this);
+	}
+}
+
+Text::Text(string family, int size, bool addToUiList) : Text(addToUiList) {
+	this->font = Font::GetFont(family, size);
 }
 
 Text::~Text() {

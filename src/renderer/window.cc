@@ -147,6 +147,9 @@ void render::Window::initialize() {
 	#endif
 
 	#endif // end for ifdef __switch__
+
+	this->htmlContainer = new LiteHTMLContainer();
+	this->htmlDocument = litehtml::document::createFromString("<html><head></head><body style=\"height: 720px; display: block; padding: 0px; margin: 0px; text-indent: 0;\"><div style=\"width: 500px; display: block; text-align: center; margin: auto; position: absolute; translate: -50% 0px; left: 50%; bottom: 0px;\">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div></body></html>", this->htmlContainer, &this->htmlContext);
 }
 
 void render::Window::addError() {
