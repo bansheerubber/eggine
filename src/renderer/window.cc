@@ -187,6 +187,9 @@ void render::Window::prerender() {
 	this->lastRenderTime = getMicrosecondsNow();
 	
 	#ifdef __switch__
+	// handle deallocated memory at the beginning of each frame
+	this->memory.processDeallocationLists();
+	
 	// do dynamic command buffer magic
 	this->commandBuffer.clear();
 	this->commandBufferFences[this->currentCommandBuffer].wait();

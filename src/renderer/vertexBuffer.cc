@@ -32,7 +32,7 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 	
 	if(!this->memoryAllocated || alignTo(size, align) != this->memory->size()) {
 		if(this->memory != nullptr) {
-			this->memory->deallocate(); // deallocate memory
+			this->memory->requestDeallocate(); // deallocate memory
 		}
 		
 		this->memory = this->window->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, this->size, align);
@@ -137,7 +137,7 @@ void render::VertexBuffer::createDynamicBuffer() {
 void render::VertexBuffer::destroyBuffer() {
 	#ifdef __switch__
 	if(this->memory != nullptr) {
-		this->memory->deallocate();
+		this->memory->requestDeallocate();
 	}
 	this->memoryAllocated = false;
 	#else

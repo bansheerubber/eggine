@@ -36,6 +36,10 @@ DkGpuAddr render::switch_memory::Piece::gpuAddr() {
 	return this->parent->gpuAddr() + this->start;
 }
 
+void render::switch_memory::Piece::requestDeallocate() {
+	this->parent->deallocationList.push_back(this);
+}
+
 void render::switch_memory::Piece::deallocate() {
 	this->parent->deallocate(this);
 }
@@ -137,6 +141,13 @@ render::switch_memory::Piece* render::switch_memory::Page::allocate(unsigned lon
 	}
 }
 
+void render::switch_memory::Page::processDeallocationList() {
+	for(Piece* piece: this->deallocationList) {
+		piece->deallocate();
+	}
+	this->deallocationList.clear();
+}
+
 void render::switch_memory::Page::deallocate(Piece* piece) {
 	piece->allocated = false;
 	this->combinePieces();
@@ -196,6 +207,14 @@ void render::switch_memory::Page::print() {
 
 render::switch_memory::Manager::Manager(Window* window) {
 	this->window = window;
+}
+
+void render::switch_memory::Manager::processDeallocationLists() {
+	for(Page* page: this->pages) {
+		if(page->deallocationList.size() > 0) {
+			page->processDeallocationList();
+		}
+	}
 }
 
 render::switch_memory::Piece* render::switch_memory::Manager::allocate(uint32_t flags, unsigned long size, unsigned long align) {

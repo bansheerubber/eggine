@@ -29,6 +29,7 @@ namespace render {
 				unsigned long size();
 				void* cpuAddr();
 				DkGpuAddr gpuAddr();
+				void requestDeallocate();
 				void deallocate();
 
 			protected:
@@ -40,6 +41,7 @@ namespace render {
 		// structure to handle a MemBlock and split it up into usable pieces for data
 		class Page {
 			friend class Manager;
+			friend Piece;
 			
 			public:
 				Page(Window* window, uint32_t flags, unsigned long size = SWITCH_MEMORY_DEFAULT_PAGE_SIZE);
@@ -47,6 +49,7 @@ namespace render {
 				dk::MemBlock block;
 				
 				Piece* allocate(unsigned long size, unsigned long align);
+				void processDeallocationList();
 				void deallocate(Piece* piece);
 				void print();
 
@@ -58,6 +61,7 @@ namespace render {
 				Piece* head = nullptr;
 				unsigned long size;
 				uint32_t flags;
+				vector<Piece*> deallocationList;
 
 				void combinePieces();
 		};
@@ -68,6 +72,7 @@ namespace render {
 				Manager(Window* window);
 				
 				Piece* allocate(uint32_t flags, unsigned long size, unsigned long align);
+				void processDeallocationLists();
 				void print();
 				size_t getAllocated();
 			
