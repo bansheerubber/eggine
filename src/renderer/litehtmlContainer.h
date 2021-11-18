@@ -5,6 +5,11 @@
 #include "../basic/text.h"
 
 namespace render {
+	struct LiteHTMLTextWrapper {
+		Text* text;
+		size_t lastUsed;
+	};
+	
 	class LiteHTMLContainer : public litehtml::document_container {
 		public:
 			LiteHTMLContainer();
@@ -61,5 +66,8 @@ namespace render {
 		
 		private:
 			Text text = Text(false);
+
+			Text* getText(class Font* font, string text);
+			tsl::robin_map<string, LiteHTMLTextWrapper> stringToText;
 	};
 };

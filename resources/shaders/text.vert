@@ -7,9 +7,10 @@ out vec2 uv;
 layout(binding = 0) uniform vertexBlock
 {
 	mat4 projection;
+	vec2 position;
 } vb;
 
 void main() {
-	gl_Position = vb.projection * vec4(vVertex, 0.0, 1.0);
+	gl_Position = vb.projection * vec4(vVertex + vb.position, 0.0, 1.0);
 	uv = vUV;
 }

@@ -11,6 +11,21 @@ render::LiteHTMLContainer::LiteHTMLContainer() {}
 
 render::LiteHTMLContainer::~LiteHTMLContainer() {}
 
+Text* render::LiteHTMLContainer::getText(Font* font, string input) {
+  auto found = this->stringToText.find(input);
+  if(found == this->stringToText.end()) {
+    Text* text = new Text(false);
+    text->font = font;
+    text->setText(input);
+    this->stringToText[input] = {
+      text: text,
+      lastUsed: 0,
+    };
+    return text;
+  }
+  return found.value().text;
+}
+
 litehtml::uint_ptr render::LiteHTMLContainer::create_font(
   const litehtml::tchar_t* faceName,
   int size,
@@ -53,15 +68,14 @@ void render::LiteHTMLContainer::draw_text(
   litehtml::web_color color,
   const litehtml::position& pos
 ) {
-  this->text.font = (Font*)hFont;
-  this->text.position.x = pos.left();
-  this->text.position.y = pos.top();
-  this->text.setText(string(text));
+  Text* foundText = this->getText((Font*)hFont, string(text));
   RenderContext context = {
 		camera: engine->camera,
 		ui: &engine->ui,
 	};
-  this->text.render(0, context);
+  foundText->position.x = pos.left();
+  foundText->position.y = pos.top();
+  foundText->render(0, context);
 }
 
 int render::LiteHTMLContainer::pt_to_px(int pt) const { return (int)((double)pt * 96 / 72.0); }

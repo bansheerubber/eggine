@@ -63,8 +63,7 @@ Text::~Text() {
 }
 
 void Text::updateBuffers() {
-	float x = this->position.x, y = this->font->size + this->position.y, scale = 1.0f;
-
+	float x = 0, y = this->font->size, scale = 1.0f;
 	glm::vec2 vertices[this->text.size() * 6];
 	glm::vec2 uvs[this->text.size() * 6];
 
@@ -72,7 +71,7 @@ void Text::updateBuffers() {
 	size_t total = 0;
 	for(size_t i = 0; i < this->text.size(); i++) {
 		if(this->text[i] == '\n') {
-			x = this->position.x;
+			x = 0;
 			y += this->font->size;
 		}
 		else {
@@ -152,8 +151,10 @@ void Text::render(double deltaTime, RenderContext &context) {
 
 	struct VertexBlock {
 		glm::mat4 projection;
+		glm::vec2 position;
 	} vb;
 	vb.projection = context.ui->projectionMatrix;
+	vb.position = this->position;
 
 	struct FragmentBlock {
 		glm::vec3 color;
