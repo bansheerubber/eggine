@@ -50,6 +50,7 @@ namespace render {
 			#else
 			GLuint program = GL_INVALID_INDEX;
 			tsl::robin_map< pair<string, size_t>, GLuint> uniformToBuffer;
+			static unsigned int UniformCount;
 			void createUniformBuffer(string uniformName, unsigned int size, size_t cacheIndex);
 			#endif
 	};

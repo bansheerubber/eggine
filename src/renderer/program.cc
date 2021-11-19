@@ -7,6 +7,8 @@
 #include "shader.h"
 #include "window.h"
 
+unsigned int render::Program::UniformCount = 0;
+
 render::Program::Program(Window* window) {
 	this->window = window;
 }
@@ -63,7 +65,6 @@ void render::Program::bind() {
 			this->program = program;
 		}
 
-		int uniformCount = 0;
 		for(Shader* shader: this->shaders) {
 			glDetachShader(program, shader->shader);
 
@@ -72,11 +73,11 @@ void render::Program::bind() {
 				// update shader binding for opengl
 				GLuint blockIndex = glGetUniformBlockIndex(this->program, uniform.c_str());
 				if(blockIndex != GL_INVALID_INDEX) {
-					glUniformBlockBinding(this->program, blockIndex, binding + uniformCount);
-					this->uniformToBinding[uniform] = binding + uniformCount;
+					glUniformBlockBinding(this->program, blockIndex, binding + UniformCount);
+					this->uniformToBinding[uniform] = binding + UniformCount;
 				}
 			}
-			uniformCount += shader->uniformToBinding.size();
+			UniformCount += shader->uniformToBinding.size();
 		}
 	}
 
@@ -122,11 +123,9 @@ void render::Program::bindUniform(string uniformName, void* data, unsigned int s
 	glBindBuffer(GL_UNIFORM_BUFFER, found.value());
 
 	if(created || !setOnce) { // only update the buffer if we really need to
-		glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW); // orphan the buffer
+		// glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW); // orphan the buffer
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
 	}
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), found.value());
 	#endif
 }
 
@@ -154,5 +153,6 @@ void render::Program::createUniformBuffer(string uniformName, unsigned int size,
 
 	glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[pair<string, size_t>(uniformName, cacheIndex)]);
 	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), bufferId);
 }
 #endif
