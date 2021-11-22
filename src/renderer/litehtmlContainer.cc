@@ -74,7 +74,7 @@ void render::LiteHTMLContainer::draw_text(
 		ui: &engine->ui,
 	};
   foundText->position.x = pos.left();
-  foundText->position.y = pos.top();
+  foundText->position.y = pos.top() - ((Font*)hFont)->descent;
   foundText->render(0, context);
 }
 
@@ -86,33 +86,52 @@ const litehtml::tchar_t* render::LiteHTMLContainer::get_default_font_name() cons
 
 void render::LiteHTMLContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker& marker) {}
 
-void render::LiteHTMLContainer::load_image(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, bool redraw_on_ready) {}
+void render::LiteHTMLContainer::load_image(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, bool redraw_on_ready) {
+  string filename = "html";
+  filename += src;
+  resources::Image* image = (resources::Image*)(engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", filename)->exec())[0]);
+  this->sourceToImage[string(src)] = image;
+}
 
-void render::LiteHTMLContainer::get_image_size(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, litehtml::size& sz) {}
+void render::LiteHTMLContainer::get_image_size(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, litehtml::size& sz) {
+  if(this->sourceToImage[string(src)] != nullptr) {
+    sz.width = this->sourceToImage[string(src)]->getWidth();
+    sz.height = this->sourceToImage[string(src)]->getHeight();
+  }
+}
 
-void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg) {}
+void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg) {
+  resources::Image* image;
+  if((image = this->sourceToImage[string(bg.image.c_str())]) != nullptr) {
+    image->position.x = bg.position_x;
+    image->position.y = bg.position_y;
+    image->size.x = bg.image_size.width;
+    image->size.y = bg.image_size.height;
+    image->render();
+  }
+}
 
-void render::LiteHTMLContainer::make_url(const litehtml::tchar_t* url, const litehtml::tchar_t* basepath, litehtml::tstring& out) { out = url; }
+void render::LiteHTMLContainer::make_url(const litehtml::tchar_t* url, const litehtml::tchar_t* basepath, litehtml::tstring& out) {
+  out = url;
+}
 
 void render::LiteHTMLContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root) {}
 
-void render::LiteHTMLContainer::set_caption(const litehtml::tchar_t* caption){};    //: set_caption
+void render::LiteHTMLContainer::set_caption(const litehtml::tchar_t* caption) {}
 
-void render::LiteHTMLContainer::set_base_url(const litehtml::tchar_t* base_url){};  //: set_base_url
+void render::LiteHTMLContainer::set_base_url(const litehtml::tchar_t* base_url) {}
 
 void render::LiteHTMLContainer::link(const std::shared_ptr<litehtml::document>& ptr, const litehtml::element::ptr& el) {}
 
-void render::LiteHTMLContainer::on_anchor_click(const litehtml::tchar_t* url, const litehtml::element::ptr& el) {}  //: on_anchor_click
+void render::LiteHTMLContainer::on_anchor_click(const litehtml::tchar_t* url, const litehtml::element::ptr& el) {}
 
-void render::LiteHTMLContainer::set_cursor(const litehtml::tchar_t* cursor) {}                                      //: set_cursor
+void render::LiteHTMLContainer::set_cursor(const litehtml::tchar_t* cursor) {}
 
 void render::LiteHTMLContainer::transform_text(litehtml::tstring& text, litehtml::text_transform tt) {}
 
-void render::LiteHTMLContainer::import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) {}  //: import_css
+void render::LiteHTMLContainer::import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) {}
 
-void render::LiteHTMLContainer::set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius, bool valid_x, bool valid_y) {
-  // printf("set clip\n");
-}
+void render::LiteHTMLContainer::set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius, bool valid_x, bool valid_y) {}
 
 void render::LiteHTMLContainer::del_clip() {}
 
@@ -121,16 +140,13 @@ void render::LiteHTMLContainer::get_client_rect(litehtml::position& client) cons
   client.y = 0;
   client.width = engine->renderWindow.width;
   client.height = engine->renderWindow.height;
-
-  // printf("%d\n", engine->renderWindow.width);
-}  //: get_client_rect
+}
 
 std::shared_ptr<litehtml::element> render::LiteHTMLContainer::create_element(
   const litehtml::tchar_t* tag_name,
   const litehtml::string_map& attributes,
   const std::shared_ptr<litehtml::document>& doc
 ) {
-  // printf("EGGGG\n");
   return 0;
 }
 
@@ -140,8 +156,8 @@ void render::LiteHTMLContainer::get_media_features(litehtml::media_features& med
   media.type = litehtml::media_type_screen;
   media.width = client.width;
   media.height = client.height;
-  media.device_width = 100;
-  media.device_height = 100;
+  media.device_width = client.width;
+  media.device_height = client.height;
   media.color = 8;
   media.monochrome = 0;
   media.color_index = 256;
@@ -152,4 +168,3 @@ void render::LiteHTMLContainer::get_language(litehtml::tstring& language, liteht
   language = _t("en");
   culture = _t("");
 }
-//: resolve_color

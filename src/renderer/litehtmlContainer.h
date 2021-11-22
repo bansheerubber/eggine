@@ -2,6 +2,7 @@
 
 #include <litehtml.h>
 
+#include "../resources/image.h"
 #include "../basic/text.h"
 
 namespace render {
@@ -69,5 +70,6 @@ namespace render {
 
 			Text* getText(class Font* font, string text);
 			tsl::robin_map<string, LiteHTMLTextWrapper> stringToText;
+			tsl::robin_map<string, resources::Image*> sourceToImage;
 	};
 };
