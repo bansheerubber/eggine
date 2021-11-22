@@ -231,6 +231,9 @@ namespace render {
 				unsigned int bitDepth,
 				unsigned int channels
 			);
+
+			unsigned int getWidth();
+			unsigned int getHeight();
 		
 		protected:
 			Window* window;

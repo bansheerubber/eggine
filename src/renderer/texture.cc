@@ -143,6 +143,14 @@ void render::Texture::load(
 	#endif
 }
 
+unsigned int render::Texture::getWidth() {
+	return this->width;
+}
+
+unsigned int render::Texture::getHeight() {
+	return this->height;
+}
+
 void render::Texture::bind(unsigned int location) {
 	#ifdef __switch__
 	// this->window->bindTexture(location, this);
