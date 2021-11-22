@@ -2,23 +2,25 @@
 
 #include "../engine/developer.h"
 
+#include "../util/crop.h"
 #include "../test/developerGui.h"
 #include "../engine/engine.h"
-#include "../util/png.h"
-#include "../util/crop.h"
+#include "html.h"
+#include "image.h"
 #include "mapSource.h"
+#include "../util/png.h"
 #include "scriptFile.h"
 #include "shaderSource.h"
 #include "spriteSheet.h"
 #include "../renderer/texture.h"
 #include "../test/tileMath.h"
 
-void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleSpritesheets(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::SpriteSheet((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
-
+	
 	#ifdef EGGINE_DEVELOPER_MODE
-	if(file->getFileName() == "spritesheets/spritesheet.png") {
+	if(file->getFileName() == "spritesheets/spritesheet.ss") {
 		engine->developerGui->spritesheet = loadPng((unsigned char*)buffer, bufferSize);
 		for(unsigned int i = 0; i < stoi(file->metadata->getMetadata("amount")); i++) {
 			glm::ivec2 start = tilemath::textureIndexToXY(i, 1057, 391);
@@ -35,6 +37,16 @@ void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t buff
 		}
 	}
 	#endif
+}
+
+void handleHTML(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::HTML((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+}
+
+void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::Image((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
@@ -78,7 +90,9 @@ resources::ShaderSource* getShaderSource(string fileName) {
 
 resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton = new carton::Carton();
+	this->carton->addExtensionHandler(".ss", handleSpritesheets, this);
 	this->carton->addExtensionHandler(".png", handlePNGs, this);
+	this->carton->addExtensionHandler(".html", handleHTML, this);
 	this->carton->addExtensionHandler(".egg", handleScripts, this);
 	this->carton->addExtensionHandler(".vert", handleShaders, this);
 	this->carton->addExtensionHandler(".frag", handleShaders, this);

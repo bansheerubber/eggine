@@ -10,7 +10,9 @@
 #include "../carton/metadata/queryList.h"
 #include "resourceObject.h"
 
+void handleSpritesheets(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+void handleHTML(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
@@ -19,7 +21,9 @@ void handleMaps(void* owner, carton::File* file, const char* buffer, size_t buff
 namespace resources {
 	class ResourceManager {
 		friend ResourceObject;
+		friend void ::handleSpritesheets(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+		friend void ::handleHTML(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);

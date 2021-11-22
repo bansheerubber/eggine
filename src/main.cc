@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
 	engine->initialize();
 
 	// TODO do smarter loading of files
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".png")->exec());
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".ss")->exec());
 
 	ChunkContainer container;
 	engine->chunkContainer = &container;

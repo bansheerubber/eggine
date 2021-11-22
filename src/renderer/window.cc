@@ -9,6 +9,7 @@
 #include "../util/align.h"
 #include "../engine/debug.h"
 #include "../engine/engine.h"
+#include "../resources/html.h"
 #include "texture.h"
 #include "window.h"
 
@@ -107,9 +108,7 @@ void render::Window::initialize() {
 	#else // else for ifdef __switch__
 	if(!glfwInit()) {
 		printf("failed to initialize glfw\n");
-	}
-	else {
-		printf("initialized glfw\n");
+		exit(1);
 	}
 
 	// support 4.3
@@ -149,7 +148,9 @@ void render::Window::initialize() {
 	#endif // end for ifdef __switch__
 
 	this->htmlContainer = new LiteHTMLContainer();
-	this->htmlDocument = litehtml::document::createFromString("<html style=\"height: 100%;\"><head></head><body style=\"height: 100%; display: block; padding: 0px; margin: 0px; text-indent: 0;\"><div style=\"width: 100%; display: block; position: absolute; bottom: 50px;\"><div style=\"width: 500px; display: block; text-align: center; margin: auto;\">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div></div></body></html>", this->htmlContainer, &this->htmlContext);
+
+	resources::HTML* html = (resources::HTML*)engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", "html/index.html")->exec())[0];
+	this->htmlDocument = litehtml::document::createFromString(html->document.c_str(), this->htmlContainer, &this->htmlContext);
 }
 
 void render::Window::addError() {
