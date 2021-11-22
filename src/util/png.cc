@@ -62,26 +62,27 @@ png loadPng(const unsigned char* buffer, unsigned int size) {
 
 	png_read_info(png, info);
 
-	png_uint_32 width = png_get_image_width(png, info);
-	png_uint_32 height = png_get_image_height(png, info);
 	png_byte colorType = png_get_color_type(png, info);
 	png_byte bitDepth = png_get_bit_depth(png, info);
 
-	unsigned int bytesPerPixel = 0;
-	if(colorType == PNG_COLOR_TYPE_RGB) {
-		bytesPerPixel = 3;
+	if(bitDepth < 8) {
+		png_set_packing(png);
 	}
-	else if(colorType == PNG_COLOR_TYPE_RGB_ALPHA) {
-		bytesPerPixel = 4;
+
+	if(colorType == PNG_COLOR_TYPE_PALETTE) {
+		png_set_palette_to_rgb(png);
+		png_set_add_alpha(png, 255, PNG_FILLER_AFTER);
 	}
-	else {
-		printf("PNG format not supported\n");
-		return {
-			buffer: nullptr,
-		};
+
+	if(png_get_valid(png, info, PNG_INFO_tRNS)) {
+		png_set_tRNS_to_alpha(png);
 	}
 
 	png_read_update_info(png, info);
+
+	png_byte channels = png_get_channels(png, info);
+	png_uint_32 width = png_get_image_width(png, info);
+	png_uint_32 height = png_get_image_height(png, info);
 
 	/* read file */
 	if(setjmp(png_jmpbuf(png))) {
@@ -98,11 +99,11 @@ png loadPng(const unsigned char* buffer, unsigned int size) {
 
 	png_read_image(png, image);
 
-	png_byte* imageData = new png_byte[width * bytesPerPixel * height];
+	png_byte* imageData = new png_byte[width * channels * height];
 	png_uint_32 index = 0;
 	for(png_uint_32 y = 0; y < height; y++) {
-		for(png_uint_32 x = 0; x < width * bytesPerPixel; x++) {
-			imageData[y * width * bytesPerPixel + x % (width * bytesPerPixel)] = image[y][x];
+		for(png_uint_32 x = 0; x < width * channels; x++) {
+			imageData[y * width * channels + x % (width * channels)] = image[y][x];
 		}
 	}
 
@@ -115,11 +116,11 @@ png loadPng(const unsigned char* buffer, unsigned int size) {
 
 	return {
 		buffer: imageData,
-		bufferSize: width * bytesPerPixel * height,
+		bufferSize: width * channels * height,
 		width: width,
 		height: height,
 		bitDepth: bitDepth,
-		bytesPerPixel: bytesPerPixel,
-		colorType == PNG_COLOR_TYPE_RGB ? 3 : 4,
+		bytesPerPixel: channels,
+		channels: channels,
 	};
 }
