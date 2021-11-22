@@ -125,6 +125,8 @@ void render::LiteHTMLContainer::link(const std::shared_ptr<litehtml::document>& 
 
 void render::LiteHTMLContainer::on_anchor_click(const litehtml::tchar_t* url, const litehtml::element::ptr& el) {}
 
+void render::LiteHTMLContainer::on_element_click(const litehtml::element::ptr& el) {}
+
 void render::LiteHTMLContainer::set_cursor(const litehtml::tchar_t* cursor) {}
 
 void render::LiteHTMLContainer::transform_text(litehtml::tstring& text, litehtml::text_transform tt) {}

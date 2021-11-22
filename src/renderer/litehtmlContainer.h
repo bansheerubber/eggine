@@ -61,6 +61,7 @@ namespace render {
 			virtual	void set_caption(const litehtml::tchar_t* caption) override;
 			virtual	void set_base_url(const litehtml::tchar_t* base_url) override;
 			virtual void on_anchor_click(const litehtml::tchar_t* url, const litehtml::element::ptr& el) override;
+			virtual void on_element_click(const litehtml::element::ptr& el) override;
 			virtual	void set_cursor(const litehtml::tchar_t* cursor) override;
 			virtual void import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) override;
 			virtual void get_client_rect(litehtml::position& client) const override;
