@@ -7,7 +7,9 @@
 #include "shader.h"
 #include "window.h"
 
+#ifndef __switch__
 unsigned int render::Program::UniformCount = 0;
+#endif
 
 render::Program::Program(Window* window) {
 	this->window = window;

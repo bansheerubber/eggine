@@ -150,6 +150,8 @@ namespace render {
 	// the Window class handles our deko3d front/back buffers as well other global-ish datastructres
 	// for opengl, we just handle a GLFW window
 	class Window {
+		friend LiteHTMLContainer;
+		
 		public:
 			double deltaTime = 0.0;
 			unsigned int width = 1280;
@@ -167,6 +169,7 @@ namespace render {
 			void addError();
 			unsigned int getErrorCount();
 			void clearErrors();
+			void registerHTMLUpdate();
 
 			#ifdef __switch__
 			switch_memory::Manager memory = switch_memory::Manager(this);
@@ -193,6 +196,8 @@ namespace render {
 			unsigned long long lastRenderTime = getMicrosecondsNow();
 
 			litehtml::context htmlContext;
+			size_t htmlChecksum = 0;
+			size_t lastHTMLChecksum = 0;
 			
 			#ifdef __switch__
 			switch_memory::Piece* imageDescriptorMemory;

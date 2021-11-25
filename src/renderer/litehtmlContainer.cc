@@ -125,7 +125,14 @@ void render::LiteHTMLContainer::link(const std::shared_ptr<litehtml::document>& 
 
 void render::LiteHTMLContainer::on_anchor_click(const litehtml::tchar_t* url, const litehtml::element::ptr& el) {}
 
-void render::LiteHTMLContainer::on_element_click(const litehtml::element::ptr& el) {}
+void render::LiteHTMLContainer::on_element_click(const litehtml::element::ptr& el) {
+  esObjectReferencePtr object = this->elementToESObject[&*el];
+  if(object) {
+    esEntry arguments[1];
+    esCreateObjectAt(&arguments[0], object);
+    esCallMethod(engine->eggscript, object, "onClick", 1, arguments);
+  }
+}
 
 void render::LiteHTMLContainer::set_cursor(const litehtml::tchar_t* cursor) {}
 
@@ -152,6 +159,30 @@ std::shared_ptr<litehtml::element> render::LiteHTMLContainer::create_element(
   return 0;
 }
 
+void render::LiteHTMLContainer::on_element_created(litehtml::element::ptr element) {
+  engine->renderWindow.registerHTMLUpdate();
+
+  string className = "HTMLElement";
+  const char* attributeClassName = element->get_attr("es-class");
+  if(attributeClassName != nullptr) {
+    className = attributeClassName;
+  }
+  // TODO check hashing/equals of shared pointers
+  esObjectReferencePtr test = this->elementToESObject[&*element] = esInstantiateObject(engine->eggscript, className.c_str(), this);
+
+  if(test == nullptr) {
+    printf("could not create es html element with class %s\n", className.c_str());
+  }
+  else {
+    this->esObjectToElement[test->objectWrapper] = element;
+  }
+  
+  const char* id = element->get_attr("id");
+  if(id != nullptr) {
+    this->idToElement[id] = element;
+  }
+}
+
 void render::LiteHTMLContainer::get_media_features(litehtml::media_features& media) const {
   litehtml::position client;
   get_client_rect(client);
@@ -169,4 +200,23 @@ void render::LiteHTMLContainer::get_media_features(litehtml::media_features& med
 void render::LiteHTMLContainer::get_language(litehtml::tstring& language, litehtml::tstring& culture) const {
   language = _t("en");
   culture = _t("");
+}
+
+esObjectReferencePtr render::LiteHTMLContainer::getESObject(string id) {
+  return this->elementToESObject[&*this->idToElement[id]];
+}
+
+esObjectReferencePtr render::LiteHTMLContainer::createChild(litehtml::element::ptr parent, string html) {
+  esObjectReferencePtr array = esInstantiateObject(engine->eggscript, "Array", nullptr);
+  litehtml::elements_vector vector = engine->renderWindow.htmlDocument->append_children_from_string(*parent, html.c_str());
+  for(const auto& child: vector) {
+    auto found = this->elementToESObject.find(&*child);
+    esEntry entry;
+    if(found != this->elementToESObject.end()) {
+      esCreateObjectAt(&entry, found.value());
+      esArrayPush(array, &entry);
+    }
+  }
+  engine->renderWindow.registerHTMLUpdate();
+  return array;
 }

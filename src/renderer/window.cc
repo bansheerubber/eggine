@@ -15,10 +15,7 @@
 
 #ifndef __switch__
 void onWindowResize(GLFWwindow* window, int width, int height) {
-	engine->renderWindow.width = width;
-	engine->renderWindow.height = height;
-
-	glViewport(0, 0, width, height);
+	engine->renderWindow.resize(width, height);
 }
 #endif
 
@@ -165,6 +162,10 @@ void render::Window::clearErrors() {
 	this->errorCount = 0;
 }
 
+void render::Window::registerHTMLUpdate() {
+	this->htmlChecksum++;
+}
+
 void render::Window::deinitialize() {
 	#ifdef __switch__
 	this->queue.waitIdle();
@@ -211,6 +212,16 @@ void render::Window::prerender() {
 }
 
 void render::Window::render() {
+	litehtml::position clip;
+	this->htmlContainer->get_client_rect(clip);
+	
+	if(this->htmlChecksum != this->lastHTMLChecksum) {
+		this->htmlDocument->render(clip.width);
+		this->lastHTMLChecksum = this->htmlChecksum;
+	}
+	
+	this->htmlDocument->draw(0, 0, 0, nullptr);
+	
 	#ifdef __switch__
 	int index = this->queue.acquireImage(this->swapchain);
 	this->queue.submitCommands(this->framebufferCommandLists[index]);
@@ -243,6 +254,10 @@ void render::Window::draw(PrimitiveType type, unsigned int firstVertex, unsigned
 }
 
 void render::Window::resize(unsigned int width, unsigned int height) {
+	this->registerHTMLUpdate();
+	this->width = width;
+	this->height = height;
+	
 	#ifndef __switch__
 	glViewport(0, 0, width, height);
 	#endif

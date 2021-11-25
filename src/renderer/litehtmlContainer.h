@@ -1,7 +1,9 @@
 #pragma once
 
+#include <eggscript/egg.h>
 #include <litehtml.h>
 
+#include "dom.h"
 #include "../resources/image.h"
 #include "../basic/text.h"
 
@@ -12,6 +14,14 @@ namespace render {
 	};
 	
 	class LiteHTMLContainer : public litehtml::document_container {
+		friend esEntryPtr es::HTMLElement__getParent(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__addChild(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__removeChild(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__createChild(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__clear(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__setAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__getAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		
 		public:
 			LiteHTMLContainer();
 			virtual ~LiteHTMLContainer();
@@ -46,6 +56,7 @@ namespace render {
 				const litehtml::string_map &attributes,
 				const std::shared_ptr<litehtml::document> &doc
 			) override;
+			virtual void on_element_created(litehtml::element::ptr el) override;
 			virtual void get_media_features(litehtml::media_features& media) const override;
 			virtual void get_language(litehtml::tstring& language, litehtml::tstring & culture) const override;
 			virtual void link(const std::shared_ptr<litehtml::document> &ptr, const litehtml::element::ptr& el) override;
@@ -65,6 +76,9 @@ namespace render {
 			virtual	void set_cursor(const litehtml::tchar_t* cursor) override;
 			virtual void import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) override;
 			virtual void get_client_rect(litehtml::position& client) const override;
+
+			esObjectReferencePtr getESObject(string id);
+			esObjectReferencePtr createChild(litehtml::element::ptr parent, string html);
 		
 		private:
 			Text text = Text(false);
@@ -72,5 +86,8 @@ namespace render {
 			Text* getText(class Font* font, string text);
 			tsl::robin_map<string, LiteHTMLTextWrapper> stringToText;
 			tsl::robin_map<string, resources::Image*> sourceToImage;
+			tsl::robin_map<string, litehtml::element::ptr> idToElement;
+			tsl::robin_map<litehtml::element*, esObjectReferencePtr> elementToESObject;
+			tsl::robin_map<esObjectWrapperPtr, litehtml::element::ptr> esObjectToElement;
 	};
 };

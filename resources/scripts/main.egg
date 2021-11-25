@@ -5,6 +5,10 @@ exec("targetting.egg");
 
 $Unit::HoveredTile = "";
 
+function HTMLElement::onClick(%this) {
+	
+}
+
 function isTileSelectable(%position) {
 	%character = getChunkContainer().getCharacter({%position[0]; %position[1]; %position[2] + 1});
 	if(isObject(%character)) {

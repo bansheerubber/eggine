@@ -125,7 +125,6 @@ CFLAGS="-O2" cmake ..
 cmake --build . --target litehtml
 popd
 cp -v tmp-setup/litehtml/build/liblitehtml.a lib
-mv -v tmp-setup/litehtml/include/* include/common/
 pushd .
 cd tmp-setup/litehtml
 rm -Rf build
@@ -135,6 +134,8 @@ CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc CXX=/opt/devkitpro/devkitA6
 cmake --build . --target litehtml
 popd
 cp -v tmp-setup/litehtml/build/liblitehtml.a libnx
+rm -Rf include/common/litehtml
+mv -v tmp-setup/litehtml/include/* include/common/
 echo -e "\033[0;32mFinished litehtml"
 tput sgr0
 
