@@ -1,13 +1,13 @@
 $Editor::Enabled = false;
 
-$Editor::GhostTile = "";
+$Editor::GhostTile = null;
 $Editor::GhostLine = new Array();
 $Editor::MouseDown = false;
 
-$Editor::LastStart = "";
-$Editor::LastEnd = "";
-$Editor::LastDirection = "";
-$Editor::LastAxis  = "";
+$Editor::LastStart = null;
+$Editor::LastEnd = null;
+$Editor::LastDirection = null;
+$Editor::LastAxis  = null;
 
 function onEditorMouseDown(%state) {
 	$Editor::MouseDown = %state;
@@ -25,14 +25,7 @@ function onEditorMouseDown(%state) {
 		$Editor::LastDirection = "";
 		$Editor::LastAxis = "";
 
-		getChunkContainer().setTile(
-			{
-				$Editor::CurrentHoverPosition[0];
-				$Editor::CurrentHoverPosition[1];
-				$Editor::CurrentHoverPosition[2] + 1
-			},
-			$Editor::GhostTile.getTexture()
-		);
+		getChunkContainer().setTile($Editor::CurrentHoverPosition + {0; 0; 1}, $Editor::GhostTile.getTexture());
 	}
 }
 
@@ -64,8 +57,8 @@ function onHoverTile(%position) {
 		return;
 	}
 	
-	if($Editor::GhostTile $= "") {
-		// echo("should create tile at " SPC %position[0] SPC %position[1] SPC %position[2]);
+	if($Editor::GhostTile == null) {
+		// echo("should create tile at " SPC %position);
 		$Editor::GhostTile = new InterweavedTile();
 		$Editor::GhostTile.setPosition({2; 2; 5});
 		$Editor::GhostTile.setTexture(2);
@@ -76,7 +69,7 @@ function onHoverTile(%position) {
 		$Editor::GhostTile.blink();
 	}
 
-	$Editor::GhostTile.setPosition({%position[0]; %position[1]; %position[2] + 1});
+	$Editor::GhostTile.setPosition(%position + {0; 0; 1});
 
 	if($Editor::MouseDown) {
 		%startX = $Editor::MouseDownPosition[0];
@@ -115,13 +108,13 @@ function onHoverTile(%position) {
 		}
 
 		// clear out the whole array
-		if($Editor::LastAxis !$= %axis || $Editor::LastDirection != %direction) {
+		if($Editor::LastAxis != %axis || $Editor::LastDirection != %direction) {
 			deleteEditorGhostLine();
 			$Editor::LastStart = %start;
 			$Editor::LastEnd = %start;
 		}
 
-		%axisVector = %axis $= "x" ? {1; 0} : {0; 1};
+		%axisVector = %axis == "x" ? {1; 0; 0} : {0; 1; 0};
 
 		if(mAbs($Editor::LastStart - $Editor::LastEnd) < mAbs(%start - %end)) {
 			for(%i = $Editor::LastEnd; %i != %end; %i += %direction) {
@@ -130,11 +123,7 @@ function onHoverTile(%position) {
 				%tile = new InterweavedTile();
 				%tile.setZIndex(50);
 				%tile.setColor({1; 1; 1; 0.8});
-				%tile.setPosition({
-					$Editor::MouseDownPosition[0] + %index * %direction * %axisVector[0];
-					$Editor::MouseDownPosition[1] + %index * %direction * %axisVector[1];
-					$Editor::MouseDownPosition[2] + 1
-				});
+				%tile.setPosition($Editor::MouseDownPosition + %index * %direction * %axisVector + {0; 0; 1});
 				%tile.setTexture($Editor::GhostTile.getTexture());
 				$Editor::GhostLine.push(%tile);
 			}

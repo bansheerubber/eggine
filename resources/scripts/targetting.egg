@@ -1,10 +1,10 @@
-$Unit::TargetSprite = "";
-$Unit::SelectedTarget = "";
+$Unit::TargetSprite = null;
+$Unit::SelectedTarget = null;
 
 function selectTarget(%target) {
 	if(!isObject(%target)) {
 		$Unit::TargetSprite.delete();
-		$Unit::SelectedTarget = "";
+		$Unit::SelectedTarget = null;
 	}
 	else {
 		if(!isObject($Unit::TargetSprite)) {

@@ -4,7 +4,7 @@ function Unit::move(%this, %position) {
 		%this.setMoves(%this.moves - %distance);
 		%this.moves -= %distance;
 
-		%this.setPosition({%position[0]; %position[1]; %position[2] + 1});
+		%this.setPosition(%position + {0; 0; 1});
 	}
 }
 
@@ -34,7 +34,7 @@ package unit {
 	}
 
 	function ChunkContainer::selectCharacter(%this, %character) {
-		selectTarget(""); // reset target selection
+		selectTarget(null); // reset target selection
 		
 		%test = getChunkContainer().getSelectedCharacter();
 		if(isObject(%test)) {
@@ -44,7 +44,7 @@ package unit {
 		
 		Parent::selectCharacter(%this, %character);
 
-		if(%character.maxMoves == "") {
+		if(%character.maxMoves == null) {
 			%character.maxMoves = 5;
 			%character.moves = 5;
 		}

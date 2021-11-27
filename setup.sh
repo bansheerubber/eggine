@@ -65,7 +65,7 @@ git clone --recurse-submodules https://github.com/bansheerubber/eggscript-interp
 cd eggscript-interpreter
 [[ "$PWD" != *eggscript-interpreter* ]] && echo "\033[0;31mNot in eggscript-interpreter" && exit 1
 
-git checkout arrays-as-objects
+git checkout linear-algebra
 echo -e "\033[0;33mCompiling eggscript"
 tput sgr0
 make -j 8 library
