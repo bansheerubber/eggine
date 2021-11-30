@@ -8,6 +8,20 @@ function Unit::move(%this, %position) {
 	}
 }
 
+function Unit::updateTargettingUI(%this) {
+	getHTMLElementById("enemy-icons").clear();
+	%html = "";
+	%team = getChunkContainer().getEnemyTeam();
+	for(%i = 0; %i < %team.size(); %i++) {
+		%enemy = %team.get(%i);
+		%raycast = raycast(%this.getPosition(), %enemy.getPosition());
+		if(%raycast == null) {
+			%html = %html @ "<img enemy-id=\"" @ %i @ "\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
+		}
+	}
+	getHTMLElementById("enemy-icons").createChild(%html);
+}
+
 package unit {
 	function Unit::setMoves(%this, %moves) {
 		Parent::setMoves(%this, %moves);
@@ -15,7 +29,7 @@ package unit {
 		if(%this == getChunkContainer().getSelectedCharacter()) {
 			%this.getDestinations().showBorder(); // re-render border if we move
 			%this.path = %this.getPath($Unit::HoveredTile);
-			if(isObject(%this.path)) {
+			if(%this.path) {
 				%this.path.showDots();
 			}
 		}
@@ -27,9 +41,10 @@ package unit {
 		if(%this == getChunkContainer().getSelectedCharacter()) {
 			%this.getDestinations().showBorder(); // re-render border if we move
 			%this.path = %this.getPath($Unit::HoveredTile);
-			if(isObject(%this.path)) {
+			if(%this.path) {
 				%this.path.showDots();
 			}
+			%this.updateTargettingUI();
 		}
 	}
 
@@ -49,6 +64,7 @@ package unit {
 			%character.moves = 5;
 		}
 
+		%character.updateTargettingUI();
 		%character.getDestinations(true).showBorder();
 	}
 };

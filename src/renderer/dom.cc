@@ -1,6 +1,7 @@
 #include "dom.h"
 
 #include "../engine/engine.h"
+#include "../util/cloneString.h"
 
 void es::defineDOM() {
 	esRegisterNamespace(engine->eggscript, "HTMLElement");
@@ -154,7 +155,7 @@ esEntryPtr es::HTMLElement__getAttribute(esEnginePtr esEngine, unsigned int argc
 		}
 		const char* value = found.value()->get_attr(args[1].stringData);
 		if(value != nullptr) {
-			return esCreateString((char*)value);
+			return esCreateString(cloneString((char*)value));
 		}
 	}
 	return nullptr;
