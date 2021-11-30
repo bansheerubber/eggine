@@ -101,6 +101,16 @@ void render::LiteHTMLContainer::get_image_size(const litehtml::tchar_t* src, con
 }
 
 void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg) {
+  if(bg.color.alpha) {
+    this->box.position.x = bg.clip_box.x;
+    this->box.position.y = bg.clip_box.y;
+    this->box.size.x = bg.clip_box.width;
+    this->box.size.y = bg.clip_box.height;
+    this->box.color = glm::vec4(1, 0, 0, 1);
+
+    this->box.render();
+  }
+  
   resources::Image* image;
   if((image = this->sourceToImage[string(bg.image.c_str())]) != nullptr) {
     image->position.x = bg.position_x;

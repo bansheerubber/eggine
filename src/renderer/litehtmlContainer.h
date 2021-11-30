@@ -3,6 +3,7 @@
 #include <eggscript/egg.h>
 #include <litehtml.h>
 
+#include "../renderer/box.h"
 #include "dom.h"
 #include "../resources/image.h"
 #include "../basic/text.h"
@@ -82,6 +83,7 @@ namespace render {
 		
 		private:
 			Text text = Text(false);
+			render::Box box;
 
 			Text* getText(class Font* font, string text);
 			tsl::robin_map<string, LiteHTMLTextWrapper> stringToText;
