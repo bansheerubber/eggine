@@ -13,6 +13,7 @@
 void handleSpritesheets(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleHTML(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+void handleCSS(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
@@ -24,6 +25,7 @@ namespace resources {
 		friend void ::handleSpritesheets(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleHTML(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+		friend void ::handleCSS(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);

@@ -16,7 +16,7 @@ function Unit::updateTargettingUI(%this) {
 		%enemy = %team.get(%i);
 		%raycast = raycast(%this.getPosition(), %enemy.getPosition());
 		if(%raycast == null) {
-			%html = %html @ "<img enemy-id=\"" @ %i @ "\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
+			%html = %html @ "<img enemy-id=\"" @ %i @ "\" es-class=\"EnemyIconElement\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
 		}
 	}
 	getHTMLElementById("enemy-icons").createChild(%html);

@@ -256,6 +256,9 @@ void onMouseMove(GLFWwindow* window, double x, double y) {
 	arguments2[1].type = ES_ENTRY_NUMBER;
 	arguments2[1].numberData = y;
 	esCallFunction(engine->eggscript, "onAxisMove", 2, arguments2);
+
+	litehtml::position::vector redraw;
+	engine->renderWindow.htmlDocument->on_mouse_over(engine->mouse.x, engine->mouse.y, engine->mouse.x, engine->mouse.y, redraw);
 }
 #endif
 

@@ -3,6 +3,7 @@
 #include "../engine/developer.h"
 
 #include "../util/crop.h"
+#include "css.h"
 #include "../test/developerGui.h"
 #include "../engine/engine.h"
 #include "html.h"
@@ -42,6 +43,11 @@ void handleSpritesheets(void* owner, carton::File* file, const char* buffer, siz
 void handleHTML(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::HTML((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+}
+
+void handleCSS(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::CSS((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
@@ -93,6 +99,7 @@ resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton->addExtensionHandler(".ss", handleSpritesheets, this);
 	this->carton->addExtensionHandler(".png", handlePNGs, this);
 	this->carton->addExtensionHandler(".html", handleHTML, this);
+	this->carton->addExtensionHandler(".css", handleCSS, this);
 	this->carton->addExtensionHandler(".egg", handleScripts, this);
 	this->carton->addExtensionHandler(".vert", handleShaders, this);
 	this->carton->addExtensionHandler(".frag", handleShaders, this);

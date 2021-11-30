@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "../resources/css.h"
 #include "../engine/engine.h"
 #include "../basic/font.h"
 
@@ -75,6 +76,9 @@ void render::LiteHTMLContainer::draw_text(
 	};
   foundText->position.x = pos.left();
   foundText->position.y = pos.top() - ((Font*)hFont)->descent;
+  foundText->color.r = (float)color.red / 255.0f;
+  foundText->color.g = (float)color.green / 255.0f;
+  foundText->color.b = (float)color.blue / 255.0f;
   foundText->render(0, context);
 }
 
@@ -87,6 +91,10 @@ const litehtml::tchar_t* render::LiteHTMLContainer::get_default_font_name() cons
 void render::LiteHTMLContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker& marker) {}
 
 void render::LiteHTMLContainer::load_image(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, bool redraw_on_ready) {
+  if(this->sourceToImage[string(src)] != nullptr) {
+    return;
+  }
+
   string filename = "html";
   filename += src;
   resources::Image* image = (resources::Image*)(engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", filename)->exec())[0]);
@@ -106,7 +114,7 @@ void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const li
     this->box.position.y = bg.clip_box.y;
     this->box.size.x = bg.clip_box.width;
     this->box.size.y = bg.clip_box.height;
-    this->box.color = glm::vec4(1, 0, 0, 1);
+    this->box.color = glm::vec4((float)bg.color.red / 255.0, (float)bg.color.green / 255.0, (float)bg.color.blue / 255.0, (float)bg.color.alpha / 255.0);
 
     this->box.render();
   }
@@ -148,7 +156,14 @@ void render::LiteHTMLContainer::set_cursor(const litehtml::tchar_t* cursor) {}
 
 void render::LiteHTMLContainer::transform_text(litehtml::tstring& text, litehtml::text_transform tt) {}
 
-void render::LiteHTMLContainer::import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) {}
+void render::LiteHTMLContainer::import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) {
+  resources::CSS* css = (resources::CSS*)engine->manager->metadataToResources(
+    engine->manager->carton->database.get()->equals("fileName", "html" + url)->exec()
+  )[0];
+  if(css != nullptr) {
+    text = css->styles;
+  }
+}
 
 void render::LiteHTMLContainer::set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius, bool valid_x, bool valid_y) {}
 

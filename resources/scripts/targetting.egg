@@ -18,14 +18,14 @@ function selectTarget(%target) {
 	}
 }
 
-package targetting {
-	function HTMLElement::onClick(%this) {
-		Parent::onClick(%this);
-		%enemy = %this.getAttribute("enemy-id");
-		if(%enemy) {
-			%enemy = getChunkContainer().getEnemyTeam().get(number(%enemy));
-			selectTarget(%enemy);
-			getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%enemy.getPosition()), 0.2);
-		}
+class EnemyIconElement inherits HTMLElement;
+
+function EnemyIconElement::onClick(%this) {
+	Parent::onClick(%this);
+	%enemy = %this.getAttribute("enemy-id");
+	if(%enemy) {
+		%enemy = getChunkContainer().getEnemyTeam().get(number(%enemy));
+		selectTarget(%enemy);
+		getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%enemy.getPosition()), 0.2);
 	}
-};
+}

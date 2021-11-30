@@ -1,21 +1,34 @@
 <html style="height: 100%;">
 
 <head>
+	<link rel="stylesheet" href="/css/index.css"></link>
+	
 	<style>
-		img {
-			display: inline-block;
+		.enemy-icon {
+			width: auto;
+			height: 35px;
+			margin: 5px;
+		}
+
+		.ability-icon {
 			width: auto;
 			height: 50px;
 			margin: 5px;
+			background-color: #AAA;
 		}
 	</style>
 </head>
 
 <body style="height: 100%; display: block; padding: 0px; margin: 0px; text-indent: 0;">
-	<div style="width: 100%; display: block; position: absolute; bottom: 75px;">
+	<div style="width: 100%; display: block; position: absolute; bottom: 15px;">
+		<div id="ability-description" style="width: 300px; background: #AAA; margin: auto; padding: 1em; margin-bottom: 1em; text-align: center;">
+			<div>A quick, inaccurate attack against an enemy</div>
+			<div style="margin-top: 10px;"><button style="font-size: 20pt;">Fire</button></div>
+		</div>
 		<div id="enemy-icons" style="width: 500px; display: block; text-align: center; margin: auto;"></div>
-		<div id="frog" style="display: block; background-color: #FF0000; width: 100px; height: 100px;">
-			hey there how are you
+		<div id="player-abilities" style="width: 500px; display: block; text-align: center; margin: auto;">
+			<img class="ability-icon" src="/images/snapshot.png" />
+			<img class="ability-icon" src="/images/accuracy.png" />
 		</div>
 	</div>
 </body>

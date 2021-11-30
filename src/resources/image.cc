@@ -68,7 +68,7 @@ void resources::Image::render() {
 	resources::Image::Program->bind();
 	this->texture->bind(0);
 	resources::Image::Program->bindTexture("inTexture", 0);
-	resources::Image::Program->bindUniform("vertexBlock", &vb, sizeof(vb), (size_t)this);
+	resources::Image::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
 
 	resources::Image::Attributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
