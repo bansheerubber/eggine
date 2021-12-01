@@ -1,3 +1,5 @@
+exec("ability.egg");
+exec("abilities/snapshot.egg");
 exec("team.egg");
 exec("unit.egg");
 exec("editor.egg");

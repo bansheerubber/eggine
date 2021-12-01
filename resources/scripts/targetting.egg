@@ -16,6 +16,8 @@ function selectTarget(%target) {
 		$Unit::TargetSprite.setPosition(%target.getPosition());
 		$Unit::SelectedTarget = %target;
 	}
+
+	getChunkContainer().getSelectedCharacter().updateAbilityList();
 }
 
 class EnemyIconElement inherits HTMLElement;

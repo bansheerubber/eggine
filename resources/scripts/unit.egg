@@ -1,3 +1,23 @@
+function Unit::onAdd(%this) {
+	%this.abilities = new Array();
+	%ability = new SnapshotAbility();
+	%ability.owner = %this;
+	%this.abilities.push(%ability);
+
+	%this.maxMoves = 5;
+	%this.moves = 5;
+}
+
+function Unit::onSelect(%this) {
+	%this.updateTargettingUI();
+	%this.getDestinations(true).showBorder();
+}
+
+function Unit::onDeSelect(%this) {
+	%this.getDestinations().hideBorder();
+	%this.path = %this.getPath($Unit::HoveredTile);
+}
+
 function Unit::move(%this, %position) {
 	%unitPosition = %this.getPosition();
 	if(%this.getDestinations().has(%position) && isObject(%this.path) && %this.moves >= (%distance = (%this.path.size() - 1))) {
@@ -14,12 +34,70 @@ function Unit::updateTargettingUI(%this) {
 	%team = getChunkContainer().getEnemyTeam();
 	for(%i = 0; %i < %team.size(); %i++) {
 		%enemy = %team.get(%i);
-		%raycast = raycast(%this.getPosition(), %enemy.getPosition());
-		if(%raycast == null) {
+		// check if any of our abilities are usable against the enemy
+		for(%j = 0; %j < %this.abilities.size(); %j++) {
+			%ability = %this.abilities[%j];
+			if(!%ability.usable(%enemy)) {
+				continue;
+			}
+
+			if($Unit::SelectedTarget == %enemy) {
+				%found = true;
+			}
+
 			%html = %html @ "<img enemy-id=\"" @ %i @ "\" es-class=\"EnemyIconElement\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
 		}
 	}
 	getHTMLElementById("enemy-icons").createChild(%html);
+
+	// figure out if we need to keep our target or get rid of it, also updates ability list
+	if(!%found) {
+		$Unit::SelectedTarget = null; // reset target if we couldn't find one
+		selectTarget(null);
+	}
+	else {
+		selectTarget($Unit::SelectedTarget); // re-select target
+	}
+}
+
+function Unit::updateAbilityList(%this) {
+	getHTMLElementById("player-abilities").clear();
+	for(%i = 0; %i < %this.abilities.size(); %i++) {
+		%ability = %this.abilities[%i];
+		if(%ability.usable($Unit::SelectedTarget)) {
+			getHTMLElementById("player-abilities").createChild("<img es-class=\"AbilityElement\" ability-index=\"" @ %i @ "\" class=\"ability-icon\" src=\"/images/" @ %ability.icon @ "\" />");
+
+			if(%this.selectedAbility == %ability) {
+				%this.selectAbility(%i); // reselect ability
+				%selected = true;
+			}
+		}
+	}
+
+	if(!%selected) { // if we couldn't select our selected ability, then it is missing from the HTML ability list and we should hide the ability UI
+		%this.selectAbility(-1);
+	}
+}
+
+function Unit::selectAbility(%this, %index) {
+	%element = getHTMLElementById("ability-description");
+	%element.clear();
+
+	if(%index == -1) {
+		%this.selectedAbility = null;
+		%element.setStyleAttribute("display", "none");
+		return;
+	}
+	%element.setStyleAttribute("display", "block");
+
+	if(%this.abilities[%index] && $Unit::SelectedTarget) {
+		%ability = %this.abilities[%index];
+		%element.createChild("<div>" @ %ability.description($Unit::SelectedTarget) @ "</div><div style=\"margin-top: 10px;\"><button style=\"font-size: 20pt;\">" @ %ability.actionName($Unit::SelectedTarget) @ "</button></div>");
+		%this.selectedAbility = %ability;
+	}
+	else {
+		%this.selectedAbility = null;
+	}
 }
 
 package unit {
@@ -49,22 +127,15 @@ package unit {
 	}
 
 	function ChunkContainer::selectCharacter(%this, %character) {
-		selectTarget(null); // reset target selection
+		// selectTarget(null); // reset target selection
 		
 		%test = getChunkContainer().getSelectedCharacter();
 		if(isObject(%test)) {
-			%test.getDestinations().hideBorder();
-			%test.path = %test.getPath($Unit::HoveredTile);
+			%test.onDeSelect();
 		}
 		
 		Parent::selectCharacter(%this, %character);
 
-		if(%character.maxMoves == null) {
-			%character.maxMoves = 5;
-			%character.moves = 5;
-		}
-
-		%character.updateTargettingUI();
-		%character.getDestinations(true).showBorder();
+		%character.onSelect();
 	}
 };

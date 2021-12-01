@@ -1,0 +1,41 @@
+class Ability inherits SimObject;
+class AbilityElement inherits HTMLElement;
+
+function AbilityElement::onClick(%this) {
+	getChunkContainer().getSelectedCharacter().selectAbility(number(%this.getAttribute("ability-index")));
+}
+
+function Ability::onAdd(%this) {
+	%this.name = "Ability";
+	%this.icon = "";
+}
+
+// use the ability
+function Ability::use(%this, %target) {
+
+}
+
+// calculate the accuracy. null means the ability does not need to satisfy an accuracy check to be used
+function Ability::accuracy(%this, %target) {
+	return null;
+}
+
+// calculate the AP cost
+function Ability::cost(%this, %target) {
+	return 0;
+}
+
+// whether or not the ability can be used
+function Ability::usable(%this, %target) {
+	return false;
+}
+
+// generate the HTML description of the ability
+function Ability::description(%this, %target) {
+	return "";
+}
+
+// get the string for the use button
+function Ability::actionName(%this, %target) {
+	return "Fire";
+}

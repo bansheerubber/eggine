@@ -1,0 +1,33 @@
+class SnapshotAbility inherits Ability;
+
+function SnapshotAbility::onAdd(%this) {
+	Parent::onAdd(%this);
+
+	%this.name = "Snapshot";
+	%this.icon = "snapshot.png";
+}
+
+function SnapshotAbility::use(%this, %target) {
+
+}
+
+function SnapshotAbility::accuracy(%this, %target) {
+	return null;
+}
+
+function SnapshotAbility::cost(%this, %target) {
+	return 0;
+}
+
+function SnapshotAbility::usable(%this, %target) {
+	%result = %target != null && raycast(%this.owner.getPosition(), %target.getPosition()) == null;
+	return %result;
+}
+
+function SnapshotAbility::description(%this, %target) {
+	return "A quick, inaccurate attack against an enemy";
+}
+
+function SnapshotAbility::actionName(%this, %target) {
+	return "Fire";
+}

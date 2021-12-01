@@ -26,6 +26,8 @@ void es::defineDOM() {
 	esEntryType setAttributeArgs[3] = { ES_ENTRY_OBJECT, ES_ENTRY_STRING, ES_ENTRY_STRING };
 	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, HTMLElement__setAttribute, "HTMLElement", "setAttribute", 3, setAttributeArgs);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_STRING, HTMLElement__getAttribute, "HTMLElement", "getAttribute", 2, createChildArgs);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_STRING, HTMLElement__setStyleAttribute, "HTMLElement", "setStyleAttribute", 3, setAttributeArgs);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_STRING, HTMLElement__getStyleAttribute, "HTMLElement", "getStyleAttribute", 2, createChildArgs);
 }
 
 esEntryPtr es::getHTMLElementById(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
@@ -154,6 +156,35 @@ esEntryPtr es::HTMLElement__getAttribute(esEnginePtr esEngine, unsigned int argc
 			return nullptr;
 		}
 		const char* value = found.value()->get_attr(args[1].stringData);
+		if(value != nullptr) {
+			return esCreateString(cloneString((char*)value));
+		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::HTMLElement__setStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 3) {
+		auto found = engine->renderWindow.htmlContainer->esObjectToElement.find(args[0].objectData->objectWrapper);
+		if(found == engine->renderWindow.htmlContainer->esObjectToElement.end()) {
+			return nullptr;
+		}
+		litehtml::style styles;
+		styles.add_property(args[1].stringData, args[2].stringData, nullptr, true);
+		found.value()->add_style(styles);
+		found.value()->parse_styles(true);
+		engine->renderWindow.registerHTMLUpdate();
+	}
+	return nullptr;
+}
+
+esEntryPtr es::HTMLElement__getStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2) {
+		auto found = engine->renderWindow.htmlContainer->esObjectToElement.find(args[0].objectData->objectWrapper);
+		if(found == engine->renderWindow.htmlContainer->esObjectToElement.end()) {
+			return nullptr;
+		}
+		const char* value = found.value()->get_style_property(args[1].stringData, false, nullptr);
 		if(value != nullptr) {
 			return esCreateString(cloneString((char*)value));
 		}

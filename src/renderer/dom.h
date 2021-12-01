@@ -12,4 +12,6 @@ namespace es {
 	esEntryPtr HTMLElement__clear(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr HTMLElement__setAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr HTMLElement__getAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr HTMLElement__setStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr HTMLElement__getStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 };

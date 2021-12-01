@@ -22,6 +22,8 @@ namespace render {
 		friend esEntryPtr es::HTMLElement__clear(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 		friend esEntryPtr es::HTMLElement__setAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 		friend esEntryPtr es::HTMLElement__getAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__setStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+		friend esEntryPtr es::HTMLElement__getStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 		
 		public:
 			LiteHTMLContainer();
