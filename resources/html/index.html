@@ -23,17 +23,39 @@
 			text-align: center;
 			margin: auto;
 		}
+
+		.ability-description {
+			width: 300px;
+			background-color: #AAA;
+			margin: auto;
+			padding: 1em;
+			margin-bottom: 1em;
+			text-align: center;
+		}
+
+		.ability-description-name {
+			margin-bottom: 5px;
+		}
+
+		.ability-description-button {
+			font-size: 20pt;
+		}
+
+		.ability-stats-table {
+			text-align: left;
+		}
 	</style>
 </head>
 
 <body style="height: 100%; display: block; padding: 0px; margin: 0px; text-indent: 0;">
 	<div style="width: 100%; display: block; position: absolute; bottom: 15px;">
-		<div id="ability-description" style="width: 300px; background-color: #AAA; margin: auto; padding: 1em; margin-bottom: 1em; text-align: center;">frog town</div>
-		<div id="enemy-icons" style="width: 500px; display: block; text-align: center; margin: auto;"></div>
-		<div class="player-abilities" id="player-abilities">
-			<img class="ability-icon" src="/images/snapshot.png" />
-			<img class="ability-icon" src="/images/accuracy.png" />
+		<div class="ability-description" id="ability-description" style="display: none;">
+			<div class="ability-description-name" id="ability-description-name"></div>
+			<div class="ability-description-body" id="ability-description-body"></div>
+			<div style="margin-top: 10px;"><button class="ability-description-button" id="ability-description-button"></button></div> 
 		</div>
+		<div id="enemy-icons" style="width: 500px; display: block; text-align: center; margin: auto;"></div>
+		<div class="player-abilities" id="player-abilities"></div>
 	</div>
 </body>
 

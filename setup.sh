@@ -65,12 +65,18 @@ git clone --recurse-submodules https://github.com/bansheerubber/eggscript-interp
 cd eggscript-interpreter
 [[ "$PWD" != *eggscript-interpreter* ]] && echo "\033[0;31mNot in eggscript-interpreter" && exit 1
 
-git checkout linear-algebra
+git checkout class-definition
 echo -e "\033[0;33mCompiling eggscript"
 tput sgr0
 make -j 8 library
 popd
 cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a lib
+pushd .
+cd tmp-setup/eggscript-interpreter
+make clean
+make -f Makefile.nx -j 8 library
+popd
+cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a libnx
 rm -Rf include/common/eggscript
 mkdir -p include/common/eggscript
 cp -v tmp-setup/eggscript-interpreter/dist/include.cpp/egg.h include/common/eggscript/egg.h

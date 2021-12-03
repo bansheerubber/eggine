@@ -11,6 +11,10 @@ function HTMLElement::onClick(%this) {
 		
 }
 
+function distance(%a, %b) {
+	return mSqrt(mPow(%a[0] - %b[0], 2) + mPow(%a[1] - %b[1], 2) + mPow(%a[2] - %b[2], 2));
+}
+
 function isTileSelectable(%position) {
 	%character = getChunkContainer().getCharacter(%position + {0; 0; 1});
 	if(isObject(%character)) {
@@ -51,6 +55,30 @@ function onGamepadPressTile(%state) {
 		if(isObject(%selectedCharacter) && %selectedCharacter.getDestinations().has(%position)) {
 			%selectedCharacter.move(%position);
 		}
+	}
+}
+
+addKeybind("unit.nextAbility", "y-button", "onNextAbility");
+function onNextAbility(%state) {
+	if(!%state) {
+		return;
+	}
+
+	%character = getChunkContainer().getSelectedCharacter();
+	if(%character) {
+		%character.selectNextAbility();
+	}
+}
+
+addKeybind("unit.previousAbility", "x-button", "onPreviousAbility");
+function onPreviousAbility(%state) {
+	if(!%state) {
+		return;
+	}
+
+	%character = getChunkContainer().getSelectedCharacter();
+	if(%character) {
+		%character.selectPreviousAbility();
 	}
 }
 

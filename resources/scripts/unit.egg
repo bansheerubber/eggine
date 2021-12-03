@@ -1,3 +1,5 @@
+$Unit::SelectedAbility = null; // try to use the same ability when we cycle through units
+
 function Unit::onAdd(%this) {
 	%this.abilities = new Array();
 	%ability = new SnapshotAbility();
@@ -62,15 +64,18 @@ function Unit::updateTargettingUI(%this) {
 
 function Unit::updateAbilityList(%this) {
 	getHTMLElementById("player-abilities").clear();
+	%this.shownAbilities = 0;
 	for(%i = 0; %i < %this.abilities.size(); %i++) {
 		%ability = %this.abilities[%i];
 		if(%ability.usable($Unit::SelectedTarget)) {
 			getHTMLElementById("player-abilities").createChild("<img es-class=\"AbilityElement\" ability-index=\"" @ %i @ "\" class=\"ability-icon\" src=\"/images/" @ %ability.icon @ "\" />");
 
-			if(%this.selectedAbility == %ability) {
-				%this.selectAbility(%i); // reselect ability
+			if(%ability.name == $Unit::SelectedAbility.name) {
+				%this.selectAbility(%i); // try to select same ability on same target between units
 				%selected = true;
 			}
+
+			%this.shownAbilities++;
 		}
 	}
 
@@ -80,24 +85,77 @@ function Unit::updateAbilityList(%this) {
 }
 
 function Unit::selectAbility(%this, %index) {
-	%element = getHTMLElementById("ability-description");
-	%element.clear();
+	%name = getHTMLElementById("ability-description-name");
+	%name.clear();
+	%description = getHTMLElementById("ability-description-body");
+	%description.clear();
+	%button = getHTMLElementById("ability-description-button");
+	%button.clear();
 
 	if(%index == -1) {
 		%this.selectedAbility = null;
-		%element.setStyleAttribute("display", "none");
+		getHTMLElementById("ability-description").setStyleAttribute("display", "none");
 		return;
 	}
-	%element.setStyleAttribute("display", "block");
+	getHTMLElementById("ability-description").setStyleAttribute("display", "block");
 
 	if(%this.abilities[%index] && $Unit::SelectedTarget) {
 		%ability = %this.abilities[%index];
-		%element.createChild("<div>" @ %ability.description($Unit::SelectedTarget) @ "</div><div style=\"margin-top: 10px;\"><button style=\"font-size: 20pt;\">" @ %ability.actionName($Unit::SelectedTarget) @ "</button></div>");
+		%name.createChild(%ability.name);
+		%description.createChild(%ability.description($Unit::SelectedTarget));
+		%button.createChild(%ability.actionName($Unit::SelectedTarget));
 		%this.selectedAbility = %ability;
+		$Unit::SelectedAbility = %ability;
 	}
 	else {
 		%this.selectedAbility = null;
+		$Unit::SelectedAbility = null;
 	}
+}
+
+function Unit::selectNextAbility(%this) {
+	if(%this.shownAbilities == 0) {
+		return;
+	}
+
+	if(%this.selectedAbility == null) {
+		%this.selectAbility(0);
+		return;
+	}
+	
+	for(%i = 0; %i < %this.abilities.size(); %i++) {
+		if(%this.selectedAbility == %this.abilities[%i]) {
+			%index = %i;
+			break;
+		}
+	}
+
+	%next = (%index + 1) % %this.abilities.size();
+	%this.selectAbility(%next);
+}
+
+function Unit::selectPreviousAbility(%this) {
+	if(%this.shownAbilities == 0) {
+		return;
+	}
+
+	if(%this.selectedAbility == null) {
+		%this.selectAbility(0);
+		return;
+	}
+	
+	for(%i = 0; %i < %this.abilities.size(); %i++) {
+		if(%this.selectedAbility == %this.abilities[%i]) {
+			%index = %i;
+			break;
+		}
+	}
+
+	%prev = (%index - 1);
+	if(%prev < 0) {
+		%prev = %this.abilities.size() - 1;
+	}
+	%this.selectAbility(%prev);
 }
 
 package unit {
