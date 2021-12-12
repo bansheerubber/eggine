@@ -93,6 +93,50 @@ TileSet* Unit::getPath(glm::ivec3 end) {
 	return this->path = this->destinations.pathfind(start, end);
 }
 
+void Unit::kill() {
+
+}
+
+void Unit::setHealth(int health) {
+	esEntry arguments[2];
+	esCreateObjectAt(&arguments[0], this->reference);
+	esCreateNumberAt(&arguments[1], health);
+	esCallMethod(engine->eggscript, this->reference, "setHealth", 2, arguments);
+}
+
+void Unit::setMaxHealth(int maxHealth) {
+	esEntry arguments[2];
+	esCreateObjectAt(&arguments[0], this->reference);
+	esCreateNumberAt(&arguments[1], maxHealth);
+	esCallMethod(engine->eggscript, this->reference, "setMaxHealth", 2, arguments);
+}
+
+void Unit::addHealth(int health) {
+	esEntry arguments[2];
+	esCreateObjectAt(&arguments[0], this->reference);
+	esCreateNumberAt(&arguments[1], health);
+	esCallMethod(engine->eggscript, this->reference, "addHealth", 2, arguments);
+}
+
+void Unit::addMaxHealth(int maxHealth) {
+	esEntry arguments[2];
+	esCreateObjectAt(&arguments[0], this->reference);
+	esCreateNumberAt(&arguments[1], maxHealth);
+	esCallMethod(engine->eggscript, this->reference, "addMaxHealth", 2, arguments);
+}
+
+int Unit::getHealth() {
+	esEntry arguments[1];
+	esCreateObjectAt(&arguments[0], this->reference);
+	return esCallMethod(engine->eggscript, this->reference, "getHealth", 1, arguments)->numberData;
+}
+
+int Unit::getMaxHealth() {
+	esEntry arguments[1];
+	esCreateObjectAt(&arguments[0], this->reference);
+	return esCallMethod(engine->eggscript, this->reference, "getMaxHealth", 1, arguments)->numberData;
+}
+
 void es::defineUnit() {
 	esRegisterNamespace(engine->eggscript, "Unit");
 	esNamespaceInherit(engine->eggscript, "Character", "Unit");
@@ -105,6 +149,13 @@ void es::defineUnit() {
 
 	esEntryType setMovesArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setMoves, "Unit", "setMoves", 2, setMovesArguments);
+
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setHealth, "Unit", "setHealth", 2, setMovesArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setMaxHealth, "Unit", "setMaxHealth", 2, setMovesArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addHealth, "Unit", "addHealth", 2, setMovesArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addMaxHealth, "Unit", "addMaxHealth", 2, setMovesArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getHealth, "Unit", "getHealth", 1, getPathArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getMaxHealth, "Unit", "getMaxHealth", 1, getPathArguments);
 }
 
 esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -139,6 +190,66 @@ esEntryPtr es::Unit__getPath(esEnginePtr esEngine, unsigned int argc, esEntry* a
 		if(unit->path) {
 			return esCreateObject(unit->path->reference);
 		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__kill(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	return nullptr;
+}
+
+esEntryPtr es::Unit__setHealth(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		unit->health = (int)args[1].numberData;
+
+		if(unit->health <= 0) {
+			unit->kill();
+		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__setMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		unit->maxHealth = (int)args[1].numberData;
+		unit->health = max(unit->maxHealth, unit->health);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__addHealth(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		unit->health = max(min(unit->health + (int)args[1].numberData, unit->maxHealth), 0);
+		if(unit->health <= 0) {
+			unit->kill();
+		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__addMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		unit->maxHealth = unit->maxHealth + (int)args[1].numberData;
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__getHealth(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		return esCreateNumber(unit->health);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__getMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		return esCreateNumber(unit->maxHealth);
 	}
 	return nullptr;
 }
