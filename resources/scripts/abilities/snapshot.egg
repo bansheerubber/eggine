@@ -12,6 +12,10 @@ function SnapshotAbility::use(%this, %target) {
 }
 
 function SnapshotAbility::accuracy(%this, %target) {
+	if(!%target) {
+		return 0;
+	}
+	
 	%range = 20;
 	%accuracy = -1 / (%range - 1) * (distance(%target.getPosition(), %this.owner.getPosition()) - 1) + 1;
 	if(%accuracy < 0.03) {
@@ -30,7 +34,14 @@ function SnapshotAbility::usable(%this, %target) {
 }
 
 function SnapshotAbility::description(%this, %target) {
-	return "<div>A quick, inaccurate attack against an enemy</div><table class=\"ability-stats-table\"><tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr><tr><td>Damage: 5</td></tr></table>";
+	%table = "<table class=\"ability-stats-table\"><tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr><tr><td>Damage: 5</td></tr></table>";
+	%html = "<div>A quick, inaccurate attack against an enemy</div>";
+	if(%this.usable(%target)) {
+		return %html @ %table;
+	}
+	else {
+		return %html;
+	}
 }
 
 function SnapshotAbility::actionName(%this, %target) {

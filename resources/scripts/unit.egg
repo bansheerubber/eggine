@@ -43,23 +43,12 @@ function Unit::updateTargettingUI(%this) {
 				continue;
 			}
 
-			if($Unit::SelectedTarget == %enemy) {
-				%found = true;
-			}
-
 			%html = %html @ "<img enemy-id=\"" @ %i @ "\" es-class=\"EnemyIconElement\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
 		}
 	}
 	getHTMLElementById("enemy-icons").createChild(%html);
 
-	// figure out if we need to keep our target or get rid of it, also updates ability list
-	if(!%found) {
-		$Unit::SelectedTarget = null; // reset target if we couldn't find one
-		selectTarget(null);
-	}
-	else {
-		selectTarget($Unit::SelectedTarget); // re-select target
-	}
+	selectTarget($Unit::SelectedTarget); // re-select target
 }
 
 function Unit::updateAbilityList(%this) {
@@ -67,16 +56,15 @@ function Unit::updateAbilityList(%this) {
 	%this.shownAbilities = 0;
 	for(%i = 0; %i < %this.abilities.size(); %i++) {
 		%ability = %this.abilities[%i];
-		if(%ability.usable($Unit::SelectedTarget)) {
-			getHTMLElementById("player-abilities").createChild("<img es-class=\"AbilityElement\" ability-index=\"" @ %i @ "\" class=\"ability-icon\" src=\"/images/" @ %ability.icon @ "\" />");
+		%disabled = %ability.usable($Unit::SelectedTarget) ? "" : "disabled";
+		getHTMLElementById("player-abilities").createChild("<img es-class=\"AbilityElement\" ability-index=\"" @ %i @ "\" class=\"ability-icon " @ %disabled @ "\" src=\"/images/" @ %ability.icon @ "\" />");
 
-			if(%ability.name == $Unit::SelectedAbility.name) {
-				%this.selectAbility(%i); // try to select same ability on same target between units
-				%selected = true;
-			}
-
-			%this.shownAbilities++;
+		if(%ability.name == $Unit::SelectedAbility.name) {
+			%this.selectAbility(%i); // try to select same ability on same target between units
+			%selected = true;
 		}
+
+		%this.shownAbilities++;
 	}
 
 	if(!%selected) { // if we couldn't select our selected ability, then it is missing from the HTML ability list and we should hide the ability UI
@@ -99,17 +87,24 @@ function Unit::selectAbility(%this, %index) {
 	}
 	getHTMLElementById("ability-description").setStyleAttribute("display", "block");
 
-	if(%this.abilities[%index] && $Unit::SelectedTarget) {
+	if(%this.abilities[%index]) {
 		%ability = %this.abilities[%index];
 		%name.createChild(%ability.name);
 		%description.createChild(%ability.description($Unit::SelectedTarget));
-		%button.createChild(%ability.actionName($Unit::SelectedTarget));
+
+		if(%ability.usable($Unit::SelectedTarget)) {
+			%button.createChild(%ability.actionName($Unit::SelectedTarget));
+			%button.setStyleAttribute("display", "inline-block");
+		}
+		else {
+			%button.setStyleAttribute("display", "none");
+		}
+
 		%this.selectedAbility = %ability;
 		$Unit::SelectedAbility = %ability;
 	}
 	else {
 		%this.selectedAbility = null;
-		$Unit::SelectedAbility = null;
 	}
 }
 
@@ -185,8 +180,6 @@ package unit {
 	}
 
 	function ChunkContainer::selectCharacter(%this, %character) {
-		// selectTarget(null); // reset target selection
-		
 		%test = getChunkContainer().getSelectedCharacter();
 		if(isObject(%test)) {
 			%test.onDeSelect();

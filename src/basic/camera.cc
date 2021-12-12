@@ -181,13 +181,13 @@ void es::defineCamera() {
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getActiveCamera, "getActiveCamera", 0, nullptr);
 
 	esEntryType setPositionArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Camera__setPosition, "Camera", "setPosition", 2, setPositionArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Camera__setPosition, "Camera", "setPosition", 2, setPositionArguments);
 
 	esEntryType getPositionArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::Camera__getPosition, "Camera", "getPosition", 1, getPositionArguments);
 
 	esEntryType panArguments[4] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX, ES_ENTRY_MATRIX, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Camera__pan, "Camera", "pan", 4, panArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Camera__pan, "Camera", "pan", 4, panArguments);
 }
 
 esEntryPtr es::getActiveCamera(esEnginePtr esEngine, unsigned int argc, esEntry* args) {

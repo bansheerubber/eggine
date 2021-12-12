@@ -121,19 +121,19 @@ void es::defineOverlappingTile() {
 	esSetNamespaceDeconstructor(engine->eggscript, "OverlappingTile", es::OverlappingTile__deconstructor);
 
 	esEntryType setPositionArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::OverlappingTile__setPosition, "OverlappingTile", "setPosition", 2, setPositionArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::OverlappingTile__setPosition, "OverlappingTile", "setPosition", 2, setPositionArguments);
 
 	esEntryType getPositionArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::OverlappingTile__getPosition, "OverlappingTile", "getPosition", 1, getPositionArguments);
 
 	esEntryType setTextureArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::OverlappingTile__setTexture, "OverlappingTile", "setTexture", 2, setTextureArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::OverlappingTile__setTexture, "OverlappingTile", "setTexture", 2, setTextureArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::OverlappingTile__getTexture, "OverlappingTile", "getTexture", 1, getPositionArguments);
 
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::OverlappingTile__setColor, "OverlappingTile", "setColor", 2, setPositionArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::OverlappingTile__setColor, "OverlappingTile", "setColor", 2, setPositionArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::OverlappingTile__getColor, "OverlappingTile", "getColor", 1, getPositionArguments);
 
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::OverlappingTile__setZIndex, "OverlappingTile", "setZIndex", 2, setTextureArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::OverlappingTile__setZIndex, "OverlappingTile", "setZIndex", 2, setTextureArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::OverlappingTile__getZIndex, "OverlappingTile", "getZIndex", 1, getPositionArguments);
 }
 

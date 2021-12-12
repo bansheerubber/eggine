@@ -14,17 +14,17 @@ void es::defineDOM() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, HTMLElement__getParent, "HTMLElement", "getParent", 1, getParentArgs);
 
 	esEntryType addChildArgs[2] = { ES_ENTRY_OBJECT, ES_ENTRY_OBJECT };
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, HTMLElement__addChild, "HTMLElement", "addChild", 2, addChildArgs);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, HTMLElement__addChild, "HTMLElement", "addChild", 2, addChildArgs);
 
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, HTMLElement__removeChild, "HTMLElement", "removeChild", 2, addChildArgs);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, HTMLElement__removeChild, "HTMLElement", "removeChild", 2, addChildArgs);
 
 	esEntryType createChildArgs[2] = { ES_ENTRY_OBJECT, ES_ENTRY_STRING };
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, HTMLElement__createChild, "HTMLElement", "createChild", 2, createChildArgs);
 
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, HTMLElement__clear, "HTMLElement", "clear", 1, getParentArgs);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, HTMLElement__clear, "HTMLElement", "clear", 1, getParentArgs);
 
 	esEntryType setAttributeArgs[3] = { ES_ENTRY_OBJECT, ES_ENTRY_STRING, ES_ENTRY_STRING };
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, HTMLElement__setAttribute, "HTMLElement", "setAttribute", 3, setAttributeArgs);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, HTMLElement__setAttribute, "HTMLElement", "setAttribute", 3, setAttributeArgs);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_STRING, HTMLElement__getAttribute, "HTMLElement", "getAttribute", 2, createChildArgs);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_STRING, HTMLElement__setStyleAttribute, "HTMLElement", "setStyleAttribute", 3, setAttributeArgs);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_STRING, HTMLElement__getStyleAttribute, "HTMLElement", "getStyleAttribute", 2, createChildArgs);

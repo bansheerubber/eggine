@@ -104,7 +104,7 @@ void es::defineUnit() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getPath, "Unit", "getPath", 1, getPathArguments);
 
 	esEntryType setMovesArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Unit__setMoves, "Unit", "setMoves", 2, setMovesArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setMoves, "Unit", "setMoves", 2, setMovesArguments);
 }
 
 esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args) {

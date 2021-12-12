@@ -9,12 +9,12 @@
 
 void es::defineCallbacks() {
 	esEntryType keyPressArguments[2] = {ES_ENTRY_STRING, ES_ENTRY_NUMBER};
-	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onKeyPress, "onKeyPress", 2, keyPressArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &es::onKeyPress, "onKeyPress", 2, keyPressArguments);
 
 	esEntryType mousePressArguments[2] = {ES_ENTRY_NUMBER, ES_ENTRY_NUMBER};
-	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onMousePress, "onMousePress", 2, mousePressArguments);
-	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onAxisMove, "onAxisMove", 2, mousePressArguments);
-	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &es::onGamepadButton, "onGamepadButton", 2, mousePressArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &es::onMousePress, "onMousePress", 2, mousePressArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &es::onAxisMove, "onAxisMove", 2, mousePressArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &es::onGamepadButton, "onGamepadButton", 2, mousePressArguments);
 }
 
 // key string, action

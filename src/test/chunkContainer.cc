@@ -402,7 +402,7 @@ void es::defineChunkContainer() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getCharacter, "ChunkContainer", "getCharacter", 2, getCharacterArguments);
 
 	esEntryType selectCharacterArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_OBJECT};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__selectCharacter, "ChunkContainer", "selectCharacter", 2, selectCharacterArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::ChunkContainer__selectCharacter, "ChunkContainer", "selectCharacter", 2, selectCharacterArguments);
 
 	esEntryType getPlayerTeamArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getPlayerTeam, "ChunkContainer", "getPlayerTeam", 1, getPlayerTeamArguments);
@@ -413,10 +413,10 @@ void es::defineChunkContainer() {
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getChunkContainer, "getChunkContainer", 0, nullptr);
 
 	esEntryType setTileArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setTile, "ChunkContainer", "setTile", 3, setTileArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::ChunkContainer__setTile, "ChunkContainer", "setTile", 3, setTileArguments);
 
 	esEntryType setRotationArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setRotation, "ChunkContainer", "setRotation", 2, setRotationArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::ChunkContainer__setRotation, "ChunkContainer", "setRotation", 2, setRotationArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::ChunkContainer__getRotation, "ChunkContainer", "getRotation", 1, getPlayerTeamArguments);
 
 	esEntryType tileToScreenArguments[1] = {ES_ENTRY_MATRIX};

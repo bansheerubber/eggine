@@ -22,7 +22,7 @@ void es::defineCharacter() {
 	esNamespaceInherit(engine->eggscript, "OverlappingTile", "Character");
 
 	esEntryType setPositionArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::Character__setPosition, "Character", "setPosition", 2, setPositionArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Character__setPosition, "Character", "setPosition", 2, setPositionArguments);
 
 	esEntryType getPositionArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::Character__getPosition, "Character", "getPosition", 1, getPositionArguments);

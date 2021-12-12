@@ -183,12 +183,12 @@ void es::defineTileSet() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::TileSet__has, "TileSet", "has", 2, addArguments);
 
 	esEntryType clearArguments[1] = {ES_ENTRY_OBJECT};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__clear, "TileSet", "clear", 1, clearArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::TileSet__clear, "TileSet", "clear", 1, clearArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::TileSet__size, "TileSet", "size", 1, clearArguments);
 
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__showDots, "TileSet", "showDots", 1, clearArguments);
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__showBorder, "TileSet", "showBorder", 1, clearArguments);
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::TileSet__hideBorder, "TileSet", "hideBorder", 1, clearArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::TileSet__showDots, "TileSet", "showDots", 1, clearArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::TileSet__showBorder, "TileSet", "showBorder", 1, clearArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::TileSet__hideBorder, "TileSet", "hideBorder", 1, clearArguments);
 }
 
 esEntryPtr es::TileSet__add(esEnginePtr esEngine, unsigned int argc, esEntry* args) {

@@ -7,13 +7,13 @@
 
 void es::eggscriptDefinitions() {
 	esEntryType addKeybindArguments[3] = {ES_ENTRY_STRING, ES_ENTRY_STRING, ES_ENTRY_STRING};
-	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &addKeybind, "addKeybind", 3, addKeybindArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &addKeybind, "addKeybind", 3, addKeybindArguments);
 
 	esEntryType addKeybindToObjectArguments[4] = {ES_ENTRY_OBJECT, ES_ENTRY_STRING, ES_ENTRY_STRING, ES_ENTRY_STRING};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, &SimObject__addKeybind, "SimObject", "addKeybind", 4, addKeybindToObjectArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, &SimObject__addKeybind, "SimObject", "addKeybind", 4, addKeybindToObjectArguments);
 
 	esEntryType execArguments[1] = {ES_ENTRY_STRING};
-	esRegisterFunction(engine->eggscript, ES_ENTRY_INVALID, &exec, "exec", 1, execArguments);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &exec, "exec", 1, execArguments);
 }
 
 esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
