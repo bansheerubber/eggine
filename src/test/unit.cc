@@ -101,40 +101,46 @@ void Unit::setHealth(int health) {
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], health);
-	esCallMethod(engine->eggscript, this->reference, "setHealth", 2, arguments);
+	esDeleteEntry(esCallMethod(engine->eggscript, this->reference, "setHealth", 2, arguments));
 }
 
 void Unit::setMaxHealth(int maxHealth) {
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], maxHealth);
-	esCallMethod(engine->eggscript, this->reference, "setMaxHealth", 2, arguments);
+	esDeleteEntry(esCallMethod(engine->eggscript, this->reference, "setMaxHealth", 2, arguments));
 }
 
 void Unit::addHealth(int health) {
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], health);
-	esCallMethod(engine->eggscript, this->reference, "addHealth", 2, arguments);
+	esDeleteEntry(esCallMethod(engine->eggscript, this->reference, "addHealth", 2, arguments));
 }
 
 void Unit::addMaxHealth(int maxHealth) {
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], maxHealth);
-	esCallMethod(engine->eggscript, this->reference, "addMaxHealth", 2, arguments);
+	esDeleteEntry(esCallMethod(engine->eggscript, this->reference, "addMaxHealth", 2, arguments));
 }
 
 int Unit::getHealth() {
 	esEntry arguments[1];
 	esCreateObjectAt(&arguments[0], this->reference);
-	return esCallMethod(engine->eggscript, this->reference, "getHealth", 1, arguments)->numberData;
+	esEntryPtr entry = esCallMethod(engine->eggscript, this->reference, "getHealth", 1, arguments);
+	int health = entry->numberData;
+	esDeleteEntry(entry);
+	return health;
 }
 
 int Unit::getMaxHealth() {
 	esEntry arguments[1];
 	esCreateObjectAt(&arguments[0], this->reference);
-	return esCallMethod(engine->eggscript, this->reference, "getMaxHealth", 1, arguments)->numberData;
+	esEntryPtr entry = esCallMethod(engine->eggscript, this->reference, "getMaxHealth", 1, arguments);
+	int health = entry->numberData;
+	esDeleteEntry(entry);
+	return health;
 }
 
 void es::defineUnit() {

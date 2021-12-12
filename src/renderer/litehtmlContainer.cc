@@ -148,7 +148,7 @@ void render::LiteHTMLContainer::on_element_click(const litehtml::element::ptr& e
   if(object) {
     esEntry arguments[1];
     esCreateObjectAt(&arguments[0], object);
-    esCallMethod(engine->eggscript, object, "onClick", 1, arguments);
+    esDeleteEntry(esCallMethod(engine->eggscript, object, "onClick", 1, arguments));
   }
 }
 

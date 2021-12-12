@@ -30,7 +30,7 @@ void DeveloperGui::render() {
 		if(ImGui::ImageButton((void*)texture->texture, ImVec2(size, size * 2), ImVec2(0, 0), ImVec2(1, 1), 0)) {
 			esEntry arguments[1];
 			esCreateNumberAt(arguments, count);
-			esCallFunction(engine->eggscript, "onDevTextureSwitch", 1, arguments);
+			esDeleteEntry(esCallFunction(engine->eggscript, "onDevTextureSwitch", 1, arguments));
 		}
 		ImGui::PopID();
 

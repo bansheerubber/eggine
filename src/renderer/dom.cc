@@ -144,7 +144,7 @@ esEntryPtr es::HTMLElement__setAttribute(esEnginePtr esEngine, unsigned int argc
 		esCreateObjectAt(&arguments[0], args[0].objectData);
 		esCreateStringAt(&arguments[1], args[1].stringData);
 		esCreateStringAt(&arguments[2], args[2].stringData);
-		esCallMethod(esEngine, args[0].objectData, "onSetAttribute", 3, arguments);
+		esDeleteEntry(esCallMethod(esEngine, args[0].objectData, "onSetAttribute", 3, arguments));
 	}
 	return nullptr;
 }	

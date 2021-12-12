@@ -272,7 +272,7 @@ void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
 	esEntry arguments[2];
 	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
 	esCreateNumberAt(&arguments[1], browsing);
-	esCallFunction(engine->eggscript, "onSelectTile", 2, arguments);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onSelectTile", 2, arguments));
 }
 
 TileNeighborIterator ChunkContainer::getNeighbors(glm::ivec3 position) {
@@ -282,13 +282,13 @@ TileNeighborIterator ChunkContainer::getNeighbors(glm::ivec3 position) {
 void ChunkContainer::rightClickTile(glm::ivec3 position) {
 	esEntry arguments[1];
 	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
-	esCallFunction(engine->eggscript, "onRightClickTile", 1, arguments);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onRightClickTile", 1, arguments));
 }
 
 void ChunkContainer::hoverTile(glm::ivec3 position) {
 	esEntry arguments[1];
 	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
-	esCallFunction(engine->eggscript, "onHoverTile", 1, arguments);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onHoverTile", 1, arguments));
 }
 
 glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {

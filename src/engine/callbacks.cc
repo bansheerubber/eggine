@@ -47,7 +47,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = action;
-				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+				esDeleteEntry(esCallFunction(engine->eggscript, callback.c_str(), 1, arguments));
 			}
 
 			// handle TS object callbacks
@@ -57,7 +57,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 					esEntry arguments[2];
 					esCreateObjectAt(&arguments[0], object);
 					esCreateNumberAt(&arguments[1], action);
-					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+					esDeleteEntry(esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments));
 				}
 			}
 		}
@@ -106,7 +106,7 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = action;
-				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+				esDeleteEntry(esCallFunction(engine->eggscript, callback.c_str(), 1, arguments));
 			}
 
 			// handle TS object callbacks
@@ -116,7 +116,7 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 					esEntry arguments[2];
 					esCreateObjectAt(&arguments[0], object);
 					esCreateNumberAt(&arguments[1], action);
-					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+					esDeleteEntry(esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments));
 				}
 			}
 		}
@@ -174,7 +174,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = 1;
-				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+				esDeleteEntry(esCallFunction(engine->eggscript, callback.c_str(), 1, arguments));
 			}
 
 			// handle TS object callbacks
@@ -184,7 +184,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 					esEntry arguments[2];
 					esCreateObjectAt(&arguments[0], object);
 					esCreateNumberAt(&arguments[1], action);
-					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+					esDeleteEntry(esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments));
 				}
 			}
 		}
@@ -204,7 +204,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = 0;
-				esCallFunction(engine->eggscript, callback.c_str(), 1, arguments);
+				esDeleteEntry(esCallFunction(engine->eggscript, callback.c_str(), 1, arguments));
 			}
 
 			// handle TS object callbacks
@@ -214,7 +214,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 					esEntry arguments[2];
 					esCreateObjectAt(&arguments[0], object);
 					esCreateNumberAt(&arguments[1], action);
-					esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments);
+					esDeleteEntry(esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments));
 				}
 			}
 		}
@@ -230,7 +230,7 @@ void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods)
 	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
 	arguments[1].type = ES_ENTRY_NUMBER;
 	arguments[1].numberData = action;
-	esCallFunction(engine->eggscript, "onKeyPress", 2, arguments);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onKeyPress", 2, arguments));
 }
 
 void onMousePress(GLFWwindow* window, int button, int action, int mods) {
@@ -239,7 +239,7 @@ void onMousePress(GLFWwindow* window, int button, int action, int mods) {
 	arguments[0].numberData = button;
 	arguments[1].type = ES_ENTRY_NUMBER;
 	arguments[1].numberData = action;
-	esCallFunction(engine->eggscript, "onMousePress", 2, arguments);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onMousePress", 2, arguments));
 }
 
 void onMouseMove(GLFWwindow* window, double x, double y) {
@@ -248,14 +248,14 @@ void onMouseMove(GLFWwindow* window, double x, double y) {
 	arguments1[0].numberData = binds::MOUSE_AXIS_X;
 	arguments1[1].type = ES_ENTRY_NUMBER;
 	arguments1[1].numberData = x;
-	esCallFunction(engine->eggscript, "onAxisMove", 2, arguments1);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onAxisMove", 2, arguments1));
 
 	esEntry arguments2[2];
 	arguments2[0].type = ES_ENTRY_NUMBER;
 	arguments2[0].numberData = binds::MOUSE_AXIS_Y;
 	arguments2[1].type = ES_ENTRY_NUMBER;
 	arguments2[1].numberData = y;
-	esCallFunction(engine->eggscript, "onAxisMove", 2, arguments2);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onAxisMove", 2, arguments2));
 
 	litehtml::position::vector redraw;
 	engine->renderWindow.htmlDocument->on_mouse_over(engine->mouse.x, engine->mouse.y, engine->mouse.x, engine->mouse.y, redraw);
@@ -268,7 +268,7 @@ void onAxisMove(binds::Axes axis, double value) {
 	arguments[0].numberData = axis;
 	arguments[1].type = ES_ENTRY_NUMBER;
 	arguments[1].numberData = value;
-	esCallFunction(engine->eggscript, "onAxisMove", 2, arguments);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onAxisMove", 2, arguments));
 }
 
 void onGamepadButton(binds::GamepadButtons bind, bool pressed) {
@@ -277,5 +277,5 @@ void onGamepadButton(binds::GamepadButtons bind, bool pressed) {
 	arguments[0].numberData = bind;
 	arguments[1].type = ES_ENTRY_NUMBER;
 	arguments[1].numberData = pressed;
-	esCallFunction(engine->eggscript, "onGamepadButton", 2, arguments);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onGamepadButton", 2, arguments));
 }
