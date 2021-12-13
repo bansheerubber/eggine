@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 
@@ -11,7 +12,7 @@ namespace render {
 	class Box {
 		public:
 			Box();
-			void render();
+			void render(glm::mat4 projection = glm::mat4(1));
 
 			glm::vec2 position;
 			glm::vec2 size;

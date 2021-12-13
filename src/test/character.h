@@ -14,7 +14,7 @@ class Character: public InterweavedTile {
 
 		// ## game_object_definitions Character
 
-		OverlappingTile* setPosition(glm::uvec3 position);
+		virtual OverlappingTile* setPosition(glm::uvec3 position);
 		bool move(glm::uvec3 position);
 		bool moveTest(glm::uvec3 position);
 };

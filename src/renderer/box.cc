@@ -32,13 +32,19 @@ render::Box::Box() {
 	}
 }
 
-void render::Box::render() {
+void render::Box::render(glm::mat4 projection) {
 	struct VertexBlock {
 		glm::mat4 projection;
 		glm::vec2 position;
 		glm::vec2 size;
 	} vb;
-	vb.projection = engine->ui.projectionMatrix;
+
+	if(projection == glm::mat4(1)) {
+		vb.projection = engine->ui.projectionMatrix;
+	}
+	else {
+		vb.projection = projection;
+	}
 	vb.position = this->position;
 	vb.size = this->size;
 

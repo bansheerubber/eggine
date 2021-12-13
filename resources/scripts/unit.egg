@@ -8,6 +8,9 @@ function Unit::onAdd(%this) {
 
 	%this.maxMoves = 5;
 	%this.moves = 5;
+
+	%this.setMaxHealth(getRandom(3, 8));
+	%this.setHealth(getRandom(2, %this.getMaxHealth() - 1));
 }
 
 function Unit::onSelect(%this) {

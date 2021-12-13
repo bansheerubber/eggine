@@ -97,6 +97,12 @@ void Unit::kill() {
 
 }
 
+OverlappingTile* Unit::setPosition(glm::uvec3 position) {
+	Character::setPosition(position);
+	this->healthbar.setPosition(tilemath::tileToScreen(position, engine->chunkContainer->getRotation()));
+	return this;
+}
+
 void Unit::setHealth(int health) {
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
@@ -208,6 +214,7 @@ esEntryPtr es::Unit__setHealth(esEnginePtr esEngine, unsigned int argc, esEntryP
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		unit->health = (int)args[1].numberData;
+		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 
 		if(unit->health <= 0) {
 			unit->kill();
@@ -221,6 +228,7 @@ esEntryPtr es::Unit__setMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		unit->maxHealth = (int)args[1].numberData;
 		unit->health = max(unit->maxHealth, unit->health);
+		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 	}
 	return nullptr;
 }
@@ -229,6 +237,7 @@ esEntryPtr es::Unit__addHealth(esEnginePtr esEngine, unsigned int argc, esEntryP
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		unit->health = max(min(unit->health + (int)args[1].numberData, unit->maxHealth), 0);
+		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 		if(unit->health <= 0) {
 			unit->kill();
 		}
@@ -240,6 +249,7 @@ esEntryPtr es::Unit__addMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		unit->maxHealth = unit->maxHealth + (int)args[1].numberData;
+		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 	}
 	return nullptr;
 }

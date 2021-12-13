@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 
 #include "character.h"
+#include "healthbar.h"
 #include "tileSet.h"
 
 namespace es { // order = 4
@@ -41,6 +42,7 @@ class Unit: public Character {
 		// ## game_object_definitions Unit
 
 		void move(glm::ivec3 position);
+		OverlappingTile* setPosition(glm::uvec3 position);
 
 		void kill();
 		void setHealth(int health);
@@ -57,6 +59,7 @@ class Unit: public Character {
 
 		int maxHealth = 1;
 		int health = 1;
+		Healthbar healthbar;
 
 		struct {
 			unsigned int moves;
