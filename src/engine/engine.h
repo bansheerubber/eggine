@@ -13,6 +13,7 @@
 #include "callbacks.h"
 #include "debug.h"
 #include "../util/dynamicArray.h"
+#include "../sound/engine.h"
 #include "keybind.h"
 #include "../basic/text.h"
 #include "../basic/renderObject.h"
@@ -77,6 +78,7 @@ class Engine {
 		esEnginePtr eggscript = nullptr;
 		resources::ResourceManager* manager;
 		render::Window renderWindow;
+		sound::Engine soundEngine;
 
 		glm::vec2 mouse;
 

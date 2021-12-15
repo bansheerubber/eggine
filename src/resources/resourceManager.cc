@@ -111,6 +111,11 @@ resources::ResourceManager::ResourceManager(string fileName) {
 DynamicArray<resources::ResourceObject*> resources::ResourceManager::loadResources(DynamicArray<carton::Metadata*> resources) {
 	DynamicArray<ResourceObject*> output(resources.head);
 	for(size_t i = 0; i < resources.head; i++) {
+		if(resources[i]->getMetadata("stream") == "true") {
+			printf("Cannot load streamed file '%s' into memory\n", resources[i]->getMetadata("fileName").c_str());
+			continue;
+		}
+
 		carton::File* file = this->carton->readFile(resources[i]->getMetadata("fileName"));
 		output[i] = this->metadataToResource[file->metadata];
 	}

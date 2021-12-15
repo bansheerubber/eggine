@@ -8,7 +8,7 @@ exec("targetting.egg");
 $Unit::HoveredTile = null;
 
 function HTMLElement::onClick(%this) {
-		
+	
 }
 
 function distance(%a, %b) {

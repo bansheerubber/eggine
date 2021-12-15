@@ -94,6 +94,7 @@ void Camera::see(double deltaTime) {
 
 void Camera::setPosition(glm::vec2 position) {
 	this->position = position;
+	engine->soundEngine.setPosition(glm::vec3(position, 0.0));
 }
 
 glm::vec2 Camera::getPosition() {
