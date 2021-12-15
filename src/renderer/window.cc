@@ -143,7 +143,9 @@ void render::Window::initialize() {
 	#endif
 
 	#endif // end for ifdef __switch__
+}
 
+void render::Window::initializeHTML() {
 	this->htmlContainer = new LiteHTMLContainer();
 
 	resources::HTML* html = (resources::HTML*)engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", "html/index.html")->exec())[0];

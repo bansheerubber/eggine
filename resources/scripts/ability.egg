@@ -1,8 +1,13 @@
 class Ability inherits SimObject;
 class AbilityElement inherits HTMLElement;
+class AbilityUseButtonElement inherits HTMLElement;
 
 function AbilityElement::onClick(%this) {
 	getChunkContainer().getSelectedCharacter().selectAbility(number(%this.getAttribute("ability-index")));
+}
+
+function AbilityUseButtonElement::onClick(%this) {
+	getChunkContainer().getSelectedCharacter().selectedAbility.use($Unit::SelectedTarget);
 }
 
 function Ability::onAdd(%this) {

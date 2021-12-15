@@ -144,11 +144,16 @@ void render::LiteHTMLContainer::link(const std::shared_ptr<litehtml::document>& 
 void render::LiteHTMLContainer::on_anchor_click(const litehtml::tchar_t* url, const litehtml::element::ptr& el) {}
 
 void render::LiteHTMLContainer::on_element_click(const litehtml::element::ptr& el) {
-  esObjectReferencePtr object = this->elementToESObject[&*el];
-  if(object) {
-    esEntry arguments[1];
-    esCreateObjectAt(&arguments[0], object);
-    esDeleteEntry(esCallMethod(engine->eggscript, object, "onClick", 1, arguments));
+  litehtml::element::ptr element = el;
+  
+  while(element) {
+    esObjectReferencePtr object = this->elementToESObject[&*element];
+    if(object) {
+      esEntry arguments[1];
+      esCreateObjectAt(&arguments[0], object);
+      esDeleteEntry(esCallMethod(engine->eggscript, object, "onClick", 1, arguments));
+    }
+    element = element->parent();
   }
 }
 

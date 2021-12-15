@@ -264,6 +264,8 @@ void Engine::initialize() {
 	)[0];
 	esExecFileFromContents(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
 
+	this->renderWindow.initializeHTML();
+
 	#ifdef EGGINE_DEVELOPER_MODE
 	this->developerGui = new DeveloperGui();
 	#endif

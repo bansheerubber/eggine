@@ -162,6 +162,7 @@ namespace render {
 			
 			void initialize(); // start the graphics
 			void deinitialize(); // end the graphics
+			void initializeHTML(); // load index.html
 			void resize(unsigned int width, unsigned int height); // resize the window
 			void prerender();
 			void render();
