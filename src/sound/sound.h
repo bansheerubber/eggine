@@ -5,18 +5,31 @@
 #include <vorbis/vorbisfile.h>
 
 #include "buffer.h"
+#include "../resources/resourceObject.h"
 
 using namespace std;
 
-#define SOUND_BUFFER_SIZE 65536
+namespace resources {
+	class ResourceManager;
+};
+
+#define SOUND_BUFFER_SIZE 32768
+#define SOUND_THREAD_WAIT 250
 #define SOUND_BUFFER_CIRCULAR_COUNT 2
 #define SOUND_BUFFER_COUNT 2 // amount of buffers we always store in memory, starting from the beginning of the file
 namespace sound {
-	class SoundFile {
+	class SoundFile: public resources::ResourceObject {
 		friend class SoundFileInstance;
+		friend class Engine;
 		
 		public:
-			SoundFile(string fileName, streampos position, size_t size);
+			SoundFile(
+				resources::ResourceManager* manager,
+				carton::Metadata* metadata,
+				string fileName,
+				streampos position,
+				size_t size
+			);
 			~SoundFile();
 
 			void play();
@@ -41,6 +54,7 @@ namespace sound {
 		
 		public:
 			SoundFileInstance(SoundFile* parent, string fileName, streampos position, size_t size);
+			~SoundFileInstance();
 
 			void play();
 

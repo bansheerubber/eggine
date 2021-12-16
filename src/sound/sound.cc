@@ -5,7 +5,13 @@
 
 #include "../engine/engine.h"
 
-sound::SoundFile::SoundFile(string fileName, streampos position, size_t size) {
+sound::SoundFile::SoundFile(
+	resources::ResourceManager* manager,
+	carton::Metadata* metadata,
+	string fileName,
+	streampos position,
+	size_t size
+) : resources::ResourceObject(manager, metadata) {
 	this->fileName = fileName;
 	this->position = position;
 	this->size = size;
@@ -57,6 +63,14 @@ void sound::SoundFileInstance::play() {
 		
 		alSourceQueueBuffers(this->source, this->parent->bufferCount, buffers);
 		alSourcePlay(this->source);
+
+		ALint state = AL_PLAYING;
+		while(state == AL_PLAYING) {
+			alGetSourcei(this->source, AL_SOURCE_STATE, &state); // update the state
+			this_thread::sleep_for(chrono::milliseconds(SOUND_THREAD_WAIT));
+		}
+
+		delete this;
 		return;
 	}
 
@@ -92,7 +106,7 @@ void sound::SoundFileInstance::play() {
 		alGetSourcei(this->source, AL_BUFFERS_PROCESSED, &buffersProcessed); // figure out if we need to update buffers
 
 		if(buffersProcessed == 0) {
-			this_thread::sleep_for(chrono::milliseconds(500));
+			this_thread::sleep_for(chrono::milliseconds(SOUND_THREAD_WAIT));
 			continue;
 		}
 
@@ -112,6 +126,9 @@ void sound::SoundFileInstance::play() {
 		
 		int result = SoundFile::ReadIntoBuffer(&file, buffer, SOUND_BUFFER_SIZE, &currentSection);
 		if(result < 0) { // error
+			ov_clear(&file);
+			delete[] buffer;
+			delete this;
 			return;
 		}
 		else if(result != SOUND_BUFFER_SIZE) {
@@ -125,6 +142,7 @@ void sound::SoundFileInstance::play() {
 
 	ov_clear(&file);
 	delete[] buffer;
+	delete this;
 }
 
 int sound::SoundFile::ReadIntoBuffer(OggVorbis_File* file, char* buffer, size_t bufferSize, int* currentSection) {
@@ -164,4 +182,8 @@ sound::SoundFileInstance::SoundFileInstance(SoundFile* parent, string fileName, 
 	alSource3f(this->source, AL_POSITION, 0, 0, 0);
 	alSource3f(this->source, AL_VELOCITY, 0, 0, 0);
 	alSourcei(this->source, AL_LOOPING, AL_FALSE);
+}
+
+sound::SoundFileInstance::~SoundFileInstance() {
+	alDeleteSources(1, &this->source);
 }

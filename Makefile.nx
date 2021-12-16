@@ -11,8 +11,8 @@ LIBNX	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 SWITCH = -ffunction-sections -fno-rtti
 
 ARCH = -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft
-LIBS = -ldeko3d -ldrm_nouveau -lnx -lm -lglad -lpng -lfreetype -leggscript -lz -lbz2 -llitehtml -lgumbo
-INCLUDE = -Iinclude/common -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ $(INCLUDENX)
+LIBS = -ldeko3d -ldrm_nouveau -lnx -lm -lglad -lpng -lfreetype -leggscript -lz -lbz2 -llitehtml -lgumbo -lopenal `$(PREFIX)pkg-config --cflags --libs SDL2_mixer`  -lvorbisfile -lvorbis -logg
+INCLUDE = -Iinclude/common -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ $(INCLUDENX) `$(PREFIX)pkg-config --cflags SDL2_mixer`
 LIBPATHS = $(LIBNX) -Llibnx
 
 CPPFLAGS = -O2 -D__switch__ -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -fPIC --static -fno-semantic-interposition $(ARCH) $(SWITCH)

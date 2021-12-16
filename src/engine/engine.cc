@@ -44,6 +44,9 @@ void Engine::initialize() {
 
 	this->renderWindow.initialize();
 
+	// initialize sound
+	this->soundEngine.initialize();
+
 	#ifndef __switch__
 	glfwSetKeyCallback(this->renderWindow.window, onKeyPress);
 	glfwSetMouseButtonCallback(this->renderWindow.window, onMousePress);
