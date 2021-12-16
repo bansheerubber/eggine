@@ -112,6 +112,7 @@ class Engine {
 		void addGamepadBind(binds::GamepadButtons bind, binds::Keybind keybind);
 
 		void setFilePrefix(string filePrefix);
+		string getFilePrefix();
 
 	private:
 		#ifdef __switch__

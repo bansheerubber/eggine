@@ -20,6 +20,8 @@
 #include "test/tileMath.h"
 #include "test/unit.h"
 
+#include "sound/sound.h"
+
 #ifdef __switch__
 #include <switch.h>
 #endif
@@ -33,6 +35,13 @@ int main(int argc, char* argv[]) {
 
 	// TODO do smarter loading of files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".ss")->exec());
+
+	sound::SoundFile file(
+		"sounds/test.ogg",
+		engine->manager->carton->getFileLocation("sounds/test.ogg"),
+		engine->manager->carton->getFileSize("sounds/test.ogg")
+	);
+	file.play();
 
 	ChunkContainer container;
 	engine->chunkContainer = &container;

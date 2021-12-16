@@ -431,6 +431,10 @@ void Engine::setFilePrefix(string filePrefix) {
 	this->filePrefix = filePrefix;
 }
 
+string Engine::getFilePrefix() {
+	return this->filePrefix;
+}
+
 void engineInitRenderables(class Engine*, RenderObject** object) {
 	*object = nullptr;
 }
