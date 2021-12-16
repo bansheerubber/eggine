@@ -15,14 +15,14 @@ namespace sound {
 
 			void initialize();
 			void setPosition(glm::vec3 position);
-			void addSound(class SoundFile* file);
+			void addSound(class Sound* file);
 			void playSoundByFileName(string fileName);
 		
 		private:
 			ALCdevice* device;
 			ALCcontext* context;
 
-			vector<class SoundFile*> sounds;
-			tsl::robin_map<string, class SoundFile*> fileToSound;
+			vector<class Sound*> sounds;
+			tsl::robin_map<string, class Sound*> fileToSound;
 	};
 }
