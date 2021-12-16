@@ -16,10 +16,16 @@ void sound::Engine::initialize() {
 	alcMakeContextCurrent(this->context);
 
 	// do special stuff for extensions meant for streaming
-	auto resources = engine->manager->carton->database.get()->equals("extension", ".ogg")->exec();
+	auto resources = engine->manager->carton->database.get()->equals("extension", ".ogg")->exec(true);
 	for(size_t i = 0; i < resources.head; i++) {
 		string fileName = resources[i]->getMetadata("fileName");
 		engine->soundEngine.addSound(new sound::Sound(engine->manager, resources[i]));
+	}
+
+	auto resources2 = engine->manager->carton->database.get()->equals("extension", ".wav")->exec(true);
+	for(size_t i = 0; i < resources2.head; i++) {
+		string fileName = resources2[i]->getMetadata("fileName");
+		engine->soundEngine.addSound(new sound::Sound(engine->manager, resources2[i]));
 	}
 }
 

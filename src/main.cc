@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 	// TODO do smarter loading of files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".ss")->exec());
 
-	engine->soundEngine.playSoundByFileName("sounds/music.ogg");
+	engine->soundEngine.playSoundByFileName("sounds/alligator.wav");
 
 	ChunkContainer container;
 	engine->chunkContainer = &container;

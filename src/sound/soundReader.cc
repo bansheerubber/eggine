@@ -22,6 +22,39 @@ sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType t
 		}
 
 		case WAV_FILE: {
+			uint32_t riffId = this->readNumber<uint32_t>();
+			if(riffId != 0x46464952) {
+				printf("Could not read .wav sound\n");
+				exit(1);
+			}
+
+			uint32_t fileSize = this->readNumber<uint32_t>();
+
+			uint32_t waveMagicNumber = this->readNumber<uint32_t>();
+			if(waveMagicNumber != 0x45564157) {
+				printf("Could not read .wav magic number\n");
+				exit(1);
+			}
+
+			this->file.read((char*)&(this->wav.format), sizeof(this->wav.format));
+
+			uint32_t section = this->readNumber<uint32_t>();
+			uint32_t size = this->readNumber<uint32_t>();
+			while(section != 0x61746164) {
+				this->file.seekg(size, ios_base::cur);
+				section = this->readNumber<uint32_t>();
+				size = this->readNumber<uint32_t>();
+			}
+			
+			if(!this->file.eof()) {
+				this->wav.dataLocation = this->file.tellg();
+				this->wav.dataSize = size;
+			}
+			else {
+				printf("Could not find .wav data section\n");
+				exit(1);
+			}
+			
 			break;
 		}
 	}
@@ -47,7 +80,7 @@ unsigned int sound::SoundReader::getSampleRate() {
 		}
 
 		case WAV_FILE: {
-			return this->wavFormat.sampleRate;
+			return this->wav.format.sampleRate;
 		}
 	}
 }
@@ -59,7 +92,7 @@ unsigned short sound::SoundReader::getBitDepth() {
 		}
 
 		case WAV_FILE: {
-			return this->wavFormat.bitdepth;
+			return this->wav.format.bitdepth;
 		}
 	}
 }
@@ -89,7 +122,10 @@ size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 		}
 
 		case WAV_FILE: {
-			break;
+			size_t bytesLeft = this->wav.dataSize - (this->file.tellg() - this->wav.dataLocation);
+			size_t readSize = min(bytesLeft, bufferSize);
+			this->file.read(buffer, readSize);
+			return readSize;
 		}
 	}
 }
@@ -102,6 +138,7 @@ void sound::SoundReader::seek(size_t location) {
 		}
 
 		case WAV_FILE: {
+			this->file.seekg(this->wav.dataLocation + location);
 			break;
 		}
 	}

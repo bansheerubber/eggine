@@ -14,7 +14,12 @@ sound::Sound::Sound(
 	this->position = engine->manager->carton->getFileLocation(this->fileName);
 	this->size = engine->manager->carton->getFileSize(this->fileName);
 
-	SoundReader reader(this->position, this->size, OGG_FILE);
+	SoundFileType type = OGG_FILE;
+	if(this->fileName.find("wav") != string::npos) {
+		type = WAV_FILE;
+	}
+
+	SoundReader reader(this->position, this->size, type);
 
 	// read data into the buffers
 	char* buffer = new char[SOUND_BUFFER_SIZE];
@@ -68,7 +73,12 @@ void sound::Sound::_play() {
 		return;
 	}
 
-	SoundReader reader(this->position, this->size, OGG_FILE);
+	SoundFileType type = OGG_FILE;
+	if(this->fileName.find("wav") != string::npos) {
+		type = WAV_FILE;
+	}
+
+	SoundReader reader(this->position, this->size, type);
 
 	// read data into the buffers
 	char* buffer = new char[SOUND_BUFFER_SIZE];

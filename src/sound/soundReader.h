@@ -33,6 +33,17 @@ namespace sound {
 			SoundFileType type;
 			ifstream file;
 
+			template<class T>
+			T readNumber() {
+				char bytes[sizeof(T)];
+				this->file.read(bytes, sizeof(T));
+				// char reversed[sizeof(T)];
+				// for(int i = sizeof(T) - 1, j = 0; i >= 0; i--, j++) {
+				// 	reversed[j] = bytes[i];
+				// }
+				return *((T*)(bytes));
+			}
+
 			struct {
 				OggVorbis_File* file;
 				vorbis_info* info;
@@ -40,15 +51,19 @@ namespace sound {
 			} ogg;
 
 			struct {
-				int32_t subchunkId;
-				int32_t subchunkSize;
-				int16_t audioFormat;
-				int16_t channels;
-				int32_t sampleRate;
-				int32_t byteRate;
-				int16_t blockAlign;
-				int16_t bitdepth;
-			} wavFormat;
+				struct {
+					uint32_t subchunkId;
+					uint32_t subchunkSize;
+					uint16_t audioFormat;
+					uint16_t channels;
+					uint32_t sampleRate;
+					uint32_t byteRate;
+					uint16_t blockAlign;
+					uint16_t bitdepth;
+				} format;
+				streampos dataLocation;
+				uint32_t dataSize;
+			} wav;
 	};
 
 	inline size_t ifstream_read(void* data, size_t size, size_t count, void* file) {
