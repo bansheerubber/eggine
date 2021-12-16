@@ -37,9 +37,9 @@ int main(int argc, char* argv[]) {
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".ss")->exec());
 
 	sound::SoundFile file(
-		"sounds/test.ogg",
-		engine->manager->carton->getFileLocation("sounds/test.ogg"),
-		engine->manager->carton->getFileSize("sounds/test.ogg")
+		"sounds/music.ogg",
+		engine->manager->carton->getFileLocation("sounds/music.ogg"),
+		engine->manager->carton->getFileSize("sounds/music.ogg")
 	);
 	file.play();
 

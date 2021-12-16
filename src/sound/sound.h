@@ -8,36 +8,53 @@
 
 using namespace std;
 
-#define SOUND_BUFFER_COUNT 4 // amount of buffers we always store in memory, starting from the beginning of the file
+#define SOUND_BUFFER_SIZE 65536
+#define SOUND_BUFFER_CIRCULAR_COUNT 2
+#define SOUND_BUFFER_COUNT 2 // amount of buffers we always store in memory, starting from the beginning of the file
 namespace sound {
 	class SoundFile {
+		friend class SoundFileInstance;
+		
 		public:
 			SoundFile(string fileName, streampos position, size_t size);
 			~SoundFile();
 
 			void play();
+
+			static int ReadIntoBuffer(OggVorbis_File* file, char* buffer, size_t bufferSize, int* currentSection);
 		
 		private:
 			string fileName;
 			streampos position; // position within the carton
 			size_t size; // full size of the file
 			Buffer buffers[SOUND_BUFFER_COUNT]; // initial buffers that we always keep in memory
+			unsigned int bufferCount = 0;
+			bool filled = true; // whether both buffers are filled all the way
 	};
 
 	class SoundFileInstance {
+		friend SoundFile;
 		friend size_t ifstream_read(void* data, size_t size, size_t count, void* file);
 		friend int ifstream_seek(void* file, ogg_int64_t offset, int origin);
 		friend int ifstream_close(void* file);
 		friend long ifstream_tell(void* file);
 		
 		public:
-			SoundFileInstance(string fileName, streampos position, size_t size);
+			SoundFileInstance(SoundFile* parent, string fileName, streampos position, size_t size);
+
+			void play();
 
 		private:
+			SoundFile* parent = nullptr;
 			ifstream file;
 			string fileName;
 			streampos position;
 			size_t size;
+
+			Buffer buffers[SOUND_BUFFER_CIRCULAR_COUNT];
+			int bufferIndex = -SOUND_BUFFER_COUNT; // negative indices are used to indicate shared buffers
+
+			ALuint source;
 	};
 
 	inline size_t ifstream_read(void* data, size_t size, size_t count, void* file) {
@@ -49,11 +66,6 @@ namespace sound {
 		size_t readAmount = min(end - current, bytes);
 
 		soundFile->file.read((char*)data, readAmount);
-
-		for(size_t i = 0; i < size * count; i++) {
-			// printf("%c", ((char*)data)[i]);
-		}
-		// printf("\n");
 
 		return soundFile->file.gcount() / size;
 	}
@@ -77,9 +89,6 @@ namespace sound {
 		return state;
 	}
 
-	inline int ifstream_close(void* file) {
-		((SoundFileInstance*)file)->file.close();
-	}
 
 	inline long ifstream_tell(void* file) {
 		SoundFileInstance* soundFile = (SoundFileInstance*)file;
@@ -89,7 +98,7 @@ namespace sound {
 	static ov_callbacks OV_CALLBACKS_IFSTREAM = {
 		(size_t (*)(void *, size_t, size_t, void *))  ifstream_read,
 		(int (*)(void *, ogg_int64_t, int))           ifstream_seek,
-		(int (*)(void *))                             ifstream_close,
+		(int (*)(void *))                             nullptr,
 		(long (*)(void *))                            ifstream_tell
 	};
 };

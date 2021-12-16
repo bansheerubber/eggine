@@ -6,6 +6,7 @@
 sound::Engine::Engine() {
 	this->device = alcOpenDevice(nullptr);
 	this->context = alcCreateContext(this->device, nullptr);
+	alcMakeContextCurrent(this->context);
 }
 
 void sound::Engine::setPosition(glm::vec3 position) {

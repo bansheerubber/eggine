@@ -15,6 +15,8 @@ namespace sound {
 			Buffer();
 			~Buffer();
 			
+			ALuint bufferId;
+
 			void setData(void* data, unsigned int size, unsigned int frequency, BufferFormat format);
 
 			bool shared() {
@@ -22,7 +24,6 @@ namespace sound {
 			}
 
 		private:
-			ALuint bufferId;
 			BufferFormat format;
 			unsigned int size = 0;
 			unsigned int frequency = 0;
