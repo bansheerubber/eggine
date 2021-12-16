@@ -8,7 +8,9 @@ namespace resources {
 			ShaderSource(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize, bool useCharBuffer =  false);
 			string source;
 			unsigned char* buffer;
-			size_t bufferSize;
+			size_t bufferSize = 0;
 			ShaderSource* original = nullptr;
+
+			unsigned int getBytesUsed();
 	};
 };

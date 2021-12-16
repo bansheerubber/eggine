@@ -20,6 +20,9 @@ namespace resources {
 			void render();
 			unsigned int getWidth();
 			unsigned int getHeight();
+			unsigned int getBytesUsed() {
+				return 0;
+			}
 		
 		private:
 			render::Texture* texture = nullptr;

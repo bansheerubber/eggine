@@ -37,6 +37,7 @@ namespace resources {
 			carton::Carton* carton = nullptr;
 			DynamicArray<ResourceObject*> loadResources(DynamicArray<carton::Metadata*> resources);
 			DynamicArray<ResourceObject*> metadataToResources(DynamicArray<carton::Metadata*> resources);
+			unsigned int getBytesUsed();
 		
 		private:
 			tsl::robin_set<ResourceObject*> objects;

@@ -8,3 +8,7 @@ resources::ScriptFile::ScriptFile(
 ) : ResourceObject(manager, metadata) {
 	this->script = string((const char*)buffer, bufferSize);
 }
+
+unsigned int resources::ScriptFile::getBytesUsed() {
+	return this->script.length();
+}

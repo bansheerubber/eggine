@@ -17,3 +17,7 @@ resources::MapSource::MapSource(
 void resources::MapSource::loadIntoMap(Map* map) {
 	map->load(this->buffer, this->bufferSize);
 }
+
+unsigned int resources::MapSource::getBytesUsed() {
+	return this->bufferSize;
+}

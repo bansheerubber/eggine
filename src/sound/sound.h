@@ -33,6 +33,9 @@ namespace sound {
 			~SoundFile();
 
 			void play();
+			unsigned int getBytesUsed() {
+				return SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT;
+			}
 
 			static int ReadIntoBuffer(OggVorbis_File* file, char* buffer, size_t bufferSize, int* currentSection);
 		

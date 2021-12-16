@@ -18,3 +18,12 @@ resources::ShaderSource::ShaderSource(
 		this->source = string((char*)buffer, bufferSize);
 	}
 }
+
+unsigned int resources::ShaderSource::getBytesUsed() {
+	if(this->bufferSize == 0) {
+		return this->source.length();
+	}
+	else {
+		return this->bufferSize;
+	}
+}

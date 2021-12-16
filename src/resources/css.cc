@@ -8,3 +8,7 @@ resources::CSS::CSS(
 ) : ResourceObject(manager, metadata) {
 	this->styles = string((const char*)buffer, bufferSize);
 }
+
+unsigned int resources::CSS::getBytesUsed() {
+	return this->styles.length();
+}

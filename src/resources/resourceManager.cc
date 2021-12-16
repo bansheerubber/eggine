@@ -108,6 +108,14 @@ resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton->read(fileName);
 }
 
+unsigned int resources::ResourceManager::getBytesUsed() {
+	unsigned int total = 0;
+	for(ResourceObject* object: this->objects) {
+		total += object->getBytesUsed();
+	}
+	return total;
+}
+
 DynamicArray<resources::ResourceObject*> resources::ResourceManager::loadResources(DynamicArray<carton::Metadata*> resources) {
 	DynamicArray<ResourceObject*> output(resources.head);
 	for(size_t i = 0; i < resources.head; i++) {

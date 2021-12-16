@@ -14,6 +14,7 @@ namespace resources {
 			void lease();
 			void release();
 			int getLeaseCount();
+			virtual unsigned int getBytesUsed() = 0; // size of whatever buffer we're using for this resource object
 		
 		protected:
 			class ResourceManager* manager;

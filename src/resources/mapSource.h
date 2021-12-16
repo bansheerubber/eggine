@@ -9,6 +9,7 @@ namespace resources {
 		public:
 			MapSource(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
 			void loadIntoMap(Map* map);
+			unsigned int getBytesUsed();
 		
 		private:
 			unsigned char* buffer;

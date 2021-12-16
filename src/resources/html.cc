@@ -8,3 +8,7 @@ resources::HTML::HTML(
 ) : ResourceObject(manager, metadata) {
 	this->document = string((const char*)buffer, bufferSize);
 }
+
+unsigned int resources::HTML::getBytesUsed() {
+	return this->document.length();
+}

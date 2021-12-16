@@ -7,5 +7,7 @@ namespace resources {
 		public:
 			HTML(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
 			string document;
+
+			unsigned int getBytesUsed();
 	};
 };

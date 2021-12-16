@@ -63,6 +63,10 @@ namespace resources {
 			// whether or not the tile should be drawn ontop of a overlapping tile
 			bool drawOntopOfOverlap(size_t spriteIndex);
 			SpriteSheetInfo getSpriteInfo(size_t index);
+
+			unsigned int getBytesUsed() {
+				return 0;
+			}
 		
 		protected:			
 			unsigned int spriteSheetWidth = 0; // number of sprites per row
