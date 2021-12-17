@@ -351,7 +351,9 @@ void Engine::tick() {
 			}
 		}
 
-		memcpy(this->lastGamepadButtons, engine->renderWindow.gamepad.buttons, sizeof(engine->renderWindow.gamepad.buttons) * 15);
+		for(unsigned int i = 0; i < 15; i++) {
+			this->lastGamepadButtons[i] = engine->renderWindow.gamepad.buttons[i];
+		}
 	}
 	#endif
 	

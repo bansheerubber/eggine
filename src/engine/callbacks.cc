@@ -159,13 +159,13 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 	binds::GamepadButtons button = (binds::GamepadButtons)arguments[0].numberData;
 	int action = (int)arguments[1].numberData;
 
-	if(action == 1) {
+	if(action == 1 || action == 0) {
 		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
 		for(auto &bind: binds) {
 			// handle game objects
 			tsl::robin_set<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
-				object->onBind(bind.bind, binds::PRESS);
+				object->onBind(bind.bind, action == 0 ? binds::RELEASE : binds::PRESS);
 			}
 
 			// handle TS callbacks
@@ -174,36 +174,6 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
 				arguments[0].numberData = 1;
-				esDeleteEntry(esCallFunction(engine->eggscript, callback.c_str(), 1, arguments));
-			}
-
-			// handle TS object callbacks
-			tsl::robin_set<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
-			for(auto &[object, callback]: esObjectPresses) {
-				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
-					esEntry arguments[2];
-					esCreateObjectAt(&arguments[0], object);
-					esCreateNumberAt(&arguments[1], action);
-					esDeleteEntry(esCallMethod(engine->eggscript, object, callback.c_str(), 2, arguments));
-				}
-			}
-		}
-	}
-	else if(action == 0) {
-		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
-		for(auto &bind: binds) {
-			// handle game objects
-			tsl::robin_set<GameObject*> presses = engine->bindToGameObject[bind.bind];
-			for(GameObject* object: presses) {
-				object->onBind(bind.bind, binds::RELEASE);
-			}
-
-			// handle TS callbacks
-			tsl::robin_set<string> esPresses = engine->bindToTSCallback[bind.bind];
-			for(auto &callback: esPresses) {
-				esEntry arguments[1];
-				arguments[0].type = ES_ENTRY_NUMBER;
-				arguments[0].numberData = 0;
 				esDeleteEntry(esCallFunction(engine->eggscript, callback.c_str(), 1, arguments));
 			}
 
