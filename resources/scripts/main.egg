@@ -67,6 +67,7 @@ function onNextAbility(%state) {
 	%character = getChunkContainer().getSelectedCharacter();
 	if(%character) {
 		%character.selectNextAbility();
+		playSound("Flip");
 	}
 }
 
@@ -79,6 +80,7 @@ function onPreviousAbility(%state) {
 	%character = getChunkContainer().getSelectedCharacter();
 	if(%character) {
 		%character.selectPreviousAbility();
+		playSound("Flip");
 	}
 }
 
@@ -99,9 +101,11 @@ function onSelectTile(%position, %browsing) {
 		if(isObject(%character)) {
 			if(getChunkContainer().getPlayerTeam().has(%character)) {
 				getChunkContainer().selectCharacter(%character);
+				playSound("SelectUnit");
 			}
 			else if(getChunkContainer().getEnemyTeam().has(%character)) {
 				selectTarget(%character);
+				playSound("SelectEnemy");
 			}
 		}
 	}

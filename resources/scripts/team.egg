@@ -8,6 +8,8 @@ function Team::selectNextCharacter(%this, %state) {
 	%character = %this.get(%this.selectedIndex);
 	getChunkContainer().selectCharacter(%character);
 	getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%character.getPosition()), 0.2);
+
+	playSound("SwapUnit");
 }
 
 function Team::selectPreviousCharacter(%this, %state) {
@@ -23,6 +25,8 @@ function Team::selectPreviousCharacter(%this, %state) {
 	%character = %this.get(%this.selectedIndex);
 	getChunkContainer().selectCharacter(%character);
 	getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%character.getPosition()), 0.2);
+
+	playSound("SwapUnit");
 }
 
 function team() {

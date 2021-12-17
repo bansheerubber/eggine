@@ -173,7 +173,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 			for(auto &callback: esPresses) {
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
-				arguments[0].numberData = 1;
+				arguments[0].numberData = action == 0 ? binds::RELEASE : binds::PRESS;
 				esDeleteEntry(esCallFunction(engine->eggscript, callback.c_str(), 1, arguments));
 			}
 

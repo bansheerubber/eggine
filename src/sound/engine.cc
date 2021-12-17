@@ -5,6 +5,7 @@
 
 #include "../engine/engine.h"
 #include "sound.h"
+#include "soundCollection.h"
 
 #ifdef __switch__
 Mutex FinishedThreadsWrite;
@@ -22,17 +23,19 @@ void sound::Engine::initialize() {
 	alcMakeContextCurrent(this->context);
 
 	// do special stuff for extensions meant for streaming
-	auto resources = engine->manager->carton->database.get()->equals("extension", ".ogg")->exec(true);
+	auto resources = engine->manager->carton->database.get()->equals("extension", ".ogg")->exec();
 	for(size_t i = 0; i < resources.head; i++) {
 		string fileName = resources[i]->getMetadata("fileName");
 		engine->soundEngine.addSound(new sound::Sound(engine->manager, resources[i]));
 	}
 
-	auto resources2 = engine->manager->carton->database.get()->equals("extension", ".wav")->exec(true);
+	auto resources2 = engine->manager->carton->database.get()->equals("extension", ".wav")->exec();
 	for(size_t i = 0; i < resources2.head; i++) {
 		string fileName = resources2[i]->getMetadata("fileName");
 		engine->soundEngine.addSound(new sound::Sound(engine->manager, resources2[i]));
 	}
+
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".sound")->exec());
 }
 
 void sound::Engine::tick() {
@@ -44,8 +47,6 @@ void sound::Engine::tick() {
 		threadClose(context->thread);
 		delete context->thread;
 		#endif
-
-		printf("closed thread\n");
 
 		delete context;
 	}
@@ -74,8 +75,19 @@ void sound::Engine::addSound(sound::Sound* file) {
 	this->fileToSound[file->fileName] = file;
 }
 
+void sound::Engine::addCollection(class SoundCollection* collection) {
+	this->soundCollections.push_back(collection);
+	this->nameToCollection[collection->name] = collection;
+}
+
 void sound::Engine::playSoundByFileName(string fileName) {
 	this->fileToSound[fileName]->play();
+}
+
+void sound::Engine::playSoundByCollectionName(string collectionName) {
+	if(this->nameToCollection.find(collectionName) != this->nameToCollection.end()) {
+		this->nameToCollection[collectionName]->play();
+	}
 }
 
 void sound::Engine::finishThread(struct SoundThreadContext* context) {
@@ -88,4 +100,16 @@ void sound::Engine::finishThread(struct SoundThreadContext* context) {
 	this->finishedThreads.push_back(context);
 	FinishedThreadsWrite.unlock();
 	#endif
+}
+
+void es::defineSoundEngine() {
+	esEntryType playSoundArguments[1] = { ES_ENTRY_STRING };
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &es::playSound, "playSound", 1, playSoundArguments);
+}
+
+esEntryPtr es::playSound(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1) {
+		engine->soundEngine.playSoundByCollectionName(string(args[0].stringData));
+	}
+	return nullptr;
 }

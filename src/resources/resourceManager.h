@@ -18,6 +18,7 @@ void handleScripts(void* owner, carton::File* file, const char* buffer, size_t b
 void handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handleMaps(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+void handleSounds(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 
 namespace resources {
 	class ResourceManager {
@@ -30,6 +31,7 @@ namespace resources {
 		friend void ::handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		friend void ::handleMaps(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
+		friend void ::handleSounds(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 		
 		public:
 			ResourceManager(string fileName);

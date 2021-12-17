@@ -12,6 +12,7 @@
 #include "../util/png.h"
 #include "scriptFile.h"
 #include "shaderSource.h"
+#include "../sound/soundCollection.h"
 #include "spriteSheet.h"
 #include "../renderer/texture.h"
 #include "../test/tileMath.h"
@@ -84,6 +85,11 @@ void handleMaps(void* owner, carton::File* file, const char* buffer, size_t buff
 		= new resources::MapSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
+void handleSounds(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new sound::SoundCollection((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+}
+
 resources::ShaderSource* getShaderSource(string fileName) {
 	#ifdef __switch__
 	fileName += ".dksh";
@@ -105,6 +111,7 @@ resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton->addExtensionHandler(".frag", handleShaders, this);
 	this->carton->addExtensionHandler(".dksh", handleDKSHShaders, this);
 	this->carton->addExtensionHandler(".map", handleMaps, this);
+	this->carton->addExtensionHandler(".sound", handleSounds, this);
 	this->carton->read(fileName);
 }
 
