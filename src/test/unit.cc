@@ -191,7 +191,7 @@ esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, es
 }
 
 esEntryPtr es::Unit__getPath(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
-	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit") && args[1].matrixData != nullptr && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		unit->getPath(glm::ivec3(
 			args[1].matrixData->data[0][0].numberData,
