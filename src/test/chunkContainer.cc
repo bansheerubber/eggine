@@ -303,7 +303,7 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 		cosine45deg, cosine45deg,
 		-cosine45deg * 2.0f, cosine45deg * 2.0f
 	);
-	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f, 0);
+	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f - glm::vec2(-1, 1), 0);
 	glm::ivec3 coordinates;
 	glm::ivec3 directionTowardsCamera;
 	switch(this->getRotation()) {

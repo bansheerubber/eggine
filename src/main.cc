@@ -45,10 +45,10 @@ int main(int argc, char* argv[]) {
 
 	unsigned int positionsSize = 4;
 	glm::uvec3 positions[positionsSize] = {
-		glm::uvec3(0, 0, 5),
-		glm::uvec3(2, 0, 5),
-		glm::uvec3(3, 4, 5),
-		glm::uvec3(15, 8, 5),
+		glm::uvec3(0, 0, 1),
+		glm::uvec3(2, 0, 1),
+		glm::uvec3(3, 4, 1),
+		glm::uvec3(15, 8, 1),
 	};
 
 	for(unsigned int i = 0; i < positionsSize; i++) {
@@ -61,10 +61,10 @@ int main(int argc, char* argv[]) {
 	// enemies
 	unsigned int enemyPositionsSize = 4;
 	glm::uvec3 enemyPositions[enemyPositionsSize] = {
-		glm::uvec3(2, 10, 5),
-		glm::uvec3(4, 6, 5),
-		glm::uvec3(3, 8, 5),
-		glm::uvec3(1, 9, 5),
+		glm::uvec3(2, 10, 1),
+		glm::uvec3(4, 6, 1),
+		glm::uvec3(3, 8, 1),
+		glm::uvec3(1, 9, 1),
 	};
 
 	for(unsigned int i = 0; i < enemyPositionsSize; i++) {
