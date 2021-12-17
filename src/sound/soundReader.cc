@@ -97,6 +97,37 @@ unsigned short sound::SoundReader::getBitDepth() {
 	}
 }
 
+unsigned short sound::SoundReader::getChannels() {
+	switch(this->type) {
+		case OGG_FILE: {
+			return this->ogg.info->channels;
+		}
+
+		case WAV_FILE: {
+			return this->wav.format.channels;
+		}
+	}
+}
+
+ALenum sound::SoundReader::getType() {
+	if(this->getChannels() == 1) {
+		if(this->getBitDepth() == 8) {
+			return AL_FORMAT_MONO8;
+		}
+		else {
+			return AL_FORMAT_MONO16;
+		}
+	}
+	else {
+		if(this->getBitDepth() == 8) {
+			return AL_FORMAT_STEREO8;
+		}
+		else {
+			return AL_FORMAT_STEREO16;
+		}
+	}
+}
+
 size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 	switch(this->type) {
 		case OGG_FILE: {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <AL/al.h>
 #include <vorbis/codec.h>
 #include <fstream>
 #include <vorbis/vorbisfile.h>
@@ -24,6 +25,9 @@ namespace sound {
 
 			unsigned int getSampleRate();
 			unsigned short getBitDepth();
+			unsigned short getChannels();
+			ALenum getType();
+			
 			size_t readIntoBuffer(char* buffer, size_t bufferSize);
 			void seek(size_t location);
 		
@@ -37,10 +41,6 @@ namespace sound {
 			T readNumber() {
 				char bytes[sizeof(T)];
 				this->file.read(bytes, sizeof(T));
-				// char reversed[sizeof(T)];
-				// for(int i = sizeof(T) - 1, j = 0; i >= 0; i--, j++) {
-				// 	reversed[j] = bytes[i];
-				// }
 				return *((T*)(bytes));
 			}
 

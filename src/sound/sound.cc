@@ -22,14 +22,14 @@ sound::Sound::Sound(
 	SoundReader reader(this->position, this->size, type);
 
 	// read data into the buffers
-	char* buffer = new char[SOUND_BUFFER_SIZE];
+	char* buffer = new char[SOUND_BUFFER_SIZE * reader.getChannels()];
 
 	int currentSection = 0;
 	for(size_t i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
-		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE);
-		this->buffers[i].setData(buffer, result, reader.getSampleRate(), MONO_16_BIT);
+		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
+		alBufferData(this->buffers[i].bufferId, reader.getType(), (void*)buffer, result, reader.getSampleRate());
 
-		if(result != SOUND_BUFFER_SIZE) {
+		if(result != SOUND_BUFFER_SIZE * reader.getChannels()) {
 			this->bufferCount = i + 1;
 			this->filled = false;
 			break;
@@ -53,7 +53,7 @@ void sound::Sound::_play() {
 	alSource3f(source, AL_POSITION, 0, 0, 0);
 	alSource3f(source, AL_VELOCITY, 0, 0, 0);
 	alSourcei(source, AL_LOOPING, AL_FALSE);
-	
+
 	if(!this->filled) {
 		ALuint buffers[this->bufferCount];
 		for(unsigned int i = 0; i < this->bufferCount; i++) {
@@ -81,9 +81,14 @@ void sound::Sound::_play() {
 	SoundReader reader(this->position, this->size, type);
 
 	// read data into the buffers
-	char* buffer = new char[SOUND_BUFFER_SIZE];
+	char* buffer = new char[SOUND_BUFFER_SIZE * reader.getChannels()];
 
-	reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT / 2.0); // seek some buffers worth into the .ogg stream
+	if(type == OGG_FILE) {
+		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT / 2.0); // seek some buffers worth into the .ogg stream
+	}
+	else if(type == WAV_FILE) {
+		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT);
+	}
 
 	int currentSection = 0;
 
@@ -122,15 +127,15 @@ void sound::Sound::_play() {
 			bufferIndex++;
 		}
 		
-		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE);
+		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
 		if(result < 0) { // error
 			break;
 		}
-		else if(result != SOUND_BUFFER_SIZE) {
+		else if(result != SOUND_BUFFER_SIZE * reader.getChannels()) {
 			done = true;
 		}
 
-		alBufferData(poppedBuffer, AL_FORMAT_MONO16, (void*)buffer, result, reader.getSampleRate());
+		alBufferData(poppedBuffer, reader.getType(), (void*)buffer, result, reader.getSampleRate());
 		alSourceQueueBuffers(source, 1, &poppedBuffer);
 		buffersProcessed--;
 	}
