@@ -1,6 +1,8 @@
 #include "healthbar.h"
 
+#include "chunkContainer.h"
 #include "../engine/engine.h"
+#include "tileMath.h"
 
 Healthbar::Healthbar() : RenderObject(false) {
 	this->box = new render::Box();
@@ -11,7 +13,7 @@ void Healthbar::setPercent(double percent) {
 	this->percent = percent;
 }
 
-void Healthbar::setPosition(glm::vec2 position) {
+void Healthbar::setPosition(glm::uvec3 position) {
 	this->position = position;
 }
 
@@ -24,7 +26,7 @@ void Healthbar::render(double deltaTime, RenderContext &context) {
 	this->box->size.y = height;
 	this->box->color = glm::vec4(0.2, 0.2, 0.2, 1);
 
-	this->box->position = this->position;
+	this->box->position = tilemath::tileToScreen(this->position, engine->chunkContainer->getRotation());
 	this->box->position.x -= width / 2;
 	this->box->position.y -= height / 2;
 

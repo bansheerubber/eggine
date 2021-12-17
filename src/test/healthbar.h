@@ -11,10 +11,10 @@ class Healthbar: public RenderObject {
 		Healthbar();
 		void render(double deltaTime, RenderContext &context);
 		void setPercent(double percent);
-		void setPosition(glm::vec2 position);
+		void setPosition(glm::uvec3 position);
 	
 	private:
 		double percent = 1.0;
-		glm::vec2 position;
+		glm::uvec3 position;
 		render::Box* box;
 };

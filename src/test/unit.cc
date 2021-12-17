@@ -99,7 +99,7 @@ void Unit::kill() {
 
 OverlappingTile* Unit::setPosition(glm::uvec3 position) {
 	Character::setPosition(position);
-	this->healthbar.setPosition(tilemath::tileToScreen(position, engine->chunkContainer->getRotation()));
+	this->healthbar.setPosition(position);
 	return this;
 }
 
