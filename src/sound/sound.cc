@@ -39,12 +39,9 @@ sound::Sound::Sound(
 	delete[] buffer;
 }
 
-void sound::Sound::play() {
-	thread t(&Sound::_play, this);
-	t.detach();
-}
-
-void sound::Sound::_play() {
+void _play(sound::SoundThreadContext* context) {
+	sound::Sound* sound = context->sound;
+	
 	int bufferIndex = -SOUND_BUFFER_COUNT;
 	ALuint source;
 	alGenSources(1, &source);
@@ -54,13 +51,13 @@ void sound::Sound::_play() {
 	alSource3f(source, AL_VELOCITY, 0, 0, 0);
 	alSourcei(source, AL_LOOPING, AL_FALSE);
 
-	if(!this->filled) {
-		ALuint buffers[this->bufferCount];
-		for(unsigned int i = 0; i < this->bufferCount; i++) {
-			buffers[i] = this->buffers[i].bufferId; // load up pre-loaded buffers
+	if(!sound->filled) {
+		ALuint buffers[sound->bufferCount];
+		for(unsigned int i = 0; i < sound->bufferCount; i++) {
+			buffers[i] = sound->buffers[i].bufferId; // load up pre-loaded buffers
 		}
 		
-		alSourceQueueBuffers(source, this->bufferCount, buffers);
+		alSourceQueueBuffers(source, sound->bufferCount, buffers);
 		alSourcePlay(source);
 
 		ALint state = AL_PLAYING;
@@ -70,23 +67,25 @@ void sound::Sound::_play() {
 		}
 
 		alDeleteSources(1, &source); // cleanup the source
+
+		engine->soundEngine.finishThread(context);
 		return;
 	}
 
-	SoundFileType type = OGG_FILE;
-	if(this->fileName.find("wav") != string::npos) {
-		type = WAV_FILE;
+	sound::SoundFileType type = sound::OGG_FILE;
+	if(sound->fileName.find("wav") != string::npos) {
+		type = sound::WAV_FILE;
 	}
 
-	SoundReader reader(this->position, this->size, type);
+	sound::SoundReader reader(sound->position, sound->size, type);
 
 	// read data into the buffers
 	char* buffer = new char[SOUND_BUFFER_SIZE * reader.getChannels()];
 
-	if(type == OGG_FILE) {
+	if(type == sound::OGG_FILE) {
 		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT / 2.0); // seek some buffers worth into the .ogg stream
 	}
-	else if(type == WAV_FILE) {
+	else if(type == sound::WAV_FILE) {
 		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT);
 	}
 
@@ -94,8 +93,10 @@ void sound::Sound::_play() {
 
 	ALuint buffers[SOUND_BUFFER_CIRCULAR_COUNT];
 	for(unsigned int i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
-		buffers[i] = this->buffers[i].bufferId; // load up pre-loaded buffers
+		buffers[i] = sound->buffers[i].bufferId; // load up pre-loaded buffers
 	}
+
+	sound::Buffer* newBuffers = new sound::Buffer[SOUND_BUFFER_CIRCULAR_COUNT];
 
 	alSourceQueueBuffers(source, SOUND_BUFFER_CIRCULAR_COUNT, buffers);
 	alSourcePlay(source);
@@ -123,7 +124,7 @@ void sound::Sound::_play() {
 		alSourceUnqueueBuffers(source, 1, &poppedBuffer);
 
 		if(bufferIndex < 0) {
-			poppedBuffer = this->buffers[bufferIndex + SOUND_BUFFER_COUNT].bufferId;
+			poppedBuffer = newBuffers[bufferIndex + SOUND_BUFFER_COUNT].bufferId;
 			bufferIndex++;
 		}
 		
@@ -142,4 +143,33 @@ void sound::Sound::_play() {
 
 	alDeleteSources(1, &source);
 	delete[] buffer;
+
+	engine->soundEngine.finishThread(context);
+}
+
+void sound::Sound::play() {
+	#ifdef __switch__
+	Thread* thread = new Thread;
+	SoundThreadContext* context = new SoundThreadContext;
+	context->sound = this;
+	context->thread = thread;
+	Result result = threadCreate(thread, (void (*)(void*))::_play, context, NULL, 0x10000, 0x2C, 1);
+
+	if(!R_SUCCEEDED(result)) {
+		printf("failed to create sound thread\n");
+		return;
+	}
+	
+	result = threadStart(thread);
+
+	if(!R_SUCCEEDED(result)) {
+		printf("failed to start sound thread\n");
+		return;
+	}
+	#else
+	SoundThreadContext* context = new SoundThreadContext;
+	context->sound = this;
+	thread t(&::_play, context);
+	t.detach();
+	#endif
 }

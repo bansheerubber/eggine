@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __switch__
+#include <switch.h>
+#endif
+
 #include <vorbis/codec.h>
 #include <fstream>
 #include <vorbis/vorbisfile.h>
@@ -13,6 +17,19 @@ namespace resources {
 	class ResourceManager;
 };
 
+namespace sound {
+	class Sound;
+
+	struct SoundThreadContext {
+		sound::Sound* sound;
+		#ifdef __switch__
+		Thread* thread;
+		#endif
+	};
+};
+
+void _play(sound::SoundThreadContext* context);
+
 #define SOUND_BUFFER_SIZE 32768
 #define SOUND_THREAD_WAIT 250
 #define SOUND_BUFFER_CIRCULAR_COUNT 2
@@ -20,6 +37,7 @@ namespace resources {
 namespace sound {
 	class Sound: public resources::ResourceObject {
 		friend class Engine;
+		friend void ::_play(sound::SoundThreadContext* context);
 		
 		public:
 			Sound(resources::ResourceManager* manager, carton::Metadata* metadata);
@@ -30,8 +48,6 @@ namespace sound {
 			}
 
 		private:
-			void _play();
-			
 			string fileName;
 			streampos position; // position within the carton
 			size_t size; // full size of the file

@@ -289,6 +289,8 @@ void Engine::exit() {
 void Engine::tick() {
 	start_tick:
 
+	this->soundEngine.tick(); // handle sounds
+
 	long long startTime = getMicrosecondsNow();
 	double deltaTime = (startTime - this->lastRenderTime) / 1000000.0;
 	this->lastRenderTime = getMicrosecondsNow();
