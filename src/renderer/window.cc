@@ -71,6 +71,8 @@ void render::Window::initialize() {
 
 	this->colorState.setBlendEnable(0, true);
 
+	this->rasterizerState.setCullMode(DkFace_None);
+
 	// tell the switch that its time to disco
 	this->staticCommandBuffer.setViewports(0, { this->viewport });
 	this->staticCommandBuffer.setScissors(0, { this->scissor });
