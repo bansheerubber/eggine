@@ -8,7 +8,12 @@ function SnapshotAbility::onAdd(%this) {
 }
 
 function SnapshotAbility::use(%this, %target) {
-	%target.addHealth(-5);
+	Parent::use(%this, %target);
+
+	if(%this.roll(%target)) {
+		%target.addHealth(-5);
+	}
+
 	playSound("SnapshotFire");
 }
 
@@ -26,11 +31,11 @@ function SnapshotAbility::accuracy(%this, %target) {
 }
 
 function SnapshotAbility::cost(%this, %target) {
-	return 0;
+	return 1;
 }
 
 function SnapshotAbility::usable(%this, %target) {
-	%result = %target != null && raycast(%this.owner.getPosition(), %target.getPosition()) == null;
+	%result = %target != null && raycast(%this.owner.getPosition(), %target.getPosition()) == null && Parent::usable(%this, %target);
 	return %result;
 }
 

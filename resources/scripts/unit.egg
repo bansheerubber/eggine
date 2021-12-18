@@ -1,4 +1,5 @@
 $Unit::SelectedAbility = null; // try to use the same ability when we cycle through units
+$Unit::SprintBorderColor = {0; 0; 1; 1};
 
 function Unit::onAdd(%this) {
 	%this.abilities = new Array();
@@ -7,28 +8,73 @@ function Unit::onAdd(%this) {
 	%this.abilities.push(%ability);
 
 	%this.maxMoves = 5;
+	%this.maxSprintMoves = 15;
 	%this.moves = 5;
+	%this.sprintMoves = 15;
+
+	%this.ap = 2;
 
 	%this.setMaxHealth(getRandom(3, 8));
 	%this.setHealth(getRandom(2, %this.getMaxHealth() - 1));
 }
 
+function Unit::updateUI(%this) { // if we're selected, then update the UI
+	if(getChunkContainer().getSelectedCharacter() == %this) {
+		%this.getDestinations().showBorder();
+		%this.getSprintDestinations().showBorder($Unit::SprintBorderColor);
+		%this.updateTargettingUI();
+		%this.updateAbilityList();
+	}
+}
+
 function Unit::onSelect(%this) {
-	%this.updateTargettingUI();
-	%this.getDestinations(true).showBorder();
+	%this.updateUI();
 }
 
 function Unit::onDeSelect(%this) {
 	%this.getDestinations().hideBorder();
+	%this.getSprintDestinations().hideBorder();
 	%this.path = %this.getPath($Unit::HoveredTile);
+}
+
+function Unit::addAP(%this, %ap) {
+	%this.setAP(%this.ap + %ap);
+}
+
+function Unit::setAP(%this, %ap) {
+	if(%ap >= 2) {
+		%this.ap = 2;
+		%this.moves = %this.maxMoves;
+		%this.sprintMoves = %this.maxSprintMoves;
+	}
+	else if(%ap == 1) {
+		%this.ap = 1;
+		%this.moves = 0;
+		%this.sprintMoves = %this.maxSprintMoves - %this.maxMoves;
+	}
+	else { // 0 or negative ap
+		%this.sprintMoves = 0;
+		%this.moves = 0;
+		%this.ap = 0;
+	}
+
+	%this.updateUI();
 }
 
 function Unit::move(%this, %position) {
 	%unitPosition = %this.getPosition();
-	if(%this.getDestinations().has(%position) && isObject(%this.path) && %this.moves >= (%distance = (%this.path.size() - 1))) {
-		%this.setMoves(%this.moves - %distance);
-		%this.moves -= %distance;
+	%distance = (%this.path.size() - 1);
 
+	if(!isObject(%this.path)) {
+		return;
+	}
+
+	if(%this.getDestinations().has(%position) && %this.moves >= %distance) {
+		%this.addAP(-1);
+		%this.setPosition(%position + {0; 0; 1});
+	}
+	else if(%this.getSprintDestinations().has(%position) && %this.sprintMoves >= %distance) {
+		%this.addAP(-2);
 		%this.setPosition(%position + {0; 0; 1});
 	}
 }
@@ -50,8 +96,6 @@ function Unit::updateTargettingUI(%this) {
 		}
 	}
 	getHTMLElementById("enemy-icons").createChild(%html);
-
-	selectTarget($Unit::SelectedTarget); // re-select target
 }
 
 function Unit::updateAbilityList(%this) {
@@ -157,28 +201,15 @@ function Unit::selectPreviousAbility(%this) {
 }
 
 package unit {
-	function Unit::setMoves(%this, %moves) {
-		Parent::setMoves(%this, %moves);
-
-		if(%this == getChunkContainer().getSelectedCharacter()) {
-			%this.getDestinations().showBorder(); // re-render border if we move
-			%this.path = %this.getPath($Unit::HoveredTile);
-			if(%this.path) {
-				%this.path.showDots();
-			}
-		}
-	}
-
 	function Unit::setPosition(%this, %position) {
 		Parent::setPosition(%this, %position);
 
 		if(%this == getChunkContainer().getSelectedCharacter()) {
-			%this.getDestinations().showBorder(); // re-render border if we move
+			%this.updateUI();
 			%this.path = %this.getPath($Unit::HoveredTile);
 			if(%this.path) {
 				%this.path.showDots();
 			}
-			%this.updateTargettingUI();
 		}
 	}
 

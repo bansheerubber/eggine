@@ -12,6 +12,7 @@
 namespace es { // order = 4
 	void defineUnit();
 	esEntryPtr Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Unit__getSprintDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__getPath(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__kill(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -25,6 +26,7 @@ namespace es { // order = 4
 
 class Unit: public Character {
 	friend esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend esEntryPtr es::Unit__getSprintDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__getPath(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__kill(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -56,18 +58,15 @@ class Unit: public Character {
 	private:
 		class Team* team = nullptr;
 		TileSet destinations;
+		TileSet sprintDestinations;
 		TileSet* path = nullptr;
 		unsigned int moves = 5;
+		unsigned int sprintMoves = 15;
 
 		int maxHealth = 1;
 		int health = 1;
 		Healthbar healthbar;
 
-		struct {
-			unsigned int moves;
-			glm::uvec3 position;
-		} lastDestinationsCalculation;
-
-		void calculateDestinations();
+		void calculateDestinations(TileSet &destinations, unsigned int moves);
 		TileSet* getPath(glm::ivec3 end);
 };

@@ -5,6 +5,7 @@
 #include <glm/gtx/hash.hpp>
 #include <tsl/robin_set.h>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include "../basic/gameObject.h"
 
@@ -31,7 +32,7 @@ class TileSet: public GameObject {
 		unsigned int size();
 		AdjacencyBitmask adjacency(glm::ivec3 position);
 		void showDots();
-		void showBorder();
+		void showBorder(glm::vec4 color = glm::vec4(1, 1, 1, 1));
 		void hideBorder();
 		TileSet* pathfind(glm::ivec3 start, glm::ivec3 end);
 	

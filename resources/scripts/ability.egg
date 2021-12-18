@@ -12,8 +12,6 @@ function AbilityUseButtonElement::onClick(%this) {
 
 	if(!isObject($Unit::SelectedTarget)) {
 		selectTarget(null);
-		getChunkContainer().getSelectedCharacter().updateTargettingUI();
-		getChunkContainer().getSelectedCharacter().updateAbilityList();
 	}
 }
 
@@ -22,9 +20,18 @@ function Ability::onAdd(%this) {
 	%this.icon = "";
 }
 
+function Ability::roll(%this, %target) {
+	if(getRandom() < %this.accuracy(%target)) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 // use the ability
 function Ability::use(%this, %target) {
-
+	%this.owner.addAP(-%this.cost(%target));
 }
 
 // calculate the accuracy. null means the ability does not need to satisfy an accuracy check to be used
@@ -39,7 +46,7 @@ function Ability::cost(%this, %target) {
 
 // whether or not the ability can be used
 function Ability::usable(%this, %target) {
-	return false;
+	return %this.owner.ap >= %this.cost(%target);
 }
 
 // generate the HTML description of the ability

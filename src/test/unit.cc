@@ -40,11 +40,8 @@ struct DijkstraEntry {
 	}
 };
 
-void Unit::calculateDestinations() {
-	this->destinations.clear();
-
-	this->lastDestinationsCalculation.moves = this->moves;
-	this->lastDestinationsCalculation.position = this->getPosition(); // different than start
+void Unit::calculateDestinations(TileSet &destinations, unsigned int moves) {
+	destinations.clear();
 
 	glm::ivec3 start = this->getPosition();
 	if(start.z > 0) {
@@ -54,11 +51,11 @@ void Unit::calculateDestinations() {
 	priority_queue<DijkstraEntry> queue;
 	tsl::robin_map<glm::vec3, unsigned int> distances;
 
-	this->destinations.add(start);
+	destinations.add(start);
 
 	queue.push(DijkstraEntry {
 		position: start,
-		moves: 5,
+		moves: moves,
 	});
 
 	while(queue.size() != 0) {
@@ -73,13 +70,13 @@ void Unit::calculateDestinations() {
 
 			unsigned int test = distances[entry.position] + 1;
 			auto found = distances.find(neighbor);
-			if(test <= this->moves && (found == distances.end() || test < found.value())) {
+			if(test <= moves && (found == distances.end() || test < found.value())) {
 				distances[neighbor] = test;
 				queue.push(DijkstraEntry {
 					position: neighbor,
 					moves: test,
 				});
-				this->destinations.add(neighbor);
+				destinations.add(neighbor);
 			}
 		}
 	}
@@ -90,12 +87,20 @@ TileSet* Unit::getPath(glm::ivec3 end) {
 		delete this->path;
 	}
 	
-	this->calculateDestinations();
+	this->calculateDestinations(this->destinations, esGetNumberFromEntry(esGetObjectProperty(this->reference, "moves")));
+	this->calculateDestinations(this->sprintDestinations, esGetNumberFromEntry(esGetObjectProperty(this->reference, "sprintMoves")));
 	glm::ivec3 start = this->getPosition();
 	if(start.z > 0) {
 		start.z -= 1;
 	}
-	return this->path = this->destinations.pathfind(start, end);
+
+	this->path = this->destinations.pathfind(start, end);
+	if(this->path != nullptr) {
+		return this->path;
+	}
+	else {
+		return this->path = this->sprintDestinations.pathfind(start, end);
+	}
 }
 
 void Unit::kill() {
@@ -158,39 +163,36 @@ void es::defineUnit() {
 	esRegisterNamespace(engine->eggscript, "Unit");
 	esNamespaceInherit(engine->eggscript, "Character", "Unit");
 
-	esEntryType destinationArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getDestinations, "Unit", "getDestinations", 2, destinationArguments);
+	esEntryType destinationArguments[2] = {ES_ENTRY_OBJECT};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getDestinations, "Unit", "getDestinations", 1, destinationArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getSprintDestinations, "Unit", "getSprintDestinations", 1, destinationArguments);
 
 	esEntryType getPathArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getPath, "Unit", "getPath", 1, getPathArguments);
 
-	esEntryType setMovesArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
-	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setMoves, "Unit", "setMoves", 2, setMovesArguments);
-
-	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setHealth, "Unit", "setHealth", 2, setMovesArguments);
-	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setMaxHealth, "Unit", "setMaxHealth", 2, setMovesArguments);
-	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addHealth, "Unit", "addHealth", 2, setMovesArguments);
-	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addMaxHealth, "Unit", "addMaxHealth", 2, setMovesArguments);
+	esEntryType setHealthArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setHealth, "Unit", "setHealth", 2, setHealthArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__setMaxHealth, "Unit", "setMaxHealth", 2, setHealthArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addHealth, "Unit", "addHealth", 2, setHealthArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addMaxHealth, "Unit", "addMaxHealth", 2, setHealthArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getHealth, "Unit", "getHealth", 1, getPathArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getMaxHealth, "Unit", "getMaxHealth", 1, getPathArguments);
 }
 
-esEntryPtr es::Unit__setMoves(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
-	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
-		unit->moves = args[1].numberData;
+		unit->calculateDestinations(unit->destinations, esGetNumberFromEntry(esGetObjectProperty(unit->reference, "moves")));
+		return esCreateObject(unit->destinations.reference);
 	}
 	return nullptr;
 }
 
-esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
-	if(argc >= 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+esEntryPtr es::Unit__getSprintDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
-		if(args[1].numberData == 1 || unit->getPosition() != unit->lastDestinationsCalculation.position || unit->moves != unit->lastDestinationsCalculation.moves) {
-			unit->calculateDestinations();
-		}
-
-		return esCreateObject(unit->destinations.reference);
+		unit->calculateDestinations(unit->sprintDestinations, esGetNumberFromEntry(esGetObjectProperty(unit->reference, "sprintMoves")));
+		return esCreateObject(unit->sprintDestinations.reference);
 	}
 	return nullptr;
 }

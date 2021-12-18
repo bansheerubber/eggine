@@ -55,7 +55,7 @@ void TileSet::showDots() {
 	}
 }
 
-void TileSet::showBorder() {
+void TileSet::showBorder(glm::vec4 color) {
 	unsigned int tiles[4] = {19, 16, 12, 34};
 	AdjacencyBit masks[4] = {ADJACENT_NORTH, ADJACENT_EAST, ADJACENT_SOUTH, ADJACENT_WEST};
 	
@@ -72,7 +72,8 @@ void TileSet::showBorder() {
 				OverlappingTile* tile = (new OverlappingTile(engine->chunkContainer))
 					->setTexture(tiles[textureIndex])
 					->setPosition(position)
-					->setZIndex(1);
+					->setZIndex(1)
+					->setColor(color);
 				this->border.insert(tile);
 			}
 		}
@@ -256,6 +257,16 @@ esEntryPtr es::TileSet__showDots(esEnginePtr esEngine, unsigned int argc, esEntr
 esEntryPtr es::TileSet__showBorder(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "TileSet")) {
 		((TileSet*)args[0].objectData->objectWrapper->data)->showBorder();
+	}
+	else if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "TileSet") && args[1].matrixData->rows == 4 && args[1].matrixData->columns == 1) {
+		((TileSet*)args[0].objectData->objectWrapper->data)->showBorder(
+			glm::vec4(
+				args[1].matrixData->data[0][0].numberData,
+				args[1].matrixData->data[1][0].numberData,
+				args[1].matrixData->data[2][0].numberData,
+				args[1].matrixData->data[3][0].numberData
+			)
+		);
 	}
 
 	return nullptr;
