@@ -9,6 +9,12 @@ function AbilityElement::onClick(%this) {
 
 function AbilityUseButtonElement::onClick(%this) {
 	getChunkContainer().getSelectedCharacter().selectedAbility.use($Unit::SelectedTarget);
+
+	if(!isObject($Unit::SelectedTarget)) {
+		selectTarget(null);
+		getChunkContainer().getSelectedCharacter().updateTargettingUI();
+		getChunkContainer().getSelectedCharacter().updateAbilityList();
+	}
 }
 
 function Ability::onAdd(%this) {
