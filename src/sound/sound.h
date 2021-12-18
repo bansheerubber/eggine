@@ -6,6 +6,7 @@
 
 #include <vorbis/codec.h>
 #include <fstream>
+#include <glm/vec3.hpp>
 #include <vorbis/vorbisfile.h>
 
 #include "buffer.h"
@@ -20,8 +21,16 @@ namespace resources {
 namespace sound {
 	class Sound;
 
+	struct SoundSourceProperties {
+		double pitch = 1.0;
+		double gain = 1.0;
+		glm::vec3 position = glm::vec3(0.0, 0.0, 0.0);
+		glm::vec3 velocity = glm::vec3(0.0, 0.0, 0.0);
+	};
+
 	struct SoundThreadContext {
 		sound::Sound* sound;
+		SoundSourceProperties properties;
 		#ifdef __switch__
 		Thread* thread;
 		#endif
@@ -42,7 +51,7 @@ namespace sound {
 		public:
 			Sound(resources::ResourceManager* manager, carton::Metadata* metadata);
 
-			void play();
+			void play(SoundSourceProperties properties = SoundSourceProperties());
 			unsigned int getBytesUsed() {
 				return SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT;
 			}

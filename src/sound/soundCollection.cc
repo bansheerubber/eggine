@@ -29,6 +29,12 @@ sound::SoundCollection::SoundCollection(
 		if(key == "soundName") {
 			this->name = value;
 		}
+		else if(key == "pitchMin") {
+			this->pitchMin = stof(value);
+		}
+		else if(key == "pitchMax") {
+			this->pitchMax = stof(value);
+		}
 		else if(regex_match(key, regex("sound[0-9]+"))) {
 			string fileName = fileBase + "/" + value;
 			fileName = filesystem::path(fileName).lexically_normal().string().c_str();
@@ -51,5 +57,7 @@ sound::SoundCollection::SoundCollection(
 }
 
 void sound::SoundCollection::play() {
-	this->sounds[rand() % this->sounds.size()]->play();
+	SoundSourceProperties properties;
+	properties.pitch = ((double)rand() / (double)RAND_MAX) * (this->pitchMax - this->pitchMin) + this->pitchMin;
+	this->sounds[rand() % this->sounds.size()]->play(properties);
 }

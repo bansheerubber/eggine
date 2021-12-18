@@ -22,5 +22,8 @@ namespace sound {
 		private:
 			string name = "";
 			vector<class Sound*> sounds;
+
+			double pitchMin = 1.0;
+			double pitchMax = 1.0;
 	};
 };

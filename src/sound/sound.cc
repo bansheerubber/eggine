@@ -41,14 +41,15 @@ sound::Sound::Sound(
 
 void _play(sound::SoundThreadContext* context) {
 	sound::Sound* sound = context->sound;
+	sound::SoundSourceProperties properties = context->properties;
 	
 	int bufferIndex = -SOUND_BUFFER_COUNT;
 	ALuint source;
 	alGenSources(1, &source);
-	alSourcef(source, AL_PITCH, 1);
-	alSourcef(source, AL_GAIN, 1.0f);
-	alSource3f(source, AL_POSITION, 0, 0, 0);
-	alSource3f(source, AL_VELOCITY, 0, 0, 0);
+	alSourcef(source, AL_PITCH, properties.pitch);
+	alSourcef(source, AL_GAIN, properties.gain);
+	alSource3f(source, AL_POSITION, properties.position.x, properties.position.y, properties.position.z);
+	alSource3f(source, AL_VELOCITY, properties.velocity.x, properties.velocity.y, properties.velocity.z);
 	alSourcei(source, AL_LOOPING, AL_FALSE);
 
 	if(!sound->filled) {
@@ -147,11 +148,12 @@ void _play(sound::SoundThreadContext* context) {
 	engine->soundEngine.finishThread(context);
 }
 
-void sound::Sound::play() {
+void sound::Sound::play(SoundSourceProperties properties) {
 	#ifdef __switch__
 	Thread* thread = new Thread;
 	SoundThreadContext* context = new SoundThreadContext;
 	context->sound = this;
+	context->properties = properties;
 	context->thread = thread;
 	Result result = threadCreate(thread, (void (*)(void*))::_play, context, NULL, 0x10000, 0x2C, 1);
 
@@ -168,6 +170,7 @@ void sound::Sound::play() {
 	}
 	#else
 	SoundThreadContext* context = new SoundThreadContext;
+	context->properties = properties;
 	context->sound = this;
 	thread t(&::_play, context);
 	t.detach();
