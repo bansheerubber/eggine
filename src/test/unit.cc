@@ -5,6 +5,7 @@
 #include "chunkContainer.h"
 #include "../util/manhattan.h"
 #include "../util/minHeap.h"
+#include "team.h"
 
 Unit::Unit(ChunkContainer* chunkContainer, bool createReference) : Character(chunkContainer, false) {
 	if(createReference) {
@@ -14,6 +15,10 @@ Unit::Unit(ChunkContainer* chunkContainer, bool createReference) : Character(chu
 
 Unit::~Unit() {
 	esDeleteObject(this->reference);
+
+	if(this->team != nullptr) {
+		this->team->remove(this);
+	}
 
 	if(this->path != nullptr) {
 		delete this->path;
@@ -94,7 +99,7 @@ TileSet* Unit::getPath(glm::ivec3 end) {
 }
 
 void Unit::kill() {
-
+	delete this;
 }
 
 OverlappingTile* Unit::setPosition(glm::uvec3 position) {
@@ -207,6 +212,9 @@ esEntryPtr es::Unit__getPath(esEnginePtr esEngine, unsigned int argc, esEntry* a
 }
 
 esEntryPtr es::Unit__kill(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		((Unit*)args[0].objectData->objectWrapper->data)->kill();
+	}
 	return nullptr;
 }
 

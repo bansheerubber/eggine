@@ -34,6 +34,7 @@ class Unit: public Character {
 	friend esEntryPtr es::Unit__addMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__getHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__getMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend class Team;
 	
 	public:
 		Unit(class ChunkContainer* container, bool createReference = true);
@@ -53,6 +54,7 @@ class Unit: public Character {
 		int getMaxHealth();
 
 	private:
+		class Team* team = nullptr;
 		TileSet destinations;
 		TileSet* path = nullptr;
 		unsigned int moves = 5;

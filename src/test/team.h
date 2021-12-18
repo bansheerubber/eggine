@@ -27,6 +27,7 @@ class Team: public GameObject {
 		// ## game_object_definitions Team
 
 		void add(class Unit* character);
+		void remove(class Unit* character);
 	
 	private:
 		SortedArray<class Unit*> units = SortedArray<class Unit*>(teamUnitSort, nullptr, nullptr);

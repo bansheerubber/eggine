@@ -13,6 +13,13 @@ Team::Team() {
 void Team::add(Unit* unit) {
 	this->units.insert(unit);
 	this->units.sort();
+	unit->team = this;
+}
+
+void Team::remove(Unit* unit) {
+	this->units.remove(unit);
+	this->units.sort();
+	unit->team = nullptr;
 }
 
 int teamUnitSort(Unit** unit1, Unit** unit2) {
