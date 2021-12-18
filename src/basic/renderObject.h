@@ -7,6 +7,7 @@ class RenderObject : public GameObject {
 	public:
 		RenderObject();
 		RenderObject(bool addToList) {};
+		~RenderObject();
 		
 		virtual void render(double deltaTime, RenderContext &context) = 0;
 

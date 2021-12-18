@@ -99,7 +99,10 @@ class Engine {
 		void exit();
 
 		void addRenderObject(RenderObject* renderable);
+		void removeRenderObject(RenderObject* renderable);
+
 		void addUIObject(RenderObject* renderable);
+		void removeUIObject(RenderObject* renderable);
 
 		// handle keybinds
 		void registerTSKeybindCallback(string bind, string key, string callback);

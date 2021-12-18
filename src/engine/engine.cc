@@ -429,9 +429,17 @@ void Engine::addRenderObject(RenderObject* renderable) {
 	this->renderables.pushed();
 }
 
+void Engine::removeRenderObject(RenderObject* renderable) {
+	this->renderables.remove(renderable);
+}
+
 void Engine::addUIObject(RenderObject* renderable) {
 	this->renderableUIs[this->renderableUIs.head] = renderable;
 	this->renderableUIs.pushed();
+}
+
+void Engine::removeUIObject(RenderObject* renderable) {
+	this->renderableUIs.remove(renderable);
 }
 
 void Engine::setFilePrefix(string filePrefix) {

@@ -9,3 +9,8 @@
 RenderObject::RenderObject() {
 	engine->addRenderObject(this);
 }
+
+RenderObject::~RenderObject() {
+	engine->removeRenderObject(this);
+	engine->removeUIObject(this);
+}

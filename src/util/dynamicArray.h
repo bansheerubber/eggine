@@ -112,6 +112,54 @@ class DynamicArray {
 			}
 		}
 
+		void remove(T entry) {
+			long index = this->index(entry);
+			if(index != -1) {
+				this->shift(index + 1, -1);
+			}
+		}
+
+		long index(T entry) {
+			for(unsigned long i = 0; i < this->head; i++) {
+				if(entry == this->array[i]) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		void shift(long index, long amount) {
+			size_t end = this->head;
+
+			for(int i = 0; i < amount; i++) {
+				this->pushed(); // allocate space
+			}
+
+			// start from the end for shifting right
+			if(amount >= 0) {
+				for(int i = end - 1; i >= index; i--) {
+					this->array[i + amount] = std::move(this->array[i]); // move
+				}
+			}
+			else {
+				for(int i = index; i < end; i++) {
+					this->array[i + amount] = std::move(this->array[i]); // move
+				}
+			}
+
+			for(int i = index; i < index + amount; i++) {
+				// re-initialize entries
+				(*this->init)(this->parent, &this->array[i]);
+			}
+
+			if(amount < 0) { // pop for shift lefts
+				for(int i = end - 1; i >= end + amount; i--) {
+					(*this->init)(this->parent, &this->array[i]);
+					this->popped();
+				}
+			}
+		}
+
 		T& operator[](size_t index) {
 			return this->array[index];
 		}

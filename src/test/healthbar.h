@@ -16,5 +16,5 @@ class Healthbar: public RenderObject {
 	private:
 		double percent = 1.0;
 		glm::uvec3 position;
-		render::Box* box;
+		render::Box box;
 };
