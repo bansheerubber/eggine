@@ -87,7 +87,7 @@ void _play(sound::SoundThreadContext* context) {
 		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT / 2.0); // seek some buffers worth into the .ogg stream
 	}
 	else if(type == sound::WAV_FILE) {
-		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT);
+		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT * reader.getChannels());
 	}
 
 	int currentSection = 0;
