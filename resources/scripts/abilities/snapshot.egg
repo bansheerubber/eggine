@@ -9,6 +9,7 @@ function SnapshotAbility::onAdd(%this) {
 
 function SnapshotAbility::use(%this, %target) {
 	%target.addHealth(-5);
+	playSound("SnapshotFire");
 }
 
 function SnapshotAbility::accuracy(%this, %target) {

@@ -4,6 +4,7 @@ class AbilityUseButtonElement inherits HTMLElement;
 
 function AbilityElement::onClick(%this) {
 	getChunkContainer().getSelectedCharacter().selectAbility(number(%this.getAttribute("ability-index")));
+	playSound("Flip");
 }
 
 function AbilityUseButtonElement::onClick(%this) {

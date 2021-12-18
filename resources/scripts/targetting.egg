@@ -29,5 +29,6 @@ function EnemyIconElement::onClick(%this) {
 		%enemy = getChunkContainer().getEnemyTeam().get(number(%enemy));
 		selectTarget(%enemy);
 		getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%enemy.getPosition()), 0.2);
+		playSound("SelectEnemy");
 	}
 }
