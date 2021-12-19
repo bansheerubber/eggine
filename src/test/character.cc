@@ -10,6 +10,7 @@ Character::Character(ChunkContainer* chunkContainer, bool createReference) : Int
 
 Character::~Character() {
 	esDeleteObject(this->reference);
+	this->container->positionToCharacter.erase(this->getPosition());
 }
 
 OverlappingTile* Character::setPosition(glm::uvec3 position) {
