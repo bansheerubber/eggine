@@ -52,7 +52,7 @@ function onGamepadPressTile(%state) {
 	%position = $Unit::HoveredTile;
 	if(!isTileSelectable(%position)) {
 		%selectedCharacter = getChunkContainer().getSelectedCharacter();
-		if(isObject(%selectedCharacter) && %selectedCharacter.getDestinations().has(%position)) {
+		if(isObject(%selectedCharacter)) {
 			%selectedCharacter.move(%position);
 		}
 	}
