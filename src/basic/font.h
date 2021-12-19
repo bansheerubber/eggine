@@ -31,11 +31,11 @@ class Font : public GameObject {
 		static tsl::robin_map<string, tsl::robin_map<int, Font*>> Fonts;
 		static Font* GetFont(string family, int size);
 
-		int size;
+		int size = 0;
 		char atlas[256 * 256];
-		int ascent;
-		int descent;
-		int x_height;
+		int ascent = 0;
+		int descent = 0;
+		int x_height = 0;
 		FontGlyph characterToGlyph[128];
 	
 	protected:
