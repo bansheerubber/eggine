@@ -83,16 +83,21 @@ void Unit::calculateDestinations(TileSet &destinations, unsigned int moves) {
 }
 
 TileSet* Unit::getPath(glm::ivec3 end) {
-	if(this->path != nullptr) {
-		delete this->path;
-	}
-	
-	this->calculateDestinations(this->destinations, esGetNumberFromEntry(esGetObjectProperty(this->reference, "moves")));
-	this->calculateDestinations(this->sprintDestinations, esGetNumberFromEntry(esGetObjectProperty(this->reference, "sprintMoves")));
 	glm::ivec3 start = this->getPosition();
 	if(start.z > 0) {
 		start.z -= 1;
 	}
+
+	if(start == this->pathCache.start && end == this->pathCache.end) {
+		return this->path;
+	}
+
+	if(this->path != nullptr) {
+		delete this->path;
+	}
+
+	this->pathCache.start = start;
+	this->pathCache.end = end;
 
 	this->path = this->destinations.pathfind(start, end);
 	if(this->path != nullptr) {

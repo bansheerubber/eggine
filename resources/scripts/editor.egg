@@ -45,9 +45,10 @@ function onHoverTile(%position) {
 	%character = getChunkContainer().getSelectedCharacter();
 	if(isObject(%character)) {
 		%character.path = %character.getPath(%position);
-		if(isObject(%character.path)) {
+		if(isObject(%character.path) && %character.lastPath != %character.path) {
 			%character.path.showDots();
 		}
+		%character.lastPath = %character.path;
 	}
 	
 	$Editor::CurrentHoverPosition = %position;

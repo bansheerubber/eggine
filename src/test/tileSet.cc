@@ -33,7 +33,7 @@ bool TileSet::remove(glm::uvec3 position) {
 }
 
 bool TileSet::has(glm::uvec3 position) {
-	return this->set.find(position) != this->set.end();
+	return this->set.contains(position);
 }
 
 unsigned int TileSet::size() {

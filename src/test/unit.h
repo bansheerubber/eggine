@@ -67,6 +67,11 @@ class Unit: public Character {
 		int health = 1;
 		Healthbar healthbar;
 
+		struct {
+			glm::ivec3 start = glm::ivec3(0, 0, 0);
+			glm::ivec3 end = glm::ivec3(0, 0, 0);
+		} pathCache;
+
 		void calculateDestinations(TileSet &destinations, unsigned int moves);
 		TileSet* getPath(glm::ivec3 end);
 };
