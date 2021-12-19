@@ -29,29 +29,23 @@ class SortedArray {
 		}
 
 		void insert(T value) {
+			// find a place to insert it at
+			for(unsigned long i = 0; i < this->array.head; i++) {
+				if(this->compare(&value, &this->array[i]) < 0) {
+					this->array.shift(i, 1);
+					this->array[i] = value;
+					return;
+				}
+			}
+			
 			// insert at the end
 			size_t iterator = this->array.head;
 			this->array[iterator] = value;
 			this->array.pushed();
-
-			this->sort();
 		}
 
 		void remove(T value) {
-			// find the value
-			size_t found = -1;
-			for(size_t i = 0; i < this->array.head; i++) {
-				if(this->array[i] == value) {
-					found = i;
-					break;
-				}
-			}
-
-			if(found != -1) {
-				this->swap(found, this->array.head - 1);
-				this->array.popped();
-				this->sort();
-			}
+			this->array.remove(value);
 		}
 
 		T& top() {

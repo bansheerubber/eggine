@@ -87,30 +87,16 @@ void Layer::rebuildBuffers() {
 
 void Layer::add(OverlappingTile* tile) {
 	this->tiles.insert(tile);
-	this->tiles.sort();
-	this->rebuildBuffers();
+	this->needsUpdate = true;
 }
 
 void Layer::update(OverlappingTile* tile) {
-	// for(size_t i = 0; i < this->tiles.array.head; i++) {
-	// 	OverlappingTile* found = this->tiles.array[i];
-	// 	if(found == tile) {
-	// 		this->offsets[i] = tile->screenSpacePosition;
-	// 		this->textureIndices[i] = tile->getTexture();
-	// 		this->colors[i] = tile->getColor();
-
-	// 		this->buffers[0]->setSubData(&this->offsets[i], sizeof(glm::vec2), i * sizeof(glm::vec2));
-	// 		this->buffers[1]->setSubData(&this->textureIndices[i], sizeof(int), i * sizeof(int));
-	// 		this->buffers[2]->setSubData(&this->colors[i], sizeof(glm::vec4), i * sizeof(glm::vec4));
-	// 	}
-	// }
-	this->tiles.sort();
-	this->rebuildBuffers();
+	this->needsUpdate = true;
 }
 
 void Layer::remove(OverlappingTile* tile) {
 	this->tiles.remove(tile);
-	this->rebuildBuffers();
+	this->needsUpdate = true;
 }
 
 void Layer::updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation) {
@@ -126,6 +112,16 @@ void Layer::render(double deltaTime, RenderContext &context) {
 		glm::vec4 color;
 	} fb;
 	fb.color = glm::vec4(1, 1, 1, 1);
+
+	if(this->needsSort) {
+		this->tiles.sort();
+		this->needsSort = false;
+	}
+
+	if(this->needsUpdate) {
+		this->rebuildBuffers();
+		this->needsUpdate = false;
+	}
 	
 	this->attributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, this->tiles.array.head);

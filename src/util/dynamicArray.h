@@ -149,12 +149,16 @@ class DynamicArray {
 
 			for(int i = index; i < index + amount; i++) {
 				// re-initialize entries
-				(*this->init)(this->parent, &this->array[i]);
+				if(this->init != nullptr) {
+					(*this->init)(this->parent, &this->array[i]);
+				}
 			}
 
 			if(amount < 0) { // pop for shift lefts
 				for(int i = end - 1; i >= end + amount; i--) {
-					(*this->init)(this->parent, &this->array[i]);
+					if(this->init != nullptr) {
+						(*this->init)(this->parent, &this->array[i]);
+					}
 					this->popped();
 				}
 			}

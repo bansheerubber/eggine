@@ -34,6 +34,8 @@ class Layer : public GameObject {
 
 		render::VertexBuffer* buffers[3];
 		render::VertexAttributes* attributes;
+		bool needsUpdate = false;
+		bool needsSort = false;
 
 		void rebuildBuffers();
 		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);
