@@ -58,6 +58,22 @@ function onGamepadPressTile(%state) {
 	}
 }
 
+addKeybind("unit.gamepadUseAbility", "a-button", "onGamepadUseAbility");
+function onGamepadUseAbility(%state) {
+	if(!%state) {
+		return;
+	}
+
+	%selectedCharacter = getChunkContainer().getSelectedCharacter();
+	if(isObject(%selectedCharacter) && %selectedCharacter.selectedAbility.usable($Unit::SelectedTarget)) {
+		%selectedCharacter.selectedAbility.use($Unit::SelectedTarget);
+
+		if(!isObject($Unit::SelectedTarget)) {
+			selectTarget(null);
+		}
+	}
+}
+
 addKeybind("unit.nextAbility", "y-button", "onNextAbility");
 function onNextAbility(%state) {
 	if(!%state) {
