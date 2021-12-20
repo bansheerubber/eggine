@@ -1,6 +1,3 @@
-$Unit::SelectedAbility = null; // try to use the same ability when we cycle through units
-$Unit::SprintBorderColor = {0; 0; 1; 1};
-
 function Unit::onAdd(%this) {
 	%this.abilities = new Array();
 	%ability = new SnapshotAbility();

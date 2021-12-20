@@ -64,6 +64,11 @@ namespace resources {
 			bool drawOntopOfOverlap(size_t spriteIndex);
 			SpriteSheetInfo getSpriteInfo(size_t index);
 
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+				ResourceObject::reload(metadata, buffer, bufferSize);
+				printf("spritesheet reload not implemented\n");
+			}
+
 			unsigned int getBytesUsed() {
 				return 0;
 			}

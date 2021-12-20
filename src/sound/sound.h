@@ -52,6 +52,12 @@ namespace sound {
 			Sound(resources::ResourceManager* manager, carton::Metadata* metadata);
 
 			void play(SoundSourceProperties properties = SoundSourceProperties());
+
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+				resources::ResourceObject::reload(metadata, buffer, bufferSize);
+				printf("sound reload not implemented\n");
+			}
+
 			unsigned int getBytesUsed() {
 				return SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT;
 			}

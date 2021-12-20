@@ -11,6 +11,10 @@ namespace resources {
 			size_t bufferSize = 0;
 			ShaderSource* original = nullptr;
 
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+				ResourceObject::reload(metadata, buffer, bufferSize);
+				printf("shader source reload not implemented\n");
+			}
 			unsigned int getBytesUsed();
 	};
 };

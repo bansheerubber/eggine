@@ -29,12 +29,10 @@ function Team::selectPreviousCharacter(%this, %state) {
 	playSound("SwapUnit");
 }
 
-function team() {
+function teamInit() {
 	%team = getChunkContainer().getPlayerTeam();
 	%team.addKeybind("team.selectPreviousCharacter", "[", "selectPreviousCharacter");
 	%team.addKeybind("team.selectNextCharacter", "]", "selectNextCharacter");
 	%team.addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
 	%team.addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
 }
-
-schedule(100, "team");

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <eggscript/egg.h>
 #include <tsl/robin_set.h>
 #include <string>
 
@@ -9,6 +10,11 @@
 #include "../carton/metadata.h"
 #include "../carton/metadata/queryList.h"
 #include "resourceObject.h"
+
+namespace es {
+	void defineResourceManager();
+	esEntryPtr hotReload(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+};
 
 void handleSpritesheets(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
 void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize);
@@ -37,9 +43,11 @@ namespace resources {
 			ResourceManager(string fileName);
 			
 			carton::Carton* carton = nullptr;
+			string fileName;
 			DynamicArray<ResourceObject*> loadResources(DynamicArray<carton::Metadata*> resources);
 			DynamicArray<ResourceObject*> metadataToResources(DynamicArray<carton::Metadata*> resources);
 			unsigned int getBytesUsed();
+			void reload();
 		
 		private:
 			tsl::robin_set<ResourceObject*> objects;

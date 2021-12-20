@@ -20,6 +20,10 @@ namespace resources {
 			void render();
 			unsigned int getWidth();
 			unsigned int getHeight();
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+				ResourceObject::reload(metadata, buffer, bufferSize);
+				printf("image reload not implemented\n");
+			}
 			unsigned int getBytesUsed() {
 				return 0;
 			}

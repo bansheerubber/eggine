@@ -5,6 +5,7 @@
 resources::ResourceObject::ResourceObject(ResourceManager* manager, carton::Metadata* metadata) {
 	this->manager = manager;
 	this->metadata = metadata;
+	this->fileName = this->metadata->getMetadata("fileName");
 	if(manager != nullptr) {
 		manager->objects.insert(this);
 	}

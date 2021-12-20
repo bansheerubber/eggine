@@ -6,7 +6,66 @@ exec("unit.egg");
 exec("editor.egg");
 exec("targetting.egg");
 
-$Unit::HoveredTile = null;
+function test() {
+	echo("original");
+}
+
+package frog {
+	function test() {
+		Parent::test();
+		echo("hey");
+	}
+};
+
+function init() {
+	// unit stuff
+	$Unit::HoveredTile = null;
+
+	$Unit::TargetSprite = null;
+	$Unit::SelectedTarget = null;
+
+	$Unit::SelectedAbility = null; // try to use the same ability when we cycle through units
+	$Unit::SprintBorderColor = {0; 0; 1; 1};
+
+	teamInit();
+
+	// tile stuff
+	$Tile::Directions = new Array();
+	$Tile::Directions.push(
+		{0; -1; 0}, // north
+		{1; 0; 0}, // east
+		{0; 1; 0}, // south
+		{-1; 0; 0} // west
+	);
+
+	// editor stuff
+	$Editor::Enabled = true;
+
+	$Editor::GhostTile = null;
+	$Editor::GhostLine = new Array();
+	$Editor::MouseDown = false;
+
+	$Editor::LastStart = null;
+	$Editor::LastEnd = null;
+	$Editor::LastDirection = null;
+	$Editor::LastAxis  = null;
+	
+	addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
+	addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");
+
+	addKeybind("chunk.rotateCounterClockwise", "e", "onRotateCounterClockwise");
+	addKeybind("chunk.rotateCounterClockwise", "d-pad-right", "onRotateCounterClockwise");
+
+	addKeybind("unit.gamepadPressTile", "b-button", "onGamepadPressTile");
+
+	addKeybind("unit.gamepadUseAbility", "a-button", "onGamepadUseAbility");
+
+	addKeybind("unit.nextAbility", "y-button", "onNextAbility");
+
+	addKeybind("unit.previousAbility", "x-button", "onPreviousAbility");
+
+	addKeybind("editor.mouseDown", "left-mouse-button", "onEditorMouseDown");
+}
 
 function HTMLElement::onClick(%this) {
 	
@@ -24,16 +83,12 @@ function isTileSelectable(%position) {
 	return 0;
 }
 
-addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
-addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");
 function onRotateClockwise(%state) {
 	if(%state) {
 		getChunkContainer().setRotation((getChunkContainer().getRotation() + 1) % 4);
 	}
 }
 
-addKeybind("chunk.rotateCounterClockwise", "e", "onRotateCounterClockwise");
-addKeybind("chunk.rotateCounterClockwise", "d-pad-right", "onRotateCounterClockwise");
 function onRotateCounterClockwise(%state) {
 	if(%state) {
 		%rotation = getChunkContainer().getRotation() - 1;
@@ -44,7 +99,6 @@ function onRotateCounterClockwise(%state) {
 	}
 }
 
-addKeybind("unit.gamepadPressTile", "b-button", "onGamepadPressTile");
 function onGamepadPressTile(%state) {
 	if(!%state) {
 		return;
@@ -59,7 +113,6 @@ function onGamepadPressTile(%state) {
 	}
 }
 
-addKeybind("unit.gamepadUseAbility", "a-button", "onGamepadUseAbility");
 function onGamepadUseAbility(%state) {
 	if(!%state) {
 		return;
@@ -75,7 +128,6 @@ function onGamepadUseAbility(%state) {
 	}
 }
 
-addKeybind("unit.nextAbility", "y-button", "onNextAbility");
 function onNextAbility(%state) {
 	if(!%state) {
 		return;
@@ -88,7 +140,6 @@ function onNextAbility(%state) {
 	}
 }
 
-addKeybind("unit.previousAbility", "x-button", "onPreviousAbility");
 function onPreviousAbility(%state) {
 	if(!%state) {
 		return;

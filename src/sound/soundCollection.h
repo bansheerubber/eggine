@@ -15,6 +15,11 @@ namespace sound {
 
 			void play(); // pick a random sound from the collection and play it
 
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+				resources::ResourceObject::reload(metadata, buffer, bufferSize);
+				printf("sound collection reload not implemented\n");
+			}
+			
 			unsigned int getBytesUsed() {
 				return 0;
 			}

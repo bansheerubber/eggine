@@ -101,7 +101,30 @@ resources::ShaderSource* getShaderSource(string fileName) {
 }
 
 resources::ResourceManager::ResourceManager(string fileName) {
+	this->fileName = fileName;
+	this->reload();
+}
+
+void resources::ResourceManager::reload() {
+	bool reload = false;
+	if(this->carton != nullptr) {
+		delete this->carton;
+		reload = true;
+	}
+	
 	this->carton = new carton::Carton();
+	this->carton->read(this->fileName);
+
+	if(reload) {
+		for(ResourceObject* object: this->objects) {
+			carton::FileBuffer buffer = this->carton->readFileToBuffer(object->fileName);
+			carton::Metadata* metadata = this->carton->database.get()->equals("fileName", object->fileName)->exec()[0];
+			this->metadataToResource[metadata] = object;
+			object->reload(metadata, buffer.buffer, buffer.size);
+			free((void*)buffer.buffer);
+		}
+	}
+
 	this->carton->addExtensionHandler(".ss", handleSpritesheets, this);
 	this->carton->addExtensionHandler(".png", handlePNGs, this);
 	this->carton->addExtensionHandler(".html", handleHTML, this);
@@ -112,7 +135,6 @@ resources::ResourceManager::ResourceManager(string fileName) {
 	this->carton->addExtensionHandler(".dksh", handleDKSHShaders, this);
 	this->carton->addExtensionHandler(".map", handleMaps, this);
 	this->carton->addExtensionHandler(".sound", handleSounds, this);
-	this->carton->read(fileName);
 }
 
 unsigned int resources::ResourceManager::getBytesUsed() {
@@ -144,4 +166,13 @@ DynamicArray<resources::ResourceObject*> resources::ResourceManager::metadataToR
 		output[i] = this->metadataToResource[resources[i]];
 	}
 	return output;
+}
+
+void es::defineResourceManager() {
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, hotReload, "hotReload", 0, nullptr);
+}
+
+esEntryPtr es::hotReload(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	engine->manager->reload();
+	return nullptr;
 }

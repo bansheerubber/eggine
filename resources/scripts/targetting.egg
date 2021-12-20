@@ -1,6 +1,3 @@
-$Unit::TargetSprite = null;
-$Unit::SelectedTarget = null;
-
 function selectTarget(%target) {
 	if(!isObject(%target)) {
 		$Unit::TargetSprite.delete();

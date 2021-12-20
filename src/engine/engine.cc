@@ -278,6 +278,7 @@ void Engine::initialize() {
 		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
 	)[0];
 	esExecFileFromContents(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
+	esCallFunction(this->eggscript, "init", 0, nullptr);
 
 	this->renderWindow.initializeHTML();
 
