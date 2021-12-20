@@ -129,7 +129,7 @@ class DynamicArray {
 		}
 
 		void shift(long index, long amount) {
-			size_t end = this->head;
+			long end = (long)this->head;
 
 			for(int i = 0; i < amount; i++) {
 				this->pushed(); // allocate space
