@@ -6,16 +6,9 @@ exec("unit.egg");
 exec("editor.egg");
 exec("targetting.egg");
 
-function test() {
-	echo("original");
+function r() {
+	hotReload();
 }
-
-package frog {
-	function test() {
-		Parent::test();
-		echo("hey");
-	}
-};
 
 function init() {
 	// unit stuff

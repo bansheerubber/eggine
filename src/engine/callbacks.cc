@@ -1,10 +1,11 @@
 #include "callbacks.h"
 
+#include "../engine/developer.h"
+
 #ifdef EGGINE_DEVELOPER_MODE
 #include "imgui_impl_glfw.h"
+#include "../test/developerGui.h"
 #endif
-
-#include "../engine/developer.h"
 
 #include <stdio.h>
 
@@ -201,6 +202,12 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
 	#ifdef EGGINE_DEVELOPER_MODE
 	ImGui_ImplGlfw_KeyCallback(window, key, scanCode, action, mods);
+	#endif
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	if(key == GLFW_KEY_GRAVE_ACCENT) {
+		engine->developerGui->focusConsole = true;
+	}
 	#endif
 	
 	esEntry arguments[2];

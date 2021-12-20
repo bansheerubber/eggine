@@ -23,6 +23,8 @@ class DeveloperGui {
 		vector<render::Texture*> spritesheetImages;
 
 		vector<ConsoleEntry> console;
+
+		bool focusConsole = false;
 		
 		void render();
 		void prerender();

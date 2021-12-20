@@ -202,6 +202,11 @@ void DeveloperGui::render() {
 		ImGui::SetNextWindowSize(ImVec2(-1, -1));
 		ImGui::Begin("eggscript shell", NULL, ImGuiWindowFlags_NoResize);
 
+		if(this->focusConsole) {
+			ImGui::SetWindowFocus();
+			ImGui::SetWindowCollapsed(false);
+		}
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.f, 10.f));
 		ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 10.f);
 		ImGui::BeginChild("scrolling", ImVec2(800.f, 400.f), true, ImGuiWindowFlags_HorizontalScrollbar);
@@ -228,6 +233,12 @@ void DeveloperGui::render() {
 		char buffer[1024];
 		memset(buffer, 0, sizeof(buffer));
 		ImGui::PushItemWidth(800.f);
+
+		if(this->focusConsole) {
+			ImGui::SetKeyboardFocusHere();
+			this->focusConsole = false;
+		}
+
 		if(
 			ImGui::InputText(
 				"##frog",
