@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 	map->loadIntoMap(&container.map);
 	container.commit();
 
-	unsigned int positionsSize = 4;
+	unsigned int positionsSize = 0;
 	glm::uvec3 positions[positionsSize] = {
 		glm::uvec3(0, 0, 1),
 		glm::uvec3(2, 0, 1),
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// enemies
-	unsigned int enemyPositionsSize = 4;
+	unsigned int enemyPositionsSize = 0;
 	glm::uvec3 enemyPositions[enemyPositionsSize] = {
 		glm::uvec3(2, 10, 1),
 		glm::uvec3(4, 6, 1),

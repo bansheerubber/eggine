@@ -19,13 +19,21 @@ void es::eggscriptDefinitions() {
 esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
 		string path = filesystem::path(esGetLastExecFileName(esEngine)).parent_path();
-		path += "/";
+		if(path != "") {
+			path += "/";
+		}
 		path += args[0].stringData;
 
 		resources::ScriptFile* file = (resources::ScriptFile*)engine->manager->metadataToResources(
 			engine->manager->carton->database.get()->equals("fileName", path)->exec()
 		)[0];
-		esExecFileFromContents(esEngine, path.c_str(), file->script.c_str());
+
+		if(file != nullptr) {
+			esExecFileFromContents(esEngine, path.c_str(), file->script.c_str());	
+		}
+		else {
+			printf("could not find file to execute\n");
+		}
 	}
 	return nullptr;
 }

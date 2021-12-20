@@ -140,7 +140,7 @@ void render::Window::initialize() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(this->window, true);
+	ImGui_ImplGlfw_InitForOpenGL(this->window, false);
 	ImGui_ImplOpenGL3_Init("#version 150");
 	#endif
 

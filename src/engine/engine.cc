@@ -1,5 +1,9 @@
 #include "engine.h"
 
+#ifdef EGGINE_DEVELOPER_MODE
+#include "imgui_impl_glfw.h"
+#endif
+
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <glm/vec3.hpp>
@@ -51,6 +55,14 @@ void Engine::initialize() {
 	glfwSetKeyCallback(this->renderWindow.window, onKeyPress);
 	glfwSetMouseButtonCallback(this->renderWindow.window, onMousePress);
 	glfwSetCursorPosCallback(this->renderWindow.window, onMouseMove);
+	#endif
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	glfwSetWindowFocusCallback(this->renderWindow.window, ImGui_ImplGlfw_WindowFocusCallback);
+	glfwSetCursorEnterCallback(this->renderWindow.window, ImGui_ImplGlfw_CursorEnterCallback);
+	glfwSetScrollCallback(this->renderWindow.window, ImGui_ImplGlfw_ScrollCallback);
+	glfwSetCharCallback(this->renderWindow.window, ImGui_ImplGlfw_CharCallback);
+	glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 	#endif
 
 	#ifdef EGGINE_DEBUG

@@ -1,4 +1,4 @@
-$Editor::Enabled = false;
+$Editor::Enabled = true;
 
 $Editor::GhostTile = null;
 $Editor::GhostLine = new Array();

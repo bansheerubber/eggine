@@ -1,5 +1,9 @@
 #include "callbacks.h"
 
+#ifdef EGGINE_DEVELOPER_MODE
+#include "imgui_impl_glfw.h"
+#endif
+
 #include "../engine/developer.h"
 
 #include <stdio.h>
@@ -195,6 +199,10 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 
 #ifndef __switch__
 void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui_ImplGlfw_KeyCallback(window, key, scanCode, action, mods);
+	#endif
+	
 	esEntry arguments[2];
 	arguments[0].type = ES_ENTRY_STRING;
 	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
@@ -204,6 +212,10 @@ void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods)
 }
 
 void onMousePress(GLFWwindow* window, int button, int action, int mods) {
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+	#endif
+	
 	esEntry arguments[2];
 	arguments[0].type = ES_ENTRY_NUMBER;
 	arguments[0].numberData = button;

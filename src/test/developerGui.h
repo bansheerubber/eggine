@@ -10,12 +10,27 @@
 
 using namespace std;
 
+struct ConsoleEntry {
+	int level;
+	string contents;
+};
+
 class DeveloperGui {
 	public:
+		DeveloperGui();
+
 		png spritesheet;
 		vector<render::Texture*> spritesheetImages;
+
+		vector<ConsoleEntry> console;
 		
 		void render();
 		void prerender();
+	
+	private:
+		vector<string> history;
+		int historyPosition = 0;
+		string incompleteCommand = "";
+		int consoleCallback(ImGuiInputTextCallbackData* data);
 };
 #endif
