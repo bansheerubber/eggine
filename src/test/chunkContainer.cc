@@ -414,6 +414,7 @@ void es::defineChunkContainer() {
 
 	esEntryType setTileArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::ChunkContainer__setTile, "ChunkContainer", "setTile", 3, setTileArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::ChunkContainer__getTile, "ChunkContainer", "getTile", 2, getCharacterArguments);
 
 	esEntryType setRotationArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::ChunkContainer__setRotation, "ChunkContainer", "setRotation", 2, setRotationArguments);
@@ -493,6 +494,20 @@ esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, 
 		);
 
 		container->setTile(position, args[2].numberData);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		glm::ivec3 position(
+			args[1].matrixData->data[0][0].numberData,
+			args[1].matrixData->data[1][0].numberData,
+			args[1].matrixData->data[2][0].numberData
+		);
+
+		return esCreateNumber(container->getTile(position));
 	}
 	return nullptr;
 }

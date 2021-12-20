@@ -35,7 +35,7 @@ function SnapshotAbility::cost(%this, %target) {
 }
 
 function SnapshotAbility::usable(%this, %target) {
-	%result = %target != null && raycast(%this.owner.getPosition(), %target.getPosition()) == null && Parent::usable(%this, %target);
+	%result = %target != null && %target.inCover(%this.owner) != 2 && Parent::usable(%this, %target);
 	return %result;
 }
 

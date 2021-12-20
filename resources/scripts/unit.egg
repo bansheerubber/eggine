@@ -37,6 +37,43 @@ function Unit::onDeSelect(%this) {
 	%this.path = %this.getPath($Unit::HoveredTile);
 }
 
+// return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
+function Unit::inCover(%this, %attacker) {
+	%result = raycast(%attacker.getPosition(), %this.getPosition());
+	if(%result == null) {
+		return 0;
+	}
+
+	%direction = Tile::getAdjacentDirectionIndex(%this.getPosition(), %result);
+	if(%direction == -1) { // if not directly adjacent, then we can't shoot past the cover
+		return 2;
+	}
+
+	%leftTile = $Tile::Directions[%direction - 1 < 0 ? 3 : %direction - 1] + %result;
+	%rightTile = $Tile::Directions[(%direction + 1) % 4] + %result;
+
+	%leftTileDistance = distance(%leftTile, %attacker.getPosition());
+	%rightTileDistance = distance(%rightTile, %attacker.getPosition());
+
+	if(Tile::isTile(%leftTile) && Tile::isTile(%rightTile)) {
+		return 2;
+	}
+	else if(%leftTileDistance == %rightTileDistance) {
+		return 1;
+	}
+	// if the left tile exists and the attacker is closer to that tile, then they don't have a line of fire on us
+	else if(Tile::isTile(%leftTile) && %leftTileDistance < %rightTileDistance) {
+		return 2;
+	}
+	// if the right tile exists and the attacker is closer to that tile, then they don't have a line of fire on us
+	else if(Tile::isTile(%rightTile) && %rightTileDistance < %leftTileDistance) {
+		return 2;
+	}
+	else { // if one of the tiles is empty, then we're partially in cover
+		return 1;
+	}
+}
+
 function Unit::addAP(%this, %ap) {
 	%this.setAP(%this.ap + %ap);
 }

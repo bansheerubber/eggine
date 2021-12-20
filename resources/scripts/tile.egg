@@ -1,0 +1,49 @@
+$Tile::Directions = new Array();
+$Tile::Directions.push(
+	{0; -1; 0}, // north
+	{1; 0; 0}, // east
+	{0; 1; 0}, // south
+	{-1; 0; 0} // west
+);
+
+// returns a vector pointing from the origin tile to the tile that is adjacent to it
+function Tile::getAdjacentDirection(%origin, %position) {
+	for(%i = 0; %i < 4; %i++) {
+		if(Tile::getAdjacent(%origin, %i) == %position) {
+			return $Tile::Directions[%i];
+		}
+	}
+	return null;
+}
+
+function Tile::getAdjacentDirectionIndex(%origin, %position) {
+	for(%i = 0; %i < 4; %i++) {
+		if(Tile::getAdjacent(%origin, %i) == %position) {
+			return %i;
+		}
+	}
+	return -1;
+}
+
+function Tile::getAdjacent(%position, %index) {
+	return %position + $Tile::Directions[%index];
+}
+
+function Tile::isAdjacent(%origin, %position) {
+	for(%i = 0; %i < 4; %i++) {
+		if(Tile::getAdjacent(%origin, %i) == %position) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// return whether or not this position has a tile
+function Tile::isTile(%position) {
+	if(getChunkContainer().getTile(%position) != 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
