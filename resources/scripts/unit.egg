@@ -32,6 +32,7 @@ function Unit::onDeSelect(%this) {
 	%this.getDestinations().hideBorder();
 	%this.getSprintDestinations().hideBorder();
 	%this.path = %this.getPath($Unit::HoveredTile);
+	%this.path.hideBorder();
 }
 
 // return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all

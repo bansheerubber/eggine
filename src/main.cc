@@ -43,12 +43,12 @@ int main(int argc, char* argv[]) {
 	map->loadIntoMap(&container.map);
 	container.commit();
 
-	unsigned int positionsSize = 0;
+	unsigned int positionsSize = 4;
 	glm::uvec3 positions[positionsSize] = {
-		glm::uvec3(0, 0, 1),
-		glm::uvec3(2, 0, 1),
-		glm::uvec3(3, 4, 1),
-		glm::uvec3(15, 8, 1),
+		glm::uvec3(7, 4, 1),
+		glm::uvec3(4, 8, 1),
+		glm::uvec3(8, 10, 1),
+		glm::uvec3(3, 15, 1),
 	};
 
 	for(unsigned int i = 0; i < positionsSize; i++) {

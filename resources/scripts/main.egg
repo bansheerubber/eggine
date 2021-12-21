@@ -20,7 +20,7 @@ function init() {
 	$Unit::SelectedAbility = null; // try to use the same ability when we cycle through units
 	$Unit::SprintBorderColor = {0; 0; 1; 1};
 
-	teamInit();
+	schedule(100, "teamInit");
 
 	// tile stuff
 	$Tile::Directions = new Array();
