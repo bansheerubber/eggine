@@ -5,18 +5,26 @@
 #include "../engine/engine.h"
 #include "../basic/gameObject.h"
 #include "interweavedTile.h"
+#include "../engine/networkMacros.h"
+#include "../engine/networkStream.h"
+#include "../basic/remoteObject.h"
 #include "tileSet.h"
 
-class Character: public InterweavedTile {
+class Character: public InterweavedTile, public network::RemoteObject {
 	public:
 		Character(class ChunkContainer* container, bool createReference = true);
 		~Character();
 
 		// ## game_object_definitions Character
+		// ##1 remote_object_definitions Character
 
 		virtual OverlappingTile* setPosition(glm::uvec3 position);
 		bool move(glm::uvec3 position);
 		bool moveTest(glm::uvec3 position);
+	
+	protected:
+		NP_PROPERTY(NP_VECTOR)
+		glm::uvec3 position;
 };
 
 namespace es { // order = 3

@@ -434,6 +434,8 @@ void Engine::tick() {
 
 	this->renderWindow.render();
 
+	this->network.tick();
+
 	goto start_tick;
 }
 

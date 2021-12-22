@@ -15,6 +15,9 @@ Character::~Character() {
 
 OverlappingTile* Character::setPosition(glm::uvec3 position) {
 	this->container->updateCharacterPosition(this, position);
+	this->position = position;
+	this->writeUpdateMask("position");
+
 	return InterweavedTile::setPosition(position);
 }
 
