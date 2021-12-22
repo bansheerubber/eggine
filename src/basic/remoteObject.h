@@ -2,15 +2,17 @@
 
 #include <string>
 
-#include "../network/stream.h"
+#include "../network/packet.h"
 
 namespace network {
 	class RemoteObject {
+		friend class Client;
+
 		public:
 			RemoteObject();
 			~RemoteObject();
 			
-			virtual void pack(Stream &stream);
+			virtual void pack(Packet* packet);
 			virtual unsigned int propertyToMaskPosition(std::string property);
 			void writeUpdateMask(unsigned int position);
 			void writeUpdateMask(std::string position);

@@ -9,7 +9,10 @@
 #include <sys/types.h>
 
 #include "connection.h"
+#include "packet.h"
 #include "../basic/remoteObject.h"
+
+#include "../util/time.h"
 
 using namespace std;
 
@@ -74,11 +77,14 @@ void network::Network::accept() {
 }
 
 void network::Network::sendInitialData(Connection* connection) {
-	Stream stream(WRITE | NO_MASK_CHECKING);
+	Packet* packet = new Packet();
+	packet->stream.setFlags(WRITE | NO_MASK_CHECKING);
+	packet->setType(DROPPABLE_PACKET);
 	for(RemoteObject* remoteObject: this->remoteObjects) {
-		remoteObject->pack(stream);
-		stream.send(connection);
+		remoteObject->pack(packet);
 	}
+
+	connection->sendPacket(packet);
 }
 
 void network::Network::close() {
@@ -98,6 +104,12 @@ void network::Network::tick() {
 	// 		remoteObject->pack(stream);
 	// 	}
 	// }
+
+	for(Connection* client: this->clients) {
+		Packet* packet = new Packet();
+		packet->setType(DROPPABLE_PACKET);
+		client->sendPacket(packet);
+	}
 }
 
 void network::Network::addRemoteObject(RemoteObject* remoteObject) {

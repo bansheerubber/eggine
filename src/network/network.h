@@ -29,5 +29,7 @@ namespace network {
 			int _socket = -1;
 			std::vector<class RemoteObject*> remoteObjects;
 			std::vector<class Connection*> clients;
+
+			unsigned long long frog;
 	};
 };

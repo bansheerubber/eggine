@@ -24,19 +24,20 @@ namespace network {
 		friend class Network;
 		friend class Connection;
 		friend class Client;
+		friend class Packet;
 		
 		public:			
 			Stream(unsigned int flags = READ);
 			
+			void setFlags(unsigned int flags);
 			void allocate(size_t size);
 			void startWriteRemoteObject(class RemoteObject* remoteId);
 			void finishWriteRemoteObject(class RemoteObject* remoteId);
 			void writeMask(unsigned int size, const char* mask);
 			bool queryMask(RemoteObject* object, unsigned int position);
-			void send(class Connection* connection);
-			void send(class Client* client);
 
-			int read(const char* buffer);
+			size_t size();
+			const char* start();
 
 			template<class T>
 			unsigned int writeNumber(T number) {
@@ -114,7 +115,7 @@ namespace network {
 			T readNumber() {
 				char reversed[sizeof(T)];
 				for(int i = sizeof(T) - 1, j = 0; i >= 0; i--, j++) {
-					reversed[j] = this->readBuffer[this->readBufferPointer + i];
+					reversed[j] = this->buffer[this->readBufferPointer + i];
 				}
 
 				this->readBufferPointer += sizeof(T);
@@ -127,7 +128,6 @@ namespace network {
 
 		private:
 			DynamicArray<char> buffer = DynamicArray<char>(4);
-			const char* readBuffer = nullptr;
 			unsigned int readBufferPointer = 0;
 			unsigned int flags;
 			

@@ -9,6 +9,7 @@
 #include <sys/types.h>
 
 #include "connection.h"
+#include "packet.h"
 #include "../basic/remoteObject.h"
 
 // ##1 remote_object__headers
@@ -16,7 +17,7 @@
 using namespace std;
 
 network::Client::Client() {
-
+	this->lastSequenceSent = 100000; // start us off at a high sequence number so i can debug easier
 }
 
 network::Client::~Client() {
@@ -57,22 +58,41 @@ void network::Client::close() {
 }
 
 void network::Client::tick() {
-	this->buffer.allocate(EGGINE_CLIENT_BUFFER_SIZE);
-	int length = ::recv(this->_socket, &this->buffer[0], EGGINE_CLIENT_BUFFER_SIZE, 0);
+	this->receiveStream.allocate(EGGINE_PACKET_SIZE);
+	this->receiveStream.flush();
+	int length = ::recv(this->_socket, &this->receiveStream.buffer[0], EGGINE_PACKET_SIZE, 0);
 	if(length < 0) {
 		if(errno == EWOULDBLOCK) {
 			return;
 		}
 	}
 	else if(length == 0) {
-		
+		return;
 	}
 
-	unsigned int index = 0;
-	while(index < length) {
-		int size = this->stream.read(&(this->buffer[index]));
-		index += size;
+	this->receiveStream.buffer.head = length;
+
+	// randomly drop packets
+	double result = (double)rand() / (double)RAND_MAX;
+	if(result < 0.5) {
+		return;
 	}
+
+	// handle packet
+	this->readPacket();
+
+	// send a packet of our very own
+	Packet* packet = new Packet();
+	packet->setType(DROPPABLE_PACKET);
+	this->sendPacket(packet);
+}
+
+void network::Client::sendPacket(Packet* packet) {
+	this->lastSequenceSent++;
+	packet->setHeader(this->lastSequenceSent, this->lastSequenceReceived, this->ackMask);
+	this->send(packet->stream.size(), packet->stream.start());
+
+	PacketHandler::sendPacket(packet);
 }
 
 void network::Client::send(size_t size, const char* buffer) {
@@ -87,8 +107,13 @@ void network::Client::removeRemoteObject(RemoteObject* remoteObject) {
 	this->remoteObjects.erase(find(this->remoteObjects.begin(), this->remoteObjects.end(), remoteObject));
 }
 
-void network::Client::instantiateRemoteObject(unsigned int remoteClassId) {
+void network::Client::instantiateRemoteObject(unsigned long remoteId, unsigned short remoteClassId) {
+	RemoteObject* object = nullptr;
 	switch(remoteClassId) {
 		// ##1 remote_object_instantiation
+	}
+	
+	if(object != nullptr) {
+		object->remoteId = remoteId;
 	}
 }

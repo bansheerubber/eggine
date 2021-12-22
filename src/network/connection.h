@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 
 #include "../util/dynamicArray.h"
+#include "packetHandler.h"
 #include "stream.h"
 
 #define EGGINE_CONNECTION_BUFFER_SIZE 65536
@@ -21,12 +22,13 @@ namespace network {
 		}
 	};
 	
-	class Connection {
+	class Connection: public PacketHandler {
 		public:
 			Connection(int _socket, sockaddr_in6 address);
 
 			void recv();
-			void send(size_t size, const char* buffer);
+
+			void sendPacket(Packet* packet);
 		
 		protected:			
 			sockaddr_in6 address;
@@ -34,6 +36,6 @@ namespace network {
 			int _socket;
 			ConnectionIPAddress ip;
 
-			DynamicArray<char> buffer = DynamicArray<char>(EGGINE_CONNECTION_BUFFER_SIZE);
+			void send(size_t size, const char* buffer);
 	};
 };

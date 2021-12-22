@@ -16,7 +16,7 @@ void network::RemoteObject::allocateMask() {
 	
 }
 
-void network::RemoteObject::pack(Stream &stream) {
+void network::RemoteObject::pack(Packet* packet) {
 	
 }
 
