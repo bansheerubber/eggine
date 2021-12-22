@@ -57,6 +57,25 @@ def remote_object_get_mask_position(classname, property_name):
 	
 	raise Exception(f"could not find property name '{property_name}' for mask")
 
+def remote_object_class_id(classname):
+	for i in range(0, len(network_class_list)):
+		_, name = network_class_list[i]
+		if name == classname:
+			return i
+	return -1
+
+def remote_object_instantiation(contents):
+	for i in range(0, len(network_class_list)):
+		classname = network_class_list[i][1]
+		contents.append(f"case {i}: {{\n")
+		contents.append(f"new {classname}();\n")
+		contents.append("}\n")
+
+def remote_object_instantiation_headers(contents):
+	for filename, _ in network_class_list:
+		filename = filename.replace("./src/", "")
+		contents.append(f'#include "../{filename}"\n')
+
 def remote_object_definitions(contents, classname):
 	global allocate_mask
 
@@ -64,6 +83,8 @@ def remote_object_definitions(contents, classname):
 		contents.append("protected:\n")
 		contents.append(allocate_mask.replace("%%size%%", str(math.ceil(len(network_property_list[classname]) / 8))))
 		contents.append("public:\n")
+
+	contents.append(get_class_id.replace("%%id%%", str(remote_object_class_id(classname))) + "\n")
 
 	sends_contents = []
 	mask_array = []
@@ -75,7 +96,7 @@ def remote_object_definitions(contents, classname):
 		for property in properties:
 			mask = remote_object_get_mask_position(classname, property["name"])
 			mask_array.append((mask, property["name"]))
-			sends_contents.append(f"\t\t\tif(this->readUpdateMask({mask})) {{\n")
+			sends_contents.append(f"\t\t\tif(stream.queryMask(this, this->readUpdateMask({mask}))) {{\n")
 			sends_contents.append(f"""\t\t\t\tstream.{np_type_to_write[property["np_type"]]}(this->{property["name"]});\n""")
 			sends_contents.append("\t\t\t}\n\n")
 
@@ -146,6 +167,10 @@ def handle_headers(filename, contents):
 			if "game_object_definitions" in command:
 				rest = " ".join(command.split(" ")[1:])
 				game_object_type_enums.append(to_snake_case(rest.split(" ")[0]))
+			elif "remote_object_definitions" in command:
+				rest = " ".join(command.split(" ")[1:])
+				if rest not in network_class_list:
+					network_class_list.append((filename, rest))
 
 def preprocess(filename, contents, depth):
 	global total_lines
@@ -174,11 +199,7 @@ def preprocess(filename, contents, depth):
 			
 			if requested_depth != 0 and filename not in files_with_custom_depth:
 				files_with_custom_depth.add(filename)
-			
-			if "remote_object_definitions" in line:
-				rest = " ".join(command.split(" ")[1:])
-				if rest not in network_class_list:
-					network_class_list.append(rest)
+				print("custom depth", filename)
 			
 			if requested_depth != depth:
 				new_contents.append(line)
@@ -190,6 +211,14 @@ def preprocess(filename, contents, depth):
 			if "remote_object_definitions" in line:
 				rest = " ".join(command.split(" ")[1:])
 				remote_object_definitions(new_contents, rest)
+				continue
+		
+			if "remote_object_instantiation" in line:
+				remote_object_instantiation(new_contents)
+				continue
+			
+			if "remote_object__headers" in line:
+				remote_object_instantiation_headers(new_contents)
 				continue
 
 			if ".py" in command:
@@ -220,6 +249,7 @@ def get_remote_object_code(file, number_of_tabs):
 allocate_mask = get_remote_object_code("allocateMask", 2)
 pack = get_remote_object_code("pack", 2)
 property_to_mask = get_remote_object_code("propertyToMaskPosition", 2)
+get_class_id = get_remote_object_code("getClassId", 2)
 
 def get_env_commands():
 	output = ""

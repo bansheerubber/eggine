@@ -84,3 +84,11 @@ void network::RemoteObject::printUpdateMask() {
 	}
 	printf("\n");
 }
+
+unsigned long network::RemoteObject::getRemoteId() {
+	return this->remoteId;
+}
+
+unsigned short network::RemoteObject::getRemoteClassId() {
+	return -1;
+}

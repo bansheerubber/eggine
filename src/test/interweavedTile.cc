@@ -5,7 +5,7 @@
 #include "../engine/engine.h"
 #include "tileMath.h"
 
-InterweavedTile::InterweavedTile(ChunkContainer* container, bool createReference) : OverlappingTile(container, false) {
+InterweavedTile::InterweavedTile(bool createReference) : OverlappingTile(false) {
 	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
 	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
 	this->vertexBuffers[2] = new render::VertexBuffer(&engine->renderWindow);

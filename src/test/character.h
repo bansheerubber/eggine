@@ -5,14 +5,14 @@
 #include "../engine/engine.h"
 #include "../basic/gameObject.h"
 #include "interweavedTile.h"
-#include "../engine/networkMacros.h"
-#include "../engine/networkStream.h"
+#include "../network/networkMacros.h"
+#include "../network/stream.h"
 #include "../basic/remoteObject.h"
 #include "tileSet.h"
 
 class Character: public InterweavedTile, public network::RemoteObject {
 	public:
-		Character(class ChunkContainer* container, bool createReference = true);
+		Character(bool createReference = true);
 		~Character();
 
 		// ## game_object_definitions Character

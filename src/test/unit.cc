@@ -7,7 +7,7 @@
 #include "../util/minHeap.h"
 #include "team.h"
 
-Unit::Unit(ChunkContainer* chunkContainer, bool createReference) : Character(chunkContainer, false) {
+Unit::Unit(bool createReference) : Character(false) {
 	if(createReference) {
 		this->reference = esInstantiateObject(engine->eggscript, "Unit", this);
 	}

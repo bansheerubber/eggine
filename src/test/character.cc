@@ -2,7 +2,7 @@
 
 #include "chunkContainer.h"
 
-Character::Character(ChunkContainer* chunkContainer, bool createReference) : InterweavedTile(chunkContainer, false) {
+Character::Character(bool createReference) : InterweavedTile(false) {
 	if(createReference) {
 		this->reference = esInstantiateObject(engine->eggscript, "Character", this);
 	}

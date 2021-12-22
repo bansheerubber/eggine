@@ -2,9 +2,7 @@
 
 #include <string>
 
-#include "../engine/networkStream.h"
-
-using namespace std;
+#include "../network/stream.h"
 
 namespace network {
 	class RemoteObject {
@@ -13,19 +11,22 @@ namespace network {
 			~RemoteObject();
 			
 			virtual void pack(Stream &stream);
-			virtual unsigned int propertyToMaskPosition(string property);
+			virtual unsigned int propertyToMaskPosition(std::string property);
 			void writeUpdateMask(unsigned int position);
-			void writeUpdateMask(string position);
+			void writeUpdateMask(std::string position);
 			bool readUpdateMask(unsigned int position);
 			void zeroUpdateMask();
 			void printUpdateMask();
 			bool hasUpdate();
+
+			unsigned long getRemoteId();
+			virtual unsigned short getRemoteClassId();
 		
 		protected:
 			virtual void allocateMask();
 			char* updateMask = nullptr; // variable size mask
 			unsigned int updateMaskSize = 0;
 			bool update = false;
-			unsigned int remoteId = 0;
+			unsigned long remoteId = 0;
 	};
 };

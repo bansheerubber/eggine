@@ -39,7 +39,7 @@ class Unit: public Character {
 	friend class Team;
 	
 	public:
-		Unit(class ChunkContainer* container, bool createReference = true);
+		Unit(bool createReference = true);
 		~Unit();
 
 		// ## game_object_definitions Unit

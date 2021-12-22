@@ -5,10 +5,13 @@
 #include <glm/vec4.hpp>
 
 #include "../util/dynamicArray.h"
+#include "types.h"
 
 namespace network {
-	enum PacketType {
-		REMOTE_OBJECT_UPDATE,
+	enum StreamFlags {
+		READ = 1,
+		WRITE = 2,
+		NO_MASK_CHECKING = 4,
 	};
 
 	template <class, template <class> class>
@@ -19,12 +22,21 @@ namespace network {
 	
 	class Stream {
 		friend class Network;
+		friend class Connection;
+		friend class Client;
 		
 		public:			
-			void startWriteRemoteObject(unsigned int remoteId);
-			void finishWriteRemoteObject(unsigned int remoteId);
+			Stream(unsigned int flags = READ);
+			
+			void allocate(size_t size);
+			void startWriteRemoteObject(class RemoteObject* remoteId);
+			void finishWriteRemoteObject(class RemoteObject* remoteId);
 			void writeMask(unsigned int size, const char* mask);
-			void flush();
+			bool queryMask(RemoteObject* object, unsigned int position);
+			void send(class Connection* connection);
+			void send(class Client* client);
+
+			int read(const char* buffer);
 
 			template<class T>
 			unsigned int writeNumber(T number) {
@@ -102,7 +114,7 @@ namespace network {
 			T readNumber() {
 				char reversed[sizeof(T)];
 				for(int i = sizeof(T) - 1, j = 0; i >= 0; i--, j++) {
-					reversed[j] = this->buffer[this->readBufferPointer + i];
+					reversed[j] = this->readBuffer[this->readBufferPointer + i];
 				}
 
 				this->readBufferPointer += sizeof(T);
@@ -115,8 +127,11 @@ namespace network {
 
 		private:
 			DynamicArray<char> buffer = DynamicArray<char>(4);
-			DynamicArray<char> readBuffer = DynamicArray<char>(4);
+			const char* readBuffer = nullptr;
 			unsigned int readBufferPointer = 0;
+			unsigned int flags;
+			
+			void flush();
 	};
 
 	template<>

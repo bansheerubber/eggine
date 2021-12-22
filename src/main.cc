@@ -20,7 +20,7 @@
 #include "test/tileMath.h"
 #include "test/unit.h"
 
-#include "engine/networkStream.h"
+#include "network/stream.h"
 
 #include "sound/sound.h"
 
@@ -34,6 +34,15 @@ int main(int argc, char* argv[]) {
 	#endif
 	
 	engine->initialize();
+
+	if(argc > 1) {
+		engine->network.open();
+		printf("opened server\n");
+	}
+	else {
+		engine->client.open();
+		printf("opened client\n");
+	}
 
 	// TODO do smarter loading of files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".ss")->exec());

@@ -302,6 +302,15 @@ void Engine::exit() {
 void Engine::tick() {
 	start_tick:
 
+	// handle client
+	if(this->client.isActive()) {
+		this->client.tick();
+	}
+
+	if(this->network.isActive()) {
+		this->network.recv();
+	}
+
 	this->soundEngine.tick(); // handle sounds
 
 	long long startTime = getMicrosecondsNow();
@@ -434,7 +443,9 @@ void Engine::tick() {
 
 	this->renderWindow.render();
 
-	this->network.tick();
+	if(this->network.isActive()) {
+		this->network.tick();
+	}
 
 	goto start_tick;
 }
