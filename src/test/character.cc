@@ -21,6 +21,12 @@ OverlappingTile* Character::setPosition(glm::uvec3 position) {
 	return InterweavedTile::setPosition(position);
 }
 
+void Character::setAppearance(unsigned int texture) {
+	this->appearance = texture;
+	this->setTexture(texture);
+	this->writeUpdateMask("appearance");
+}
+
 void es::defineCharacter() {
 	esRegisterNamespace(engine->eggscript, "Character");
 	esNamespaceInherit(engine->eggscript, "OverlappingTile", "Character");

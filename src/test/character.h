@@ -22,10 +22,15 @@ class Character: public InterweavedTile, public network::RemoteObject {
 		virtual OverlappingTile* setPosition(glm::uvec3 position);
 		bool move(glm::uvec3 position);
 		bool moveTest(glm::uvec3 position);
+
+		void setAppearance(unsigned int texture);
 	
 	protected:
 		NP_PROPERTY(NP_VECTOR, Character::setPosition);
 		glm::uvec3 position;
+
+		NP_PROPERTY(NP_NUMBER, Character::setAppearance);
+		unsigned int appearance = 4;
 };
 
 namespace es { // order = 3

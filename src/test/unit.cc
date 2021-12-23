@@ -231,6 +231,8 @@ esEntryPtr es::Unit__setHealth(esEnginePtr esEngine, unsigned int argc, esEntryP
 		unit->health = (int)args[1].numberData;
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 
+		unit->writeUpdateMask("health");
+
 		if(unit->health <= 0) {
 			unit->kill();
 		}
@@ -244,6 +246,8 @@ esEntryPtr es::Unit__setMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 		unit->maxHealth = (int)args[1].numberData;
 		unit->health = max(unit->maxHealth, unit->health);
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
+
+		unit->writeUpdateMask("maxHealth");
 	}
 	return nullptr;
 }

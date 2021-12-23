@@ -68,10 +68,10 @@ class Unit: public Character {
 		NP_PROPERTY(NP_NUMBER)
 		unsigned int sprintMoves = 15;
 
-		NP_PROPERTY(NP_NUMBER)
+		NP_PROPERTY(NP_NUMBER, Unit::setMaxHealth)
 		int maxHealth = 1;
 
-		NP_PROPERTY(NP_NUMBER)
+		NP_PROPERTY(NP_NUMBER, Unit::setHealth)
 		int health = 1;
 		Healthbar healthbar;
 
