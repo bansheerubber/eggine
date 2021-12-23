@@ -12,8 +12,10 @@
 
 namespace network {
 	struct ConnectionIPAddress {
-		unsigned char address[16];
+		sa_family_t _;
 		unsigned short port;
+		uint32_t __;
+		unsigned char address[16];
 
 		ConnectionIPAddress() {}
 		ConnectionIPAddress(sockaddr_in6 address) {
@@ -51,7 +53,8 @@ namespace network {
 		public:
 			Connection(int _socket, sockaddr_in6 address);
 
-			void recv();
+			void receiveTCP();
+			void receiveUDP(Stream &stream);
 
 			void sendPacket(Packet* packet);
 		

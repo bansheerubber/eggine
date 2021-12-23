@@ -28,10 +28,10 @@ void network::Connection::send(size_t size, const char* buffer) {
 	::send(this->_socket, buffer, size, 0);
 }
 
-void network::Connection::recv() {
-	this->receiveStream.allocate(EGGINE_PACKET_SIZE);
-	this->receiveStream.flush();
-	int length = ::recv(this->_socket, &this->receiveStream.buffer[0], EGGINE_PACKET_SIZE, 0);
+void network::Connection::receiveTCP() {
+	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
+	this->receiveStream->flush();
+	int length = ::recv(this->_socket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
 	if(length < 0) {
 		if(errno == EWOULDBLOCK) {
 			return;
@@ -41,8 +41,14 @@ void network::Connection::recv() {
 		return;
 	}
 
-	this->receiveStream.buffer.head = length;
+	this->receiveStream->buffer.head = length;
 
 	// handle packet
 	this->readPacket();
+}
+
+void network::Connection::receiveUDP(Stream &stream) {
+	Stream* oldStream = this->receiveStream; // TODO fix this potential nightmare
+	this->readPacket();
+	this->receiveStream = oldStream;
 }

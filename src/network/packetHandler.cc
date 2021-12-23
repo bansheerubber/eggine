@@ -97,12 +97,12 @@ void network::PacketHandler::deleteNodeAndPacketFromList(unsigned int sequence) 
 }
 
 void network::PacketHandler::readPacket() {
-	PacketType type = (PacketType)this->receiveStream.readNumber<char>();
-	unsigned int receivedSequence = this->receiveStream.readNumber<unsigned int>();
-	unsigned int receivedHighestSequenceAck = this->receiveStream.readNumber<unsigned int>();
+	PacketType type = (PacketType)this->receiveStream->readNumber<char>();
+	unsigned int receivedSequence = this->receiveStream->readNumber<unsigned int>();
+	unsigned int receivedHighestSequenceAck = this->receiveStream->readNumber<unsigned int>();
 	
 	// ack mask is a mask of the messages the client has successfully received, starting at highestSequenceAck and then heading downwards
-	unsigned long receivedAckMask = this->receiveStream.readNumber<unsigned long>();
+	unsigned long receivedAckMask = this->receiveStream->readNumber<unsigned long>();
 
 	if(type == INVALID_PACKET || type >= MAX_PACKET) {
 		return;

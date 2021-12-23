@@ -33,5 +33,7 @@ namespace network {
 
 			void instantiateRemoteObject(unsigned long remoteId, unsigned short remoteClassId);
 			void send(size_t size, const char* buffer);
+			void receiveTCP();
+			void receiveUDP();
 	};
 };

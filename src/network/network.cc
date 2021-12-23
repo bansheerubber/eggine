@@ -117,34 +117,39 @@ void network::Network::close() {
 }
 
 void network::Network::recv() {
-	sockaddr_in6 addresses[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
-	mmsghdr headers[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
 	for(unsigned int i = 0; i < EGGINE_NETWORK_UDP_MESSAGE_AMOUNT; i++) {
-		this->udpStreams[i].allocate(EGGINE_PACKET_SIZE);
-		this->scatterGather[i].iov_base = (char*)this->udpStreams[i].start();
-		this->scatterGather[i].iov_len = EGGINE_PACKET_SIZE;
-		headers[i].msg_hdr.msg_iov = &this->scatterGather[i];
-		headers[i].msg_hdr.msg_iovlen = 1;
-		headers[i].msg_hdr.msg_control = &this->controls[i];
-		headers[i].msg_hdr.msg_controllen = 0;
-		headers[i].msg_hdr.msg_flags = 0;
-		headers[i].msg_hdr.msg_name = &addresses[i];
-		headers[i].msg_hdr.msg_namelen = sizeof(sockaddr_in6);
+		this->udp.streams[i].allocate(EGGINE_PACKET_SIZE);
+		this->udp.scatterGather[i].iov_base = (char*)this->udp.streams[i].start();
+		this->udp.scatterGather[i].iov_len = EGGINE_PACKET_SIZE;
+		this->udp.headers[i].msg_hdr.msg_iov = &this->udp.scatterGather[i];
+		this->udp.headers[i].msg_hdr.msg_iovlen = 1;
+		this->udp.headers[i].msg_hdr.msg_control = &this->udp.controls[i];
+		this->udp.headers[i].msg_hdr.msg_controllen = sizeof(cmsghdr);
+		this->udp.headers[i].msg_hdr.msg_flags = 0;
+		this->udp.headers[i].msg_hdr.msg_name = &this->udp.addresses[i];
+		this->udp.headers[i].msg_hdr.msg_namelen = sizeof(sockaddr_in6);
 	}
 
-	int messages = ::recvmmsg(this->udpSocket, headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
+	int messages = ::recvmmsg(this->udpSocket, this->udp.headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
 	if(messages > 0) {
 		printf("got a message!\n");
 		for(unsigned int i = 0; i < messages; i++) {
-			printf("and its %d bytes long!!\n", headers[i].msg_len);
-			printf("%.16s\n", headers[i].msg_hdr.msg_iov->iov_base);
+			// prepare the buffers
+			this->udp.streams[i].flush();
+			this->udp.streams[i].buffer.head = this->udp.headers[i].msg_len;
+			
+			printf("and its %d bytes long!!\n", this->udp.headers[i].msg_len);
+			printf("%.16s\n", this->udp.headers[i].msg_hdr.msg_iov->iov_base);
 
-			printf("%s\n", ipv6ToString((sockaddr_in6*)headers[i].msg_hdr.msg_name).c_str());
+			printf("%s\n", ipv6ToString((sockaddr_in6*)this->udp.headers[i].msg_hdr.msg_name).c_str());
+
+			const char response[17] = "frog to meet you";
+			::sendto(this->udpSocket, response, 16, 0, (sockaddr*)&this->udp.addresses[i], sizeof(sockaddr_in6));
 		}
 	}
 	
 	for(Connection* client: this->clients) {
-		client->recv();
+		client->receiveTCP();
 	}
 }
 

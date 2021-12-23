@@ -23,7 +23,7 @@ namespace network {
 			virtual void resendPacket(unsigned int sequence);
 
 		protected:
-			Stream receiveStream;
+			Stream* receiveStream = new Stream();
 
 			unsigned int lastSequenceReceived = 0;
 			unsigned long lastHighestAckReceived;

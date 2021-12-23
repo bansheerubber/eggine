@@ -1,5 +1,6 @@
 #pragma once
 
+#include <netinet/in.h>
 #include <sys/socket.h>
 #include <vector>
 
@@ -33,9 +34,14 @@ namespace network {
 			int udpSocket = -1;
 			std::vector<class RemoteObject*> remoteObjects;
 			std::vector<class Connection*> clients;
-			Stream udpStreams[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
-			iovec scatterGather[32];
-			cmsghdr controls[32];
+
+			struct {
+				Stream streams[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
+				iovec scatterGather[32];
+				cmsghdr controls[32];
+				sockaddr_in6 addresses[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
+				mmsghdr headers[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
+			} udp;
 
 			unsigned long long frog;
 	};

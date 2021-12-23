@@ -75,9 +75,14 @@ void network::Client::close() {
 }
 
 void network::Client::tick() {
-	this->receiveStream.allocate(EGGINE_PACKET_SIZE);
-	this->receiveStream.flush();
-	int length = ::recv(this->tcpSocket, &this->receiveStream.buffer[0], EGGINE_PACKET_SIZE, 0);
+	this->receiveTCP();
+	this->receiveUDP();
+}
+
+void network::Client::receiveTCP() {
+	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
+	this->receiveStream->flush();
+	int length = ::recv(this->tcpSocket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
 	if(length < 0) {
 		if(errno == EWOULDBLOCK) {
 			return;
@@ -87,7 +92,7 @@ void network::Client::tick() {
 		return;
 	}
 
-	this->receiveStream.buffer.head = length;
+	this->receiveStream->buffer.head = length;
 
 	// randomly drop packets
 	double result = (double)rand() / (double)RAND_MAX;
@@ -102,6 +107,30 @@ void network::Client::tick() {
 	Packet* packet = new Packet();
 	packet->setType(DROPPABLE_PACKET);
 	this->sendPacket(packet);
+}
+
+void network::Client::receiveUDP() {
+	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
+	this->receiveStream->flush();
+	int length = ::recv(this->udpSocket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
+	if(length < 0) {
+		if(errno == EWOULDBLOCK) {
+			return;
+		}
+	}
+	else if(length == 0) {
+		return;
+	}
+
+	this->receiveStream->buffer.head = length;
+
+	for(unsigned int i = 0; i < length; i++) {
+		printf("%c", this->receiveStream->buffer[i]);
+	}
+	printf("\n");
+
+	// handle packet
+	// this->readPacket();
 }
 
 void network::Client::sendPacket(Packet* packet) {
