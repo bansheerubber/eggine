@@ -6,6 +6,7 @@
 #include "../basic/gameObject.h"
 #include "interweavedTile.h"
 #include "../network/networkMacros.h"
+#include "../network/types.h"
 #include "../network/stream.h"
 #include "../basic/remoteObject.h"
 #include "tileSet.h"
@@ -23,7 +24,7 @@ class Character: public InterweavedTile, public network::RemoteObject {
 		bool moveTest(glm::uvec3 position);
 	
 	protected:
-		NP_PROPERTY(NP_VECTOR)
+		NP_PROPERTY(NP_VECTOR, Character::setPosition);
 		glm::uvec3 position;
 };
 

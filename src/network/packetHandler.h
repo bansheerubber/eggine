@@ -36,5 +36,6 @@ namespace network {
 			unsigned int packetListSize();
 			void deleteNodeFromList(unsigned int sequence);
 			void deleteNodeAndPacketFromList(unsigned int sequence);
+			virtual void handlePacket() = 0;
 	};
 };

@@ -95,8 +95,6 @@ void network::Network::accept() {
 		Connection* client = new Connection(clientSocket, clientAddress);
 		this->clients.push_back(client);
 		this->secretToConnection[client->secret] = client;
-		thread t(&Network::sendInitialData, this, client);
-		t.detach();
 
 		this_thread::sleep_for(chrono::milliseconds(16));
 	}
@@ -155,6 +153,9 @@ void network::Network::recv() {
 
 				this->udpAddressToConnection[this->udp.addresses[i]] = this->secretToConnection[secret];
 				this->secretToConnection[secret]->initializeUDP(this->udp.addresses[i]);
+
+				thread t(&Network::sendInitialData, this, this->secretToConnection[secret]);
+				t.detach();
 			}
 
 			// the minimum header length for a packet is always greater than 8. if we got a length of 8, its probably a redundant secret
@@ -172,29 +173,44 @@ void network::Network::recv() {
 }
 
 void network::Network::tick() {
-	if(getMicrosecondsNow() - this->frog > 300000) {
-		for(Connection* client: this->clients) {
-			if(!client->isInitialized()) {
-				return;
-			}
+	// if(getMicrosecondsNow() - this->frog > 300000) {
+	// 	for(Connection* client: this->clients) {
+	// 		if(!client->isInitialized()) {
+	// 			return;
+	// 		}
 
-			Packet* packet = new Packet();
-			packet->setType(DROPPABLE_PACKET);
-			client->sendPacket(packet);
-		}
+	// 		Packet* packet = new Packet();
+	// 		packet->setType(DROPPABLE_PACKET);
+	// 		client->sendPacket(packet);
+	// 	}
 
-		this->frog = getMicrosecondsNow();
-	}
+	// 	this->frog = getMicrosecondsNow();
+	// }
 }
 
 void network::Network::addRemoteObject(RemoteObject* remoteObject) {
+	remoteObject->remoteId = ++this->highestRemoteId;
 	this->remoteObjects.push_back(remoteObject);
+	this->idToRemoteObject[remoteObject->remoteId] = remoteObject;
 }
 
 void network::Network::removeRemoteObject(RemoteObject* remoteObject) {
 	this->remoteObjects.erase(find(this->remoteObjects.begin(), this->remoteObjects.end(), remoteObject));
+	this->idToRemoteObject[remoteObject->remoteId] = nullptr;
+}
+
+network::RemoteObject* network::Network::getRemoteObject(remote_object_id id) {
+	return this->idToRemoteObject[id];
 }
 
 int network::Network::getUDPSocket() {
 	return this->udpSocket;
+}
+
+bool network::Network::isServer() {
+	return this->tcpSocket != -1;
+}
+
+bool network::Network::isClient() {
+	return this->tcpSocket == -1;
 }

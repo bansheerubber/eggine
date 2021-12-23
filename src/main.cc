@@ -67,16 +67,6 @@ int main(int argc, char* argv[]) {
 		unit->setTexture(5);
 		unit->setPosition(positions[i]);
 		container.getPlayerTeam()->add(unit);
-
-		if(i == 0) {
-			network::Stream stream;
-
-			unit->writeUpdateMask(0);
-			unit->writeUpdateMask(1);
-			unit->writeUpdateMask(2);
-			unit->writeUpdateMask(3);
-			unit->writeUpdateMask(4);
-		}
 	}
 
 	// enemies

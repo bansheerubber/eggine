@@ -150,12 +150,14 @@ void network::PacketHandler::readPacket() {
 	this->lastHighestAckReceived = receivedHighestSequenceAck;
 	this->lastSequenceReceived = receivedSequence;
 	printf("-----------------------------------------------\n");
-	printf("packet recieved: %u\n", this->lastSequenceReceived);
+	printf("packet recieved: %u %ld\n", this->lastSequenceReceived, this->receiveStream->size());
 	printf("our ack mask: ");
 	for(unsigned long i = 0; i < 64; i++) {
 		printf("%d", (this->ackMask & ((unsigned long)1 << i)) > 0);
 	}
 	printf("\n");
+
+	this->handlePacket();
 }
 
 unsigned int network::PacketHandler::packetListSize() {

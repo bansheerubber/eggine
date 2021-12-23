@@ -70,5 +70,6 @@ namespace network {
 			void sendUDP(size_t size, const char* buffer);
 			void requestSecret();
 			void initializeUDP(sockaddr_in6 address);
+			void handlePacket();
 	};
 };

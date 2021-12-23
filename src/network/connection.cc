@@ -81,3 +81,7 @@ void network::Connection::receiveUDP(Stream &stream) {
 	this->readPacket();
 	this->receiveStream = oldStream;
 }
+
+void network::Connection::handlePacket() {
+	
+}

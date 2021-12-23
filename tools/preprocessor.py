@@ -49,6 +49,11 @@ np_type_to_write = {
 	"NP_VECTOR": "writeVector",
 }
 
+np_type_to_read = {
+	"NP_NUMBER": "readNumber",
+	"NP_VECTOR": "readVector",
+}
+
 def remote_object_get_mask_position(classname, property_name):
 	for i in range(0, len(network_property_list[classname])):
 		property = network_property_list[classname][i]
@@ -68,7 +73,7 @@ def remote_object_instantiation(contents):
 	for i in range(0, len(network_class_list)):
 		classname = network_class_list[i][1]
 		contents.append(f"case {i}: {{\n")
-		contents.append(f"new {classname}();\n")
+		contents.append(f"object = new {classname}();\n")
 		contents.append("}\n")
 
 def remote_object_instantiation_headers(contents):
@@ -87,6 +92,7 @@ def remote_object_definitions(contents, classname):
 	contents.append(get_class_id.replace("%%id%%", str(remote_object_class_id(classname))) + "\n")
 
 	sends_contents = []
+	unpack_contents = []
 	mask_array = []
 	mask_length = 0
 
@@ -100,7 +106,15 @@ def remote_object_definitions(contents, classname):
 			sends_contents.append(f"""\t\t\t\tpacket->stream.{np_type_to_write[property["np_type"]]}(this->{property["name"]});\n""")
 			sends_contents.append("\t\t\t}\n\n")
 
+			unpack_contents.append(f"\t\t\tif(mask.read({mask})) {{\n")
+			if property["np_setter"] == None:
+				unpack_contents.append(f"""\t\t\t\tthis->{property["name"]} = stream.{np_type_to_read[property["np_type"]]}<{property["type"]}>();\n""")
+			else:
+				unpack_contents.append(f"""\t\t\t\tthis->{property["np_setter"]}(stream.{np_type_to_read[property["np_type"]]}<{property["type"]}>());\n""")
+			unpack_contents.append("\t\t\t}\n\n")
+
 	contents.append(pack.replace("%%sends%%", "".join(sends_contents)))
+	contents.append(unpack.replace("%%unpacks%%", "".join(unpack_contents)))
 
 	mask_array = sorted(mask_array)
 	mask_array = "".join([f'"{i[1]}", ' for i in mask_array])
@@ -110,7 +124,8 @@ def remote_object_definitions(contents, classname):
 
 class_regex = re.compile(r"class ([a-zA-Z]+).+?{")
 inheritance_regex = re.compile(r"public (?:(?:[a-zA-Z]+::([a-zA-Z]+))|([a-zA-Z]+))")
-np_property_regex = re.compile(r"NP_PROPERTY\(([a-zA-Z_]+)\)")
+np_property_regex = re.compile(r"NP_PROPERTY\((.+)\)")
+np_setter_regex = re.compile(r".+::(.+)")
 def handle_network(filename, contents):
 	current_class = None
 	read_property = False
@@ -130,6 +145,7 @@ def handle_network(filename, contents):
 				"filename": filename,
 				"type": " ".join(split[:-1]),
 				"np_type": np_type,
+				"np_setter": np_setter,
 				"name": split[-1].replace(";", ""),
 				"inherited": False,
 			})
@@ -137,7 +153,12 @@ def handle_network(filename, contents):
 			read_property = False
 		elif "NP_PROPERTY(" in line:
 			read_property = True
-			np_type = np_property_regex.search(line).group(1)
+			arguments = [i.strip() for i in np_property_regex.search(line).group(1).split(",")]
+			np_type = arguments[0]
+			if len(arguments) > 1 and (match := np_setter_regex.match(arguments[1])):
+				np_setter = match.group(1)
+			else:
+				np_setter = None
 
 # headers are always scanned, because they have information that is needed in the preprocessing of other files
 def handle_headers(filename, contents):
@@ -199,7 +220,6 @@ def preprocess(filename, contents, depth):
 			
 			if requested_depth != 0 and filename not in files_with_custom_depth:
 				files_with_custom_depth.add(filename)
-				print("custom depth", filename)
 			
 			if requested_depth != depth:
 				new_contents.append(line)
@@ -248,6 +268,7 @@ def get_remote_object_code(file, number_of_tabs):
 
 allocate_mask = get_remote_object_code("allocateMask", 2)
 pack = get_remote_object_code("pack", 2)
+unpack = get_remote_object_code("unpack", 2)
 property_to_mask = get_remote_object_code("propertyToMaskPosition", 2)
 get_class_id = get_remote_object_code("getClassId", 2)
 
@@ -323,24 +344,25 @@ if __name__ == "__main__":
 
 	# handle network class stuff
 	def recurse_network_properties(original_class, classname):
-		if classname not in class_inheritance_list:
+		if classname[1] not in class_inheritance_list:
 			return
 
-		for inherited_class in class_inheritance_list[classname]:
+		for inherited_class in class_inheritance_list[classname[1]]:
 			if inherited_class in network_property_list:
 				properties = network_property_list[inherited_class]
 				for property in properties:
 					if property["inherited"] == False:
-						if original_class not in network_property_list:
-							network_property_list[original_class] = []
+						if original_class[1] not in network_property_list:
+							network_property_list[original_class[1]] = []
 						
-						network_property_list[original_class].append({
+						network_property_list[original_class[1]].append({
 							"filename": property["filename"],
 							"type": property["type"],
 							"np_type": property["np_type"],
+							"np_setter": property["np_setter"],
 							"name": property["name"],
 							"inherited": True,
-						})			
+						})
 			recurse_network_properties(original_class, inherited_class)
 
 	for network_class in network_class_list:

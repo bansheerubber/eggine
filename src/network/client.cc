@@ -9,6 +9,7 @@
 #include <sys/types.h>
 
 #include "connection.h"
+#include "../engine/engine.h"
 #include "packet.h"
 #include "../basic/remoteObject.h"
 
@@ -137,10 +138,10 @@ void network::Client::receiveUDP() {
 	this->receiveStream->buffer.head = length;
 
 	// randomly drop packets
-	double result = (double)rand() / (double)RAND_MAX;
-	if(result < 0.5) {
-		return;
-	}
+	// double result = (double)rand() / (double)RAND_MAX;
+	// if(result < 0.5) {
+	// 	return;
+	// }
 
 	// handle packet
 	this->readPacket();
@@ -149,6 +150,49 @@ void network::Client::receiveUDP() {
 	Packet* packet = new Packet();
 	packet->setType(DROPPABLE_PACKET);
 	this->sendPacket(packet);
+}
+
+void network::Client::handlePacket() {
+	try {
+		while(this->receiveStream->canRead(2)) { // read the size of the next chunk
+			unsigned short size = this->receiveStream->readNumber<unsigned short>();
+			StreamType type = (StreamType)this->receiveStream->readNumber<char>();
+			switch(type) {
+				case REMOTE_OBJECT_CREATE: {
+					remote_class_id remoteClassId = this->receiveStream->readNumber<remote_class_id>();
+					remote_object_id remoteObjectId = this->receiveStream->readNumber<remote_object_id>();
+
+					RemoteObject* object = this->instantiateRemoteObject(remoteObjectId, remoteClassId);
+					if(object != nullptr) {
+						object->unpack(*this->receiveStream);
+					}
+					else {
+						throw 0;
+					}
+
+					break;
+				}
+				
+				case REMOTE_OBJECT_UPDATE: {
+					remote_class_id remoteClassId = this->receiveStream->readNumber<remote_class_id>();
+					remote_object_id remoteObjectId = this->receiveStream->readNumber<remote_object_id>();
+
+					RemoteObject* object = engine->network.getRemoteObject(remoteObjectId);
+					if(object != nullptr) {
+						object->unpack(*this->receiveStream);
+					}
+					else {
+						throw 0;
+					}
+
+					break;
+				}
+			}
+		}
+	}
+	catch(...) {
+		printf("epic fail\n");
+	}
 }
 
 void network::Client::sendPacket(Packet* packet) {
@@ -171,8 +215,13 @@ void network::Client::removeRemoteObject(RemoteObject* remoteObject) {
 	this->remoteObjects.erase(find(this->remoteObjects.begin(), this->remoteObjects.end(), remoteObject));
 }
 
-void network::Client::instantiateRemoteObject(unsigned long remoteId, unsigned short remoteClassId) {
+network::RemoteObject* network::Client::instantiateRemoteObject(remote_object_id remoteId, remote_class_id remoteClassId) {
 	RemoteObject* object = nullptr;
+
+	if(engine->network.getRemoteObject(remoteId)) {
+		return engine->network.getRemoteObject(remoteId);
+	}
+
 	switch(remoteClassId) {
 		// ##1 remote_object_instantiation
 	}
@@ -180,4 +229,6 @@ void network::Client::instantiateRemoteObject(unsigned long remoteId, unsigned s
 	if(object != nullptr) {
 		object->remoteId = remoteId;
 	}
+
+	return object;
 }

@@ -33,7 +33,11 @@ namespace network {
 			void allocate(size_t size);
 			void startWriteRemoteObject(class RemoteObject* remoteId);
 			void finishWriteRemoteObject(class RemoteObject* remoteId);
-			void writeMask(unsigned int size, const char* mask);
+			void finishReadRemoteObject(class RemoteObject* remoteId);
+			void writeUpdateMask(unsigned int size, const unsigned char* mask);
+			void startChunk();
+			void commitChunk();
+			const UpdateMask readUpdateMask();
 			bool queryMask(RemoteObject* object, unsigned int position);
 
 			bool canRead(unsigned int size) {
@@ -117,6 +121,10 @@ namespace network {
 
 			template<class T>
 			T readNumber() {
+				if(!this->canRead(sizeof(T))) {
+					throw 0;
+				}
+				
 				char reversed[sizeof(T)];
 				for(int i = sizeof(T) - 1, j = 0; i >= 0; i--, j++) {
 					reversed[j] = this->buffer[this->readBufferPointer + i];
@@ -134,52 +142,80 @@ namespace network {
 			DynamicArray<char> buffer = DynamicArray<char>(4);
 			unsigned int readBufferPointer = 0;
 			unsigned int flags;
+			size_t chunkHead = 0;
 			
 			void flush();
 	};
 
 	template<>
 	inline glm::vec2 Stream::readVector<glm::vec2>() {
-		return glm::vec2(this->readNumber<float>(), this->readNumber<float>());
+		float x = this->readNumber<float>();
+		float y = this->readNumber<float>();
+		return glm::vec2(x, y);
 	}
 
 	template<>
 	inline glm::vec3 Stream::readVector<glm::vec3>() {
-		return glm::vec3(this->readNumber<float>(), this->readNumber<float>(), this->readNumber<float>());
+		float x = this->readNumber<float>();
+		float y = this->readNumber<float>();
+		float z = this->readNumber<float>();
+		return glm::vec3(x, y, z);
 	}
 
 	template<>
 	inline glm::vec4 Stream::readVector<glm::vec4>() {
-		return glm::vec4(this->readNumber<float>(), this->readNumber<float>(), this->readNumber<float>(), this->readNumber<float>());
+		float x = this->readNumber<float>();
+		float y = this->readNumber<float>();
+		float z = this->readNumber<float>();
+		float w = this->readNumber<float>();
+		return glm::vec4(x, y, z, w);
 	}
 
 	template<>
 	inline glm::ivec2 Stream::readVector<glm::ivec2>() {
-		return glm::ivec2(this->readNumber<int>(), this->readNumber<int>());
+		int x = this->readNumber<int>();
+		int y = this->readNumber<int>();
+		return glm::ivec2(x, y);
 	}
 
 	template<>
 	inline glm::ivec3 Stream::readVector<glm::ivec3>() {
-		return glm::ivec3(this->readNumber<int>(), this->readNumber<int>(), this->readNumber<int>());
+		int x = this->readNumber<int>();
+		int y = this->readNumber<int>();
+		int z = this->readNumber<int>();
+		return glm::ivec3(x, y, z);
 	}
 
 	template<>
 	inline glm::ivec4 Stream::readVector<glm::ivec4>() {
-		return glm::ivec4(this->readNumber<int>(), this->readNumber<int>(), this->readNumber<int>(), this->readNumber<int>());
+		int x = this->readNumber<int>();
+		int y = this->readNumber<int>();
+		int z = this->readNumber<int>();
+		int w = this->readNumber<int>();
+		return glm::ivec4(x, y, z, w);
 	}
 
 	template<>
 	inline glm::uvec2 Stream::readVector<glm::uvec2>() {
-		return glm::uvec2(this->readNumber<unsigned int>(), this->readNumber<unsigned int>());
+		unsigned int x = this->readNumber<unsigned int>();
+		unsigned int y = this->readNumber<unsigned int>();
+		return glm::uvec2(x, y);
 	}
 
 	template<>
 	inline glm::uvec3 Stream::readVector<glm::uvec3>() {
-		return glm::uvec3(this->readNumber<unsigned int>(), this->readNumber<unsigned int>(), this->readNumber<unsigned int>());
+		unsigned int x = this->readNumber<unsigned int>();
+		unsigned int y = this->readNumber<unsigned int>();
+		unsigned int z = this->readNumber<unsigned int>();
+		return glm::uvec3(x, y, z);
 	}
 
 	template<>
 	inline glm::uvec4 Stream::readVector<glm::uvec4>() {
-		return glm::uvec4(this->readNumber<unsigned int>(), this->readNumber<unsigned int>(), this->readNumber<unsigned int>(), this->readNumber<unsigned int>());
+		unsigned int x = this->readNumber<unsigned int>();
+		unsigned int y = this->readNumber<unsigned int>();
+		unsigned int z = this->readNumber<unsigned int>();
+		unsigned int w = this->readNumber<unsigned int>();
+		return glm::uvec4(x, y, z, w);
 	}
 };

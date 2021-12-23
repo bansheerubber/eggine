@@ -70,13 +70,19 @@ namespace network {
 			
 			void addRemoteObject(class RemoteObject* remoteObject);
 			void removeRemoteObject(class RemoteObject* remoteObject);
+			class RemoteObject* getRemoteObject(remote_object_id id);
 
 			int getUDPSocket();
+
+			bool isServer();
+			bool isClient();
 		
 		private:
+			unsigned long highestRemoteId = 0;
 			int tcpSocket = -1;
 			int udpSocket = -1;
 			std::vector<class RemoteObject*> remoteObjects;
+			tsl::robin_map<remote_object_id, class RemoteObject*> idToRemoteObject;
 			std::vector<class Connection*> clients;
 
 			tsl::robin_map<sockaddr_in6, class Connection*> udpAddressToConnection;

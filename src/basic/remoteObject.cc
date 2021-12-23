@@ -20,6 +20,10 @@ void network::RemoteObject::pack(Packet* packet) {
 	
 }
 
+void network::RemoteObject::unpack(Stream &stream) {
+	
+}
+
 bool network::RemoteObject::hasUpdate() {
 	return this->update;
 }
@@ -79,16 +83,16 @@ void network::RemoteObject::printUpdateMask() {
 		this->allocateMask();
 	}
 	
-	for(unsigned int i = 0; i < this->updateMaskSize * sizeof(char) * 8; i++) {
+	for(unsigned char i = 0; i < this->updateMaskSize * sizeof(char) * 8; i++) {
 		printf("%d", this->readUpdateMask(i));
 	}
 	printf("\n");
 }
 
-unsigned long network::RemoteObject::getRemoteId() {
+network::remote_object_id network::RemoteObject::getRemoteId() {
 	return this->remoteId;
 }
 
-unsigned short network::RemoteObject::getRemoteClassId() {
+network::remote_class_id network::RemoteObject::getRemoteClassId() {
 	return -1;
 }
