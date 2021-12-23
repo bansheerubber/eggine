@@ -12,9 +12,6 @@
 
 namespace network {
 	struct ConnectionIPAddress {
-		sa_family_t _;
-		unsigned short port;
-		uint32_t __;
 		unsigned char address[16];
 
 		ConnectionIPAddress() {}
@@ -22,12 +19,11 @@ namespace network {
 			for(unsigned int i = 0; i < 16; i++) {
 				this->address[i] = address.sin6_addr.s6_addr[i];
 			}
-			this->port = address.sin6_port;
 		}
 
 		std::string toString() {
 			return fmt::format(
-				"{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{}",
+				"{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}",
 				this->address[0],
 				this->address[1],
 				this->address[2],
@@ -43,13 +39,14 @@ namespace network {
 				this->address[12],
 				this->address[13],
 				this->address[14],
-				this->address[15],
-				this->port
+				this->address[15]
 			);
 		}
 	};
 	
 	class Connection: public PacketHandler {
+		friend class Network;
+		
 		public:
 			Connection(int _socket, sockaddr_in6 address);
 
@@ -57,13 +54,21 @@ namespace network {
 			void receiveUDP(Stream &stream);
 
 			void sendPacket(Packet* packet);
+
+			bool isInitialized();
 		
 		protected:			
-			sockaddr_in6 address;
+			sockaddr_in6 tcpAddress;
+			sockaddr_in6 udpAddress;
 
+			bool initialized = false;
+			unsigned long secret = 2974321; // secret negociated with TCP, used to identify UDP ip/port
 			int _socket;
 			ConnectionIPAddress ip;
 
-			void send(size_t size, const char* buffer);
+			void sendTCP(size_t size, const char* buffer);
+			void sendUDP(size_t size, const char* buffer);
+			void requestSecret();
+			void initializeUDP(sockaddr_in6 address);
 	};
 };

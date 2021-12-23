@@ -36,6 +36,10 @@ namespace network {
 			void writeMask(unsigned int size, const char* mask);
 			bool queryMask(RemoteObject* object, unsigned int position);
 
+			bool canRead(unsigned int size) {
+				return this->readBufferPointer + size <= this->buffer.head;
+			}
+
 			size_t size();
 			const char* start();
 

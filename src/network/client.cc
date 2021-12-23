@@ -39,12 +39,12 @@ void network::Client::open() {
 	{
 		this->tcpSocket = socket(AF_INET6, SOCK_STREAM, 0);
 		if(this->tcpSocket < 0) {
-			printf("could not open socket\n");
+			printf("could not instantiate tcp socket\n");
 			return;
 		}
 
 		if(connect(this->tcpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
-			printf("could not connect socket\n");
+			printf("could not connect tcp socket\n");
 			this->tcpSocket = -1;
 			return;
 		}
@@ -56,12 +56,12 @@ void network::Client::open() {
 	{
 		this->udpSocket = socket(AF_INET6, SOCK_DGRAM, 0);
 		if(this->udpSocket < 0) {
-			printf("could not open socket\n");
+			printf("could not instantiate udp socket\n");
 			return;
 		}
 
 		if(connect(this->udpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
-			printf("could not connect socket\n");
+			printf("could not udp socket\n");
 			this->udpSocket = -1;
 			return;
 		}
@@ -94,19 +94,31 @@ void network::Client::receiveTCP() {
 
 	this->receiveStream->buffer.head = length;
 
-	// randomly drop packets
-	double result = (double)rand() / (double)RAND_MAX;
-	if(result < 0.5) {
-		return;
+	// if our connection isn't initialized, we should receive a secret as our first message
+	if(!this->initialized) {
+		if(this->secret == 0) {
+			this->secret = this->receiveStream->readNumber<unsigned long>();
+		}
+
+		printf("got secret %ld\n", this->secret);
+
+		// simple protocol for negotiating UDP connection
+		while(this->receiveStream->canRead(1)) {
+			switch(this->receiveStream->readNumber<char>()) {
+				case 1: { // transmit secret via UDP
+					Stream stream(WRITE);
+					stream.writeNumber<unsigned long>(this->secret);
+					::send(this->udpSocket, stream.start(), 8, 0);
+					break;
+				}
+
+				case 2: { // we're initialized
+					this->initialized = true;
+					break;
+				}
+			}
+		}
 	}
-
-	// handle packet
-	this->readPacket();
-
-	// send a packet of our very own
-	Packet* packet = new Packet();
-	packet->setType(DROPPABLE_PACKET);
-	this->sendPacket(packet);
 }
 
 void network::Client::receiveUDP() {
@@ -124,13 +136,19 @@ void network::Client::receiveUDP() {
 
 	this->receiveStream->buffer.head = length;
 
-	for(unsigned int i = 0; i < length; i++) {
-		printf("%c", this->receiveStream->buffer[i]);
+	// randomly drop packets
+	double result = (double)rand() / (double)RAND_MAX;
+	if(result < 0.5) {
+		return;
 	}
-	printf("\n");
 
 	// handle packet
-	// this->readPacket();
+	this->readPacket();
+
+	// send a packet of our very own
+	Packet* packet = new Packet();
+	packet->setType(DROPPABLE_PACKET);
+	this->sendPacket(packet);
 }
 
 void network::Client::sendPacket(Packet* packet) {
@@ -143,9 +161,6 @@ void network::Client::sendPacket(Packet* packet) {
 
 void network::Client::send(size_t size, const char* buffer) {
 	::send(this->tcpSocket, buffer, size, 0);
-
-	char frog[16] = "hello there1234";
-	::send(this->udpSocket, frog, 16, 0);
 }
 
 void network::Client::addRemoteObject(RemoteObject* remoteObject) {

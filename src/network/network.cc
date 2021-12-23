@@ -94,6 +94,7 @@ void network::Network::accept() {
 
 		Connection* client = new Connection(clientSocket, clientAddress);
 		this->clients.push_back(client);
+		this->secretToConnection[client->secret] = client;
 		thread t(&Network::sendInitialData, this, client);
 		t.detach();
 
@@ -132,19 +133,36 @@ void network::Network::recv() {
 
 	int messages = ::recvmmsg(this->udpSocket, this->udp.headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
 	if(messages > 0) {
-		printf("got a message!\n");
 		for(unsigned int i = 0; i < messages; i++) {
 			// prepare the buffers
 			this->udp.streams[i].flush();
 			this->udp.streams[i].buffer.head = this->udp.headers[i].msg_len;
+
+			if(this->udp.streams[i].buffer.head < 8) { // if the message isn't even big enough to hold a secret, discard the packet
+				printf("discard because of small length\n");
+				continue;
+			}
 			
-			printf("and its %d bytes long!!\n", this->udp.headers[i].msg_len);
-			printf("%.16s\n", this->udp.headers[i].msg_hdr.msg_iov->iov_base);
+			if(
+				this->udpAddressToConnection.find(this->udp.addresses[i]) == this->udpAddressToConnection.end()
+			) {
+				// if we can't find a secret, discard the packet
+				unsigned long secret = this->udp.streams[i].readNumber<unsigned long>();
+				if(this->secretToConnection.find(secret) == this->secretToConnection.end()) {
+					printf("discard because of invalid secret\n");
+					continue;
+				}
 
-			printf("%s\n", ipv6ToString((sockaddr_in6*)this->udp.headers[i].msg_hdr.msg_name).c_str());
+				this->udpAddressToConnection[this->udp.addresses[i]] = this->secretToConnection[secret];
+				this->secretToConnection[secret]->initializeUDP(this->udp.addresses[i]);
+			}
 
-			const char response[17] = "frog to meet you";
-			::sendto(this->udpSocket, response, 16, 0, (sockaddr*)&this->udp.addresses[i], sizeof(sockaddr_in6));
+			// the minimum header length for a packet is always greater than 8. if we got a length of 8, its probably a redundant secret
+			if(this->udp.streams[i].buffer.head == 8) {
+				continue;
+			}
+
+			this->udpAddressToConnection[this->udp.addresses[i]]->receiveUDP(this->udp.streams[i]);
 		}
 	}
 	
@@ -156,6 +174,10 @@ void network::Network::recv() {
 void network::Network::tick() {
 	if(getMicrosecondsNow() - this->frog > 300000) {
 		for(Connection* client: this->clients) {
+			if(!client->isInitialized()) {
+				return;
+			}
+
 			Packet* packet = new Packet();
 			packet->setType(DROPPABLE_PACKET);
 			client->sendPacket(packet);
@@ -171,4 +193,8 @@ void network::Network::addRemoteObject(RemoteObject* remoteObject) {
 
 void network::Network::removeRemoteObject(RemoteObject* remoteObject) {
 	this->remoteObjects.erase(find(this->remoteObjects.begin(), this->remoteObjects.end(), remoteObject));
+}
+
+int network::Network::getUDPSocket() {
+	return this->udpSocket;
 }

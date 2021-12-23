@@ -6,26 +6,55 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include "../engine/engine.h"
 #include "packet.h"
 
 network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->_socket = _socket;
-	this->address = address;
+	this->tcpAddress = address;
 	this->ip = ConnectionIPAddress(address);
 
-	printf("got tcp connection from %s\n", this->ip.toString().c_str());
+	Stream stream(WRITE);
+	stream.writeNumber<unsigned long>(this->secret);
+	stream.writeNumber<char>(1);
+	this->sendTCP(stream.size(), stream.start());
 }
 
 void network::Connection::sendPacket(Packet* packet) {
 	this->lastSequenceSent++;
 	packet->setHeader(this->lastSequenceSent, this->lastSequenceReceived, this->ackMask);
-	this->send(packet->stream.size(), packet->stream.start());
+	this->sendUDP(packet->stream.size(), packet->stream.start());
 
 	PacketHandler::sendPacket(packet);
 }
 
-void network::Connection::send(size_t size, const char* buffer) {
+bool network::Connection::isInitialized() {
+	return this->initialized;
+}
+
+void network::Connection::sendTCP(size_t size, const char* buffer) {
 	::send(this->_socket, buffer, size, 0);
+}
+
+void network::Connection::sendUDP(size_t size, const char* buffer) {
+	::sendto(engine->network.getUDPSocket(), buffer, size, 0, (sockaddr*)&this->udpAddress, sizeof(this->udpAddress));
+}
+
+void network::Connection::requestSecret()  {
+	Stream stream(WRITE);
+	stream.writeNumber<char>(1);
+	this->sendTCP(stream.size(), stream.start());
+}
+
+void network::Connection::initializeUDP(sockaddr_in6 address) {
+	this->udpAddress = address;
+	
+	Stream stream(WRITE);
+	stream.writeNumber<char>(2);
+	this->sendTCP(stream.size(), stream.start());
+	this->initialized = true;
+
+	printf("initialized udp connection for %s\n", this->ip.toString().c_str());
 }
 
 void network::Connection::receiveTCP() {
