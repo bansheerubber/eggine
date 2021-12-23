@@ -1,11 +1,14 @@
 #pragma once
 
+#include <sys/socket.h>
 #include <vector>
 
 #include "stream.h"
 #include "types.h"
 
 namespace network {
+	#define EGGINE_NETWORK_UDP_MESSAGE_AMOUNT 32
+	
 	class Network {
 		public:
 			Network();
@@ -26,9 +29,13 @@ namespace network {
 			void removeRemoteObject(class RemoteObject* remoteObject);
 		
 		private:
-			int _socket = -1;
+			int tcpSocket = -1;
+			int udpSocket = -1;
 			std::vector<class RemoteObject*> remoteObjects;
 			std::vector<class Connection*> clients;
+			Stream udpStreams[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
+			iovec scatterGather[32];
+			cmsghdr controls[32];
 
 			unsigned long long frog;
 	};

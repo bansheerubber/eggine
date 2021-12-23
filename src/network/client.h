@@ -27,7 +27,8 @@ namespace network {
 			void sendPacket(Packet* packet);
 		
 		private:
-			int _socket = -1;
+			int tcpSocket = -1;
+			int udpSocket = -1;
 			std::vector<class RemoteObject*> remoteObjects;
 
 			void instantiateRemoteObject(unsigned long remoteId, unsigned short remoteClassId);

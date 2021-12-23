@@ -12,6 +12,8 @@ network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->_socket = _socket;
 	this->address = address;
 	this->ip = ConnectionIPAddress(address);
+
+	printf("got tcp connection from %s\n", this->ip.toString().c_str());
 }
 
 void network::Connection::sendPacket(Packet* packet) {

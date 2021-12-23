@@ -9,6 +9,7 @@
 #include <sys/types.h>
 
 #include "connection.h"
+#include "../util/ipv6ToString.h"
 #include "packet.h"
 #include "../basic/remoteObject.h"
 
@@ -23,33 +24,57 @@ network::Network::~Network() {
 }
 
 bool network::Network::isActive() {
-	return this->_socket != -1;
+	return this->tcpSocket != -1;
 }
 
 void network::Network::open() {
-	this->_socket = socket(AF_INET6, SOCK_STREAM, 0);
-	if(this->_socket < 0) {
-		printf("could not open socket\n");
-		return;
-	}
-
 	sockaddr_in6 serverAddress;
 
 	serverAddress.sin6_family = AF_INET6;
 	serverAddress.sin6_addr = in6addr_any;
 	serverAddress.sin6_port = htons(28000);
 
-	int enabled = 1;
-	setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
+	// setup tcp socket
+	{
+		this->tcpSocket = socket(AF_INET6, SOCK_STREAM, 0);
+		if(this->tcpSocket < 0) {
+			printf("could not instantiate tcp socket\n");
+			return;
+		}
 
-	if(bind(this->_socket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
-		printf("could not bind socket\n");
-		return;
+		int enabled = 1;
+		setsockopt(this->tcpSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
+
+		if(bind(this->tcpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
+			printf("could not bind tcp socket\n");
+			return;
+		}
+
+		listen(this->tcpSocket, 32);
+
+		fcntl(this->tcpSocket, F_SETFL, O_NONBLOCK);
 	}
 
-	listen(this->_socket, 32);
+	// setup udp socket
+	{
+		this->udpSocket = socket(AF_INET6, SOCK_DGRAM, 0);
+		if(this->udpSocket < 0) {
+			printf("could not instantiate udp socket\n");
+			return;
+		}
 
-	fcntl(this->_socket, F_SETFL, O_NONBLOCK);
+		int enabled = 1;
+		setsockopt(this->udpSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
+
+		if(bind(this->udpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
+			printf("could not bind tcp socket\n");
+			return;
+		}
+
+		listen(this->udpSocket, 32);
+
+		fcntl(this->udpSocket, F_SETFL, O_NONBLOCK);
+	}
 
 	thread t(&Network::accept, this);
 	t.detach();
@@ -59,7 +84,7 @@ void network::Network::accept() {
 	while(true) {
 		sockaddr_in6 clientAddress;
 		socklen_t clientLength = sizeof(clientAddress);
-		int clientSocket = ::accept(this->_socket, (sockaddr*)&clientAddress, &clientLength);
+		int clientSocket = ::accept(this->tcpSocket, (sockaddr*)&clientAddress, &clientLength);
 		if(clientSocket < 0) {
 			this_thread::sleep_for(chrono::milliseconds(16));
 			continue;
@@ -92,23 +117,46 @@ void network::Network::close() {
 }
 
 void network::Network::recv() {
+	sockaddr_in6 addresses[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
+	mmsghdr headers[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
+	for(unsigned int i = 0; i < EGGINE_NETWORK_UDP_MESSAGE_AMOUNT; i++) {
+		this->udpStreams[i].allocate(EGGINE_PACKET_SIZE);
+		this->scatterGather[i].iov_base = (char*)this->udpStreams[i].start();
+		this->scatterGather[i].iov_len = EGGINE_PACKET_SIZE;
+		headers[i].msg_hdr.msg_iov = &this->scatterGather[i];
+		headers[i].msg_hdr.msg_iovlen = 1;
+		headers[i].msg_hdr.msg_control = &this->controls[i];
+		headers[i].msg_hdr.msg_controllen = 0;
+		headers[i].msg_hdr.msg_flags = 0;
+		headers[i].msg_hdr.msg_name = &addresses[i];
+		headers[i].msg_hdr.msg_namelen = sizeof(sockaddr_in6);
+	}
+
+	int messages = ::recvmmsg(this->udpSocket, headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
+	if(messages > 0) {
+		printf("got a message!\n");
+		for(unsigned int i = 0; i < messages; i++) {
+			printf("and its %d bytes long!!\n", headers[i].msg_len);
+			printf("%.16s\n", headers[i].msg_hdr.msg_iov->iov_base);
+
+			printf("%s\n", ipv6ToString((sockaddr_in6*)headers[i].msg_hdr.msg_name).c_str());
+		}
+	}
+	
 	for(Connection* client: this->clients) {
 		client->recv();
 	}
 }
 
 void network::Network::tick() {
-	// Stream stream;
-	// for(RemoteObject* remoteObject: this->remoteObjects) {
-	// 	if(remoteObject->hasUpdate()) {
-	// 		remoteObject->pack(stream);
-	// 	}
-	// }
+	if(getMicrosecondsNow() - this->frog > 300000) {
+		for(Connection* client: this->clients) {
+			Packet* packet = new Packet();
+			packet->setType(DROPPABLE_PACKET);
+			client->sendPacket(packet);
+		}
 
-	for(Connection* client: this->clients) {
-		Packet* packet = new Packet();
-		packet->setType(DROPPABLE_PACKET);
-		client->sendPacket(packet);
+		this->frog = getMicrosecondsNow();
 	}
 }
 
