@@ -119,6 +119,10 @@ OverlappingTile* Unit::setPosition(glm::uvec3 position) {
 }
 
 void Unit::setHealth(int health) {
+	if(this->unpacking && health <= 0) {
+		throw network::RemoteObjectUnpackException(this, "Unit: invalid max health");
+	}
+	
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], health);
@@ -126,6 +130,10 @@ void Unit::setHealth(int health) {
 }
 
 void Unit::setMaxHealth(int maxHealth) {
+	if(this->unpacking && maxHealth <= 0) {
+		throw network::RemoteObjectUnpackException(this, "Unit: invalid max health");
+	}
+	
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], maxHealth);

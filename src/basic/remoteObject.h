@@ -33,6 +33,7 @@ namespace network {
 			unsigned char* updateMask = nullptr; // variable size mask
 			unsigned char updateMaskSize = 0;
 			bool update = false;
+			bool unpacking = false;
 			remote_object_id remoteId = 0;
 	};
 };

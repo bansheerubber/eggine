@@ -31,9 +31,9 @@ namespace network {
 			
 			void setFlags(unsigned int flags);
 			void allocate(size_t size);
-			void startWriteRemoteObject(class RemoteObject* remoteId);
-			void finishWriteRemoteObject(class RemoteObject* remoteId);
-			void finishReadRemoteObject(class RemoteObject* remoteId);
+			void startWriteRemoteObject(class RemoteObject* object);
+			void finishWriteRemoteObject(class RemoteObject* object);
+			void finishReadRemoteObject(class RemoteObject* object);
 			void writeUpdateMask(unsigned int size, const unsigned char* mask);
 			void startChunk();
 			void commitChunk();

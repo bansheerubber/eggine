@@ -14,6 +14,16 @@ Character::~Character() {
 }
 
 OverlappingTile* Character::setPosition(glm::uvec3 position) {
+	if(
+		this->unpacking
+		&& (
+			position.x >= engine->chunkContainer->getSize() * Chunk::Size
+			|| position.y >= engine->chunkContainer->getSize() * Chunk::Size
+		)
+	) {
+		throw network::RemoteObjectUnpackException(this, "Character: invalid position");
+	}
+	
 	this->container->updateCharacterPosition(this, position);
 	this->position = position;
 	this->writeUpdateMask("position");
@@ -22,6 +32,8 @@ OverlappingTile* Character::setPosition(glm::uvec3 position) {
 }
 
 void Character::setAppearance(unsigned int texture) {
+	// TODO bounds check for network
+	
 	this->appearance = texture;
 	this->setTexture(texture);
 	this->writeUpdateMask("appearance");

@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 
 	for(unsigned int i = 0; i < positionsSize; i++) {
 		Unit* unit = new Unit(&container);
-		unit->setTexture(5);
+		unit->setAppearance(5);
 		unit->setPosition(positions[i]);
 		container.getPlayerTeam()->add(unit);
 	}

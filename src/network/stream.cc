@@ -50,8 +50,11 @@ void network::Stream::finishWriteRemoteObject(RemoteObject* object) {
 	this->commitChunk();
 }
 
-void network::Stream::finishReadRemoteObject(class RemoteObject* remoteId) {
-	this->readNumber<remote_object_id>();
+void network::Stream::finishReadRemoteObject(class RemoteObject* object) {
+	remote_object_id id = this->readNumber<remote_object_id>();
+	if(id != object->getRemoteId()) {
+		throw RemoteObjectUnpackException(object, "Remote object id does not match end of packet");
+	}
 }
 
 void network::Stream::writeUpdateMask(unsigned int size, const unsigned char* mask) {
