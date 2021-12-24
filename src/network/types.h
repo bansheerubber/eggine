@@ -1,5 +1,7 @@
 #pragma once
 
+#define FMT_HEADER_ONLY
+#include <fmt/format.h>
 #include <string>
 
 namespace network {
@@ -66,6 +68,25 @@ namespace network {
 			}
 	};
 
+	class RemoteObjectIdMisMatchException: public std::exception {
+		public:
+			RemoteObjectIdMisMatchException(remote_object_id expectedId, remote_object_id receivedId) {
+				this->expectedId = expectedId;
+				this->receivedId = receivedId;
+				this->message = fmt::format("Expected remote object id {}, got {}", expectedId, receivedId);
+			}
+
+			remote_object_id expectedId;
+			remote_object_id receivedId;
+
+			virtual const char* what() const throw() {
+				return message.c_str();
+			}
+		
+		protected:
+			std::string message;
+	};
+
 	class StreamOverReadException: public std::exception {
 		public:
 			StreamOverReadException(size_t size, unsigned int attemptedRead) {
@@ -76,6 +97,42 @@ namespace network {
 
 			size_t size;
 			unsigned int attemptedRead;
+
+			virtual const char* what() const throw() {
+				return message.c_str();
+			}
+		
+		protected:
+			std::string message;
+	};
+
+	class RemoteObjectInstantiateException: public std::exception {
+		public:
+			RemoteObjectInstantiateException(remote_object_id objectId, remote_class_id classId) {
+				this->classId = classId;
+				this->objectId = objectId;
+				this->message = fmt::format("Could not instantiate remote object {} with class {}", objectId, classId);
+			}
+
+			remote_class_id classId;
+			remote_object_id objectId;
+
+			virtual const char* what() const throw() {
+				return message.c_str();
+			}
+		
+		protected:
+			std::string message;
+	};
+
+	class RemoteObjectLookupException: public std::exception {
+		public:
+			RemoteObjectLookupException(remote_object_id objectId) {
+				this->objectId = objectId;
+				this->message = fmt::format("Could not lookup remote object {}", objectId);
+			}
+
+			remote_object_id objectId;
 
 			virtual const char* what() const throw() {
 				return message.c_str();

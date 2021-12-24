@@ -53,7 +53,7 @@ void network::Stream::finishWriteRemoteObject(RemoteObject* object) {
 void network::Stream::finishReadRemoteObject(class RemoteObject* object) {
 	remote_object_id id = this->readNumber<remote_object_id>();
 	if(id != object->getRemoteId()) {
-		throw RemoteObjectUnpackException(object, "Remote object id does not match end of packet");
+		throw RemoteObjectIdMisMatchException(object->getRemoteId(), id);
 	}
 }
 

@@ -167,7 +167,7 @@ void network::Client::handlePacket() {
 						object->unpack(*this->receiveStream);
 					}
 					else {
-						throw 0;
+						throw RemoteObjectInstantiateException(remoteObjectId, remoteClassId);
 					}
 
 					break;
@@ -182,13 +182,47 @@ void network::Client::handlePacket() {
 						object->unpack(*this->receiveStream);
 					}
 					else {
-						throw 0;
+						throw RemoteObjectLookupException(remoteObjectId);
 					}
 
 					break;
 				}
 			}
 		}
+	}
+	// if we couldn't instantiate a remote object, then terminate the connection. there may be a problem with:
+	// 1. remote object constructor failure
+	// 2. remote class id not being matched to a remote object constructor
+	// and i think either of those is a fatal error that we can't recover from because:
+	// 1. if we can't do `new ...` without a constructor failure, then this remote object shouldn't have been
+	//    replicated in the first place. server is going crazy
+	// 2. if we can't match a remote class id to a remote object constructor, then there is something wrong
+	//    with the packet that could be a). a data corruption problem which means the server has gone haywire or
+	//    b). the client and server are somehow out of sync on which remote class id matches to which remote class
+	catch(RemoteObjectInstantiateException &e) {
+		printf("%s\n", e.what());
+	}
+	// if we couldn't look up a remote object, then just log it, drop the packet, and continue.
+	// TODO is there a better behavior for this? i don't want to read the full packet, but dropping data is bad. maybe
+	//      ask the server to create a rescue packet for us?
+	catch(RemoteObjectLookupException &e) {
+		printf("%s\n", e.what());
+	}
+	// if we over-read the stream, then terminate the connection. something has gone really bad
+	catch(StreamOverReadException &e) {
+		printf("%s\n", e.what());
+	}
+	// this is thrown when a setter doesn't like the data it given during the unpacking phase. this could be caused
+	// by straight up bad data, or something as simple as out-of-bounds values. log the error and continue, since we
+	// don't know which it could be. if its straight up bad data and the server has gone crazy, then there's many other
+	// checks in place for us to discover that
+	catch(RemoteObjectUnpackException &e) {
+		printf("%s\n", e.what());
+	}
+	// if the remote object id supplied at the end of a update chunk does not match the id we read at the beginning, then
+	// this is enough evidence to say that the server has gone crazy. terminate the connection
+	catch(RemoteObjectIdMisMatchException &e) {
+		printf("%s\n", e.what());
 	}
 	catch(...) {
 		printf("epic fail\n");
