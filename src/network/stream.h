@@ -31,12 +31,12 @@ namespace network {
 			
 			void setFlags(unsigned int flags);
 			void allocate(size_t size);
+			void startChunk();
+			void commitChunk();
 			void startWriteRemoteObject(class RemoteObject* object);
 			void finishWriteRemoteObject(class RemoteObject* object);
 			void finishReadRemoteObject(class RemoteObject* object);
 			void writeUpdateMask(unsigned int size, const unsigned char* mask);
-			void startChunk();
-			void commitChunk();
 			const UpdateMask readUpdateMask();
 			bool queryMask(RemoteObject* object, unsigned int position);
 
@@ -44,6 +44,7 @@ namespace network {
 				return this->readBufferPointer + size <= this->buffer.head;
 			}
 
+			void flush();
 			size_t size();
 			const char* start();
 
@@ -142,9 +143,7 @@ namespace network {
 			DynamicArray<char> buffer = DynamicArray<char>(4);
 			unsigned int readBufferPointer = 0;
 			unsigned int flags;
-			size_t chunkHead = 0;
-			
-			void flush();
+			size_t chunkHead = 0;			
 	};
 
 	template<>

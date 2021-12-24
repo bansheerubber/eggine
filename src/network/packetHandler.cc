@@ -2,100 +2,6 @@
 
 #include "packet.h"
 
-void network::PacketHandler::sendPacket(class Packet* packet) {
-	if(this->head == nullptr) {
-		this->head = new PacketNode(packet);
-	}	
-	else {
-		PacketNode* node = this->head;
-		this->head = new PacketNode(packet);
-		this->head->next = node;
-		node->previous = this->head;
-	}
-}
-
-void network::PacketHandler::ackPacket(unsigned int sequence) {
-	this->deleteNodeAndPacketFromList(sequence);
-}
-
-void network::PacketHandler::resendPacket(unsigned int sequence) {
-	this->deleteNodeFromList(sequence);
-}
-
-void network::PacketHandler::deleteNodeFromList(unsigned int sequence) {
-	PacketNode* node = this->head;
-	while(node != nullptr) {
-		if(node->packet->getSequence() == sequence) {
-			break;
-		}
-		node = node->next;
-	}
-
-	if(node == nullptr) {
-		return;
-	}
-
-	if(node == this->head) {
-		if(node->next != nullptr) {
-			this->head = node->next;
-		}
-		else {
-			this->head = nullptr;
-		}
-
-		delete node;
-	}
-	else {
-		if(node->next != nullptr) {
-			node->previous->next = node->next;
-			node->next->previous = node->previous;
-		}
-		else {
-			node->previous->next = nullptr;
-		}
-
-		delete node;
-	}
-}
-
-void network::PacketHandler::deleteNodeAndPacketFromList(unsigned int sequence) {
-	PacketNode* node = this->head;
-	while(node != nullptr) {
-		if(node->packet->getSequence() == sequence) {
-			break;
-		}
-		node = node->next;
-	}
-
-	if(node == nullptr) {
-		return;
-	}
-
-	if(node == this->head) {
-		if(node->next != nullptr) {
-			this->head = node->next;
-		}
-		else {
-			this->head = nullptr;
-		}
-
-		delete node->packet;
-		delete node;
-	}
-	else {
-		if(node->next != nullptr) {
-			node->previous->next = node->next;
-			node->next->previous = node->previous;
-		}
-		else {
-			node->previous->next = nullptr;
-		}
-
-		delete node->packet;
-		delete node;
-	}
-}
-
 void network::PacketHandler::readPacket() {
 	PacketType type = (PacketType)this->receiveStream->readNumber<char>();
 	unsigned int receivedSequence = this->receiveStream->readNumber<unsigned int>();
@@ -160,6 +66,25 @@ void network::PacketHandler::readPacket() {
 	this->handlePacket();
 }
 
+void network::PacketHandler::sendPacket(class Packet* packet) {
+	if(this->head == nullptr) {
+		this->head = new PacketNode(packet);
+	}	
+	else {
+		PacketNode* node = this->head;
+		this->head = new PacketNode(packet);
+		this->head->next = node;
+	}
+}
+
+void network::PacketHandler::ackPacket(unsigned int sequence) {
+	this->deleteNodeAndPacketFromList(sequence);
+}
+
+void network::PacketHandler::resendPacket(unsigned int sequence) {
+	this->deleteNodeFromList(sequence);
+}
+
 unsigned int network::PacketHandler::packetListSize() {
 	PacketNode* node = this->head;
 	unsigned int count = 0;
@@ -168,4 +93,64 @@ unsigned int network::PacketHandler::packetListSize() {
 		count++;
 	}
 	return count;
+}
+
+void network::PacketHandler::deleteNodeFromList(unsigned int sequence) {
+	if(this->head == nullptr) {
+		return;
+	}
+
+	if(this->head->packet->getSequence() == sequence) {
+		PacketNode* deletedNode = this->head;
+		this->head = this->head->next;
+		delete deletedNode;
+	}
+	
+	PacketNode* node = this->head;
+	while(node != nullptr) {
+		if(node->next != nullptr && node->next->packet->getSequence() == sequence) {
+			break;
+		}
+		node = node->next;
+	}
+
+	if(node == nullptr) {
+		return;
+	}
+
+	// delete the next node
+	PacketNode* deletedNode = node->next;
+	node->next = deletedNode->next;
+	delete deletedNode;
+}
+
+void network::PacketHandler::deleteNodeAndPacketFromList(unsigned int sequence) {
+	if(this->head == nullptr) {
+		return;
+	}
+
+	if(this->head->packet->getSequence() == sequence) {
+		PacketNode* deletedNode = this->head;
+		this->head = this->head->next;
+		delete deletedNode->packet;
+		delete deletedNode;
+	}
+	
+	PacketNode* node = this->head;
+	while(node != nullptr) {
+		if(node->next != nullptr && node->next->packet->getSequence() == sequence) {
+			break;
+		}
+		node = node->next;
+	}
+
+	if(node == nullptr) {
+		return;
+	}
+
+	// delete the next node
+	PacketNode* deletedNode = node->next;
+	node->next = deletedNode->next;
+	delete deletedNode->packet;
+	delete deletedNode;
 }

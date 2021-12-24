@@ -11,7 +11,6 @@ namespace network {
 		PacketNode(Packet* packet) {
 			this->packet = packet;
 			this->next = nullptr;
-			this->previous = nullptr;
 		}
 	};
 

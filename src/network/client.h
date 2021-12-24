@@ -13,16 +13,11 @@ namespace network {
 		public:
 			Client();
 			~Client();
-
-			bool isActive();
 			
 			void open();
 			void close();
 
-			void tick();
-
-			void addRemoteObject(class RemoteObject* remoteObject);
-			void removeRemoteObject(class RemoteObject* remoteObject);
+			void receive();
 
 			void sendPacket(Packet* packet);
 		
@@ -32,7 +27,6 @@ namespace network {
 			
 			int tcpSocket = -1;
 			int udpSocket = -1;
-			std::vector<class RemoteObject*> remoteObjects;
 
 			class RemoteObject* instantiateRemoteObject(remote_object_id remoteId, remote_class_id remoteClassId);
 			void send(size_t size, const char* buffer);

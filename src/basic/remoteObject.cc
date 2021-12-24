@@ -12,38 +12,6 @@ network::RemoteObject::~RemoteObject() {
 	engine->network.removeRemoteObject(this);
 }
 
-void network::RemoteObject::allocateMask() {
-	
-}
-
-void network::RemoteObject::pack(Packet* packet) {
-	
-}
-
-void network::RemoteObject::unpack(Stream &stream) {
-	
-}
-
-bool network::RemoteObject::hasUpdate() {
-	return this->update;
-}
-
-unsigned int network::RemoteObject::propertyToMaskPosition(string property) {
-	return 0;
-}
-
-void network::RemoteObject::zeroUpdateMask() {
-	if(this->updateMask == nullptr) {
-		this->allocateMask();
-	}
-	
-	for(unsigned int i = 0; i < this->updateMaskSize; i++) {
-		this->updateMask[i] = 0;
-	}
-
-	this->update = false;
-}
-
 void network::RemoteObject::writeUpdateMask(unsigned int position) {
 	if(this->updateMask == nullptr) {
 		this->allocateMask();
@@ -78,6 +46,18 @@ bool network::RemoteObject::readUpdateMask(unsigned int position) {
 	return this->updateMask[charIndex] & (1 << maskIndex);
 }
 
+void network::RemoteObject::zeroUpdateMask() {
+	if(this->updateMask == nullptr) {
+		this->allocateMask();
+	}
+	
+	for(unsigned int i = 0; i < this->updateMaskSize; i++) {
+		this->updateMask[i] = 0;
+	}
+
+	this->update = false;
+}
+
 void network::RemoteObject::printUpdateMask() {
 	if(this->updateMask == nullptr) {
 		this->allocateMask();
@@ -89,10 +69,30 @@ void network::RemoteObject::printUpdateMask() {
 	printf("\n");
 }
 
+bool network::RemoteObject::hasUpdate() {
+	return this->update;
+}
+
 network::remote_object_id network::RemoteObject::getRemoteId() {
 	return this->remoteId;
 }
 
 network::remote_class_id network::RemoteObject::getRemoteClassId() {
 	return -1;
+}
+
+void network::RemoteObject::pack(Packet* packet) {
+	
+}
+
+void network::RemoteObject::unpack(Stream &stream) {
+	
+}
+
+void network::RemoteObject::allocateMask() {
+	
+}
+
+unsigned int network::RemoteObject::propertyToMaskPosition(string property) {
+	return 0;
 }

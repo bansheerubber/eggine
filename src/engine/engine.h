@@ -82,7 +82,6 @@ class Engine {
 		render::Window renderWindow;
 		sound::Engine soundEngine;
 		network::Network network;
-		network::Client client;
 
 		glm::vec2 mouse;
 

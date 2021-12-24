@@ -303,12 +303,8 @@ void Engine::tick() {
 	start_tick:
 
 	// handle client
-	if(this->client.isActive()) {
-		this->client.tick();
-	}
-
-	if(this->network.isActive()) {
-		this->network.recv();
+	if(this->network.isClient() || this->network.isServer()) {
+		this->network.receive();
 	}
 
 	this->soundEngine.tick(); // handle sounds
@@ -443,7 +439,7 @@ void Engine::tick() {
 
 	this->renderWindow.render();
 
-	if(this->network.isActive()) {
+	if(this->network.isServer()) {
 		this->network.tick();
 	}
 

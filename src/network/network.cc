@@ -23,11 +23,9 @@ network::Network::Network() {
 network::Network::~Network() {
 }
 
-bool network::Network::isActive() {
-	return this->tcpSocket != -1;
-}
-
-void network::Network::open() {
+void network::Network::openServer() {
+	this->mode = NETWORK_SERVER;
+	
 	sockaddr_in6 serverAddress;
 
 	serverAddress.sin6_family = AF_INET6;
@@ -57,30 +55,34 @@ void network::Network::open() {
 
 	// setup udp socket
 	{
-		this->udpSocket = socket(AF_INET6, SOCK_DGRAM, 0);
-		if(this->udpSocket < 0) {
+		this->udp.socket = socket(AF_INET6, SOCK_DGRAM, 0);
+		if(this->udp.socket < 0) {
 			printf("could not instantiate udp socket\n");
 			return;
 		}
 
 		int enabled = 1;
-		setsockopt(this->udpSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
+		setsockopt(this->udp.socket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
 
-		if(bind(this->udpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
+		if(bind(this->udp.socket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
 			printf("could not bind tcp socket\n");
 			return;
 		}
 
-		listen(this->udpSocket, 32);
+		listen(this->udp.socket, 32);
 
-		fcntl(this->udpSocket, F_SETFL, O_NONBLOCK);
+		fcntl(this->udp.socket, F_SETFL, O_NONBLOCK);
 	}
 
-	thread t(&Network::accept, this);
+	thread t(&Network::acceptServer, this);
 	t.detach();
 }
 
-void network::Network::accept() {
+void network::Network::closeServer() {
+
+}
+
+void network::Network::acceptServer() {
 	while(true) {
 		sockaddr_in6 clientAddress;
 		socklen_t clientLength = sizeof(clientAddress);
@@ -92,30 +94,45 @@ void network::Network::accept() {
 
 		fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 
-		Connection* client = new Connection(clientSocket, clientAddress);
-		this->clients.push_back(client);
-		this->secretToConnection[client->secret] = client;
+		Connection* connection = new Connection(clientSocket, clientAddress);
+		this->connections.push_back(connection);
+		this->secretToConnection[connection->secret] = connection;
 
 		this_thread::sleep_for(chrono::milliseconds(16));
 	}
 }
 
-void network::Network::sendInitialData(Connection* connection) {
-	Packet* packet = new Packet();
-	packet->stream.setFlags(WRITE | NO_MASK_CHECKING);
-	packet->setType(DROPPABLE_PACKET);
-	for(RemoteObject* remoteObject: this->remoteObjects) {
-		remoteObject->pack(packet);
+void network::Network::openClient() {
+	this->mode = NETWORK_CLIENT;
+	this->client.open();
+}
+
+void network::Network::closeClient() {
+	this->client.close();
+}
+
+void network::Network::tick() {
+	// if(getMicrosecondsNow() - this->frog > 30000) {
+	// 	for(Connection* connection: this->connections) {
+	// 		if(!connection->isInitialized()) {
+	// 			return;
+	// 		}
+
+	// 		Packet* packet = new Packet();
+	// 		packet->setType(DROPPABLE_PACKET);
+	// 		connection->sendPacket(packet);
+	// 	}
+
+	// 	this->frog = getMicrosecondsNow();
+	// }
+}
+
+void network::Network::receive() {
+	if(this->isClient()) {
+		this->client.receive();
+		return;
 	}
-
-	connection->sendPacket(packet);
-}
-
-void network::Network::close() {
-
-}
-
-void network::Network::recv() {
+	
 	for(unsigned int i = 0; i < EGGINE_NETWORK_UDP_MESSAGE_AMOUNT; i++) {
 		this->udp.streams[i].allocate(EGGINE_PACKET_SIZE);
 		this->udp.scatterGather[i].iov_base = (char*)this->udp.streams[i].start();
@@ -129,7 +146,7 @@ void network::Network::recv() {
 		this->udp.headers[i].msg_hdr.msg_namelen = sizeof(sockaddr_in6);
 	}
 
-	int messages = ::recvmmsg(this->udpSocket, this->udp.headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
+	int messages = ::recvmmsg(this->udp.socket, this->udp.headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
 	if(messages > 0) {
 		for(unsigned int i = 0; i < messages; i++) {
 			// prepare the buffers
@@ -167,25 +184,9 @@ void network::Network::recv() {
 		}
 	}
 	
-	for(Connection* client: this->clients) {
-		client->receiveTCP();
+	for(Connection* connection: this->connections) {
+		connection->receiveTCP();
 	}
-}
-
-void network::Network::tick() {
-	// if(getMicrosecondsNow() - this->frog > 300000) {
-	// 	for(Connection* client: this->clients) {
-	// 		if(!client->isInitialized()) {
-	// 			return;
-	// 		}
-
-	// 		Packet* packet = new Packet();
-	// 		packet->setType(DROPPABLE_PACKET);
-	// 		client->sendPacket(packet);
-	// 	}
-
-	// 	this->frog = getMicrosecondsNow();
-	// }
 }
 
 void network::Network::addRemoteObject(RemoteObject* remoteObject) {
@@ -204,13 +205,24 @@ network::RemoteObject* network::Network::getRemoteObject(remote_object_id id) {
 }
 
 int network::Network::getUDPSocket() {
-	return this->udpSocket;
+	return this->udp.socket;
 }
 
 bool network::Network::isServer() {
-	return this->tcpSocket != -1;
+	return this->mode == NETWORK_SERVER;
 }
 
 bool network::Network::isClient() {
-	return this->tcpSocket == -1;
+	return this->mode == NETWORK_CLIENT;
+}
+
+void network::Network::sendInitialData(Connection* connection) {
+	Packet* packet = new Packet();
+	packet->stream.setFlags(WRITE | NO_MASK_CHECKING);
+	packet->setType(DROPPABLE_PACKET);
+	for(RemoteObject* remoteObject: this->remoteObjects) {
+		remoteObject->pack(packet);
+	}
+
+	connection->sendPacket(packet);
 }

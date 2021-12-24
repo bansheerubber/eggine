@@ -20,6 +20,31 @@ network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->sendTCP(stream.size(), stream.start());
 }
 
+void network::Connection::receiveTCP() {
+	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
+	this->receiveStream->flush();
+	int length = ::recv(this->_socket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
+	if(length < 0) {
+		if(errno == EWOULDBLOCK) {
+			return;
+		}
+	}
+	else if(length == 0) {
+		return;
+	}
+
+	this->receiveStream->buffer.head = length;
+
+	// handle packet
+	this->readPacket();
+}
+
+void network::Connection::receiveUDP(Stream &stream) {
+	Stream* oldStream = this->receiveStream; // TODO fix this potential nightmare
+	this->readPacket();
+	this->receiveStream = oldStream;
+}
+
 void network::Connection::sendPacket(Packet* packet) {
 	this->lastSequenceSent++;
 	packet->setHeader(this->lastSequenceSent, this->lastSequenceReceived, this->ackMask);
@@ -55,31 +80,6 @@ void network::Connection::initializeUDP(sockaddr_in6 address) {
 	this->initialized = true;
 
 	printf("initialized udp connection for %s\n", this->ip.toString().c_str());
-}
-
-void network::Connection::receiveTCP() {
-	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
-	this->receiveStream->flush();
-	int length = ::recv(this->_socket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
-	if(length < 0) {
-		if(errno == EWOULDBLOCK) {
-			return;
-		}
-	}
-	else if(length == 0) {
-		return;
-	}
-
-	this->receiveStream->buffer.head = length;
-
-	// handle packet
-	this->readPacket();
-}
-
-void network::Connection::receiveUDP(Stream &stream) {
-	Stream* oldStream = this->receiveStream; // TODO fix this potential nightmare
-	this->readPacket();
-	this->receiveStream = oldStream;
 }
 
 void network::Connection::handlePacket() {

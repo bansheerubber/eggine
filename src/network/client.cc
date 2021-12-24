@@ -25,10 +25,6 @@ network::Client::~Client() {
 
 }
 
-bool network::Client::isActive() {
-	return this->tcpSocket != -1;
-}
-
 void network::Client::open() {
 	sockaddr_in6 serverAddress;
 
@@ -75,7 +71,7 @@ void network::Client::close() {
 
 }
 
-void network::Client::tick() {
+void network::Client::receive() {
 	this->receiveTCP();
 	this->receiveUDP();
 }
@@ -239,14 +235,6 @@ void network::Client::sendPacket(Packet* packet) {
 
 void network::Client::send(size_t size, const char* buffer) {
 	::send(this->tcpSocket, buffer, size, 0);
-}
-
-void network::Client::addRemoteObject(RemoteObject* remoteObject) {
-	this->remoteObjects.push_back(remoteObject);
-}
-
-void network::Client::removeRemoteObject(RemoteObject* remoteObject) {
-	this->remoteObjects.erase(find(this->remoteObjects.begin(), this->remoteObjects.end(), remoteObject));
 }
 
 network::RemoteObject* network::Client::instantiateRemoteObject(remote_object_id remoteId, remote_class_id remoteClassId) {
