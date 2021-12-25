@@ -23,6 +23,10 @@ network::Network::Network() {
 network::Network::~Network() {
 }
 
+const network::IPAddress network::Network::getHostIPAddress() {
+	return this->ip;
+}
+
 void network::Network::openServer() {
 	this->mode = NETWORK_SERVER;
 	
@@ -73,6 +77,8 @@ void network::Network::openServer() {
 
 		fcntl(this->udp.socket, F_SETFL, O_NONBLOCK);
 	}
+
+	this->ip = serverAddress;
 
 	thread t(&Network::acceptServer, this);
 	t.detach();
@@ -232,6 +238,10 @@ void network::Network::removeConnection(class Connection* connection) {
 	}
 
 	this->secretToConnection[connection->secret] = nullptr;
+}
+
+unsigned int network::Network::getConnectionCount() {
+	return this->connections.size();
 }
 
 void network::Network::sendInitialData(Connection* connection) {

@@ -14,7 +14,7 @@
 network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->_socket = _socket;
 	this->tcpAddress = address;
-	this->ip = ConnectionIPAddress(address);
+	this->ip = IPAddress(address);
 	this->secret = randomLong();
 
 	this->lastSequenceReceived = randomInt();

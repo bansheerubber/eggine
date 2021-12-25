@@ -48,9 +48,13 @@ namespace network {
 			Network();
 			~Network();
 
+			Client client;
+
 			inline std::string getChecksum() {
 				// ##1 remote_object_checksum
 			}
+
+			const IPAddress getHostIPAddress();
 
 			void openServer();
 			void closeServer();
@@ -72,10 +76,12 @@ namespace network {
 			bool isClient(); // whether or not the network is acting as a client
 
 			void removeConnection(class Connection* connection);
+			unsigned int getConnectionCount();
 		
 		private:
+			IPAddress ip;
+			
 			NetworkMode mode = NETWORK_INACTIVE;
-			Client client;
 			
 			// bookkeeping for remote objects
 			unsigned long highestRemoteId = 0;

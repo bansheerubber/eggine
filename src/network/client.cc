@@ -70,6 +70,8 @@ void network::Client::open() {
 
 		fcntl(this->udpSocket, F_SETFL, O_NONBLOCK);
 	}
+
+	this->ip = serverAddress;
 }
 
 void network::Client::close() {
@@ -239,6 +241,10 @@ void network::Client::sendPacket(Packet* packet) {
 	this->send(packet->stream.size(), packet->stream.start());
 
 	PacketHandler::sendPacket(packet);
+}
+
+const network::IPAddress network::Client::getIPAddress() {
+	return this->ip;
 }
 
 void network::Client::send(size_t size, const char* buffer) {

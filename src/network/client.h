@@ -20,8 +20,12 @@ namespace network {
 			void receive();
 
 			void sendPacket(Packet* packet);
+
+			const IPAddress getIPAddress();
 		
 		protected:
+			IPAddress ip;
+			
 			unsigned long secret = 0;
 			bool initialized = false;
 			bool hasSecret = false;

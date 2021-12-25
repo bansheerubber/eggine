@@ -1,6 +1,7 @@
 #pragma once
 
 #define FMT_HEADER_ONLY
+#include <netinet/in.h>
 #include <fmt/format.h>
 #include <string>
 
@@ -9,6 +10,39 @@ namespace network {
 	
 	typedef unsigned short remote_class_id;
 	typedef unsigned long remote_object_id;
+
+	struct IPAddress {
+		unsigned char address[16];
+
+		IPAddress() {}
+		IPAddress(sockaddr_in6 address) {
+			for(unsigned int i = 0; i < 16; i++) {
+				this->address[i] = address.sin6_addr.s6_addr[i];
+			}
+		}
+
+		std::string toString() const {
+			return fmt::format(
+				"{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}",
+				this->address[0],
+				this->address[1],
+				this->address[2],
+				this->address[3],
+				this->address[4],
+				this->address[5],
+				this->address[6],
+				this->address[7],
+				this->address[8],
+				this->address[9],
+				this->address[10],
+				this->address[11],
+				this->address[12],
+				this->address[13],
+				this->address[14],
+				this->address[15]
+			);
+		}
+	};
 
 	enum StreamType {
 		REMOTE_OBJECT_CREATE = 1,
