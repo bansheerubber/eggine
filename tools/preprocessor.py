@@ -113,7 +113,7 @@ def remote_object_definitions(contents, classname):
 		for property in properties:
 			mask = remote_object_get_mask_position(classname, property["name"])
 			mask_array.append((mask, property["name"]))
-			sends_contents.append(f"\t\t\tif(packet->stream.queryMask(this, this->readUpdateMask({mask}))) {{\n")
+			sends_contents.append(f"\t\t\tif(packet->stream.queryMask(this, {mask})) {{\n")
 			sends_contents.append(f"""\t\t\t\tpacket->stream.{np_type_to_write[property["np_type"]]}(this->{property["name"]});\n""")
 			sends_contents.append("\t\t\t}\n\n")
 

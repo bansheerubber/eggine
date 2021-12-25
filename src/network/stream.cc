@@ -39,8 +39,6 @@ void network::Stream::commitChunk() {
 }
 
 void network::Stream::startWriteRemoteObject(RemoteObject* object) {
-	this->startChunk();
-	this->writeNumber((char)REMOTE_OBJECT_CREATE);
 	this->writeNumber(object->getRemoteClassId());
 	this->writeNumber(object->getRemoteId());
 }

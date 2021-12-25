@@ -32,7 +32,7 @@ function init() {
 	);
 
 	// editor stuff
-	$Editor::Enabled = true;
+	$Editor::Enabled = false;
 
 	$Editor::GhostTile = null;
 	$Editor::GhostLine = new Array();

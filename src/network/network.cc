@@ -112,7 +112,27 @@ void network::Network::closeClient() {
 }
 
 void network::Network::tick() {
-	
+	Packet* packet = new Packet();
+	packet->setType(DROPPABLE_PACKET);
+
+	unsigned int packed = 0;
+	for(RemoteObject* object: this->remoteObjects) {
+		if(object->hasUpdate()) {
+			packet->stream.startChunk();
+			packet->stream.writeNumber<char>(REMOTE_OBJECT_UPDATE);
+			object->pack(packet);
+			packed++;
+		}
+	}
+
+	if(packed == 0) {
+		delete packet;
+		return;
+	}
+
+	for(Connection* connection: this->connections) {
+		connection->sendPacket(packet);
+	}
 }
 
 void network::Network::receive() {
@@ -219,6 +239,8 @@ void network::Network::sendInitialData(Connection* connection) {
 	packet->stream.setFlags(WRITE | NO_MASK_CHECKING);
 	packet->setType(DROPPABLE_PACKET);
 	for(RemoteObject* remoteObject: this->remoteObjects) {
+		packet->stream.startChunk();
+		packet->stream.writeNumber<char>(REMOTE_OBJECT_CREATE);
 		remoteObject->pack(packet);
 	}
 

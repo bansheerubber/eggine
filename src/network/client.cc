@@ -139,18 +139,13 @@ void network::Client::receiveUDP() {
 		if(errno == EWOULDBLOCK) {
 			return;
 		}
+		return;
 	}
 	else if(length == 0) {
 		return;
 	}
 
 	this->receiveStream->buffer.head = length;
-
-	// randomly drop packets
-	// double result = (double)rand() / (double)RAND_MAX;
-	// if(result < 0.5) {
-	// 	return;
-	// }
 
 	// handle packet
 	this->readPacket();
