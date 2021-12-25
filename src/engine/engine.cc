@@ -302,6 +302,11 @@ void Engine::exit() {
 void Engine::tick() {
 	start_tick:
 
+	// handle client
+	if(this->network.isClient() || this->network.isServer()) {
+		this->network.receive();
+	}
+
 	this->soundEngine.tick(); // handle sounds
 
 	long long startTime = getMicrosecondsNow();
@@ -381,6 +386,15 @@ void Engine::tick() {
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->eggscriptTickTime));
 	this->debug.addInfoMessage(fmt::format("{} renderables", this->renderables.head + this->renderableUIs.head));
 	this->debug.addInfoMessage(fmt::format("{} zoom", this->camera->getZoom()));
+
+	if(this->network.isClient()) {
+		this->debug.addInfoMessage(fmt::format("Client: connected to {}", this->network.client.getIPAddress().toString()));
+	}
+	else if(this->network.isServer()) {
+		this->debug.addInfoMessage(fmt::format("Server: hosting on {}", this->network.getHostIPAddress().toString()));
+		this->debug.addInfoMessage(fmt::format("{} connections", this->network.getConnectionCount()));
+	}
+
 	#endif
 
 	if(deltaTime > 1.0) {
@@ -433,6 +447,10 @@ void Engine::tick() {
 	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
 
 	this->renderWindow.render();
+
+	if(this->network.isServer()) {
+		this->network.tick();
+	}
 
 	goto start_tick;
 }

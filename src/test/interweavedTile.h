@@ -15,7 +15,7 @@ class InterweavedTile: public OverlappingTile {
 	friend class Chunk;
 
 	public:
-		InterweavedTile(class ChunkContainer* container, bool createReference = true);
+		InterweavedTile(bool createReference = true);
 		~InterweavedTile();
 
 		// ## game_object_definitions InterweavedTile

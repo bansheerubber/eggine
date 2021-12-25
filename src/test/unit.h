@@ -39,10 +39,11 @@ class Unit: public Character {
 	friend class Team;
 	
 	public:
-		Unit(class ChunkContainer* container, bool createReference = true);
+		Unit(bool createReference = true);
 		~Unit();
 
 		// ## game_object_definitions Unit
+		// ##1 remote_object_definitions Unit
 
 		void move(glm::ivec3 position);
 		OverlappingTile* setPosition(glm::uvec3 position);
@@ -60,10 +61,17 @@ class Unit: public Character {
 		TileSet destinations;
 		TileSet sprintDestinations;
 		TileSet* path = nullptr;
+
+		NP_PROPERTY(NP_NUMBER)
 		unsigned int moves = 5;
+
+		NP_PROPERTY(NP_NUMBER)
 		unsigned int sprintMoves = 15;
 
+		NP_PROPERTY(NP_NUMBER, Unit::setMaxHealth)
 		int maxHealth = 1;
+
+		NP_PROPERTY(NP_NUMBER, Unit::setHealth)
 		int health = 1;
 		Healthbar healthbar;
 

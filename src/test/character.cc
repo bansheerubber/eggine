@@ -2,7 +2,7 @@
 
 #include "chunkContainer.h"
 
-Character::Character(ChunkContainer* chunkContainer, bool createReference) : InterweavedTile(chunkContainer, false) {
+Character::Character(bool createReference) : InterweavedTile(false) {
 	if(createReference) {
 		this->reference = esInstantiateObject(engine->eggscript, "Character", this);
 	}
@@ -14,8 +14,29 @@ Character::~Character() {
 }
 
 OverlappingTile* Character::setPosition(glm::uvec3 position) {
+	if(
+		this->unpacking
+		&& (
+			position.x >= engine->chunkContainer->getSize() * Chunk::Size
+			|| position.y >= engine->chunkContainer->getSize() * Chunk::Size
+		)
+	) {
+		throw network::RemoteObjectUnpackException(this, "Character: invalid position");
+	}
+	
 	this->container->updateCharacterPosition(this, position);
+	this->position = position;
+	this->writeUpdateMask("position");
+
 	return InterweavedTile::setPosition(position);
+}
+
+void Character::setAppearance(unsigned int texture) {
+	// TODO bounds check for network
+	
+	this->appearance = texture;
+	this->setTexture(texture);
+	this->writeUpdateMask("appearance");
 }
 
 void es::defineCharacter() {

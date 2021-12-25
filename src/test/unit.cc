@@ -7,7 +7,7 @@
 #include "../util/minHeap.h"
 #include "team.h"
 
-Unit::Unit(ChunkContainer* chunkContainer, bool createReference) : Character(chunkContainer, false) {
+Unit::Unit(bool createReference) : Character(false) {
 	if(createReference) {
 		this->reference = esInstantiateObject(engine->eggscript, "Unit", this);
 	}
@@ -119,6 +119,10 @@ OverlappingTile* Unit::setPosition(glm::uvec3 position) {
 }
 
 void Unit::setHealth(int health) {
+	if(this->unpacking && health <= 0) {
+		throw network::RemoteObjectUnpackException(this, "Unit: invalid max health");
+	}
+	
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], health);
@@ -126,6 +130,10 @@ void Unit::setHealth(int health) {
 }
 
 void Unit::setMaxHealth(int maxHealth) {
+	if(this->unpacking && maxHealth <= 0) {
+		throw network::RemoteObjectUnpackException(this, "Unit: invalid max health");
+	}
+	
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], maxHealth);
@@ -231,6 +239,8 @@ esEntryPtr es::Unit__setHealth(esEnginePtr esEngine, unsigned int argc, esEntryP
 		unit->health = (int)args[1].numberData;
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 
+		unit->writeUpdateMask("health");
+
 		if(unit->health <= 0) {
 			unit->kill();
 		}
@@ -244,6 +254,8 @@ esEntryPtr es::Unit__setMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 		unit->maxHealth = (int)args[1].numberData;
 		unit->health = max(unit->maxHealth, unit->health);
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
+
+		unit->writeUpdateMask("maxHealth");
 	}
 	return nullptr;
 }

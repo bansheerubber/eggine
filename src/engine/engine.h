@@ -11,10 +11,12 @@
 
 #include "../basic/camera.h"
 #include "callbacks.h"
+#include "../network/client.h"
 #include "debug.h"
 #include "../util/dynamicArray.h"
 #include "../sound/engine.h"
 #include "keybind.h"
+#include "../network/network.h"
 #include "../basic/text.h"
 #include "../basic/renderObject.h"
 #include "../resources/resourceManager.h"
@@ -79,6 +81,7 @@ class Engine {
 		resources::ResourceManager* manager;
 		render::Window renderWindow;
 		sound::Engine soundEngine;
+		network::Network network;
 
 		glm::vec2 mouse;
 

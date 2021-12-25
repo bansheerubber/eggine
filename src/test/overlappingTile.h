@@ -27,7 +27,7 @@ class OverlappingTile : public GameObject {
 	friend class Layer;
 	
 	public:
-		OverlappingTile(class ChunkContainer* container, bool createReference = true);
+		OverlappingTile(bool createReference = true);
 		~OverlappingTile();
 
 		// ## game_object_definitions OverlappingTile
