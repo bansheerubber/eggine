@@ -112,19 +112,7 @@ void network::Network::closeClient() {
 }
 
 void network::Network::tick() {
-	// if(getMicrosecondsNow() - this->frog > 30000) {
-	// 	for(Connection* connection: this->connections) {
-	// 		if(!connection->isInitialized()) {
-	// 			return;
-	// 		}
-
-	// 		Packet* packet = new Packet();
-	// 		packet->setType(DROPPABLE_PACKET);
-	// 		connection->sendPacket(packet);
-	// 	}
-
-	// 	this->frog = getMicrosecondsNow();
-	// }
+	
 }
 
 void network::Network::receive() {
@@ -214,6 +202,16 @@ bool network::Network::isServer() {
 
 bool network::Network::isClient() {
 	return this->mode == NETWORK_CLIENT;
+}
+
+void network::Network::removeConnection(class Connection* connection) {
+	this->connections.erase(find(this->connections.begin(), this->connections.end(), connection));
+	
+	if(connection->isInitialized()) {
+		this->udpAddressToConnection[connection->udpAddress] = nullptr;
+	}
+
+	this->secretToConnection[connection->secret] = nullptr;
 }
 
 void network::Network::sendInitialData(Connection* connection) {

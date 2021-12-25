@@ -13,7 +13,7 @@
 #include "packet.h"
 #include "../basic/remoteObject.h"
 
-// ##1 remote_object__headers
+// ##1 remote_object_headers
 
 using namespace std;
 
@@ -45,6 +45,11 @@ void network::Client::open() {
 			this->tcpSocket = -1;
 			return;
 		}
+
+		// send network checksum right away
+		Stream stream;
+		stream.writeString(engine->network.getChecksum());
+		::send(this->tcpSocket, stream.start(), stream.size(), 0);
 
 		fcntl(this->tcpSocket, F_SETFL, O_NONBLOCK);
 	}
@@ -96,8 +101,6 @@ void network::Client::receiveTCP() {
 		if(this->secret == 0) {
 			this->secret = this->receiveStream->readNumber<unsigned long>();
 		}
-
-		printf("got secret %ld\n", this->secret);
 
 		// simple protocol for negotiating UDP connection
 		while(this->receiveStream->canRead(1)) {
@@ -234,7 +237,7 @@ void network::Client::sendPacket(Packet* packet) {
 }
 
 void network::Client::send(size_t size, const char* buffer) {
-	::send(this->tcpSocket, buffer, size, 0);
+	::send(this->udpSocket, buffer, size, 0);
 }
 
 network::RemoteObject* network::Client::instantiateRemoteObject(remote_object_id remoteId, remote_class_id remoteClassId) {

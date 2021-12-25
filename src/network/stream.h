@@ -48,6 +48,18 @@ namespace network {
 			size_t size();
 			const char* start();
 
+			unsigned int writeString(std::string input) {
+				if(input.size() > 0xffff) {
+					return 0;
+				}
+				
+				this->writeNumber<unsigned short>(input.size());
+				for(size_t i = 0; i < input.size(); i++) {
+					this->writeNumber<char>(input[i]);
+				}
+				return (unsigned int)input.size();
+			}
+
 			template<class T>
 			unsigned int writeNumber(T number) {
 				for(int i = sizeof(T) - 1; i >= 0; i--) {
@@ -120,10 +132,19 @@ namespace network {
 				return sizeof(vector);
 			}
 
+			std::string readString() {
+				std::string output;
+				unsigned short size = this->readNumber<unsigned short>();
+				for(unsigned short i = 0; i < size; i++) {
+					output += this->readNumber<char>();
+				}
+				return output;
+			}
+
 			template<class T>
 			T readNumber() {
 				if(!this->canRead(sizeof(T))) {
-					throw 0;
+					throw StreamOverReadException(this->buffer.head, sizeof(T));
 				}
 				
 				char reversed[sizeof(T)];

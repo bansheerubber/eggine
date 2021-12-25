@@ -48,6 +48,10 @@ namespace network {
 			Network();
 			~Network();
 
+			inline std::string getChecksum() {
+				// ##1 remote_object_checksum
+			}
+
 			void openServer();
 			void closeServer();
 			void acceptServer();
@@ -66,6 +70,8 @@ namespace network {
 
 			bool isServer(); // whether or not the network is acting as a server
 			bool isClient(); // whether or not the network is acting as a client
+
+			void removeConnection(class Connection* connection);
 		
 		private:
 			NetworkMode mode = NETWORK_INACTIVE;
@@ -91,6 +97,7 @@ namespace network {
 			} udp;
 
 			unsigned long long frog;
+			unsigned int sent = 0;
 
 			void sendInitialData(class Connection* connection);
 	};

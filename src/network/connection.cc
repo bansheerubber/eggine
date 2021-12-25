@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "../engine/engine.h"
 #include "packet.h"
@@ -13,11 +14,16 @@ network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->_socket = _socket;
 	this->tcpAddress = address;
 	this->ip = ConnectionIPAddress(address);
+}
 
-	Stream stream(WRITE);
-	stream.writeNumber<unsigned long>(this->secret);
-	stream.writeNumber<char>(1);
-	this->sendTCP(stream.size(), stream.start());
+network::Connection::~Connection() {
+	if(this->_socket > 0) {
+		::close(this->_socket);
+	}
+
+	printf("dropped connection %s\n", this->ip.toString().c_str());
+
+	engine->network.removeConnection(this);
 }
 
 void network::Connection::receiveTCP() {
@@ -25,23 +31,68 @@ void network::Connection::receiveTCP() {
 	this->receiveStream->flush();
 	int length = ::recv(this->_socket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
 	if(length < 0) {
-		if(errno == EWOULDBLOCK) {
+		if(errno == EAGAIN || errno == EWOULDBLOCK) {
 			return;
 		}
+		delete this;
+		return;
 	}
 	else if(length == 0) {
+		delete this;
 		return;
 	}
 
 	this->receiveStream->buffer.head = length;
 
-	// handle packet
-	this->readPacket();
+	if(!this->isInitialized()) { // this should be a checksum
+		switch(this->handshake) {
+			case WAIT_FOR_CHECKSUM: {
+				if(length != 34) { // drop the packet if it isn't a checksum
+					delete this;
+					return;
+				}
+
+				std::string checksum = this->receiveStream->readString();
+				if(checksum == engine->network.getChecksum()) { // send the secret if we got the right checksum
+					Stream stream(WRITE);
+					stream.writeNumber<unsigned long>(this->secret);
+					stream.writeNumber<char>(1);
+					this->sendTCP(stream.size(), stream.start());
+					this->handshake = WAIT_FOR_SECRET;
+				}
+				else {
+					// TODO disconnect the client
+					printf("wrong checksum, bye\n");
+					const char* error = "E:Wrong checksum";
+					this->sendTCP(16, error);
+					delete this;
+					return;
+				}
+				break;
+			}
+
+			case WAIT_FOR_SECRET: { // we expect this connection to be silent if we're waiting for the secret
+				delete this;
+				return;
+			}
+		}
+	}
 }
 
 void network::Connection::receiveUDP(Stream &stream) {
+	if(!this->isInitialized() || this->handshake != PACKET_READY) { // something really wrong, close the connection
+		delete this;
+		return;
+	}
+	
 	Stream* oldStream = this->receiveStream; // TODO fix this potential nightmare
-	this->readPacket();
+	this->receiveStream = &stream;
+	try {
+		this->readPacket();
+	}
+	catch(StreamOverReadException &e) {
+		printf("%s\n", e.what());
+	}
 	this->receiveStream = oldStream;
 }
 
@@ -72,6 +123,7 @@ void network::Connection::requestSecret()  {
 }
 
 void network::Connection::initializeUDP(sockaddr_in6 address) {
+	this->handshake = PACKET_READY;
 	this->udpAddress = address;
 	
 	Stream stream(WRITE);

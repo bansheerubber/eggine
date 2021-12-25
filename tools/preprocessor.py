@@ -6,6 +6,7 @@ import subprocess
 import sys
 import json
 import math
+import hashlib
 
 total_lines = 0
 
@@ -53,6 +54,16 @@ np_type_to_read = {
 	"NP_NUMBER": "readNumber",
 	"NP_VECTOR": "readVector",
 }
+
+def get_network_hash():
+	hash_string = ""
+	for _, network_class in network_class_list:
+		hash_string += network_class
+		for property in network_property_list[network_class]:
+			hash_string += property["np_type"]
+			hash_string += "None" if property["np_setter"] == None else property["np_setter"]
+			hash_string += property["name"]
+	return hashlib.md5(hash_string.encode()).hexdigest()
 
 def remote_object_get_mask_position(classname, property_name):
 	for i in range(0, len(network_property_list[classname])):
@@ -237,8 +248,12 @@ def preprocess(filename, contents, depth):
 				remote_object_instantiation(new_contents)
 				continue
 			
-			if "remote_object__headers" in line:
+			if "remote_object_headers" in line:
 				remote_object_instantiation_headers(new_contents)
+				continue
+		
+			if "remote_object_checksum" in line:
+				new_contents.append(get_checksum.replace("%%checksum%%", get_network_hash()))
 				continue
 
 			if ".py" in command:
@@ -271,6 +286,7 @@ pack = get_remote_object_code("pack", 2)
 unpack = get_remote_object_code("unpack", 2)
 property_to_mask = get_remote_object_code("propertyToMaskPosition", 2)
 get_class_id = get_remote_object_code("getClassId", 2)
+get_checksum = get_remote_object_code("checksum", 3)
 
 def get_env_commands():
 	output = ""

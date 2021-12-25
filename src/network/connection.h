@@ -11,6 +11,13 @@
 #define EGGINE_CONNECTION_BUFFER_SIZE 65536
 
 namespace network {
+	enum ConnectionHandshakeState {
+		INVALID_STATE,
+		WAIT_FOR_CHECKSUM,
+		WAIT_FOR_SECRET,
+		PACKET_READY
+	};
+	
 	struct ConnectionIPAddress {
 		unsigned char address[16];
 
@@ -49,6 +56,7 @@ namespace network {
 		
 		public:
 			Connection(int _socket, sockaddr_in6 address);
+			~Connection();
 
 			void receiveTCP();
 			void receiveUDP(Stream &stream);
@@ -58,12 +66,14 @@ namespace network {
 			bool isInitialized();
 		
 		protected:			
+			ConnectionHandshakeState handshake = WAIT_FOR_CHECKSUM;
+			
 			sockaddr_in6 tcpAddress;
 			sockaddr_in6 udpAddress;
 
 			bool initialized = false;
 			unsigned long secret = 2974321; // secret negociated with TCP, used to identify UDP ip/port
-			int _socket;
+			int _socket = -1;
 			ConnectionIPAddress ip;
 
 			void sendTCP(size_t size, const char* buffer);
