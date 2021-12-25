@@ -16,6 +16,8 @@ namespace network {
 
 	class PacketHandler {
 		public:
+			virtual ~PacketHandler();
+			
 			void readPacket();
 			virtual void sendPacket(class Packet* packet);
 			virtual void ackPacket(unsigned int sequence);
@@ -25,7 +27,7 @@ namespace network {
 			Stream* receiveStream = new Stream();
 
 			unsigned int lastSequenceReceived = 0;
-			unsigned long lastHighestAckReceived;
+			unsigned int lastHighestAckReceived;
 			unsigned long ackMask = 0; // mask for all packets that we've acknowledged receiving
 
 			unsigned int lastSequenceSent = 0;

@@ -24,7 +24,7 @@ void handleSpritesheets(void* owner, carton::File* file, const char* buffer, siz
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(file->getFileName() == "spritesheets/spritesheet.ss") {
 		engine->developerGui->spritesheet = loadPng((unsigned char*)buffer, bufferSize);
-		for(unsigned int i = 0; i < stoi(file->metadata->getMetadata("amount")); i++) {
+		for(unsigned int i = 0; i < stoul(file->metadata->getMetadata("amount")); i++) {
 			glm::ivec2 start = tilemath::textureIndexToXY(i, 1057, 391);
 			cropped result = crop(engine->developerGui->spritesheet, start.x, start.y, 64, 128);
 

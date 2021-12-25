@@ -135,7 +135,7 @@ glm::uvec2& Chunk::getPosition() {
 void Chunk::defineBounds() {
 	tilemath::Rotation rotation = this->container->getRotation();
 	int topHeight = 0, rightHeight = 0, bottomHeight = 0, leftHeight = 0;
-	glm::vec2 bias;
+	glm::vec2 bias(0, 0);
 	switch(rotation) {
 		case tilemath::ROTATION_0_DEG: {
 			bias = glm::vec2(-0.5, -(32.0 / 2.0 + 39.0 * 2.0 + 2) / 128.0);
@@ -251,7 +251,6 @@ void Chunk::updateRotation(tilemath::Rotation rotation) {
 }
 
 size_t Chunk::renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context) {
-	unsigned int total = Chunk::Size * Chunk::Size * this->height;
 	unsigned int lastIndex = startIndex;
 	size_t leftOff = startInterweavedIndex;
 	size_t limit = startIndex + amount;
@@ -293,8 +292,6 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	#ifdef EGGINE_DEBUG
 	this->drawCalls = 0;
 	#endif
-
-	int interweavedIndex = 0;
 
 	struct VertexBlock {
 		glm::mat4 projection;

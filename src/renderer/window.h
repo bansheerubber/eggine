@@ -91,6 +91,10 @@ namespace render {
 			case PRIMITIVE_PATCHES: {
 				return DkPrimitive_Patches;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 	#else
@@ -142,6 +146,10 @@ namespace render {
 
 			case PRIMITIVE_PATCHES: {
 				return GL_PATCHES;
+			}
+
+			default: {
+				return GL_INVALID_ENUM;
 			}
 		}
 	}

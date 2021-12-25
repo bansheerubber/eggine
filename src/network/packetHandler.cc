@@ -2,6 +2,10 @@
 
 #include "packet.h"
 
+network::PacketHandler::~PacketHandler() {
+	
+}
+
 void network::PacketHandler::readPacket() {
 	PacketType type = (PacketType)this->receiveStream->readNumber<char>();
 	unsigned int receivedSequence = this->receiveStream->readNumber<unsigned int>();

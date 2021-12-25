@@ -56,7 +56,7 @@ int render::LiteHTMLContainer::text_width(const litehtml::tchar_t* text, litehtm
   int x = 0;
   size_t length = strlen(text);
   for(size_t i = 0; i < length; i++) {
-    FontGlyph ch = font->characterToGlyph[text[i]];
+    FontGlyph ch = font->characterToGlyph[(unsigned char)text[i]]; // TODO sign check
     x += (ch.advance >> 6);
   }
   return x;

@@ -12,6 +12,7 @@ using namespace std;
 class GameObject {
 	public:
 		GameObject();
+		virtual ~GameObject();
 		
 		virtual GameObjectType getType() {
 			return INVALID;

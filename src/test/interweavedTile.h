@@ -16,7 +16,7 @@ class InterweavedTile: public OverlappingTile {
 
 	public:
 		InterweavedTile(bool createReference = true);
-		~InterweavedTile();
+		virtual ~InterweavedTile();
 
 		// ## game_object_definitions InterweavedTile
 

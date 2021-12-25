@@ -196,6 +196,10 @@ namespace render {
 			case VERTEX_ATTRIB_DOUBLE: {
 				return GL_DOUBLE;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 	#endif

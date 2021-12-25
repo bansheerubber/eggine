@@ -70,7 +70,7 @@ namespace sound {
 		SoundReader* soundReader = (SoundReader*)file;
 
 		size_t bytes = size * count;
-		size_t end = soundReader->location + soundReader->size;
+		size_t end = (size_t)soundReader->location + soundReader->size;
 		size_t current = soundReader->file.tellg();
 		size_t readAmount = min(end - current, bytes);
 
@@ -83,7 +83,7 @@ namespace sound {
 		int state = -1;
 		SoundReader* soundReader = (SoundReader*)file;
 		if(origin == SEEK_SET) {
-			soundReader->file.seekg(offset + soundReader->location, ios_base::beg);
+			soundReader->file.seekg(offset + (size_t)soundReader->location, ios_base::beg);
 			state = soundReader->file.good() ? 0 : -1;
 		}
 		else if(origin == SEEK_CUR) {
@@ -91,23 +91,15 @@ namespace sound {
 			state = soundReader->file.good() ? 0 : -1;
 		}
 		else if(origin == SEEK_END) {
-			soundReader->file.seekg(soundReader->location + soundReader->size - offset, ios_base::beg);
+			soundReader->file.seekg((size_t)soundReader->location + soundReader->size - offset, ios_base::beg);
 			state = soundReader->file.good() ? 0 : -1;
 		}
 
 		return state;
 	}
 
-
 	inline long ifstream_tell(void* file) {
 		SoundReader* soundReader = (SoundReader*)file;
 		return (size_t)soundReader->file.tellg() - soundReader->location;
 	}
-	
-	static ov_callbacks OV_CALLBACKS_IFSTREAM = {
-		(size_t (*)(void *, size_t, size_t, void *))  ifstream_read,
-		(int (*)(void *, ogg_int64_t, int))           ifstream_seek,
-		(int (*)(void *))                             nullptr,
-		(long (*)(void *))                            ifstream_tell
-	};
 };

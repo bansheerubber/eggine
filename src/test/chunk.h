@@ -85,7 +85,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		unsigned int maxLayer = 0;
 
 		glm::uvec2 position = glm::uvec2(0, 0);
-		glm::vec2 screenSpacePosition;
+		glm::vec2 screenSpacePosition = glm::vec2(0, 0);
 		
 		render::VertexBuffer* vertexBuffer;
 		render::VertexAttributes* vertexAttributes;

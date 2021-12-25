@@ -24,7 +24,6 @@ sound::Sound::Sound(
 	// read data into the buffers
 	char* buffer = new char[SOUND_BUFFER_SIZE * reader.getChannels()];
 
-	int currentSection = 0;
 	for(size_t i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
 		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
 		alBufferData(this->buffers[i].bufferId, reader.getType(), (void*)buffer, result, reader.getSampleRate());
@@ -89,8 +88,6 @@ void _play(sound::SoundThreadContext* context) {
 	else if(type == sound::WAV_FILE) {
 		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT * reader.getChannels());
 	}
-
-	int currentSection = 0;
 
 	ALuint buffers[SOUND_BUFFER_CIRCULAR_COUNT];
 	for(unsigned int i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {

@@ -120,7 +120,7 @@ int DeveloperGui::consoleCallback(ImGuiInputTextCallbackData* data) {
 			
 			if(data->EventKey == ImGuiKey_UpArrow) {
 				this->historyPosition++;
-				if(this->historyPosition >= this->history.size()) {
+				if((unsigned int)this->historyPosition >= this->history.size()) {
 					this->historyPosition = this->history.size();
 				}
 			}
@@ -176,7 +176,7 @@ void DeveloperGui::render() {
 				usedWidth = 0.f;
 			}
 			ImGui::PushID(count);
-			if(ImGui::ImageButton((void*)texture->texture, ImVec2(size, size * 2), ImVec2(0, 0), ImVec2(1, 1), 0)) {
+			if(ImGui::ImageButton((void*)(intptr_t)texture->texture, ImVec2(size, size * 2), ImVec2(0, 0), ImVec2(1, 1), 0)) {
 				esEntry arguments[1];
 				esCreateNumberAt(arguments, count);
 				esDeleteEntry(esCallFunction(engine->eggscript, "onDevTextureSwitch", 1, arguments));

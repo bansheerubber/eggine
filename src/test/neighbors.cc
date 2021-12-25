@@ -48,7 +48,7 @@ void TileNeighborIterator::iterateTile() {
 	resources::SpriteSheetInfo info = this->container->getSpriteInfo(this->position + glm::ivec3(0, 0, 1), true);
 	if(info.wall != resources::NO_WALL) {
 		for(; this->index < 3; this->index++) {
-			NeighborDirection direction = directionsForWall[lsb(info.wall)][this->index];
+			NeighborDirection direction = directionsForWall[(size_t)lsb(info.wall)][this->index];
 			if(direction == INVALID_DIRECTION) {
 				continue;
 			}
@@ -102,7 +102,12 @@ bool TileNeighborIterator::testTile(glm::ivec3 position, NeighborDirection direc
 	// test for invalid walls
 	if(info.wall != resources::NO_WALL) {
 		for(unsigned int i = 0; i < 2; i++) {
-			if(invalidDirectionsForWall[lsb(info.wall)][i] == direction) {
+			char index = lsb(info.wall);
+			if(index < 0) {
+				continue;
+			}
+
+			if(invalidDirectionsForWall[(unsigned char)index][i] == direction) {
 				return false;
 			}
 		}

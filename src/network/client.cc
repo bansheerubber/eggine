@@ -161,7 +161,7 @@ void network::Client::receiveUDP() {
 void network::Client::handlePacket() {
 	try {
 		while(this->receiveStream->canRead(2)) { // read the size of the next chunk
-			unsigned short size = this->receiveStream->readNumber<unsigned short>();
+			this->receiveStream->readNumber<unsigned short>(); // TODO use size to do bug checking
 			StreamType type = (StreamType)this->receiveStream->readNumber<char>();
 			switch(type) {
 				case REMOTE_OBJECT_CREATE: {
@@ -180,7 +180,7 @@ void network::Client::handlePacket() {
 				}
 				
 				case REMOTE_OBJECT_UPDATE: {
-					remote_class_id remoteClassId = this->receiveStream->readNumber<remote_class_id>();
+					this->receiveStream->readNumber<remote_class_id>(); // remote class id
 					remote_object_id remoteObjectId = this->receiveStream->readNumber<remote_object_id>();
 
 					RemoteObject* object = engine->network.getRemoteObject(remoteObjectId);

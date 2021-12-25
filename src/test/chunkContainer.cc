@@ -186,13 +186,11 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	#endif
 }
 
-bool ChunkContainer::isValidTilePosition(glm::ivec3 position) {
+bool ChunkContainer::isValidTilePosition(glm::uvec3 position) {
 	if(
 		position.x >= this->size * Chunk::Size 
-		|| position.x < 0
 		|| position.y >= this->size * Chunk::Size
-		|| position.y < 0
-		|| position.z < 0
+		|| position.z >= 50
 	) {
 		return false;
 	}
@@ -304,8 +302,8 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 		-cosine45deg * 2.0f, cosine45deg * 2.0f
 	);
 	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f - glm::vec2(-1, 1), 0);
-	glm::ivec3 coordinates;
-	glm::ivec3 directionTowardsCamera;
+	glm::ivec3 coordinates(0, 0, 0);
+	glm::ivec3 directionTowardsCamera(0, 0, 0);
 	switch(this->getRotation()) {
 		case tilemath::ROTATION_0_DEG: {
 			coordinates = glm::ivec3(floor(_.x), floor(_.y), _.z);
@@ -371,14 +369,14 @@ void ChunkContainer::onAxis(string &bind, double value) {
 
 void ChunkContainer::commit() {
 	if(this->tileSelectionSprite == nullptr) {
-		this->tileSelectionSprite = (new OverlappingTile(this))
+		this->tileSelectionSprite = (new OverlappingTile())
 			->setTexture(18)
 			->setPosition(glm::uvec3(0, 0, 0))
 			->setZIndex(1);
 	}
 
 	if(this->characterSelectionSprite == nullptr) {
-		this->characterSelectionSprite = (new OverlappingTile(this))
+		this->characterSelectionSprite = (new OverlappingTile())
 			->setTexture(18)
 			->setColor(glm::vec4(0.0, 0.55, 1.0, 1.0))
 			->setPosition(glm::uvec3(0, 0, 0))

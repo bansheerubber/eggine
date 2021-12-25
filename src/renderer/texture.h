@@ -98,6 +98,10 @@ namespace render {
 					}
 				}
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 	
@@ -109,6 +113,10 @@ namespace render {
 
 			case TEXTURE_FILTER_LINEAR: {
 				return DkFilter_Linear;
+			}
+
+			default: {
+				return GL_INVALID_ENUM;
 			}
 		}
 	}
@@ -134,6 +142,10 @@ namespace render {
 			case TEXTURE_WRAP_MIRROR_CLAMP_TO_EDGE: {
 				return DkWrapMode_MirrorClampToEdge;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 	#else
@@ -154,6 +166,10 @@ namespace render {
 			case 4: {
 				return GL_RGBA;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 
@@ -170,6 +186,10 @@ namespace render {
 			case 32: {
 				return GL_UNSIGNED_INT;
 			}
+			
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 
@@ -181,6 +201,10 @@ namespace render {
 
 			case TEXTURE_FILTER_LINEAR: {
 				return GL_LINEAR;
+			}
+
+			default: {
+				return GL_INVALID_ENUM;
 			}
 		}
 	}
@@ -205,6 +229,10 @@ namespace render {
 
 			case TEXTURE_WRAP_MIRROR_CLAMP_TO_EDGE: {
 				return GL_MIRROR_CLAMP_TO_EDGE;
+			}
+
+			default: {
+				return GL_INVALID_ENUM;
 			}
 		}
 	}

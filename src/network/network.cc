@@ -162,7 +162,7 @@ void network::Network::receive() {
 
 	int messages = ::recvmmsg(this->udp.socket, this->udp.headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
 	if(messages > 0) {
-		for(unsigned int i = 0; i < messages; i++) {
+		for(unsigned int i = 0; i < (unsigned int)messages; i++) {
 			// prepare the buffers
 			this->udp.streams[i].flush();
 			this->udp.streams[i].buffer.head = this->udp.headers[i].msg_len;

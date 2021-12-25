@@ -2,6 +2,13 @@
 
 #include "../engine/engine.h"
 
+static ov_callbacks OV_CALLBACKS_IFSTREAM = {
+	(size_t (*)(void *, size_t, size_t, void *))  sound::ifstream_read,
+	(int (*)(void *, ogg_int64_t, int))           sound::ifstream_seek,
+	(int (*)(void *))                             nullptr,
+	(long (*)(void *))                            sound::ifstream_tell
+};
+
 sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType type) {
 	this->location = location;
 	this->size = size;
@@ -28,7 +35,7 @@ sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType t
 				exit(1);
 			}
 
-			uint32_t fileSize = this->readNumber<uint32_t>();
+			this->readNumber<uint32_t>(); // file size
 
 			uint32_t waveMagicNumber = this->readNumber<uint32_t>();
 			if(waveMagicNumber != 0x45564157) {
@@ -82,6 +89,10 @@ unsigned int sound::SoundReader::getSampleRate() {
 		case WAV_FILE: {
 			return this->wav.format.sampleRate;
 		}
+
+		default: {
+			return 0;
+		}
 	}
 }
 
@@ -94,6 +105,10 @@ unsigned short sound::SoundReader::getBitDepth() {
 		case WAV_FILE: {
 			return this->wav.format.bitdepth;
 		}
+
+		default: {
+			return 0;
+		}
 	}
 }
 
@@ -105,6 +120,10 @@ unsigned short sound::SoundReader::getChannels() {
 
 		case WAV_FILE: {
 			return this->wav.format.channels;
+		}
+
+		default: {
+			return 0;
 		}
 	}
 }
@@ -158,6 +177,10 @@ size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 			this->file.read(buffer, readSize);
 			return readSize;
 		}
+
+		default: {
+			return 0;
+		}
 	}
 }
 
@@ -169,7 +192,7 @@ void sound::SoundReader::seek(size_t location) {
 		}
 
 		case WAV_FILE: {
-			this->file.seekg(this->wav.dataLocation + location);
+			this->file.seekg((size_t)this->wav.dataLocation + location);
 			break;
 		}
 	}

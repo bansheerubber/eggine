@@ -43,7 +43,7 @@ void Map::load(unsigned char* buffer, unsigned long size) {
 		exit(1);
 	}
 	
-	uint16_t chunkSize;
+	uint16_t chunkSize = 0;
 	while((index + sizeof(uint16_t)) < size) {
 		MapCommand command = (MapCommand)this->readNumber<uint16_t>(&buffer[index], &index);
 		switch(command) {

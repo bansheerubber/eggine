@@ -100,7 +100,6 @@ png loadPng(const unsigned char* buffer, unsigned int size) {
 	png_read_image(png, image);
 
 	png_byte* imageData = new png_byte[width * channels * height];
-	png_uint_32 index = 0;
 	for(png_uint_32 y = 0; y < height; y++) {
 		for(png_uint_32 x = 0; x < width * channels; x++) {
 			imageData[y * width * channels + x % (width * channels)] = image[y][x];

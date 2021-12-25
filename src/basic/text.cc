@@ -19,20 +19,6 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 		Text::Program->addShader(fragmentShader);
 	}
 
-	glm::vec2 triangleVertices[] = {
-		glm::vec2(-0.5, 1.0),
-		glm::vec2(-0.5, -1.0),
-		glm::vec2(0.5, 1.0),
-		glm::vec2(0.5, -1.0),
-	};
-
-	glm::vec2 triangleUVs[] = {
-		glm::vec2(0.0, 0.0),
-		glm::vec2(0.0, 1.0),
-		glm::vec2(1.0, 0.0),
-		glm::vec2(1.0, 1.0),
-	};
-
 	string filePrefix = "";
 	#ifdef __switch__
 	filePrefix = "romfs:/";
@@ -75,7 +61,7 @@ void Text::updateBuffers() {
 			y += this->font->size;
 		}
 		else {
-			FontGlyph ch = this->font->characterToGlyph[this->text[i]];
+			FontGlyph ch = this->font->characterToGlyph[(unsigned char)this->text[i]];
 
 			float xpos = x + ch.left * scale;
 			float ypos = y - ch.top;

@@ -65,7 +65,7 @@ esEntryPtr es::Team__get(esEnginePtr esEngine, unsigned int argc, esEntry* args)
 		int index = args[1].numberData;
 		team->units.sort();
 
-		if(index >= team->units.array.head || index < 0) {
+		if(index < 0 || (unsigned int)index >= team->units.array.head) {
 			return nullptr;
 		}
 		return esCreateObject(team->units.array[index]->reference);

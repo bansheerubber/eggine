@@ -1,5 +1,6 @@
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL
 #define GLM_GTX_hash
 
 #include <glm/gtx/hash.hpp>
@@ -76,7 +77,7 @@ class ChunkContainer : public RenderObject {
 		class Team* getPlayerTeam();
 		class Team* getEnemyTeam();
 
-		bool isValidTilePosition(glm::ivec3 position);
+		bool isValidTilePosition(glm::uvec3 position);
 
 		void setTile(glm::ivec3 position, int texture);
 		int getTile(glm::ivec3 position);
