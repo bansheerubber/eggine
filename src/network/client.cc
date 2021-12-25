@@ -82,6 +82,10 @@ void network::Client::receive() {
 }
 
 void network::Client::receiveTCP() {
+	if(this->initialized) {
+		return;
+	}
+	
 	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
 	this->receiveStream->flush();
 	int length = ::recv(this->tcpSocket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
@@ -89,6 +93,7 @@ void network::Client::receiveTCP() {
 		if(errno == EWOULDBLOCK) {
 			return;
 		}
+		return;
 	}
 	else if(length == 0) {
 		return;
@@ -98,8 +103,13 @@ void network::Client::receiveTCP() {
 
 	// if our connection isn't initialized, we should receive a secret as our first message
 	if(!this->initialized) {
-		if(this->secret == 0) {
+		if(!this->hasSecret) {
 			this->secret = this->receiveStream->readNumber<unsigned long>();
+			this->hasSecret = true;
+
+			this->lastSequenceSent = this->receiveStream->readNumber<unsigned int>();
+			this->lastSequenceReceived = this->receiveStream->readNumber<unsigned int>();
+			this->lastHighestAckReceived = this->lastSequenceSent;
 		}
 
 		// simple protocol for negotiating UDP connection

@@ -24,6 +24,7 @@ namespace network {
 		protected:
 			unsigned long secret = 0;
 			bool initialized = false;
+			bool hasSecret = false;
 			
 			int tcpSocket = -1;
 			int udpSocket = -1;

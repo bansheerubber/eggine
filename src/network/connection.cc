@@ -9,11 +9,17 @@
 
 #include "../engine/engine.h"
 #include "packet.h"
+#include "../util/random.h"
 
 network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->_socket = _socket;
 	this->tcpAddress = address;
 	this->ip = ConnectionIPAddress(address);
+	this->secret = randomLong();
+
+	this->lastSequenceReceived = randomInt();
+	this->lastSequenceSent = randomInt();
+	this->lastHighestAckReceived = this->lastSequenceSent;
 }
 
 network::Connection::~Connection() {
@@ -56,6 +62,8 @@ void network::Connection::receiveTCP() {
 				if(checksum == engine->network.getChecksum()) { // send the secret if we got the right checksum
 					Stream stream(WRITE);
 					stream.writeNumber<unsigned long>(this->secret);
+					stream.writeNumber<unsigned int>(this->lastSequenceReceived);
+					stream.writeNumber<unsigned int>(this->lastSequenceSent);
 					stream.writeNumber<char>(1);
 					this->sendTCP(stream.size(), stream.start());
 					this->handshake = WAIT_FOR_SECRET;

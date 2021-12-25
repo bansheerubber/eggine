@@ -20,8 +20,8 @@ void network::PacketHandler::readPacket() {
 	printf("-----------------------------------------------\n");
 	printf("packet check:\n");
 	printf("packets in list: %u\n", this->packetListSize());
-	printf("their last ack: %d\n", receivedHighestSequenceAck);
-	printf("our remembered last ack: %d\n", lastHighestAckReceived);
+	printf("their last ack: %u\n", receivedHighestSequenceAck);
+	printf("our remembered last ack: %u\n", lastHighestAckReceived);
 	printf("their ack mask: ");
 	for(unsigned long i = 0; i < 64; i++) {
 		printf("%d", (receivedAckMask & ((unsigned long)1 << i)) > 0);
@@ -33,21 +33,19 @@ void network::PacketHandler::readPacket() {
 	}
 
 	// do ack check. if we think that the connection didn't get packets that we sent, then we're going to re-send them
-	if(this->head != nullptr) {
-		for(unsigned int i = lastHighestAckReceived + 1; i <= receivedHighestSequenceAck; i++) {
-			unsigned int checkBit = receivedHighestSequenceAck - i;
-			if(checkBit >= 64) {
-				printf("dropped packet from outside the ack window #%d\n", i);
-				this->resendPacket(i);
-			}
-			else if(receivedAckMask & (1 << checkBit)) {
-				printf("acked packet #%d\n", i);
-				this->ackPacket(i);
-			}
-			else {
-				printf("dropped packet #%d\n", i);
-				this->resendPacket(i);
-			}
+	for(unsigned int i = lastHighestAckReceived + 1; i <= receivedHighestSequenceAck; i++) {
+		unsigned int checkBit = receivedHighestSequenceAck - i;
+		if(checkBit >= 64) {
+			printf("dropped packet from outside the ack window #%u\n", i);
+			this->resendPacket(i);
+		}
+		else if(receivedAckMask & (1 << checkBit)) {
+			printf("acked packet #%u\n", i);
+			this->ackPacket(i);
+		}
+		else {
+			printf("dropped packet #%u\n", i);
+			this->resendPacket(i);
 		}
 	}
 

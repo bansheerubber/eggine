@@ -72,7 +72,7 @@ namespace network {
 			sockaddr_in6 udpAddress;
 
 			bool initialized = false;
-			unsigned long secret = 2974321; // secret negociated with TCP, used to identify UDP ip/port
+			unsigned long secret = 0; // secret negociated with TCP, used to identify UDP ip/port
 			int _socket = -1;
 			ConnectionIPAddress ip;
 
