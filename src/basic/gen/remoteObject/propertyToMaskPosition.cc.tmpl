@@ -1,0 +1,10 @@
+inline unsigned int propertyToMaskPosition(string property) {
+	const char* masks[] = %%array%%;
+	unsigned int length = %%length%%;
+	for(unsigned int i = 0; i < length; i++) {
+		if(masks[i] == property) {
+			return i;
+		}
+	}
+	return -1;
+}

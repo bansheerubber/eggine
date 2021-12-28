@@ -1,0 +1,10 @@
+inline void unpack(network::Stream &stream) {
+	const network::UpdateMask mask = stream.readUpdateMask();
+	this->unpacking = true;
+
+%%unpacks%%
+
+	this->unpacking = false;
+	stream.finishReadRemoteObject(this);
+}
+

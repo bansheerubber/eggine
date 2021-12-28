@@ -278,7 +278,7 @@ def get_remote_object_code(file, number_of_tabs):
 	for i in range(0, number_of_tabs):
 		tabs = tabs + "\t"
 
-	with open(f"src/basic/gen/remoteObject/{file}.cc.gen") as start:
+	with open(f"src/basic/gen/remoteObject/{file}.cc.tmpl") as start:
 		return ''.join(preprocess("", [f"{tabs}{line}" for line in start.readlines()], "."))
 
 allocate_mask = get_remote_object_code("allocateMask", 2)
