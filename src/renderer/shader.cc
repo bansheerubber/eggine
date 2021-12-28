@@ -45,7 +45,7 @@ void render::Shader::loadFromFile(string filename, ShaderType type) {
   }
 
 	file.seekg(0, file.end);
-	unsigned long length = file.tellg();
+	uint64_t length = file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);

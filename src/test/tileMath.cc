@@ -5,8 +5,8 @@
 
 using namespace std;
 
-long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size, tilemath::Rotation rotation) {
-	long x = 0, y = 0;
+int64_t tilemath::coordinateToIndex(glm::ivec2 coordinate, int64_t size, tilemath::Rotation rotation) {
+	int64_t x = 0, y = 0;
 	switch(rotation) {
 		case ROTATION_0_DEG: {
 			x = size - coordinate.x - 1;
@@ -49,7 +49,7 @@ long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size, tilemath::Rot
 	}
 }
 
-glm::uvec2 tilemath::indexToCoordinate(long index, long size, tilemath::Rotation rotation) {
+glm::uvec2 tilemath::indexToCoordinate(int64_t index, int64_t size, tilemath::Rotation rotation) {
 	double threshold = size * (size + 1.0) / 2.0;
 	double x = 0.0, y = 0.0;
 	if(index < threshold) {

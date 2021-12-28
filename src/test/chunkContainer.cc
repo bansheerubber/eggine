@@ -128,7 +128,7 @@ tilemath::Rotation ChunkContainer::getRotation() {
 }
 
 Chunk* ChunkContainer::addChunk(glm::uvec2 position) {
-	long index = tilemath::coordinateToIndex(position, this->size, this->getRotation());
+	int64_t index = tilemath::coordinateToIndex(position, this->size, this->getRotation());
 	if(this->renderOrder[index] == nullptr) {
 		this->renderOrder[index] = new Chunk(this);
 	}
@@ -228,7 +228,7 @@ void ChunkContainer::setTile(glm::ivec3 position, int texture) {
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
-	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
+	int64_t index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
 	this->renderOrder[index]->setTileTexture(position, texture);
 }
 
@@ -238,7 +238,7 @@ int ChunkContainer::getTile(glm::ivec3 position) {
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
-	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
+	int64_t index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
 	return this->renderOrder[index]->getTileTexture(position);
 }
 

@@ -12,7 +12,7 @@ namespace network {
 			void setType(PacketType type);
 			PacketType getType();
 			unsigned int getSequence();
-			void setHeader(unsigned int sequence, unsigned int lastAckedSequence, unsigned long ackMask);
+			void setHeader(unsigned int sequence, unsigned int lastAckedSequence, uint64_t ackMask);
 		
 		private:
 			PacketType type = INVALID_PACKET;

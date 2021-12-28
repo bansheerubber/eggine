@@ -12,7 +12,7 @@ void network::PacketHandler::readPacket() {
 	unsigned int receivedHighestSequenceAck = this->receiveStream->readNumber<unsigned int>();
 	
 	// ack mask is a mask of the messages the client has successfully received, starting at highestSequenceAck and then heading downwards
-	unsigned long receivedAckMask = this->receiveStream->readNumber<unsigned long>();
+	uint64_t receivedAckMask = this->receiveStream->readNumber<uint64_t>();
 
 	if(type == INVALID_PACKET || type >= MAX_PACKET) {
 		return;
@@ -27,8 +27,8 @@ void network::PacketHandler::readPacket() {
 	printf("their last ack: %u\n", receivedHighestSequenceAck);
 	printf("our remembered last ack: %u\n", lastHighestAckReceived);
 	printf("their ack mask: ");
-	for(unsigned long i = 0; i < 64; i++) {
-		printf("%d", (receivedAckMask & ((unsigned long)1 << i)) > 0);
+	for(uint64_t i = 0; i < 64; i++) {
+		printf("%d", (receivedAckMask & ((uint64_t)1 << i)) > 0);
 	}
 	printf("\n");
 
@@ -60,8 +60,8 @@ void network::PacketHandler::readPacket() {
 	printf("-----------------------------------------------\n");
 	printf("packet recieved: %u %ld\n", this->lastSequenceReceived, this->receiveStream->size());
 	printf("our ack mask: ");
-	for(unsigned long i = 0; i < 64; i++) {
-		printf("%d", (this->ackMask & ((unsigned long)1 << i)) > 0);
+	for(uint64_t i = 0; i < 64; i++) {
+		printf("%d", (this->ackMask & ((uint64_t)1 << i)) > 0);
 	}
 	printf("\n");
 

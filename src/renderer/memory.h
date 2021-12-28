@@ -20,13 +20,13 @@ namespace render {
 			public:
 				Piece(class Page* parent);
 				
-				unsigned long start; // start of the chunk relative to the memory block
-				unsigned long end; // end of the chunk relative to the memory block
-				unsigned long align;
+				uint64_t start; // start of the chunk relative to the memory block
+				uint64_t end; // end of the chunk relative to the memory block
+				uint64_t align;
 				Page* parent = nullptr;
 
 				void print();
-				unsigned long size();
+				uint64_t size();
 				void* cpuAddr();
 				DkGpuAddr gpuAddr();
 				void requestDeallocate();
@@ -44,11 +44,11 @@ namespace render {
 			friend Piece;
 			
 			public:
-				Page(Window* window, uint32_t flags, unsigned long size = SWITCH_MEMORY_DEFAULT_PAGE_SIZE);
+				Page(Window* window, uint32_t flags, uint64_t size = SWITCH_MEMORY_DEFAULT_PAGE_SIZE);
 
 				dk::MemBlock block;
 				
-				Piece* allocate(unsigned long size, unsigned long align);
+				Piece* allocate(uint64_t size, uint64_t align);
 				void processDeallocationList();
 				void deallocate(Piece* piece);
 				void print();
@@ -59,7 +59,7 @@ namespace render {
 			protected:
 				Window* window;
 				Piece* head = nullptr;
-				unsigned long size;
+				uint64_t size;
 				uint32_t flags;
 				vector<Piece*> deallocationList;
 
@@ -71,7 +71,7 @@ namespace render {
 			public:
 				Manager(Window* window);
 				
-				Piece* allocate(uint32_t flags, unsigned long size, unsigned long align);
+				Piece* allocate(uint32_t flags, uint64_t size, uint64_t align);
 				void processDeallocationLists();
 				void print();
 				size_t getAllocated();

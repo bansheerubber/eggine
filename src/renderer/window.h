@@ -187,7 +187,7 @@ namespace render {
 
 			HidAnalogStickState leftStick;
 			HidAnalogStickState rightStick;
-			unsigned long buttons;
+			uint64_t buttons;
 
 			void addTexture(switch_memory::Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height);
 			void bindTexture(unsigned int location, class Texture* texture);
@@ -202,7 +202,7 @@ namespace render {
 
 			glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-			unsigned long long lastRenderTime = getMicrosecondsNow();
+			uint64_t lastRenderTime = getMicrosecondsNow();
 
 			litehtml::context htmlContext;
 			size_t htmlChecksum = 0;

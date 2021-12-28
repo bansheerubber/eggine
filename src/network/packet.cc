@@ -4,7 +4,7 @@ network::Packet::Packet() {
 	this->stream.writeNumber<char>(0);
 	this->stream.writeNumber<unsigned int>(0);
 	this->stream.writeNumber<unsigned int>(0);
-	this->stream.writeNumber<unsigned long>(0);
+	this->stream.writeNumber<uint64_t>(0);
 }
 
 void network::Packet::setType(PacketType type) {
@@ -23,7 +23,7 @@ unsigned int network::Packet::getSequence() {
 	return this->sequence;
 }
 
-void network::Packet::setHeader(unsigned int sequence, unsigned int lastAckedSequence, unsigned long ackMask) {
+void network::Packet::setHeader(unsigned int sequence, unsigned int lastAckedSequence, uint64_t ackMask) {
 	size_t oldHead = this->stream.buffer.head;
 	this->stream.buffer.head = 0;
 	this->stream.writeNumber((char)this->type);

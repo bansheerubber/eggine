@@ -24,7 +24,7 @@ void render::switch_memory::Piece::print() {
 	printf("  };\n");
 }
 
-unsigned long render::switch_memory::Piece::size() {
+uint64_t render::switch_memory::Piece::size() {
 	return this->end - this->start + 1;
 }
 
@@ -44,7 +44,7 @@ void render::switch_memory::Piece::deallocate() {
 	this->parent->deallocate(this);
 }
 
-render::switch_memory::Page::Page(Window* window, uint32_t flags, unsigned long size) {
+render::switch_memory::Page::Page(Window* window, uint32_t flags, uint64_t size) {
 	size = alignTo(size, DK_MEMBLOCK_ALIGNMENT); // align to 4KB otherwise we'll crash
 	
 	this->window = window;
@@ -66,8 +66,8 @@ DkGpuAddr render::switch_memory::Page::gpuAddr() {
 	return this->block.getGpuAddr();
 }
 
-render::switch_memory::Piece* render::switch_memory::Page::allocate(unsigned long size, unsigned long align) {
-	unsigned long realSize = alignTo(size, align);
+render::switch_memory::Piece* render::switch_memory::Page::allocate(uint64_t size, uint64_t align) {
+	uint64_t realSize = alignTo(size, align);
 
 	if(realSize > this->size) {
 		return nullptr;
@@ -76,10 +76,10 @@ render::switch_memory::Piece* render::switch_memory::Page::allocate(unsigned lon
 	// look through the pieces and see if there's a piece that is big enough to hold our memory
 	Piece* current = this->head;
 	while(current != nullptr) {
-		unsigned long realStart = alignTo(current->start, align); // we need to align the start
-		long pieceSize = (long)current->size() - (long)(realStart - current->start); // calculate useable size using alignment
+		uint64_t realStart = alignTo(current->start, align); // we need to align the start
+		int64_t pieceSize = (int64_t)current->size() - (int64_t)(realStart - current->start); // calculate useable size using alignment
 
-		if(pieceSize >= (long)realSize && !current->allocated) { // we found a piece that we can use
+		if(pieceSize >= (int64_t)realSize && !current->allocated) { // we found a piece that we can use
 			break;
 		}
 		
@@ -90,7 +90,7 @@ render::switch_memory::Piece* render::switch_memory::Page::allocate(unsigned lon
 		return nullptr;
 	}
 	else if(realSize != this->size) { // segment memory if needed
-		unsigned long realStart = alignTo(current->start, align); // round up to closest alignment
+		uint64_t realStart = alignTo(current->start, align); // round up to closest alignment
 
 		Piece* unusedSegment = new Piece(this);
 		unusedSegment->start = realStart + realSize;
@@ -217,8 +217,8 @@ void render::switch_memory::Manager::processDeallocationLists() {
 	}
 }
 
-render::switch_memory::Piece* render::switch_memory::Manager::allocate(uint32_t flags, unsigned long size, unsigned long align) {
-	unsigned long realSize = alignTo(size, align);
+render::switch_memory::Piece* render::switch_memory::Manager::allocate(uint32_t flags, uint64_t size, uint64_t align) {
+	uint64_t realSize = alignTo(size, align);
 	
 	Piece* foundPiece = nullptr;
 	for(Page* page: this->pages) {
@@ -231,7 +231,7 @@ render::switch_memory::Piece* render::switch_memory::Manager::allocate(uint32_t 
 	}
 
 	// we always need memory if we ask for it. create a new page
-	unsigned long blockSize = realSize > SWITCH_MEMORY_DEFAULT_PAGE_SIZE ? realSize : SWITCH_MEMORY_DEFAULT_PAGE_SIZE;
+	uint64_t blockSize = realSize > SWITCH_MEMORY_DEFAULT_PAGE_SIZE ? realSize : SWITCH_MEMORY_DEFAULT_PAGE_SIZE;
 	this->pages.emplace_back(new Page(this->window, flags, blockSize));
 	this->allocated += blockSize;
 	return this->pages.back()->allocate(realSize, align);

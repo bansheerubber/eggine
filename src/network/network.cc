@@ -176,7 +176,7 @@ void network::Network::receive() {
 				this->udpAddressToConnection.find(this->udp.addresses[i]) == this->udpAddressToConnection.end()
 			) {
 				// if we can't find a secret, discard the packet
-				unsigned long secret = this->udp.streams[i].readNumber<unsigned long>();
+				uint64_t secret = this->udp.streams[i].readNumber<uint64_t>();
 				if(this->secretToConnection.find(secret) == this->secretToConnection.end()) {
 					printf("discard because of invalid secret\n");
 					continue;

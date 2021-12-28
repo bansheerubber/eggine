@@ -18,7 +18,7 @@ class Map {
 	public:
 		Map(class ChunkContainer* container);
 		void loadFromFile(string filename);
-		void load(unsigned char* buffer, unsigned long size);
+		void load(unsigned char* buffer, uint64_t size);
 		void save(string filename);
 	
 	private:
@@ -26,10 +26,10 @@ class Map {
 
 		tsl::robin_map<string, string> info;
 
-		static constexpr unsigned long Version = 1;
+		static constexpr uint64_t Version = 1;
 		
 		template<class T>
-		T readNumber(unsigned char* buffer, unsigned long* index) {
+		T readNumber(unsigned char* buffer, uint64_t* index) {
 			*index += sizeof(T);
 			
 			if constexpr(is_same<float, T>::value || is_same<double, T>::value) {
@@ -62,7 +62,7 @@ class Map {
 			}
 		}
 
-		string readString(unsigned char* buffer, unsigned long* index) {
+		string readString(unsigned char* buffer, uint64_t* index) {
 			uint16_t size = this->readNumber<uint16_t>(buffer, index);
 			char output[size];
 			for(unsigned int i = 0; i < size; i++) {

@@ -189,7 +189,7 @@ void render::Window::deinitialize() {
 }
 
 void render::Window::prerender() {
-	long long startTime = getMicrosecondsNow();
+	int64_t startTime = getMicrosecondsNow();
 	this->deltaTime = (startTime - this->lastRenderTime) / 1000000.0;
 	this->lastRenderTime = getMicrosecondsNow();
 	

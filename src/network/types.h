@@ -9,7 +9,7 @@ namespace network {
 	#define EGGINE_PACKET_SIZE 32768
 	
 	typedef unsigned short remote_class_id;
-	typedef unsigned long remote_object_id;
+	typedef uint64_t remote_object_id;
 
 	struct IPAddress {
 		unsigned char address[16];

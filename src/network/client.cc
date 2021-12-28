@@ -106,7 +106,7 @@ void network::Client::receiveTCP() {
 	// if our connection isn't initialized, we should receive a secret as our first message
 	if(!this->initialized) {
 		if(!this->hasSecret) {
-			this->secret = this->receiveStream->readNumber<unsigned long>();
+			this->secret = this->receiveStream->readNumber<uint64_t>();
 			this->hasSecret = true;
 
 			this->lastSequenceSent = this->receiveStream->readNumber<unsigned int>();
@@ -119,7 +119,7 @@ void network::Client::receiveTCP() {
 			switch(this->receiveStream->readNumber<char>()) {
 				case 1: { // transmit secret via UDP
 					Stream stream(WRITE);
-					stream.writeNumber<unsigned long>(this->secret);
+					stream.writeNumber<uint64_t>(this->secret);
 					::send(this->udpSocket, stream.start(), 8, 0);
 					break;
 				}

@@ -6,7 +6,7 @@ static ov_callbacks OV_CALLBACKS_IFSTREAM = {
 	(size_t (*)(void *, size_t, size_t, void *))  sound::ifstream_read,
 	(int (*)(void *, ogg_int64_t, int))           sound::ifstream_seek,
 	(int (*)(void *))                             nullptr,
-	(long (*)(void *))                            sound::ifstream_tell
+	(int64_t (*)(void *))                            sound::ifstream_tell
 };
 
 sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType type) {
@@ -150,9 +150,9 @@ ALenum sound::SoundReader::getType() {
 size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 	switch(this->type) {
 		case OGG_FILE: {
-			unsigned long pointer = 0;
+			uint64_t pointer = 0;
 			while(pointer < bufferSize) {
-				long result = ov_read(this->ogg.file, &buffer[pointer], bufferSize - pointer, 0, 2, 1, &this->ogg.currentSection);
+				int64_t result = ov_read(this->ogg.file, &buffer[pointer], bufferSize - pointer, 0, 2, 1, &this->ogg.currentSection);
 				if(result == OV_HOLE) {
 					return -1;
 				}

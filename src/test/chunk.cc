@@ -16,7 +16,7 @@
 
 glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
-tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>>();
+tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>>();
 
 void initInterweavedTileWrapper(Chunk* chunk, InterweavedTileWrapper* tile) {
 	*tile = {};
@@ -52,7 +52,7 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 					Chunk::Rotations[rotationPair].resize(Chunk::Size * Chunk::Size);
 					for(unsigned int oldIndex = 0; oldIndex < Chunk::Size * Chunk::Size; oldIndex++) {
 						glm::ivec2 intermediatePosition = tilemath::indexToCoordinate(oldIndex, Chunk::Size, (tilemath::Rotation)a);
-						long newIndex = tilemath::coordinateToIndex(intermediatePosition, Chunk::Size, (tilemath::Rotation)b);
+						int64_t newIndex = tilemath::coordinateToIndex(intermediatePosition, Chunk::Size, (tilemath::Rotation)b);
 						Chunk::Rotations[rotationPair][oldIndex] = newIndex;
 					}
 				}
@@ -216,7 +216,7 @@ void Chunk::updateRotation(tilemath::Rotation rotation) {
 	int* newTextureIndices = (int*)calloc(Chunk::Size * Chunk::Size * Chunk::MaxHeight, sizeof(int)); // this is slightly faster than new
 	for(unsigned int i = 0;  i < Chunk::Size * Chunk::Size * Chunk::MaxHeight; i++) {
 		unsigned int height = i / (Chunk::Size * Chunk::Size);
-		long newIndex = Chunk::Rotations[pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
+		int64_t newIndex = Chunk::Rotations[pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
 
 		resources::SpriteFacingInfo* facingsMap;
 		if((facingsMap = ChunkContainer::Image->getSpriteInfo(this->textureIndices[i]).facingsMap) != nullptr) {

@@ -26,7 +26,7 @@ namespace network {
 		protected:
 			IPAddress ip;
 			
-			unsigned long secret = 0;
+			uint64_t secret = 0;
 			bool initialized = false;
 			bool hasSecret = false;
 			

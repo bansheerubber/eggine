@@ -30,7 +30,7 @@ class SortedArray {
 
 		void insert(T value) {
 			// find a place to insert it at
-			for(unsigned long i = 0; i < this->array.head; i++) {
+			for(uint64_t i = 0; i < this->array.head; i++) {
 				if(this->compare(&value, &this->array[i]) < 0) {
 					this->array.shift(i, 1);
 					this->array[i] = value;

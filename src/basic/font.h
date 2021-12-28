@@ -16,7 +16,7 @@ struct FontGlyph {
 	unsigned int height;
 	int left;
 	int top;
-	long int advance;
+	int64_t advance;
 	glm::vec2 minUV;
 	glm::vec2 maxUV;
 };

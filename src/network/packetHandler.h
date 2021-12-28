@@ -28,7 +28,7 @@ namespace network {
 
 			unsigned int lastSequenceReceived = 0;
 			unsigned int lastHighestAckReceived;
-			unsigned long ackMask = 0; // mask for all packets that we've acknowledged receiving
+			uint64_t ackMask = 0; // mask for all packets that we've acknowledged receiving
 
 			unsigned int lastSequenceSent = 0;
 

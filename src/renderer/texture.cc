@@ -36,7 +36,7 @@ void render::Texture::loadPNGFromFile(string filename) {
 	}
 
 	file.seekg(0, file.end);
-	unsigned long length = file.tellg();
+	uint64_t length = file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);

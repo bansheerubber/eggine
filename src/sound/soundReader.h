@@ -17,7 +17,7 @@ namespace sound {
 		friend size_t ifstream_read(void* data, size_t size, size_t count, void* file);
 		friend int ifstream_seek(void* file, ogg_int64_t offset, int origin);
 		friend int ifstream_close(void* file);
-		friend long ifstream_tell(void* file);
+		friend int64_t ifstream_tell(void* file);
 		
 		public:
 			SoundReader(streampos location, size_t size, SoundFileType type);
@@ -98,7 +98,7 @@ namespace sound {
 		return state;
 	}
 
-	inline long ifstream_tell(void* file) {
+	inline int64_t ifstream_tell(void* file) {
 		SoundReader* soundReader = (SoundReader*)file;
 		return (size_t)soundReader->file.tellg() - soundReader->location;
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,14 +115,14 @@ class DynamicArray {
 		}
 
 		void remove(T entry) {
-			long index = this->index(entry);
+			int64_t index = this->index(entry);
 			if(index != -1) {
 				this->shift(index + 1, -1);
 			}
 		}
 
-		long index(T entry) {
-			for(unsigned long i = 0; i < this->head; i++) {
+		int64_t index(T entry) {
+			for(uint64_t i = 0; i < this->head; i++) {
 				if(entry == this->array[i]) {
 					return i;
 				}
@@ -129,8 +130,8 @@ class DynamicArray {
 			return -1;
 		}
 
-		void shift(long index, long amount) {
-			long end = (long)this->head;
+		void shift(int64_t index, int64_t amount) {
+			int64_t end = (int64_t)this->head;
 
 			for(int i = 0; i < amount; i++) {
 				this->pushed(); // allocate space

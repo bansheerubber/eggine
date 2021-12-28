@@ -309,7 +309,7 @@ void Engine::tick() {
 
 	this->soundEngine.tick(); // handle sounds
 
-	long long startTime = getMicrosecondsNow();
+	int64_t startTime = getMicrosecondsNow();
 	double deltaTime = (startTime - this->lastRenderTime) / 1000000.0;
 	this->lastRenderTime = getMicrosecondsNow();
 
@@ -334,7 +334,7 @@ void Engine::tick() {
 		onAxisMove(axis, value);
 
 		binds::GamepadButtons buttons[16] = {binds::B_BUTTON, binds::A_BUTTON, binds::Y_BUTTON, binds::X_BUTTON, binds::INVALID_BUTTON, binds::INVALID_BUTTON, binds::LEFT_BUTTON, binds::RIGHT_BUTTON, binds::LEFT_TRIGGER, binds::RIGHT_TRIGGER, binds::SPECIAL_RIGHT, binds::SPECIAL_LEFT, binds::D_PAD_LEFT, binds::D_PAD_UP, binds::D_PAD_RIGHT, binds::D_PAD_DOWN};
-		for(unsigned long i = 0; i < 16; i++) {
+		for(uint64_t i = 0; i < 16; i++) {
 			bool pressed = (this->renderWindow.buttons >> i) & 1;
 			if(buttons[i] != binds::INVALID_BUTTON && ((this->lastGamepadButtons >> i) & 1) != pressed) {
 				onGamepadButton(buttons[i], pressed);
@@ -410,7 +410,7 @@ void Engine::tick() {
 	// }
 
 	// handle eggscript
-	long long esStartTime = getMicrosecondsNow();
+	int64_t esStartTime = getMicrosecondsNow();
 	esTick(this->eggscript);
 	this->eggscriptTickTime = getMicrosecondsNow() - esStartTime;
 
@@ -427,7 +427,7 @@ void Engine::tick() {
 	};
 
 	// render everything
-	long long startRenderTime = getMicrosecondsNow();
+	int64_t startRenderTime = getMicrosecondsNow();
 	for(size_t i = 0; i < this->renderables.head; i++) {
 		this->renderables[i]->render(deltaTime, context);
 	}

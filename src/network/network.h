@@ -84,14 +84,14 @@ namespace network {
 			NetworkMode mode = NETWORK_INACTIVE;
 			
 			// bookkeeping for remote objects
-			unsigned long highestRemoteId = 0;
+			uint64_t highestRemoteId = 0;
 			int tcpSocket = -1;
 			std::vector<class RemoteObject*> remoteObjects;
 			tsl::robin_map<remote_object_id, class RemoteObject*> idToRemoteObject;
 
 			std::vector<class Connection*> connections;
 			tsl::robin_map<sockaddr_in6, class Connection*> udpAddressToConnection;
-			tsl::robin_map<unsigned long, class Connection*> secretToConnection;
+			tsl::robin_map<uint64_t, class Connection*> secretToConnection;
 
 			struct {
 				Stream streams[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
@@ -102,7 +102,7 @@ namespace network {
 				int socket;
 			} udp;
 
-			unsigned long long frog;
+			uint64_t frog;
 			unsigned int sent = 0;
 
 			void sendInitialData(class Connection* connection);

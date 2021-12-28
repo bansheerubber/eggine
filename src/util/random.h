@@ -4,8 +4,8 @@
 
 std::default_random_engine generator;
 
-unsigned long randomLong() {
-	std::uniform_int_distribution<unsigned long> distribution(0, 0xFFFFFFFFFFFFFFFF);
+uint64_t randomLong() {
+	std::uniform_int_distribution<uint64_t> distribution(0, 0xFFFFFFFFFFFFFFFF);
 	return distribution(generator);
 }
 

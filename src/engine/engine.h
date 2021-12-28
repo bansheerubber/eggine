@@ -127,11 +127,11 @@ class Engine {
 
 		string filePrefix = "";
 		
-		long long cpuRenderTime = 0;
-		long long eggscriptTickTime = 0;
+		int64_t cpuRenderTime = 0;
+		int64_t eggscriptTickTime = 0;
 		
 		class Shader* boundShader = nullptr;
-		long long lastRenderTime;
+		int64_t lastRenderTime;
 
 		#ifdef EGGINE_DEBUG
 		Text* debugText;
@@ -158,7 +158,7 @@ class Engine {
 		tsl::robin_map<string, int> mouseToEnum;
 
 		#ifdef __switch__
-		unsigned long lastGamepadButtons = 0;
+		uint64_t lastGamepadButtons = 0;
 		#else
 		unsigned char* lastGamepadButtons = new unsigned char[15]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		#endif

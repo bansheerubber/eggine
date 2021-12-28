@@ -17,7 +17,7 @@ void Map::loadFromFile(string filename) {
   }
 
 	file.seekg(0, file.end);
-	unsigned long length = file.tellg();
+	uint64_t length = file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);
@@ -27,9 +27,9 @@ void Map::loadFromFile(string filename) {
 	delete[] buffer;
 }
 
-void Map::load(unsigned char* buffer, unsigned long size) {
+void Map::load(unsigned char* buffer, uint64_t size) {
 	const char header[4] = {'X', 'M', 'A', 'P'};
-	unsigned long index = 0;
+	uint64_t index = 0;
 	for(; index < sizeof(header); index++) {
 		if(buffer[index] != header[index]) {
 			printf("invalid map header\n");

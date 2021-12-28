@@ -116,5 +116,5 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		static glm::vec2 OffsetsSource[];
 		static render::VertexBuffer* Offsets;
-		static tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>> Rotations;
+		static tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Rotations;
 };

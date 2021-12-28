@@ -61,7 +61,7 @@ void network::Connection::receiveTCP() {
 				std::string checksum = this->receiveStream->readString();
 				if(checksum == engine->network.getChecksum()) { // send the secret if we got the right checksum
 					Stream stream(WRITE);
-					stream.writeNumber<unsigned long>(this->secret);
+					stream.writeNumber<uint64_t>(this->secret);
 					stream.writeNumber<unsigned int>(this->lastSequenceReceived);
 					stream.writeNumber<unsigned int>(this->lastSequenceSent);
 					stream.writeNumber<char>(1);
