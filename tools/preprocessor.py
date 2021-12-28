@@ -238,6 +238,12 @@ def preprocess(filename, contents, depth):
 
 			if command.split(" ")[0].strip() in keywords:
 				continue
+				
+			if "game_object_enums" in command:
+				new_contents.append("INVALID = 0,\n")
+				for enum in game_object_type_enums:
+					new_contents.append(f"{enum},\n")
+				continue
 
 			if "remote_object_definitions" in line:
 				rest = " ".join(command.split(" ")[1:])
@@ -257,9 +263,9 @@ def preprocess(filename, contents, depth):
 				continue
 
 			if ".py" in command:
-				command = f"cd {directory} && {get_env_commands()} python3 {command}"
+				command = f"cd {directory} && python3 {command}"
 			else:
-				command = f"cd {directory} && {get_env_commands()} {command}"
+				command = f"cd {directory} && {command}"
 
 			process = os.popen(command)
 			output = process.read()

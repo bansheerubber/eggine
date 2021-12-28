@@ -21,7 +21,7 @@ void copyToPNGBuffer(png_structp png, png_bytep output, png_size_t size) {
 }
 
 png loadPng(const unsigned char* buffer, unsigned int size) {
-	if(png_sig_cmp(buffer, 0, 8)) {
+	if(png_sig_cmp((unsigned char*)buffer, 0, 8)) {
 		printf("could not recognize as PNG\n");
 		return {
 			buffer: nullptr,

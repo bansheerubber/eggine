@@ -49,8 +49,8 @@ cd tmp-setup
 
 git clone https://github.com/freetype/freetype
 cd ..
-rm -Rf include/pc/freetype
-rm include/pc/ft2build.h
+rm -Rf include/common/freetype
+rm include/common/ft2build.h
 mv -v tmp-setup/freetype/include/* include/common/
 echo -e "\033[0;32mFinished freetype"
 tput sgr0
@@ -71,12 +71,12 @@ tput sgr0
 make -j 8 library
 popd
 cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a lib
-pushd .
-cd tmp-setup/eggscript-interpreter
-make clean
-make -f Makefile.nx -j 8 library
-popd
-cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a libnx
+# pushd .
+# cd tmp-setup/eggscript-interpreter
+# make clean
+# make -f Makefile.nx -j 8 library
+# popd
+# cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a libnx
 rm -Rf include/common/eggscript
 mkdir -p include/common/eggscript
 cp -v tmp-setup/eggscript-interpreter/dist/include.cpp/egg.h include/common/eggscript/egg.h
@@ -131,15 +131,15 @@ CFLAGS="-O2" cmake .. -D DLITEHTML_UTF8=ON
 cmake --build . --target litehtml
 popd
 cp -v tmp-setup/litehtml/build/liblitehtml.a lib
-pushd .
-cd tmp-setup/litehtml
-rm -Rf build
-mkdir build
-cd build
-CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc CXX=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ CFLAGS="-O2 -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" CXXFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" LDFLAGS="-fPIE" cmake .. -D DLITEHTML_UTF8=ON
-cmake --build . --target litehtml
-popd
-cp -v tmp-setup/litehtml/build/liblitehtml.a libnx
+# pushd .
+# cd tmp-setup/litehtml
+# rm -Rf build
+# mkdir build
+# cd build
+# CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc CXX=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ CFLAGS="-O2 -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" CXXFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" LDFLAGS="-fPIE" cmake ..
+# cmake --build . --target litehtml
+# popd
+# cp -v tmp-setup/litehtml/build/liblitehtml.a libnx
 rm -Rf include/common/litehtml
 mv -v tmp-setup/litehtml/include/* include/common/
 echo -e "\033[0;32mFinished litehtml"
@@ -154,13 +154,13 @@ cd gumbo-parser
 ./configure
 make
 cp -v .libs/libgumbo.a ../../lib
-./configure CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc LD=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-ld AR=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc-ar CFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -Wall -fPIC" LDFLAGS="-fPIE"
-make clean
-make
-cp -v .libs/libgumbo.a ../../libnx
+# ./configure CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc LD=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-ld AR=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc-ar CFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -Wall -fPIC" LDFLAGS="-fPIE"
+# make clean
+# make
+# cp -v .libs/libgumbo.a ../../libnx
 popd
 echo -e "\033[0;32mFinished gumbo"
 tput sgr0
 
 # delete tmp-setup
-rm -Rf tmp-setup
+# rm -Rf tmp-setup

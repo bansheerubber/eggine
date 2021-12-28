@@ -14,7 +14,7 @@ sound::SoundCollection::SoundCollection(
 	const unsigned char* buffer,
 	size_t bufferSize
 ) : ResourceObject(manager, metadata) {
-	string fileBase = filesystem::path(metadata->getMetadata("fileName")).parent_path();
+	string fileBase = filesystem::path(metadata->getMetadata("fileName")).parent_path().string();
 	
 	istringstream stream(string((const char*)buffer, bufferSize));
 	for(string line; getline(stream, line);) {
