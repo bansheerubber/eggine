@@ -2,8 +2,7 @@ target = game
 cclibs = -lpthread -llitehtml -lgumbo -lGL -lglfw3 -ldl -lpng -lfreetype -leggscript -lfmt -lz -lopenal -lvorbis -lvorbisfile
 ccinclude = -Iinclude/pc/glm/ -Iinclude/common/ -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ -Iinclude/pc/ -Iimgui -Llib
 CC = g++
-CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17 -Werror=return-type
-soflags =
+CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17 -Werror=return-type -DLITEHTML_UTF8
 ldflags =
 
 cpp_source = $(shell find imgui -type f -name "*.cc") $(shell find src -type f -name "*.cc" ! -path "src/include*")
@@ -30,17 +29,17 @@ preprocessor:
 
 glad/gl.o: glad/gl.c
 	@echo -e "   CC      $@"
-	@$(CC) $(CPPFLAGS) $(soflags) $(ccinclude) -c $< -o $@
+	@$(CC) $(CPPFLAGS) $(ccinclude) -c $< -o $@
 
 $(cpp_objects_tmp) : %.o : %.cc
 	@mkdir -p $(dir $@)
 	@echo -e "   CC      $<"
-	@$(CC) $(CPPFLAGS) $(soflags) $(ccinclude) -c $< -o $@
+	@$(CC) $(CPPFLAGS) $(ccinclude) -c $< -o $@
 
 dist/$(target): $(cpp_objects_tmp) glad/gl.o
 	@mkdir -p $(dir dist/$(target))
 	@echo -e "   CC      $@"
-	@$(CC) $(cpp_objects_tmp) glad/gl.o -Wall $(ccinclude) $(cclibs) -o $@
+	@$(CC) $(cpp_objects_tmp) glad/gl.o -Wall $(ccinclude) $(cclibs) $(ldflags) -o $@
 
 clean:
 	@echo -e "   RM      tmp"
