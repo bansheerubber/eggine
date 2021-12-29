@@ -90,7 +90,7 @@ void render::VertexBuffer::setSubData(void* data, unsigned int size, unsigned in
 		return;
 	}
 	
-	memcpy(this->memory->cpuAddr() + offset, data, size);
+	memcpy((void*)((uintptr_t)this->memory->cpuAddr() + offset), data, size);
 	#else
 	if(this->bufferId == GL_INVALID_INDEX) {
 		printf("vertex data must be initialized in setSubData\n");

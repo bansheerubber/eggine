@@ -100,13 +100,14 @@ namespace render {
 			}
 
 			default: {
-				return GL_INVALID_ENUM;
+				return DkImageFormat_None;
 			}
 		}
 	}
 	
 	inline DkFilter textureFilterToDkFilter(TextureFilter type) {
 		switch(type) {
+			default:
 			case TEXTURE_FILTER_NEAREST: {
 				return DkFilter_Nearest;
 			}
@@ -114,15 +115,12 @@ namespace render {
 			case TEXTURE_FILTER_LINEAR: {
 				return DkFilter_Linear;
 			}
-
-			default: {
-				return GL_INVALID_ENUM;
-			}
 		}
 	}
 
 	inline DkWrapMode textureWrapToDkWrap(TextureWrap wrap) {
 		switch(wrap) {
+			default:
 			case TEXTURE_WRAP_REPEAT: {
 				return DkWrapMode_Repeat;
 			}
@@ -141,10 +139,6 @@ namespace render {
 
 			case TEXTURE_WRAP_MIRROR_CLAMP_TO_EDGE: {
 				return DkWrapMode_MirrorClampToEdge;
-			}
-
-			default: {
-				return GL_INVALID_ENUM;
 			}
 		}
 	}

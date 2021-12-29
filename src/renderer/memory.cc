@@ -55,7 +55,7 @@ render::switch_memory::Page::Page(Window* window, uint32_t flags, uint64_t size)
 	this->head->align = DK_MEMBLOCK_ALIGNMENT;
 	this->flags = flags;
 
-	this->block = dk::MemBlockMaker{this->window->device, this->size}.setFlags(flags).create();
+	this->block = dk::MemBlockMaker{this->window->device, (uint32_t)this->size}.setFlags(flags).create();
 }
 
 void* render::switch_memory::Page::cpuAddr() {

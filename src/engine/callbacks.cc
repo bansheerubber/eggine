@@ -27,11 +27,11 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	if(argc != 2) {
 		return nullptr;
 	}
-	
+
+	#ifndef __switch__
 	int key = engine->keyToScancode[string(arguments[0].stringData)];
 	int action = (int)arguments[1].numberData;
 
-	#ifndef __switch__
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow)) {
 		return nullptr;
@@ -76,11 +76,11 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 	if(argc != 2) {
 		return nullptr;
 	}
-	
+
+	#ifndef __switch__
 	int button = (int)arguments[0].numberData;
 	int action = (int)arguments[1].numberData;
 
-	#ifndef __switch__
 	if(action == GLFW_PRESS) {
 		litehtml::position::vector redraw;
 		engine->renderWindow.htmlDocument->on_lbutton_down(engine->mouse.x, engine->mouse.y, engine->mouse.x, engine->mouse.y, redraw);

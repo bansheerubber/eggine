@@ -104,7 +104,7 @@ void render::Shader::load(const char* buffer, uint64_t length, ShaderType type) 
 
 	memcpy(this->memory->cpuAddr(), &buffer[header.controlSize], header.codeSize); // read code straight into code memory
 
-	dk::ShaderMaker{this->memory->parent->block, this->memory->start}
+	dk::ShaderMaker{this->memory->parent->block, (uint32_t)this->memory->start}
 		.setControl(controlBuffer.data())
 		.setProgramId(0)
 		.initialize(this->shader);

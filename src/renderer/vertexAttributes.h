@@ -56,6 +56,10 @@ namespace render {
 			case VERTEX_ATTRIB_DOUBLE: {
 				return 8;
 			}
+
+			default: {
+				return 0;
+			}
 		}
 	}
 
@@ -137,10 +141,13 @@ namespace render {
 				}
 			}
 		}
+
+		return DkVtxAttribSize_1x8;
 	}
 
 	inline DkVtxAttribType attributeTypeToDkAttribType(VertexAttributeType type) {
 		switch(type) {
+			default:
 			case VERTEX_ATTRIB_UNSIGNED_BYTE:
 			case VERTEX_ATTRIB_UNSIGNED_SHORT:
 			case VERTEX_ATTRIB_UNSIGNED_INT: {

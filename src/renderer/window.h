@@ -44,6 +44,7 @@ namespace render {
 
 	inline DkPrimitive primitiveToDkPrimitive(PrimitiveType type) {
 		switch(type) {
+			default:
 			case PRIMITIVE_POINTS: {
 				return DkPrimitive_Points;
 			}
@@ -90,10 +91,6 @@ namespace render {
 
 			case PRIMITIVE_PATCHES: {
 				return DkPrimitive_Patches;
-			}
-
-			default: {
-				return GL_INVALID_ENUM;
 			}
 		}
 	}
