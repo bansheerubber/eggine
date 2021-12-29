@@ -20,7 +20,7 @@ namespace sound {
 		friend long ifstream_tell(void* file);
 		
 		public:
-			SoundReader(uint64_t location, size_t size, SoundFileType type);
+			SoundReader(uint64_t location, uint64_t size, SoundFileType type);
 			~SoundReader();
 
 			unsigned int getSampleRate();
@@ -28,12 +28,12 @@ namespace sound {
 			unsigned short getChannels();
 			ALenum getType();
 			
-			size_t readIntoBuffer(char* buffer, size_t bufferSize);
-			void seek(size_t location);
+			uint64_t readIntoBuffer(char* buffer, uint64_t bufferSize);
+			void seek(uint64_t location);
 		
 		private:
 			uint64_t location;
-			size_t size;
+			uint64_t size;
 			SoundFileType type;
 			ifstream file;
 

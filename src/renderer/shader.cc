@@ -75,7 +75,7 @@ void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 	#endif
 }
 
-void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
+void render::Shader::load(const char* buffer, uint64_t length, ShaderType type) {
 	this->type = type;
 	#ifdef __switch__
 	DkshHeader header {
@@ -141,9 +141,9 @@ void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
 	#endif
 }
 
-void render::Shader::processUniforms(const char* buffer, size_t bufferSize) {
+void render::Shader::processUniforms(const char* buffer, uint64_t bufferSize) {
 	string line;
-	size_t index = 0;
+	uint64_t index = 0;
 	while(index < bufferSize) {
 		// read a line
 		line = "";
@@ -152,9 +152,9 @@ void render::Shader::processUniforms(const char* buffer, size_t bufferSize) {
 		}
 		index++; // skip the newline
 
-		size_t uniformLocation = line.find("uniform");
+		uint64_t uniformLocation = line.find("uniform");
 		if(uniformLocation != string::npos) {
-			size_t bindingLocation = line.find("binding");
+			uint64_t bindingLocation = line.find("binding");
 			if(bindingLocation == string::npos) {
 				printf("could not find binding for uniform\n");
 				return;
@@ -215,9 +215,9 @@ void render::Shader::processUniforms(string filename) {
 
 	string line;
 	while(getline(file, line)) {
-		size_t uniformLocation = line.find("uniform");
+		uint64_t uniformLocation = line.find("uniform");
 		if(uniformLocation != string::npos) {
-			size_t bindingLocation = line.find("binding");
+			uint64_t bindingLocation = line.find("binding");
 			if(bindingLocation == string::npos) {
 				printf("could not find binding for uniform\n");
 				file.close();

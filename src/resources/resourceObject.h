@@ -16,7 +16,7 @@ namespace resources {
 			void lease();
 			void release();
 			int getLeaseCount();
-			virtual void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+			virtual void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				this->metadata = metadata;
 			}
 			virtual unsigned int getBytesUsed() = 0; // size of whatever buffer we're using for this resource object

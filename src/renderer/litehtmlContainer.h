@@ -11,7 +11,7 @@
 namespace render {
 	struct LiteHTMLTextWrapper {
 		Text* text;
-		size_t lastUsed;
+		uint64_t lastUsed;
 	};
 	
 	class LiteHTMLContainer : public litehtml::document_container {

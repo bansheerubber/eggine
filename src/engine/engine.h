@@ -31,7 +31,7 @@ namespace std {
 	template<>
 	struct hash<pair<esObjectReferencePtr, string>> {
 		size_t operator()(pair<esObjectReferencePtr, string> const& source) const noexcept {
-			size_t result = hash<esObjectWrapperPtr>{}(source.first->objectWrapper);
+			uint64_t result = hash<esObjectWrapperPtr>{}(source.first->objectWrapper);
 			return result ^ (hash<string>{}(source.second) + 0x9e3779b9 + (result << 6) + (result >> 2));
     }
 	};

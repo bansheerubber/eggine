@@ -39,7 +39,7 @@ class SortedArray {
 			}
 			
 			// insert at the end
-			size_t iterator = this->array.head;
+			uint64_t iterator = this->array.head;
 			this->array[iterator] = value;
 			this->array.pushed();
 		}
@@ -73,7 +73,7 @@ class SortedArray {
 	private:
 		int (*compare) (T* a, T* b);
 
-		void swap(size_t index1, size_t index2) {
+		void swap(uint64_t index1, uint64_t index2) {
 			T temp = this->array[index1];
 			this->array[index1] = this->array[index2];
 			this->array[index2] = temp;

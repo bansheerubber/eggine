@@ -15,7 +15,7 @@ resources::Image::Image(
 	ResourceManager* manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
-	size_t bufferSize
+	uint64_t bufferSize
 ) : ResourceObject(manager, metadata) {
 	this->texture = new render::Texture(&engine->renderWindow);
 	this->texture->setFilters(render::TEXTURE_FILTER_NEAREST, render::TEXTURE_FILTER_NEAREST);

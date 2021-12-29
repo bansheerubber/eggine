@@ -17,7 +17,7 @@
 #include "../renderer/texture.h"
 #include "../test/tileMath.h"
 
-void handleSpritesheets(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleSpritesheets(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::SpriteSheet((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 	
@@ -41,32 +41,32 @@ void handleSpritesheets(void* owner, carton::File* file, const char* buffer, siz
 	#endif
 }
 
-void handleHTML(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleHTML(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::HTML((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
-void handleCSS(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleCSS(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::CSS((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
-void handlePNGs(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handlePNGs(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::Image((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
-void handleScripts(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleScripts(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::ScriptFile((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
-void handleShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
-void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize, true);
 	
@@ -80,12 +80,12 @@ void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, size
 	((resources::ShaderSource*)(((resources::ResourceManager*)owner)->metadataToResource[file->metadata]))->original = original;
 }
 
-void handleMaps(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleMaps(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::MapSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
-void handleSounds(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
+void handleSounds(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new sound::SoundCollection((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
@@ -147,7 +147,7 @@ unsigned int resources::ResourceManager::getBytesUsed() {
 
 DynamicArray<resources::ResourceObject*> resources::ResourceManager::loadResources(DynamicArray<carton::Metadata*> resources) {
 	DynamicArray<ResourceObject*> output(resources.head);
-	for(size_t i = 0; i < resources.head; i++) {
+	for(uint64_t i = 0; i < resources.head; i++) {
 		if(resources[i]->getMetadata("stream") == "true") {
 			printf("Cannot load streamed file '%s' into memory\n", resources[i]->getMetadata("fileName").c_str());
 			continue;
@@ -162,7 +162,7 @@ DynamicArray<resources::ResourceObject*> resources::ResourceManager::loadResourc
 DynamicArray<resources::ResourceObject*> resources::ResourceManager::metadataToResources(DynamicArray<carton::Metadata*> resources) {
 	DynamicArray<ResourceObject*> output(resources.head);
 	output[0] = nullptr;
-	for(size_t i = 0; i < resources.head; i++) {
+	for(uint64_t i = 0; i < resources.head; i++) {
 		output[i] = this->metadataToResource[resources[i]];
 	}
 	return output;

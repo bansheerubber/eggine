@@ -56,15 +56,15 @@ namespace resources {
 	
 	class SpriteSheet: public ResourceObject {
 		public:
-			SpriteSheet(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
+			SpriteSheet(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
 
 			render::Texture* texture = nullptr;
 
 			// whether or not the tile should be drawn ontop of a overlapping tile
-			bool drawOntopOfOverlap(size_t spriteIndex);
-			SpriteSheetInfo getSpriteInfo(size_t index);
+			bool drawOntopOfOverlap(uint64_t spriteIndex);
+			SpriteSheetInfo getSpriteInfo(uint64_t index);
 
-			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				ResourceObject::reload(metadata, buffer, bufferSize);
 				printf("spritesheet reload not implemented\n");
 			}

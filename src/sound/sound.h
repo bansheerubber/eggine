@@ -53,7 +53,7 @@ namespace sound {
 
 			void play(SoundSourceProperties properties = SoundSourceProperties());
 
-			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				resources::ResourceObject::reload(metadata, buffer, bufferSize);
 				printf("sound reload not implemented\n");
 			}
@@ -65,7 +65,7 @@ namespace sound {
 		private:
 			string fileName;
 			uint64_t position; // position within the carton
-			size_t size; // full size of the file
+			uint64_t size; // full size of the file
 			Buffer buffers[SOUND_BUFFER_COUNT]; // initial buffers that we always keep in memory
 			unsigned int bufferCount = 0;
 			bool filled = true; // whether both buffers are filled all the way

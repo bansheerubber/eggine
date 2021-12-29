@@ -7,9 +7,9 @@ class Map;
 namespace resources {
 	class MapSource: public ResourceObject {
 		public:
-			MapSource(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
+			MapSource(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
 			void loadIntoMap(Map* map);
-			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				ResourceObject::reload(metadata, buffer, bufferSize);
 				printf("map source reload not implemented\n");
 			}
@@ -17,6 +17,6 @@ namespace resources {
 		
 		private:
 			unsigned char* buffer;
-			size_t bufferSize;
+			uint64_t bufferSize;
 	};
 };

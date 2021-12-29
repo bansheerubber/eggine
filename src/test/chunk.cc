@@ -250,14 +250,14 @@ void Chunk::updateRotation(tilemath::Rotation rotation) {
 	this->oldRotation = rotation;
 }
 
-size_t Chunk::renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context) {
+uint64_t Chunk::renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint64_t startIndex, uint64_t amount, double deltaTime, RenderContext &context) {
 	unsigned int lastIndex = startIndex;
-	size_t leftOff = startInterweavedIndex;
-	size_t limit = startIndex + amount;
+	uint64_t leftOff = startInterweavedIndex;
+	uint64_t limit = startIndex + amount;
 	InterweavedTileWrapper* tile = nullptr;
 
 	for(
-		size_t i = startInterweavedIndex;
+		uint64_t i = startInterweavedIndex;
 		i < this->interweavedTiles.array.head && (tile = &this->interweavedTiles.array[i])->index < limit;
 		i++
 	) { // go through interweaved tiles
@@ -327,7 +327,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		// try to draw as many layers at once as we can
 		unsigned int start = 0;
 		unsigned int end = 0;
-		size_t interweavedIndex = 0;
+		uint64_t interweavedIndex = 0;
 		bool rendered = false;
 		for(unsigned int i = 0; i < this->height; i++) {
 			end = i;
@@ -360,7 +360,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		}
 
 		// draw overlapping tiles above the height of the chunk
-		for(size_t i = interweavedIndex; i < this->interweavedTiles.array.head; i++) {
+		for(uint64_t i = interweavedIndex; i < this->interweavedTiles.array.head; i++) {
 			this->interweavedTiles.array[i].tile->render(deltaTime, context);
 		}
 
@@ -426,7 +426,7 @@ void Chunk::updateInterweavedTile(InterweavedTile* tile) {
 	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
 	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, this->container->getRotation()) + Chunk::Size * Chunk::Size * tile->getPosition().z;
 
-	for(size_t i = 0; i < this->interweavedTiles.array.head; i++) {
+	for(uint64_t i = 0; i < this->interweavedTiles.array.head; i++) {
 		if(this->interweavedTiles.array[i].tile == tile) {
 			this->interweavedTiles.array[i].index = index;
 		}
@@ -472,7 +472,7 @@ int Chunk::getTileTexture(glm::uvec3 position) {
 	return this->textureIndices[index];
 }
 
-void Chunk::setTileTextureByIndex(size_t index, unsigned int spritesheetIndex) {
+void Chunk::setTileTextureByIndex(uint64_t index, unsigned int spritesheetIndex) {
 	if(index < Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
 		unsigned int height = index / (Chunk::Size * Chunk::Size);
 		this->height = max(this->height, height + 1);
@@ -481,7 +481,7 @@ void Chunk::setTileTextureByIndex(size_t index, unsigned int spritesheetIndex) {
 	}
 }
 
-int Chunk::getTileTextureByIndex(size_t index) {
+int Chunk::getTileTextureByIndex(uint64_t index) {
 	if(index < Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
 		return this->textureIndices[index];
 	}

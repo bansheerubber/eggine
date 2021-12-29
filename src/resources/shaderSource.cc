@@ -6,7 +6,7 @@ resources::ShaderSource::ShaderSource(
 	ResourceManager* manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
-	size_t bufferSize,
+	uint64_t bufferSize,
 	bool useCharBuffer
 ) : ResourceObject(manager, metadata) {
 	if(useCharBuffer) {

@@ -140,7 +140,7 @@ int DeveloperGui::consoleCallback(ImGuiInputTextCallbackData* data) {
 				data->InsertChars(0, this->incompleteCommand.c_str());
 			}
 			else {
-				size_t index = this->history.size() - this->historyPosition;
+				uint64_t index = this->history.size() - this->historyPosition;
 				data->DeleteChars(0, data->BufTextLen);
 				data->InsertChars(0, this->history[index].c_str());
 			}

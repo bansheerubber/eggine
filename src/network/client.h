@@ -34,7 +34,7 @@ namespace network {
 			int udpSocket = -1;
 
 			class RemoteObject* instantiateRemoteObject(remote_object_id remoteId, remote_class_id remoteClassId);
-			void send(size_t size, const char* buffer);
+			void send(uint64_t size, const char* buffer);
 			void receiveTCP();
 			void receiveUDP();
 			void handlePacket();

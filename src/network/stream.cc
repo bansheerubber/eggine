@@ -24,7 +24,7 @@ void network::Stream::setFlags(unsigned int flags) {
 	this->flags = flags;
 }
 
-void network::Stream::allocate(size_t size) {
+void network::Stream::allocate(uint64_t size) {
 	this->buffer.allocate(size);
 }
 
@@ -34,7 +34,7 @@ void network::Stream::startChunk() {
 }
 
 void network::Stream::commitChunk() {
-	size_t oldHead = this->buffer.head;
+	uint64_t oldHead = this->buffer.head;
 	unsigned short size = this->buffer.head - this->chunkHead;
 	this->buffer.head = this->chunkHead;
 	this->writeNumber<unsigned short>(size);
@@ -94,7 +94,7 @@ void network::Stream::flush() {
 	this->readBufferPointer = 0;
 }
 
-size_t network::Stream::size() {
+uint64_t network::Stream::size() {
 	return this->buffer.head;
 }
 

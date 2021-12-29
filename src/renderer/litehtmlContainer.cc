@@ -54,8 +54,8 @@ void render::LiteHTMLContainer::delete_font(litehtml::uint_ptr hFont) {
 int render::LiteHTMLContainer::text_width(const litehtml::tchar_t* text, litehtml::uint_ptr hFont) {
   Font* font = (Font*)hFont;
   int x = 0;
-  size_t length = strlen(text);
-  for(size_t i = 0; i < length; i++) {
+  uint64_t length = strlen(text);
+  for(uint64_t i = 0; i < length; i++) {
     FontGlyph ch = font->characterToGlyph[(unsigned char)text[i]]; // TODO sign check
     x += (ch.advance >> 6);
   }

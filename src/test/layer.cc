@@ -73,7 +73,7 @@ void Layer::rebuildBuffers() {
 	this->colors.allocate(this->tiles.array.head);
 	
 	// go through sorted list and build the texture/offset buffers
-	for(size_t i = 0; i < this->tiles.array.head; i++) {
+	for(uint64_t i = 0; i < this->tiles.array.head; i++) {
 		OverlappingTile* tile = this->tiles.array[i];
 		this->offsets[i] = tile->screenSpacePosition;
 		this->textureIndices[i] = tile->getTexture();
@@ -101,7 +101,7 @@ void Layer::remove(OverlappingTile* tile) {
 
 void Layer::updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation) {
 	this->tiles.sort();
-	for(size_t i = 0; i < this->tiles.array.head; i++) {
+	for(uint64_t i = 0; i < this->tiles.array.head; i++) {
 		this->tiles.array[i]->updateRotation(oldRotation, newRotation);
 	}
 	this->rebuildBuffers();

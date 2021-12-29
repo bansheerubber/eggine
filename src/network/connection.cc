@@ -122,13 +122,13 @@ bool network::Connection::isInitialized() {
 	return this->initialized;
 }
 
-void network::Connection::sendTCP(size_t size, const char* buffer) {
+void network::Connection::sendTCP(uint64_t size, const char* buffer) {
 	#ifndef _WIN32
 	::send(this->_socket, buffer, size, 0);
 	#endif
 }
 
-void network::Connection::sendUDP(size_t size, const char* buffer) {
+void network::Connection::sendUDP(uint64_t size, const char* buffer) {
 	#ifndef _WIN32
 	::sendto(engine->network.getUDPSocket(), buffer, size, 0, (sockaddr*)&this->udpAddress, sizeof(this->udpAddress));
 	#endif

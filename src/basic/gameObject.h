@@ -28,6 +28,6 @@ class GameObject {
 		esObjectReferencePtr reference = nullptr;
 	
 	protected:
-		size_t id;
-		static size_t maxId;
+		uint64_t id;
+		static uint64_t maxId;
 };

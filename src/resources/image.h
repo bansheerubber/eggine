@@ -12,7 +12,7 @@
 namespace resources {
 	class Image: public ResourceObject {
 		public:
-			Image(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
+			Image(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
 
 			glm::vec2 position;
 			glm::vec2 size;
@@ -20,7 +20,7 @@ namespace resources {
 			void render();
 			unsigned int getWidth();
 			unsigned int getHeight();
-			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				ResourceObject::reload(metadata, buffer, bufferSize);
 				printf("image reload not implemented\n");
 			}

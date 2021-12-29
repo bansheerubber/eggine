@@ -77,7 +77,7 @@ esEntryPtr es::Team__has(esEnginePtr esEngine, unsigned int argc, esEntry* args)
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
 		Team* team = (Team*)args[0].objectData->objectWrapper->data;
 		Unit* unit = (Unit*)args[1].objectData->objectWrapper->data;
-		for(size_t i = 0; i < team->units.array.head; i++) {
+		for(uint64_t i = 0; i < team->units.array.head; i++) {
 			if(team->units.array[i] == unit) {
 				return esCreateNumber(1);
 			}

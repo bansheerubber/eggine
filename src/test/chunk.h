@@ -69,8 +69,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void setTileTexture(glm::uvec3 position, unsigned int spritesheetIndex);
 		int getTileTexture(glm::uvec3 position);
 
-		void setTileTextureByIndex(size_t index, unsigned int spritesheetIndex);
-		int getTileTextureByIndex(size_t index);
+		void setTileTextureByIndex(uint64_t index, unsigned int spritesheetIndex);
+		int getTileTextureByIndex(uint64_t index);
 
 		static constexpr unsigned int Size = 25;
 		static constexpr unsigned int MaxHeight = 15;
@@ -99,7 +99,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		int drawCalls = 0;
 		#endif
 
-		size_t renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context);
+		uint64_t renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint64_t startIndex, uint64_t amount, double deltaTime, RenderContext &context);
 
 		void updateRotation(tilemath::Rotation rotation);
 

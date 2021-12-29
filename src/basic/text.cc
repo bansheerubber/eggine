@@ -54,8 +54,8 @@ void Text::updateBuffers() {
 	glm::vec2 uvs[this->text.size() * 6];
 
 	// iterate through all characters
-	size_t total = 0;
-	for(size_t i = 0; i < this->text.size(); i++) {
+	uint64_t total = 0;
+	for(uint64_t i = 0; i < this->text.size(); i++) {
 		if(this->text[i] == '\n') {
 			x = 0;
 			y += this->font->size;

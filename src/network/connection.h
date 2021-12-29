@@ -51,8 +51,8 @@ namespace network {
 			int _socket = -1;
 			IPAddress ip;
 
-			void sendTCP(size_t size, const char* buffer);
-			void sendUDP(size_t size, const char* buffer);
+			void sendTCP(uint64_t size, const char* buffer);
+			void sendUDP(uint64_t size, const char* buffer);
 			void requestSecret();
 			#ifndef _WIN32
 			void initializeUDP(sockaddr_in6 address);

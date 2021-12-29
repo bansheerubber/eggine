@@ -129,13 +129,13 @@ namespace network {
 
 	class StreamOverReadException: public std::exception {
 		public:
-			StreamOverReadException(size_t size, unsigned int attemptedRead) {
+			StreamOverReadException(uint64_t size, unsigned int attemptedRead) {
 				this->size = size;
 				this->attemptedRead = attemptedRead;
 				this->message = fmt::format("Over-read trying to read {} bytes from stream of size {}", attemptedRead, size);
 			}
 
-			size_t size;
+			uint64_t size;
 			unsigned int attemptedRead;
 
 			virtual const char* what() const throw() {

@@ -428,7 +428,7 @@ void Engine::tick() {
 
 	// render everything
 	int64_t startRenderTime = getMicrosecondsNow();
-	for(size_t i = 0; i < this->renderables.head; i++) {
+	for(uint64_t i = 0; i < this->renderables.head; i++) {
 		this->renderables[i]->render(deltaTime, context);
 	}
 
@@ -436,7 +436,7 @@ void Engine::tick() {
 	this->debugText->setText(this->debug.getInfoText());
 	#endif
 
-	for(size_t i = 0; i < this->renderableUIs.head; i++) {
+	for(uint64_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
 	}
 

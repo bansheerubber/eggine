@@ -12,15 +12,15 @@
 template <typename T, typename S = void>
 class DynamicArray {
 	public:
-		size_t head;
-		size_t size;
+		uint64_t head;
+		uint64_t size;
 
 		DynamicArray() {
 			this->array = nullptr;
 			this->dontDelete = true;
 		}
 
-		DynamicArray(size_t size) {
+		DynamicArray(uint64_t size) {
 			this->parent = nullptr;
 			this->init = nullptr;
 			this->onRealloc = nullptr;
@@ -32,7 +32,7 @@ class DynamicArray {
 		}
 
 		DynamicArray(
-			size_t size,
+			uint64_t size,
 			void (*init) (S* parent, T* location),
 			void (*onRealloc) (S* parent)
 		) {
@@ -47,7 +47,7 @@ class DynamicArray {
 
 		DynamicArray(
 			S* parent,
-			size_t size,
+			uint64_t size,
 			void (*init) (S* parent, T* location),
 			void (*onRealloc) (S* parent)
 		) {
@@ -85,7 +85,7 @@ class DynamicArray {
 			this->head--;
 		}
 
-		void allocate(size_t amount) {
+		void allocate(uint64_t amount) {
 			if(amount < this->size) {
 				return;
 			}
@@ -103,7 +103,7 @@ class DynamicArray {
 			this->array = array;
 
 			if(this->init != nullptr) {
-				for(size_t i = this->size; i < amount; i++) {
+				for(uint64_t i = this->size; i < amount; i++) {
 					(*this->init)(this->parent, &this->array[i]);
 				}
 			}
@@ -166,7 +166,7 @@ class DynamicArray {
 			}
 		}
 
-		T& operator[](size_t index) {
+		T& operator[](uint64_t index) {
 			return this->array[index];
 		}
 	
@@ -180,7 +180,7 @@ class DynamicArray {
 			this->array = array;
 
 			if(this->init != nullptr) {
-				for(size_t i = 0; i < this->size; i++) {
+				for(uint64_t i = 0; i < this->size; i++) {
 					(*this->init)(this->parent, &(this->array[i]));
 				}
 			}

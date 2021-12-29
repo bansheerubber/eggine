@@ -205,8 +205,8 @@ namespace render {
 			uint64_t lastRenderTime = getMicrosecondsNow();
 
 			litehtml::context htmlContext;
-			size_t htmlChecksum = 0;
-			size_t lastHTMLChecksum = 0;
+			uint64_t htmlChecksum = 0;
+			uint64_t lastHTMLChecksum = 0;
 			
 			#ifdef __switch__
 			switch_memory::Piece* imageDescriptorMemory;

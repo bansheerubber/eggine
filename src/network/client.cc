@@ -257,7 +257,7 @@ const network::IPAddress network::Client::getIPAddress() {
 	return this->ip;
 }
 
-void network::Client::send(size_t size, const char* buffer) {
+void network::Client::send(uint64_t size, const char* buffer) {
 	#ifndef _WIN32
 	::send(this->udpSocket, buffer, size, 0);
 	#endif

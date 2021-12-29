@@ -82,7 +82,7 @@ ChunkContainer::ChunkContainer() {
 }
 
 ChunkContainer::~ChunkContainer() {
-	for(size_t i = 0; i < this->renderOrder.head; i++) {
+	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
 		delete this->renderOrder[i];
 	}
 }
@@ -141,7 +141,7 @@ Chunk* ChunkContainer::addChunk(glm::uvec2 position) {
 	return this->renderOrder[index];
 }
 
-Chunk* ChunkContainer::getChunk(size_t index) {
+Chunk* ChunkContainer::getChunk(uint64_t index) {
 	if(index >= this->size * this->size) {
 		printf("ChunkContainer::getChunk(): chunk index out of bounds\n");
 		exit(1);
@@ -150,7 +150,7 @@ Chunk* ChunkContainer::getChunk(size_t index) {
 	return this->renderOrder[index];
 }
 
-size_t ChunkContainer::getChunkCount() {
+uint64_t ChunkContainer::getChunkCount() {
 	return this->renderOrder.head;
 }
 
@@ -161,14 +161,14 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	ChunkContainer::Image->texture->bind(0);
 
 	#ifdef EGGINE_DEBUG
-	size_t chunksRendered = 0;
-	size_t tilesRendered = 0;
-	size_t tiles = 0;
-	size_t drawCalls = 0;
-	size_t overlappingCalls = 0;
+	uint64_t chunksRendered = 0;
+	uint64_t tilesRendered = 0;
+	uint64_t tiles = 0;
+	uint64_t drawCalls = 0;
+	uint64_t overlappingCalls = 0;
 	#endif
 
-	for(size_t i = 0; i < this->renderOrder.head; i++) {
+	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
 		Chunk* chunk = this->renderOrder[i];
 		chunk->renderChunk(deltaTime, context);
 

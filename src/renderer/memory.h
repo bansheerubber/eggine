@@ -74,12 +74,12 @@ namespace render {
 				Piece* allocate(uint32_t flags, uint64_t size, uint64_t align);
 				void processDeallocationLists();
 				void print();
-				size_t getAllocated();
+				uint64_t getAllocated();
 			
 			protected:
 				vector<Page*> pages;
 				Window* window;
-				size_t allocated = 0;
+				uint64_t allocated = 0;
 		};
 	};
 };

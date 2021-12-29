@@ -64,8 +64,8 @@ class ChunkContainer : public RenderObject {
 		tilemath::Rotation getRotation();
 		
 		Chunk* addChunk(glm::uvec2 position);
-		Chunk* getChunk(size_t index);
-		size_t getChunkCount();
+		Chunk* getChunk(uint64_t index);
+		uint64_t getChunkCount();
 
 		void render(double deltaTime, RenderContext &context);
 

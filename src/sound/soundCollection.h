@@ -11,11 +11,11 @@ namespace sound {
 		friend class Engine;
 		
 		public:
-			SoundCollection(resources::ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
+			SoundCollection(resources::ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
 
 			void play(); // pick a random sound from the collection and play it
 
-			void reload(carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize) {
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				resources::ResourceObject::reload(metadata, buffer, bufferSize);
 				printf("sound collection reload not implemented\n");
 			}

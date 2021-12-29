@@ -12,7 +12,7 @@ sound::SoundCollection::SoundCollection(
 	resources::ResourceManager* manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
-	size_t bufferSize
+	uint64_t bufferSize
 ) : ResourceObject(manager, metadata) {
 	string fileBase = filesystem::path(metadata->getMetadata("fileName")).parent_path().string();
 	std::replace(fileBase.begin(), fileBase.end(), '\\', '/');
@@ -23,7 +23,7 @@ sound::SoundCollection::SoundCollection(
 			continue;
 		}
 
-		size_t equalsPosition = line.find("=");
+		uint64_t equalsPosition = line.find("=");
 		string key = trim(line.substr(0, equalsPosition));
 		string value = trim(line.substr(equalsPosition + 1, line.length() - equalsPosition));
 

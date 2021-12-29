@@ -9,7 +9,7 @@ static ov_callbacks OV_CALLBACKS_IFSTREAM = {
 	(long (*)(void *))                            sound::ifstream_tell
 };
 
-sound::SoundReader::SoundReader(uint64_t location, size_t size, SoundFileType type) {
+sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType type) {
 	this->location = location;
 	this->size = size;
 	this->type = type;
@@ -147,7 +147,7 @@ ALenum sound::SoundReader::getType() {
 	}
 }
 
-size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
+uint64_t sound::SoundReader::readIntoBuffer(char* buffer, uint64_t bufferSize) {
 	switch(this->type) {
 		case OGG_FILE: {
 			uint64_t pointer = 0;
@@ -172,8 +172,8 @@ size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 		}
 
 		case WAV_FILE: {
-			size_t bytesLeft = this->wav.dataSize - ((uint64_t)this->file.tellg() - this->wav.dataLocation);
-			size_t readSize = min(bytesLeft, bufferSize);
+			uint64_t bytesLeft = this->wav.dataSize - ((uint64_t)this->file.tellg() - this->wav.dataLocation);
+			uint64_t readSize = min(bytesLeft, bufferSize);
 			this->file.read(buffer, readSize);
 			return readSize;
 		}
@@ -184,7 +184,7 @@ size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 	}
 }
 
-void sound::SoundReader::seek(size_t location) {
+void sound::SoundReader::seek(uint64_t location) {
 	switch(this->type) {
 		case OGG_FILE: {
 			ov_pcm_seek(this->ogg.file, location);
@@ -192,7 +192,7 @@ void sound::SoundReader::seek(size_t location) {
 		}
 
 		case WAV_FILE: {
-			this->file.seekg((size_t)this->wav.dataLocation + location);
+			this->file.seekg((uint64_t)this->wav.dataLocation + location);
 			break;
 		}
 	}

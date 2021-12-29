@@ -24,8 +24,8 @@ sound::Sound::Sound(
 	// read data into the buffers
 	char* buffer = new char[SOUND_BUFFER_SIZE * reader.getChannels()];
 
-	for(size_t i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
-		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
+	for(uint64_t i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
+		uint64_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
 		alBufferData(this->buffers[i].bufferId, reader.getType(), (void*)buffer, result, reader.getSampleRate());
 
 		if(result != SOUND_BUFFER_SIZE * reader.getChannels()) {
@@ -126,7 +126,7 @@ void _play(sound::SoundThreadContext* context) {
 			bufferIndex++;
 		}
 		
-		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
+		uint64_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
 		if(result < 0) { // error
 			break;
 		}

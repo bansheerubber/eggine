@@ -30,7 +30,7 @@ namespace network {
 			Stream(unsigned int flags = READ);
 			
 			void setFlags(unsigned int flags);
-			void allocate(size_t size);
+			void allocate(uint64_t size);
 			void startChunk();
 			void commitChunk();
 			void startWriteRemoteObject(class RemoteObject* object);
@@ -45,7 +45,7 @@ namespace network {
 			}
 
 			void flush();
-			size_t size();
+			uint64_t size();
 			const char* start();
 
 			unsigned int writeString(std::string input) {
@@ -54,7 +54,7 @@ namespace network {
 				}
 				
 				this->writeNumber<unsigned short>(input.size());
-				for(size_t i = 0; i < input.size(); i++) {
+				for(uint64_t i = 0; i < input.size(); i++) {
 					this->writeNumber<char>(input[i]);
 				}
 				return (unsigned int)input.size();
@@ -164,7 +164,7 @@ namespace network {
 			DynamicArray<char> buffer = DynamicArray<char>(4);
 			unsigned int readBufferPointer = 0;
 			unsigned int flags;
-			size_t chunkHead = 0;			
+			uint64_t chunkHead = 0;			
 	};
 
 	template<>

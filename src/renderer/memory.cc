@@ -244,7 +244,7 @@ void render::switch_memory::Manager::print() {
 	printf("allocated: %ld\n", this->allocated);
 }
 
-size_t render::switch_memory::Manager::getAllocated() {
+uint64_t render::switch_memory::Manager::getAllocated() {
 	return this->allocated;
 }
 #endif

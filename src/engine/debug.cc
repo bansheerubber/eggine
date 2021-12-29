@@ -42,7 +42,7 @@ void Debug::clearInfoMessages() {
 
 #ifndef __switch__
 void Debug::flushGLDebugMessages() {
-	for(size_t i = 0; i < this->glDebugMessages.size(); i++) {
+	for(uint64_t i = 0; i < this->glDebugMessages.size(); i++) {
 		// only print groups if they actually captured some sort of message
 		if(
 			this->glDebugMessages[i].id == 1

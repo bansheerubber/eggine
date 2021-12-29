@@ -17,8 +17,8 @@ namespace std {
 	template<>
 	struct hash<sockaddr_in6> {
 		size_t operator()(sockaddr_in6 const& source) const noexcept {
-			size_t hash = *((size_t*)&source.sin6_addr.s6_addr[0]);
-			size_t second = *((size_t*)&source.sin6_addr.s6_addr[8]);
+			uint64_t hash = *((uint64_t*)&source.sin6_addr.s6_addr[0]);
+			uint64_t second = *((uint64_t*)&source.sin6_addr.s6_addr[8]);
 			hash = hash ^ (second + 0x9e3779b9 + (hash << 6) + (hash >> 2));
 			return hash ^ (source.sin6_port + 0x9e3779b9 + (hash << 6) + (hash >> 2));
     }

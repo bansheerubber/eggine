@@ -48,7 +48,11 @@ void TileNeighborIterator::iterateTile() {
 	resources::SpriteSheetInfo info = this->container->getSpriteInfo(this->position + glm::ivec3(0, 0, 1), true);
 	if(info.wall != resources::NO_WALL) {
 		for(; this->index < 3; this->index++) {
-			NeighborDirection direction = directionsForWall[(size_t)lsb(info.wall)][this->index];
+			if(lsb(info.wall) < 0) {
+				continue;
+			}
+			
+			NeighborDirection direction = directionsForWall[(unsigned char)lsb(info.wall)][this->index];
 			if(direction == INVALID_DIRECTION) {
 				continue;
 			}
