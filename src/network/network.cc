@@ -1,12 +1,15 @@
 #include "network.h"
 
-#include <algorithm>
+#ifndef _WIN32
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <thread>
 #include <sys/types.h>
+#endif
+
+#include <algorithm>
+#include <thread>
 
 #include "connection.h"
 #include "../util/ipv6ToString.h"
@@ -30,6 +33,7 @@ const network::IPAddress network::Network::getHostIPAddress() {
 void network::Network::openServer() {
 	this->mode = NETWORK_SERVER;
 	
+	#ifndef _WIN32
 	sockaddr_in6 serverAddress;
 
 	serverAddress.sin6_family = AF_INET6;
@@ -82,6 +86,7 @@ void network::Network::openServer() {
 
 	thread t(&Network::acceptServer, this);
 	t.detach();
+	#endif
 }
 
 void network::Network::closeServer() {
@@ -89,6 +94,7 @@ void network::Network::closeServer() {
 }
 
 void network::Network::acceptServer() {
+	#ifndef _WIN32
 	while(true) {
 		sockaddr_in6 clientAddress;
 		socklen_t clientLength = sizeof(clientAddress);
@@ -106,6 +112,7 @@ void network::Network::acceptServer() {
 
 		this_thread::sleep_for(chrono::milliseconds(16));
 	}
+	#endif
 }
 
 void network::Network::openClient() {
@@ -142,6 +149,7 @@ void network::Network::tick() {
 }
 
 void network::Network::receive() {
+	#ifndef _WIN32
 	if(this->isClient()) {
 		this->client.receive();
 		return;
@@ -201,6 +209,7 @@ void network::Network::receive() {
 	for(Connection* connection: this->connections) {
 		connection->receiveTCP();
 	}
+	#endif
 }
 
 void network::Network::addRemoteObject(RemoteObject* remoteObject) {
@@ -219,7 +228,10 @@ network::RemoteObject* network::Network::getRemoteObject(remote_object_id id) {
 }
 
 int network::Network::getUDPSocket() {
+	#ifndef _WIN32
 	return this->udp.socket;
+	#endif
+	return -1;
 }
 
 bool network::Network::isServer() {
@@ -233,9 +245,11 @@ bool network::Network::isClient() {
 void network::Network::removeConnection(class Connection* connection) {
 	this->connections.erase(find(this->connections.begin(), this->connections.end(), connection));
 	
+	#ifndef _WIN32
 	if(connection->isInitialized()) {
 		this->udpAddressToConnection[connection->udpAddress] = nullptr;
 	}
+	#endif
 
 	this->secretToConnection[connection->secret] = nullptr;
 }

@@ -64,7 +64,7 @@ namespace sound {
 
 		private:
 			string fileName;
-			streampos position; // position within the carton
+			uint64_t position; // position within the carton
 			size_t size; // full size of the file
 			Buffer buffers[SOUND_BUFFER_COUNT]; // initial buffers that we always keep in memory
 			unsigned int bufferCount = 0;

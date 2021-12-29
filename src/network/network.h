@@ -1,14 +1,18 @@
 #pragma once
 
+#ifndef _WIN32
 #include <netinet/in.h>
-#include <tsl/robin_map.h>
 #include <sys/socket.h>
+#endif
+
+#include <tsl/robin_map.h>
 #include <vector>
 
 #include "client.h"
 #include "stream.h"
 #include "types.h"
 
+#ifndef _WIN32
 namespace std {
 	template<>
 	struct hash<sockaddr_in6> {
@@ -33,6 +37,7 @@ namespace std {
 		}
 	};
 };
+#endif
 
 namespace network {
 	#define EGGINE_NETWORK_UDP_MESSAGE_AMOUNT 32
@@ -90,9 +95,11 @@ namespace network {
 			tsl::robin_map<remote_object_id, class RemoteObject*> idToRemoteObject;
 
 			std::vector<class Connection*> connections;
-			tsl::robin_map<sockaddr_in6, class Connection*> udpAddressToConnection;
 			tsl::robin_map<uint64_t, class Connection*> secretToConnection;
 
+			#ifndef _WIN32
+			tsl::robin_map<sockaddr_in6, class Connection*> udpAddressToConnection;
+		
 			struct {
 				Stream streams[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
 				iovec scatterGather[32];
@@ -101,6 +108,7 @@ namespace network {
 				mmsghdr headers[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
 				int socket;
 			} udp;
+			#endif
 
 			uint64_t frog;
 			unsigned int sent = 0;

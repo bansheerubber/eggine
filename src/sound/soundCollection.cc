@@ -15,6 +15,7 @@ sound::SoundCollection::SoundCollection(
 	size_t bufferSize
 ) : ResourceObject(manager, metadata) {
 	string fileBase = filesystem::path(metadata->getMetadata("fileName")).parent_path().string();
+	std::replace(fileBase.begin(), fileBase.end(), '\\', '/');
 	
 	istringstream stream(string((const char*)buffer, bufferSize));
 	for(string line; getline(stream, line);) {
@@ -37,7 +38,8 @@ sound::SoundCollection::SoundCollection(
 		}
 		else if(regex_match(key, regex("sound[0-9]+"))) {
 			string fileName = fileBase + "/" + value;
-			fileName = filesystem::path(fileName).lexically_normal().string().c_str();
+			fileName = filesystem::path(fileName).lexically_normal().string();
+			std::replace(fileName.begin(), fileName.end(), '\\', '/');
 			if(engine->soundEngine.fileToSound.find(fileName) != engine->soundEngine.fileToSound.end()) {
 				this->sounds.push_back(engine->soundEngine.fileToSound[fileName]);
 			}

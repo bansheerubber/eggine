@@ -8,7 +8,7 @@ Map::Map(ChunkContainer* container) {
 }
 
 void Map::loadFromFile(string filename) {
-	ifstream file(filename);
+	ifstream file(filename, ios::binary);
 
 	if(file.bad() || file.fail()) {
 		printf("failed to open file for map %s\n", filename.c_str());
@@ -17,7 +17,7 @@ void Map::loadFromFile(string filename) {
   }
 
 	file.seekg(0, file.end);
-	uint64_t length = file.tellg();
+	uint64_t length = (uint64_t)file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);

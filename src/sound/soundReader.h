@@ -17,10 +17,10 @@ namespace sound {
 		friend size_t ifstream_read(void* data, size_t size, size_t count, void* file);
 		friend int ifstream_seek(void* file, ogg_int64_t offset, int origin);
 		friend int ifstream_close(void* file);
-		friend int64_t ifstream_tell(void* file);
+		friend long ifstream_tell(void* file);
 		
 		public:
-			SoundReader(streampos location, size_t size, SoundFileType type);
+			SoundReader(uint64_t location, size_t size, SoundFileType type);
 			~SoundReader();
 
 			unsigned int getSampleRate();
@@ -32,7 +32,7 @@ namespace sound {
 			void seek(size_t location);
 		
 		private:
-			streampos location;
+			uint64_t location;
 			size_t size;
 			SoundFileType type;
 			ifstream file;
@@ -61,7 +61,7 @@ namespace sound {
 					uint16_t blockAlign;
 					uint16_t bitdepth;
 				} format;
-				streampos dataLocation;
+				uint64_t dataLocation;
 				uint32_t dataSize;
 			} wav;
 	};
@@ -71,7 +71,7 @@ namespace sound {
 
 		size_t bytes = size * count;
 		size_t end = (size_t)soundReader->location + soundReader->size;
-		size_t current = soundReader->file.tellg();
+		size_t current = (size_t)soundReader->file.tellg();
 		size_t readAmount = min(end - current, bytes);
 
 		soundReader->file.read((char*)data, readAmount);
@@ -98,7 +98,7 @@ namespace sound {
 		return state;
 	}
 
-	inline int64_t ifstream_tell(void* file) {
+	inline long ifstream_tell(void* file) {
 		SoundReader* soundReader = (SoundReader*)file;
 		return (size_t)soundReader->file.tellg() - soundReader->location;
 	}

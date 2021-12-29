@@ -35,7 +35,7 @@ void render::Shader::loadFromFile(string filename, ShaderType type) {
 	filename += ".dksh";
 	#endif
 	
-	ifstream file(filename);
+	ifstream file(filename, ios::binary);
 
 	if(file.bad() || file.fail()) {
 		printf("failed to open file for shader %s\n", filename.c_str());
@@ -45,7 +45,7 @@ void render::Shader::loadFromFile(string filename, ShaderType type) {
   }
 
 	file.seekg(0, file.end);
-	uint64_t length = file.tellg();
+	uint64_t length = (uint64_t)file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);

@@ -1,10 +1,14 @@
 #pragma once
 
+#ifndef _WIN32
+#include <netinet/in.h>
+#endif
+
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
-#include <netinet/in.h>
 #include <string>
 
+#ifndef _WIN32
 std::string ipv6ToString(sockaddr_in6* address) {
 	return fmt::format(
 		"{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{}",
@@ -31,3 +35,4 @@ std::string ipv6ToString(sockaddr_in6* address) {
 std::string ipv6ToString(sockaddr_in6 address) {
 	return ipv6ToString(&address);
 }
+#endif

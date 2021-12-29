@@ -26,7 +26,7 @@ void render::Texture::setWrap(TextureWrap uWrap, TextureWrap vWrap) {
 }
 
 void render::Texture::loadPNGFromFile(string filename) {
-	ifstream file(filename);
+	ifstream file(filename, ios::binary);
 
 	if(file.bad() || file.fail()) {
 		printf("failed to open file for png %s\n", filename.c_str());
@@ -36,7 +36,7 @@ void render::Texture::loadPNGFromFile(string filename) {
 	}
 
 	file.seekg(0, file.end);
-	uint64_t length = file.tellg();
+	uint64_t length = (uint64_t)file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);

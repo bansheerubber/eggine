@@ -20,8 +20,8 @@ cpp_objects_without = $(patsubst src\/, , $(cpp_source))
 
 # force synchronization for preprocessor
 default:
-	@"$(MAKE)" preprocessor --no-print-directory
-	@"$(MAKE)" dist/$(target) --no-print-directory
+	@"$(MAKE)" preprocessor -f Makefile.win --no-print-directory
+	@"$(MAKE)" dist/$(target) -f Makefile.win --no-print-directory
 
 preprocessor:
 	@echo -e "   PY      tools/preprocessor.py"

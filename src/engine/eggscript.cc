@@ -19,6 +19,7 @@ void es::eggscriptDefinitions() {
 esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
 		string path = filesystem::path(esGetLastExecFileName(esEngine)).parent_path().string();
+		std::replace(path.begin(), path.end(), '\\', '/');
 		if(path != "") {
 			path += "/";
 		}

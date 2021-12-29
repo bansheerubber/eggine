@@ -1,12 +1,15 @@
 #include "stream.h"
 
-#include <algorithm>
+#ifndef _WIN32
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <thread>
 #include <sys/types.h>
+#endif
+
+#include <algorithm>
+#include <thread>
 
 #include "client.h"
 #include "connection.h"

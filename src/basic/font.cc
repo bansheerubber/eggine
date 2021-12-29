@@ -7,7 +7,7 @@ tsl::robin_map<string, tsl::robin_map<int, Font*>> Font::Fonts;
 Font* Font::GetFont(string family, int size) {
 	if(Font::Fonts[family][size] == nullptr) {
 		// TODO load this from the carton
-		#ifdef __switch__
+		#if defined(__switch__) || defined(_WIN32)
 		return new Font(engine->filePrefix + "arial.ttf", size);
 		#else
 		return new Font("/usr/share/fonts/TTF/arial.ttf", size);

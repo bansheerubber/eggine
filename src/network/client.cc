@@ -1,12 +1,16 @@
 #include "client.h"
 
-#include <algorithm>
+#ifndef _WIN32
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <thread>
 #include <sys/types.h>
+#endif
+
+#include <algorithm>
+#include <thread>
+
 
 #include "connection.h"
 #include "../engine/engine.h"
@@ -26,6 +30,7 @@ network::Client::~Client() {
 }
 
 void network::Client::open() {
+	#ifndef _WIN32
 	sockaddr_in6 serverAddress;
 
 	serverAddress.sin6_family = AF_INET6;
@@ -72,6 +77,7 @@ void network::Client::open() {
 	}
 
 	this->ip = serverAddress;
+	#endif
 }
 
 void network::Client::close() {
@@ -84,6 +90,7 @@ void network::Client::receive() {
 }
 
 void network::Client::receiveTCP() {
+	#ifndef _WIN32
 	if(this->initialized) {
 		return;
 	}
@@ -131,9 +138,11 @@ void network::Client::receiveTCP() {
 			}
 		}
 	}
+	#endif
 }
 
 void network::Client::receiveUDP() {
+	#ifndef _WIN32
 	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
 	this->receiveStream->flush();
 	int length = ::recv(this->udpSocket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
@@ -156,6 +165,7 @@ void network::Client::receiveUDP() {
 	Packet* packet = new Packet();
 	packet->setType(DROPPABLE_PACKET);
 	this->sendPacket(packet);
+	#endif
 }
 
 void network::Client::handlePacket() {
@@ -248,7 +258,9 @@ const network::IPAddress network::Client::getIPAddress() {
 }
 
 void network::Client::send(size_t size, const char* buffer) {
+	#ifndef _WIN32
 	::send(this->udpSocket, buffer, size, 0);
+	#endif
 }
 
 network::RemoteObject* network::Client::instantiateRemoteObject(remote_object_id remoteId, remote_class_id remoteClassId) {

@@ -1,7 +1,10 @@
 #pragma once
 
-#define FMT_HEADER_ONLY
+#ifndef _WIN32
 #include <netinet/in.h>
+#endif
+
+#define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <string>
 
@@ -15,11 +18,14 @@ namespace network {
 		unsigned char address[16];
 
 		IPAddress() {}
+
+		#ifndef _WIN32
 		IPAddress(sockaddr_in6 address) {
 			for(unsigned int i = 0; i < 16; i++) {
 				this->address[i] = address.sin6_addr.s6_addr[i];
 			}
 		}
+		#endif
 
 		std::string toString() const {
 			return fmt::format(

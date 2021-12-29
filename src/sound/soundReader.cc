@@ -6,14 +6,14 @@ static ov_callbacks OV_CALLBACKS_IFSTREAM = {
 	(size_t (*)(void *, size_t, size_t, void *))  sound::ifstream_read,
 	(int (*)(void *, ogg_int64_t, int))           sound::ifstream_seek,
 	(int (*)(void *))                             nullptr,
-	(int64_t (*)(void *))                            sound::ifstream_tell
+	(long (*)(void *))                            sound::ifstream_tell
 };
 
-sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType type) {
+sound::SoundReader::SoundReader(uint64_t location, size_t size, SoundFileType type) {
 	this->location = location;
 	this->size = size;
 	this->type = type;
-	this->file = ifstream(engine->getFilePrefix() + "out.carton");
+	this->file = ifstream(engine->getFilePrefix() + "out.carton", ios::binary);
 	this->file.seekg(location);
 
 	switch(this->type) {
@@ -54,7 +54,7 @@ sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType t
 			}
 			
 			if(!this->file.eof()) {
-				this->wav.dataLocation = this->file.tellg();
+				this->wav.dataLocation = (uint64_t)this->file.tellg();
 				this->wav.dataSize = size;
 			}
 			else {
@@ -172,7 +172,7 @@ size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 		}
 
 		case WAV_FILE: {
-			size_t bytesLeft = this->wav.dataSize - (this->file.tellg() - this->wav.dataLocation);
+			size_t bytesLeft = this->wav.dataSize - ((uint64_t)this->file.tellg() - this->wav.dataLocation);
 			size_t readSize = min(bytesLeft, bufferSize);
 			this->file.read(buffer, readSize);
 			return readSize;

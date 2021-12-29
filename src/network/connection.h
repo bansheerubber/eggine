@@ -1,8 +1,11 @@
 #pragma once
 
+#ifndef _WIN32
+#include <netinet/in.h>
+#endif
+
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
-#include <netinet/in.h>
 
 #include "../util/dynamicArray.h"
 #include "packetHandler.h"
@@ -22,7 +25,10 @@ namespace network {
 		friend class Network;
 		
 		public:
+			Connection() {};
+			#ifndef _WIN32
 			Connection(int _socket, sockaddr_in6 address);
+			#endif
 			~Connection();
 
 			void receiveTCP();
@@ -35,8 +41,10 @@ namespace network {
 		protected:			
 			ConnectionHandshakeState handshake = WAIT_FOR_CHECKSUM;
 			
+			#ifndef _WIN32
 			sockaddr_in6 tcpAddress;
 			sockaddr_in6 udpAddress;
+			#endif
 
 			bool initialized = false;
 			uint64_t secret = 0; // secret negociated with TCP, used to identify UDP ip/port
@@ -46,7 +54,9 @@ namespace network {
 			void sendTCP(size_t size, const char* buffer);
 			void sendUDP(size_t size, const char* buffer);
 			void requestSecret();
+			#ifndef _WIN32
 			void initializeUDP(sockaddr_in6 address);
+			#endif
 			void handlePacket();
 	};
 };

@@ -1,16 +1,19 @@
 #include "connection.h"
 
+#ifndef _WIN32
 #include <errno.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#endif
 
 #include "../engine/engine.h"
 #include "packet.h"
 #include "../util/random.h"
 
+#ifndef _WIN32
 network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->_socket = _socket;
 	this->tcpAddress = address;
@@ -21,6 +24,7 @@ network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->lastSequenceSent = randomInt();
 	this->lastHighestAckReceived = this->lastSequenceSent;
 }
+#endif
 
 network::Connection::~Connection() {
 	if(this->_socket > 0) {
@@ -33,6 +37,7 @@ network::Connection::~Connection() {
 }
 
 void network::Connection::receiveTCP() {
+	#ifndef _WIN32
 	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
 	this->receiveStream->flush();
 	int length = ::recv(this->_socket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
@@ -85,6 +90,7 @@ void network::Connection::receiveTCP() {
 			}
 		}
 	}
+	#endif
 }
 
 void network::Connection::receiveUDP(Stream &stream) {
@@ -117,11 +123,15 @@ bool network::Connection::isInitialized() {
 }
 
 void network::Connection::sendTCP(size_t size, const char* buffer) {
+	#ifndef _WIN32
 	::send(this->_socket, buffer, size, 0);
+	#endif
 }
 
 void network::Connection::sendUDP(size_t size, const char* buffer) {
+	#ifndef _WIN32
 	::sendto(engine->network.getUDPSocket(), buffer, size, 0, (sockaddr*)&this->udpAddress, sizeof(this->udpAddress));
+	#endif
 }
 
 void network::Connection::requestSecret()  {
@@ -130,6 +140,7 @@ void network::Connection::requestSecret()  {
 	this->sendTCP(stream.size(), stream.start());
 }
 
+#ifndef _WIN32
 void network::Connection::initializeUDP(sockaddr_in6 address) {
 	this->handshake = PACKET_READY;
 	this->udpAddress = address;
@@ -141,6 +152,7 @@ void network::Connection::initializeUDP(sockaddr_in6 address) {
 
 	printf("initialized udp connection for %s\n", this->ip.toString().c_str());
 }
+#endif
 
 void network::Connection::handlePacket() {
 	
