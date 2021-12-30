@@ -1,3 +1,21 @@
+class SwitchTeamElement inherits HTMLElement;
+
+function SwitchTeamElement::onClick(%this) {
+	getChunkContainer().selectCharacter(null);
+	selectTarget(null);
+	
+	if($Team::Player == getChunkContainer().getPlayerTeam()) {
+		getChunkContainer().setPlayerTeam($Team::Enemy);
+		getChunkContainer().setEnemyTeam($Team::Player);
+		echo("set enemy team as primary");
+	}
+	else {
+		getChunkContainer().setPlayerTeam($Team::Player);
+		getChunkContainer().setEnemyTeam($Team::Enemy);
+		echo("set player team as primary");
+	}
+}
+
 function Team::selectNextCharacter(%this, %state) {
 	if(!%state) {
 		return;
@@ -35,4 +53,7 @@ function teamInit() {
 	%team.addKeybind("team.selectNextCharacter", "]", "selectNextCharacter");
 	%team.addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
 	%team.addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
+
+	$Team::Player = getChunkContainer().getPlayerTeam();
+	$Team::Enemy = getChunkContainer().getEnemyTeam();
 }

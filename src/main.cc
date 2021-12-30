@@ -37,15 +37,6 @@ int main(int argc, char* argv[]) {
 	
 	engine->initialize();
 
-	if(argc > 1) {
-		engine->network.openServer();
-		printf("opened server\n");
-	}
-	else {
-		engine->network.openClient();
-		printf("opened client\n");
-	}
-
 	// TODO do smarter loading of files
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".ss")->exec());
 
@@ -56,36 +47,34 @@ int main(int argc, char* argv[]) {
 	map->loadIntoMap(&container.map);
 	container.commit();
 
-	if(engine->network.isServer()) {
-		unsigned int positionsSize = 4;
-		glm::uvec3 positions[positionsSize] = {
-			glm::uvec3(7, 4, 1),
-			glm::uvec3(4, 8, 1),
-			glm::uvec3(8, 10, 1),
-			glm::uvec3(3, 15, 1),
-		};
+	unsigned int positionsSize = 4;
+	glm::uvec3 positions[positionsSize] = {
+		glm::uvec3(7, 4, 1),
+		glm::uvec3(4, 8, 1),
+		glm::uvec3(8, 10, 1),
+		glm::uvec3(3, 15, 1),
+	};
 
-		for(unsigned int i = 0; i < positionsSize; i++) {
-			Unit* unit = new Unit();
-			unit->setAppearance(5);
-			unit->setPosition(positions[i]);
-			container.getPlayerTeam()->add(unit);
-		}
+	for(unsigned int i = 0; i < positionsSize; i++) {
+		Unit* unit = new Unit();
+		unit->setAppearance(5);
+		unit->setPosition(positions[i]);
+		container.getPlayerTeam()->add(unit);
+	}
 
-		// enemies
-		unsigned int enemyPositionsSize = 0;
-		glm::uvec3 enemyPositions[enemyPositionsSize] = {
-			glm::uvec3(2, 10, 1),
-			glm::uvec3(4, 6, 1),
-			glm::uvec3(3, 8, 1),
-			glm::uvec3(1, 9, 1),
-		};
+	// enemies
+	unsigned int enemyPositionsSize = 0;
+	glm::uvec3 enemyPositions[enemyPositionsSize] = {
+		glm::uvec3(2, 10, 1),
+		glm::uvec3(4, 6, 1),
+		glm::uvec3(3, 8, 1),
+		glm::uvec3(1, 9, 1),
+	};
 
-		for(unsigned int i = 0; i < enemyPositionsSize; i++) {
-			Unit* unit = new Unit();
-			unit->setPosition(enemyPositions[i]);
-			container.getEnemyTeam()->add(unit);
-		}
+	for(unsigned int i = 0; i < enemyPositionsSize; i++) {
+		Unit* unit = new Unit();
+		unit->setPosition(enemyPositions[i]);
+		container.getEnemyTeam()->add(unit);
 	}
 
 	engine->tick();

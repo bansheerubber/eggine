@@ -57,7 +57,7 @@ function init() {
 
 	addKeybind("unit.previousAbility", "x-button", "onPreviousAbility");
 
-	addKeybind("editor.mouseDown", "left-mouse-button", "onEditorMouseDown");
+	addKeybind("editor.mouseDown", "left-mouse-button", "onEditorMouseDown");	
 }
 
 function HTMLElement::onClick(%this) {

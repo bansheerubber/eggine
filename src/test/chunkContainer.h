@@ -24,7 +24,9 @@ namespace es {
 	esEntryPtr getChunkContainer(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__setPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__setEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
@@ -72,7 +74,10 @@ class ChunkContainer : public RenderObject {
 		void onBind(std::string &bind, binds::Action action);
 		void onAxis(std::string &bind, double value);
 
+		void setPlayerTeam(class Team*);
 		class Team* getPlayerTeam();
+
+		void setEnemyTeam(class Team*);
 		class Team* getEnemyTeam();
 
 		bool isValidTilePosition(glm::uvec3 position);

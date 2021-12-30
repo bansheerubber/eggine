@@ -1,5 +1,6 @@
 #include "litehtmlContainer.h"
 
+#include <cmath>
 #include <string>
 
 #include "../resources/css.h"
@@ -73,6 +74,10 @@ void render::LiteHTMLContainer::draw_text(
 		ui: &engine->ui,
 	};
   foundText->position.x = pos.left();
+  if(foundText->position.x < 0) {
+    foundText->position.x = pos.left() + engine->renderWindow.width;
+  }
+  
   foundText->position.y = pos.top() - ((Font*)hFont)->descent;
   foundText->color.r = (float)color.red / 255.0f;
   foundText->color.g = (float)color.green / 255.0f;
@@ -108,7 +113,11 @@ void render::LiteHTMLContainer::get_image_size(const litehtml::tchar_t* src, con
 
 void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg) {
   if(bg.color.alpha) {
-    this->box.position.x = bg.clip_box.x;
+    this->box.position.x = bg.clip_box.left();
+    if(this->box.position.x < 0) {
+      this->box.position.x = bg.clip_box.left() + engine->renderWindow.width;
+    }
+
     this->box.position.y = bg.clip_box.y;
     this->box.size.x = bg.clip_box.width;
     this->box.size.y = bg.clip_box.height;

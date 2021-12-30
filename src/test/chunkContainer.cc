@@ -205,12 +205,14 @@ bool ChunkContainer::isValidTilePosition(glm::uvec3 position) {
 void ChunkContainer::selectCharacter(Character* character) {
 	this->selectedCharacter = character;
 
-	glm::uvec3 position = character->getPosition();
-	if(position.z != 0) {
-		position.z -= 1;
-	}
+	if(character != nullptr) {
+		glm::uvec3 position = character->getPosition();
+		if(position.z != 0) {
+			position.z -= 1;
+		}
 
-	this->characterSelectionSprite->setPosition(position);
+		this->characterSelectionSprite->setPosition(position);
+	}
 }
 
 // called by the selected character when the characters position/etc changes
@@ -389,8 +391,16 @@ void ChunkContainer::commit() {
 	}
 }
 
+void ChunkContainer::setPlayerTeam(Team* team) {
+	this->playerTeam = team;
+}
+
 Team* ChunkContainer::getPlayerTeam() {
 	return this->playerTeam;
+}
+
+void ChunkContainer::setEnemyTeam(Team* team) {
+	this->enemyTeam = team;
 }
 
 Team* ChunkContainer::getEnemyTeam() {
@@ -410,6 +420,9 @@ void es::defineChunkContainer() {
 	esEntryType getPlayerTeamArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getPlayerTeam, "ChunkContainer", "getPlayerTeam", 1, getPlayerTeamArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getEnemyTeam, "ChunkContainer", "getEnemyTeam", 1, getPlayerTeamArguments);
+
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setPlayerTeam, "ChunkContainer", "setPlayerTeam", 2, selectCharacterArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setEnemyTeam, "ChunkContainer", "setEnemyTeam", 2, selectCharacterArguments);
 
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getSelectedCharacter, "ChunkContainer", "getSelectedCharacter", 1, getPlayerTeamArguments);
 
@@ -452,10 +465,23 @@ esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int a
 }
 
 esEntryPtr es::ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
-	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObjectParents(args[1].objectData, "Character")) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
-		Character* character = (Character*)args[1].objectData->objectWrapper->data;
-		container->selectCharacter(character);
+
+		if(esCompareNamespaceToObjectParents(args[1].objectData, "Character")) {
+			Character* character = (Character*)args[1].objectData->objectWrapper->data;
+			container->selectCharacter(character);
+		}
+		else {
+			container->selectCharacter(nullptr);
+		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__setPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObject(args[1].objectData, "Team")) {
+		((ChunkContainer*)args[0].objectData->objectWrapper->data)->setPlayerTeam((Team*)args[1].objectData->objectWrapper->data);
 	}
 	return nullptr;
 }
@@ -464,6 +490,13 @@ esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int 
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
 		return esCreateObject(container->getPlayerTeam()->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__setEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObject(args[1].objectData, "Team")) {
+		((ChunkContainer*)args[0].objectData->objectWrapper->data)->setEnemyTeam((Team*)args[1].objectData->objectWrapper->data);
 	}
 	return nullptr;
 }
