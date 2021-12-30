@@ -4,6 +4,10 @@
 #include "imgui_impl_glfw.h"
 #endif
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <glm/vec3.hpp>
@@ -22,6 +26,16 @@
 Engine* engine = new Engine();
 
 void Engine::initialize() {
+	#ifdef _WIN32
+	// initialize Winsock
+	WSADATA wsaData;
+	int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+	if(iResult != 0) {
+		printf("could not initialize winsock2\n");
+		::exit(1);
+	}
+	#endif
+
 	// initialize nxlink and romfs right away
 	#ifdef __switch__
 	socketInitializeDefault();

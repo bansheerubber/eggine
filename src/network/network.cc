@@ -1,6 +1,9 @@
 #include "network.h"
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <Ws2tcpip.h>
+#include <winsock2.h>
+#else
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -9,6 +12,7 @@
 #endif
 
 #include <algorithm>
+#include <iostream>
 #include <thread>
 
 #include "connection.h"
@@ -17,8 +21,6 @@
 #include "../basic/remoteObject.h"
 
 #include "../util/time.h"
-
-using namespace std;
 
 network::Network::Network() {
 }
@@ -33,7 +35,79 @@ const network::IPAddress network::Network::getHostIPAddress() {
 void network::Network::openServer() {
 	this->mode = NETWORK_SERVER;
 	
-	#ifndef _WIN32
+	#ifdef _WIN32
+	
+	// setup tcp socket
+	{
+		addrinfo* result = nullptr;
+		addrinfo hints;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET6;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = AI_PASSIVE;
+
+		getaddrinfo("localhost", "28000", &hints, &result);
+
+		this->ip = *(sockaddr_in6*)result->ai_addr;
+
+		this->tcpSocket = socket(result->ai_family, SOCK_STREAM, IPPROTO_TCP);
+		if((SOCKET)this->tcpSocket == INVALID_SOCKET) {
+			printf("could not instantiate tcp socket\n");
+			return;
+		}
+
+		char enabled = 1;
+		setsockopt((SOCKET)this->tcpSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
+
+		if(::bind((SOCKET)this->tcpSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
+			printf("could not bind tcp socket\n");
+			return;
+		}
+
+		u_long block = 1;
+		ioctlsocket((SOCKET)this->tcpSocket, FIONBIO, &block);
+
+		listen(this->tcpSocket, 32);
+	}
+
+	// setup udp socket
+	{
+		addrinfo* result = nullptr;
+		addrinfo hints;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET6;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		hints.ai_flags = AI_PASSIVE;
+
+		getaddrinfo("localhost", "28000", &hints, &result);
+
+		this->udp.socket = socket(result->ai_family, SOCK_DGRAM, IPPROTO_UDP);
+		if((SOCKET)this->udp.socket == INVALID_SOCKET) {
+			printf("could not instantiate udp socket\n");
+			return;
+		}
+
+		char enabled = 1;
+		setsockopt((SOCKET)this->udp.socket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
+
+		if(::bind((SOCKET)this->udp.socket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
+			printf("could not bind udp socket\n");
+			return;
+		}
+
+		u_long block = 1;
+		ioctlsocket((SOCKET)this->udp.socket, FIONBIO, &block);
+
+		listen((SOCKET)this->udp.socket, 32);
+	}
+
+	std::thread t(&Network::acceptServer, this);
+	t.detach();
+	#else
 	sockaddr_in6 serverAddress;
 
 	serverAddress.sin6_family = AF_INET6;
@@ -84,7 +158,7 @@ void network::Network::openServer() {
 
 	this->ip = serverAddress;
 
-	thread t(&Network::acceptServer, this);
+	std::thread t(&Network::acceptServer, this);
 	t.detach();
 	#endif
 }
@@ -94,25 +168,36 @@ void network::Network::closeServer() {
 }
 
 void network::Network::acceptServer() {
-	#ifndef _WIN32
 	while(true) {
 		sockaddr_in6 clientAddress;
 		socklen_t clientLength = sizeof(clientAddress);
+
+		#ifdef _WIN32
+		SOCKET clientSocket = ::accept((SOCKET)this->tcpSocket, (sockaddr*)&clientAddress, &clientLength);
+		if(clientSocket == INVALID_SOCKET) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(16));
+			continue;
+		}
+
+		u_long block = 1;
+		ioctlsocket((SOCKET)clientSocket, FIONBIO, &block);
+		#else
 		int clientSocket = ::accept(this->tcpSocket, (sockaddr*)&clientAddress, &clientLength);
 		if(clientSocket < 0) {
-			this_thread::sleep_for(chrono::milliseconds(16));
+			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 			continue;
 		}
 
 		fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+		#endif
 
 		Connection* connection = new Connection(clientSocket, clientAddress);
 		this->connections.push_back(connection);
-		this->secretToConnection[connection->secret] = connection;
 
-		this_thread::sleep_for(chrono::milliseconds(16));
+		this->secretToConnection[connection->secret] = connection;
+		
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	}
-	#endif
 }
 
 void network::Network::openClient() {
@@ -149,12 +234,29 @@ void network::Network::tick() {
 }
 
 void network::Network::receive() {
-	#ifndef _WIN32
 	if(this->isClient()) {
 		this->client.receive();
 		return;
 	}
 	
+	#ifdef _WIN32
+	this->udp.stream.allocate(EGGINE_PACKET_SIZE);
+	
+	for(unsigned int i = 0; i < 16; i++) {
+		sockaddr_in6 clientAddress;
+		socklen_t clientLength = sizeof(clientAddress);
+		int length = recvfrom(this->udp.socket, &this->udp.stream.buffer[0], EGGINE_PACKET_SIZE, 0, (sockaddr*)&clientAddress, &clientLength);
+
+		if(length <= 0) {
+			if(WSAGetLastError() == WSAEWOULDBLOCK) {
+				break;
+			}
+			continue;
+		}
+
+		// ## recv_generator.py "this->udp.stream" "length" "clientAddress"
+	}
+	#else
 	for(unsigned int i = 0; i < EGGINE_NETWORK_UDP_MESSAGE_AMOUNT; i++) {
 		this->udp.streams[i].allocate(EGGINE_PACKET_SIZE);
 		this->udp.scatterGather[i].iov_base = (char*)this->udp.streams[i].start();
@@ -171,45 +273,14 @@ void network::Network::receive() {
 	int messages = ::recvmmsg(this->udp.socket, this->udp.headers, EGGINE_NETWORK_UDP_MESSAGE_AMOUNT, 0, nullptr);
 	if(messages > 0) {
 		for(unsigned int i = 0; i < (unsigned int)messages; i++) {
-			// prepare the buffers
-			this->udp.streams[i].flush();
-			this->udp.streams[i].buffer.head = this->udp.headers[i].msg_len;
-
-			if(this->udp.streams[i].buffer.head < 8) { // if the message isn't even big enough to hold a secret, discard the packet
-				printf("discard because of small length\n");
-				continue;
-			}
-			
-			if(
-				this->udpAddressToConnection.find(this->udp.addresses[i]) == this->udpAddressToConnection.end()
-			) {
-				// if we can't find a secret, discard the packet
-				uint64_t secret = this->udp.streams[i].readNumber<uint64_t>();
-				if(this->secretToConnection.find(secret) == this->secretToConnection.end()) {
-					printf("discard because of invalid secret\n");
-					continue;
-				}
-
-				this->udpAddressToConnection[this->udp.addresses[i]] = this->secretToConnection[secret];
-				this->secretToConnection[secret]->initializeUDP(this->udp.addresses[i]);
-
-				thread t(&Network::sendInitialData, this, this->secretToConnection[secret]);
-				t.detach();
-			}
-
-			// the minimum header length for a packet is always greater than 8. if we got a length of 8, its probably a redundant secret
-			if(this->udp.streams[i].buffer.head == 8) {
-				continue;
-			}
-
-			this->udpAddressToConnection[this->udp.addresses[i]]->receiveUDP(this->udp.streams[i]);
+			// ## recv_generator.py "this->udp.streams[i]" "this->udp.headers[i].msg_len" "this->udp.addresses[i]"
 		}
 	}
-	
+	#endif
+
 	for(Connection* connection: this->connections) {
 		connection->receiveTCP();
 	}
-	#endif
 }
 
 void network::Network::addRemoteObject(RemoteObject* remoteObject) {
@@ -227,11 +298,8 @@ network::RemoteObject* network::Network::getRemoteObject(remote_object_id id) {
 	return this->idToRemoteObject[id];
 }
 
-int network::Network::getUDPSocket() {
-	#ifndef _WIN32
+uint64_t network::Network::getUDPSocket() {
 	return this->udp.socket;
-	#endif
-	return -1;
 }
 
 bool network::Network::isServer() {
@@ -245,11 +313,9 @@ bool network::Network::isClient() {
 void network::Network::removeConnection(class Connection* connection) {
 	this->connections.erase(find(this->connections.begin(), this->connections.end(), connection));
 	
-	#ifndef _WIN32
 	if(connection->isInitialized()) {
 		this->udpAddressToConnection[connection->udpAddress] = nullptr;
 	}
-	#endif
 
 	this->secretToConnection[connection->secret] = nullptr;
 }

@@ -1,6 +1,12 @@
 #pragma once
 
-#ifndef _WIN32
+#include <cstdint>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <ws2def.h>
+#else
 #include <netinet/in.h>
 #include <sys/socket.h>
 #endif
@@ -12,7 +18,32 @@
 #include "stream.h"
 #include "types.h"
 
-#ifndef _WIN32
+#ifdef _WIN32
+namespace std {
+	template<>
+	struct hash<sockaddr_in6> {
+		size_t operator()(sockaddr_in6 const& source) const noexcept {
+			uint64_t hash = *((uint64_t*)&source.sin6_addr.u.Byte[0]);
+			uint64_t second = *((uint64_t*)&source.sin6_addr.u.Byte[8]);
+			hash = hash ^ (second + 0x9e3779b9 + (hash << 6) + (hash >> 2));
+			return hash ^ (source.sin6_port + 0x9e3779b9 + (hash << 6) + (hash >> 2));
+    }
+	};
+
+	template<>
+	struct equal_to<sockaddr_in6> {
+		bool operator()(const sockaddr_in6& x, const sockaddr_in6& y) const {
+			for(unsigned int i = 0; i < 16; i++) {
+				if(x.sin6_addr.u.Byte[i] != y.sin6_addr.u.Byte[i]) {
+					return false;
+				}
+			}
+
+			return x.sin6_port == y.sin6_port;
+		}
+	};
+};
+#else
 namespace std {
 	template<>
 	struct hash<sockaddr_in6> {
@@ -75,7 +106,7 @@ namespace network {
 			void removeRemoteObject(class RemoteObject* remoteObject);
 			class RemoteObject* getRemoteObject(remote_object_id id);
 
-			int getUDPSocket();
+			uint64_t getUDPSocket();
 
 			bool isServer(); // whether or not the network is acting as a server
 			bool isClient(); // whether or not the network is acting as a client
@@ -90,16 +121,21 @@ namespace network {
 			
 			// bookkeeping for remote objects
 			uint64_t highestRemoteId = 0;
-			int tcpSocket = -1;
+			int64_t tcpSocket = -1;
 			std::vector<class RemoteObject*> remoteObjects;
 			tsl::robin_map<remote_object_id, class RemoteObject*> idToRemoteObject;
 
 			std::vector<class Connection*> connections;
 			tsl::robin_map<uint64_t, class Connection*> secretToConnection;
 
-			#ifndef _WIN32
 			tsl::robin_map<sockaddr_in6, class Connection*> udpAddressToConnection;
-		
+
+			#ifdef _WIN32
+			struct {
+				uint64_t socket;
+				Stream stream;
+			} udp;
+			#else
 			struct {
 				Stream streams[EGGINE_NETWORK_UDP_MESSAGE_AMOUNT];
 				iovec scatterGather[32];

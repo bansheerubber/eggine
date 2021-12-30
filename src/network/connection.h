@@ -1,6 +1,10 @@
 #pragma once
 
-#ifndef _WIN32
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <ws2def.h>
+#else
 #include <netinet/in.h>
 #endif
 
@@ -26,9 +30,7 @@ namespace network {
 		
 		public:
 			Connection() {};
-			#ifndef _WIN32
-			Connection(int _socket, sockaddr_in6 address);
-			#endif
+			Connection(int64_t _socket, sockaddr_in6 address);
 			~Connection();
 
 			void receiveTCP();
@@ -41,22 +43,18 @@ namespace network {
 		protected:			
 			ConnectionHandshakeState handshake = WAIT_FOR_CHECKSUM;
 			
-			#ifndef _WIN32
 			sockaddr_in6 tcpAddress;
 			sockaddr_in6 udpAddress;
-			#endif
 
 			bool initialized = false;
 			uint64_t secret = 0; // secret negociated with TCP, used to identify UDP ip/port
-			int _socket = -1;
+			int64_t _socket = -1;
 			IPAddress ip;
 
 			void sendTCP(uint64_t size, const char* buffer);
 			void sendUDP(uint64_t size, const char* buffer);
 			void requestSecret();
-			#ifndef _WIN32
 			void initializeUDP(sockaddr_in6 address);
-			#endif
 			void handlePacket();
 	};
 };

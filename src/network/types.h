@@ -1,6 +1,11 @@
 #pragma once
 
-#ifndef _WIN32
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <netinet/in.h>
 #endif
 
@@ -17,15 +22,21 @@ namespace network {
 	struct IPAddress {
 		unsigned char address[16];
 
-		IPAddress() {}
-
-		#ifndef _WIN32
-		IPAddress(sockaddr_in6 address) {
+		IPAddress() {
 			for(unsigned int i = 0; i < 16; i++) {
-				this->address[i] = address.sin6_addr.s6_addr[i];
+				this->address[i] = 255;
 			}
 		}
-		#endif
+
+		IPAddress(sockaddr_in6 address) {
+			for(unsigned int i = 0; i < 16; i++) {
+				#ifdef _WIN32
+				this->address[i] = address.sin6_addr.u.Byte[i];
+				#else
+				this->address[i] = address.sin6_addr.s6_addr[i];
+				#endif
+			}
+		}
 
 		std::string toString() const {
 			return fmt::format(

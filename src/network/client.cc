@@ -1,6 +1,9 @@
 #include "client.h"
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <Ws2tcpip.h>
+#include <winsock2.h>
+#else
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -19,8 +22,6 @@
 
 // ##1 remote_object_headers
 
-using namespace std;
-
 network::Client::Client() {
 	this->lastSequenceSent = 100000; // start us off at a high sequence number so i can debug easier
 }
@@ -30,7 +31,72 @@ network::Client::~Client() {
 }
 
 void network::Client::open() {
-	#ifndef _WIN32
+	#ifdef _WIN32
+	// setup tcp socket
+	{
+		addrinfo* result = nullptr;
+		addrinfo hints;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET6;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = AI_PASSIVE;
+
+		getaddrinfo("localhost", "28000", &hints, &result);
+		
+		this->tcpSocket = socket(result->ai_family, SOCK_STREAM, IPPROTO_TCP);
+		if((SOCKET)this->tcpSocket == INVALID_SOCKET) {
+			printf("could not instantiate tcp socket: %d\n", WSAGetLastError());
+			return;
+		}
+
+		if(connect((SOCKET)this->tcpSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
+			printf("could not connect tcp socket: %d\n", WSAGetLastError());
+			this->tcpSocket = (uint64_t)INVALID_SOCKET;
+			return;
+		}
+
+		// send network checksum right away
+		Stream stream;
+		stream.writeString(engine->network.getChecksum());
+		::send((SOCKET)this->tcpSocket, stream.start(), (int)stream.size(), 0);
+
+		u_long block = 1;
+		ioctlsocket((SOCKET)this->tcpSocket, FIONBIO, &block);
+	}
+
+	// initialize udp socket
+	{
+		addrinfo* result = nullptr;
+		addrinfo hints;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET6;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		hints.ai_flags = AI_PASSIVE;
+
+		getaddrinfo("localhost", "28000", &hints, &result);
+		
+		this->udpSocket = socket(result->ai_family, SOCK_DGRAM, IPPROTO_UDP);
+		if((SOCKET)this->udpSocket == INVALID_SOCKET) {
+			printf("could not instantiate udp socket: %d\n", WSAGetLastError());
+			return;
+		}
+
+		if(connect((SOCKET)this->udpSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
+			printf("could not udp socket: %d\n", WSAGetLastError());
+			this->udpSocket = (uint64_t)INVALID_SOCKET;
+			return;
+		}
+
+		u_long block = 1;
+		ioctlsocket((SOCKET)this->udpSocket, FIONBIO, &block);
+
+		this->ip = *(sockaddr_in6*)result->ai_addr;
+	}
+	#else
 	sockaddr_in6 serverAddress;
 
 	serverAddress.sin6_family = AF_INET6;
@@ -90,7 +156,26 @@ void network::Client::receive() {
 }
 
 void network::Client::receiveTCP() {
-	#ifndef _WIN32
+	#ifdef _WIN32
+	if(this->initialized) {
+		return;
+	}
+	
+	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
+	this->receiveStream->flush();
+	int length = ::recv((SOCKET)this->tcpSocket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
+	if(length < 0) {
+		if(WSAGetLastError() == WSAEWOULDBLOCK) {
+			return;
+		}
+		return;
+	}
+	else if(length == 0) {
+		return;
+	}
+
+	this->receiveStream->buffer.head = length;
+	#else
 	if(this->initialized) {
 		return;
 	}
@@ -109,6 +194,7 @@ void network::Client::receiveTCP() {
 	}
 
 	this->receiveStream->buffer.head = length;
+	#endif
 
 	// if our connection isn't initialized, we should receive a secret as our first message
 	if(!this->initialized) {
@@ -138,13 +224,25 @@ void network::Client::receiveTCP() {
 			}
 		}
 	}
-	#endif
 }
 
 void network::Client::receiveUDP() {
-	#ifndef _WIN32
 	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
 	this->receiveStream->flush();
+	#ifdef _WIN32
+	int length = ::recv((SOCKET)this->udpSocket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
+	if(length < 0) {
+		if(WSAGetLastError() == WSAEWOULDBLOCK) {
+			return;
+		}
+		return;
+	}
+	else if(length == 0) {
+		return;
+	}
+
+	this->receiveStream->buffer.head = length;
+	#else
 	int length = ::recv(this->udpSocket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
 	if(length < 0) {
 		if(errno == EWOULDBLOCK) {
@@ -157,6 +255,7 @@ void network::Client::receiveUDP() {
 	}
 
 	this->receiveStream->buffer.head = length;
+	#endif
 
 	// handle packet
 	this->readPacket();
@@ -165,7 +264,6 @@ void network::Client::receiveUDP() {
 	Packet* packet = new Packet();
 	packet->setType(DROPPABLE_PACKET);
 	this->sendPacket(packet);
-	#endif
 }
 
 void network::Client::handlePacket() {
@@ -258,7 +356,9 @@ const network::IPAddress network::Client::getIPAddress() {
 }
 
 void network::Client::send(uint64_t size, const char* buffer) {
-	#ifndef _WIN32
+	#ifdef _WIN32
+	::send((SOCKET)this->udpSocket, buffer, size, 0);
+	#else
 	::send(this->udpSocket, buffer, size, 0);
 	#endif
 }

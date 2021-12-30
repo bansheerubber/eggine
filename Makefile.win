@@ -1,5 +1,5 @@
 target = game
-cclibs = -lpthread -llitehtml -lgumbo -lglfw3 -lpng -leggscript -lz -lopenal -lvorbisfile -lvorbis -logg -lfreetype -lbrotlidec -lbrotlicommon -lbz2 -lharfbuzz -lgraphite2 -lfreetype -lwinmm -dsound -lole32 -loleaut32 -lgdi32 -lrpcrt4
+cclibs = -lpthread -llitehtml -lgumbo -lglfw3 -lpng -leggscript -lz -lopenal -lvorbisfile -lvorbis -logg -lfreetype -lbrotlidec -lbrotlicommon -lbz2 -lharfbuzz -lgraphite2 -lfreetype -lwinmm -dsound -lole32 -loleaut32 -lgdi32 -lrpcrt4 -lWs2_32
 ccinclude = -Iinclude/pc/glm/ -Iinclude/common/ -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ -Iinclude/pc/ -Iimgui -Llib
 CXX = g++
 CPPFLAGS = -std=c++17 -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -DGLFW_INCLUDE_GLEXT -DAL_LIBTYPE_STATIC -DLITEHTML_UTF8

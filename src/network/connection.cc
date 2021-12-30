@@ -13,8 +13,7 @@
 #include "packet.h"
 #include "../util/random.h"
 
-#ifndef _WIN32
-network::Connection::Connection(int _socket, sockaddr_in6 address) {
+network::Connection::Connection(int64_t _socket, sockaddr_in6 address) {
 	this->_socket = _socket;
 	this->tcpAddress = address;
 	this->ip = IPAddress(address);
@@ -24,7 +23,6 @@ network::Connection::Connection(int _socket, sockaddr_in6 address) {
 	this->lastSequenceSent = randomInt();
 	this->lastHighestAckReceived = this->lastSequenceSent;
 }
-#endif
 
 network::Connection::~Connection() {
 	if(this->_socket > 0) {
@@ -37,9 +35,18 @@ network::Connection::~Connection() {
 }
 
 void network::Connection::receiveTCP() {
-	#ifndef _WIN32
 	this->receiveStream->allocate(EGGINE_PACKET_SIZE);
 	this->receiveStream->flush();
+	
+	#ifdef _WIN32
+	int length = ::recv((SOCKET)this->_socket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
+	if(length < 0) {
+		return;
+	}
+	else if(length == 0) {
+		return;
+	}
+	#else
 	int length = ::recv(this->_socket, &this->receiveStream->buffer[0], EGGINE_PACKET_SIZE, 0);
 	if(length < 0) {
 		if(errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -52,6 +59,9 @@ void network::Connection::receiveTCP() {
 		delete this;
 		return;
 	}
+	#endif
+
+	printf("got a communication\n");
 
 	this->receiveStream->buffer.head = length;
 
@@ -72,6 +82,8 @@ void network::Connection::receiveTCP() {
 					stream.writeNumber<char>(1);
 					this->sendTCP(stream.size(), stream.start());
 					this->handshake = WAIT_FOR_SECRET;
+
+					printf("checksum pass\n");
 				}
 				else {
 					// TODO disconnect the client
@@ -90,7 +102,6 @@ void network::Connection::receiveTCP() {
 			}
 		}
 	}
-	#endif
 }
 
 void network::Connection::receiveUDP(Stream &stream) {
@@ -123,13 +134,17 @@ bool network::Connection::isInitialized() {
 }
 
 void network::Connection::sendTCP(uint64_t size, const char* buffer) {
-	#ifndef _WIN32
+	#ifdef _WIN32
+	::send((SOCKET)this->_socket, buffer, size, 0);
+	#else
 	::send(this->_socket, buffer, size, 0);
 	#endif
 }
 
 void network::Connection::sendUDP(uint64_t size, const char* buffer) {
-	#ifndef _WIN32
+	#ifdef _WIN32
+	::sendto((SOCKET)engine->network.getUDPSocket(), buffer, size, 0, (sockaddr*)&this->udpAddress, sizeof(this->udpAddress));
+	#else
 	::sendto(engine->network.getUDPSocket(), buffer, size, 0, (sockaddr*)&this->udpAddress, sizeof(this->udpAddress));
 	#endif
 }
@@ -140,7 +155,6 @@ void network::Connection::requestSecret()  {
 	this->sendTCP(stream.size(), stream.start());
 }
 
-#ifndef _WIN32
 void network::Connection::initializeUDP(sockaddr_in6 address) {
 	this->handshake = PACKET_READY;
 	this->udpAddress = address;
@@ -152,7 +166,6 @@ void network::Connection::initializeUDP(sockaddr_in6 address) {
 
 	printf("initialized udp connection for %s\n", this->ip.toString().c_str());
 }
-#endif
 
 void network::Connection::handlePacket() {
 	

@@ -287,13 +287,6 @@ def get_remote_object_code(file, number_of_tabs):
 	with open(f"src/basic/gen/remoteObject/{file}.cc.tmpl") as start:
 		return ''.join(preprocess("", [f"{tabs}{line}" for line in start.readlines()], "."))
 
-allocate_mask = get_remote_object_code("allocateMask", 2)
-pack = get_remote_object_code("pack", 2)
-unpack = get_remote_object_code("unpack", 2)
-property_to_mask = get_remote_object_code("propertyToMaskPosition", 2)
-get_class_id = get_remote_object_code("getClassId", 2)
-get_checksum = get_remote_object_code("checksum", 3)
-
 def get_env_commands():
 	output = ""
 	global environment_variables
@@ -356,7 +349,21 @@ def handle_file(file, depth = 0):
 		new_tmp_file = file.replace("./src/", "./tmp/")
 		copyfile(tmp_file, new_tmp_file)
 
+allocate_mask = ""
+pack = ""
+unpack = ""
+property_to_mask = ""
+get_class_id = ""
+get_checksum = ""
+
 if __name__ == "__main__":
+	allocate_mask = get_remote_object_code("allocateMask", 2)
+	pack = get_remote_object_code("pack", 2)
+	unpack = get_remote_object_code("unpack", 2)
+	property_to_mask = get_remote_object_code("propertyToMaskPosition", 2)
+	get_class_id = get_remote_object_code("getClassId", 2)
+	get_checksum = get_remote_object_code("checksum", 3)
+	
 	total_files = []
 	for root, subdirs, files in os.walk("./src"):
 		files = [f"{root}/{file}" for file in files]
