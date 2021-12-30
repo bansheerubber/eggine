@@ -17,8 +17,6 @@
 #include "../resources/spriteSheet.h"
 #include "tileMath.h"
 
-using namespace std;
-
 void initChunk(class ChunkContainer* container, class Chunk** chunk);
 
 namespace es {
@@ -71,8 +69,8 @@ class ChunkContainer : public RenderObject {
 
 		void commit();
 
-		void onBind(string &bind, binds::Action action);
-		void onAxis(string &bind, double value);
+		void onBind(std::string &bind, binds::Action action);
+		void onAxis(std::string &bind, double value);
 
 		class Team* getPlayerTeam();
 		class Team* getEnemyTeam();

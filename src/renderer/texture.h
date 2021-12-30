@@ -10,8 +10,6 @@
 #include <png.h>
 #include <string>
 
-using namespace std;
-
 class DeveloperGui;
 
 namespace render {
@@ -242,7 +240,7 @@ namespace render {
 			void setFilters(TextureFilter minFilter, TextureFilter magFilter);
 			void setWrap(TextureWrap uWrap, TextureWrap vWrap);
 
-			void loadPNGFromFile(string filename);
+			void loadPNGFromFile(std::string filename);
 			void loadPNG(const unsigned char* buffer, unsigned int size);
 			void bind(unsigned int location);
 			void load(

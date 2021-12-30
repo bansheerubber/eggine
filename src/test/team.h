@@ -5,8 +5,6 @@
 #include "../basic/gameObject.h"
 #include "../util/sortedArray.h"
 
-using namespace std;
-
 namespace es {
 	void defineTeam();
 	esEntryPtr Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args);

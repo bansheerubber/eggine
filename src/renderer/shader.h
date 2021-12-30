@@ -12,8 +12,6 @@
 
 #include "memory.h"
 
-using namespace std;
-
 namespace render {
 	enum ShaderType {
 		SHADER_FRAGMENT,
@@ -35,7 +33,7 @@ namespace render {
 		protected:
 			class Window* window;
 
-			tsl::robin_map<string, unsigned int> uniformToBinding;
+			tsl::robin_map<std::string, unsigned int> uniformToBinding;
 			ShaderType type;
 
 			#ifdef __switch__
@@ -46,6 +44,6 @@ namespace render {
 			#endif
 
 			void processUniforms(const char* buffer, uint64_t bufferSize);
-			void processUniforms(string filename);
+			void processUniforms(std::string filename);
 	};
 };

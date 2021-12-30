@@ -24,12 +24,12 @@ void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 }
 #endif
 
-void Debug::addInfoMessage(string message) {
+void Debug::addInfoMessage(std::string message) {
 	this->infoMessages.push_back(message);
 }
 
-string Debug::getInfoText() {
-	string output;
+std::string Debug::getInfoText() {
+	std::string output;
 	for(string &message: this->infoMessages) {
 		output += message + '\n';
 	}

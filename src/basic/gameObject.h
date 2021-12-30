@@ -7,8 +7,6 @@
 #include "gameObject.h.gen"
 #include "../engine/keybind.h"
 
-using namespace std;
-
 class GameObject {
 	public:
 		GameObject();
@@ -18,8 +16,8 @@ class GameObject {
 			return INVALID;
 		}
 
-		virtual void onBind(string &bind, binds::Action action) {}
-		virtual void onAxis(string &bind, double axis) {};
+		virtual void onBind(std::string &bind, binds::Action action) {}
+		virtual void onAxis(std::string &bind, double axis) {};
 
 		int operator==(const GameObject &other) {
 			return this->id == other.id;

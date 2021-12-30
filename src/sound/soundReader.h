@@ -5,8 +5,6 @@
 #include <fstream>
 #include <vorbis/vorbisfile.h>
 
-using namespace std;
-
 namespace sound {
 	enum SoundFileType {
 		OGG_FILE,
@@ -35,7 +33,7 @@ namespace sound {
 			uint64_t location;
 			uint64_t size;
 			SoundFileType type;
-			ifstream file;
+			std::ifstream file;
 
 			template<class T>
 			T readNumber() {
@@ -72,7 +70,7 @@ namespace sound {
 		size_t bytes = size * count;
 		size_t end = (size_t)soundReader->location + soundReader->size;
 		size_t current = (size_t)soundReader->file.tellg();
-		size_t readAmount = min(end - current, bytes);
+		size_t readAmount = std::min(end - current, bytes);
 
 		soundReader->file.read((char*)data, readAmount);
 
@@ -83,15 +81,15 @@ namespace sound {
 		int state = -1;
 		SoundReader* soundReader = (SoundReader*)file;
 		if(origin == SEEK_SET) {
-			soundReader->file.seekg(offset + (size_t)soundReader->location, ios_base::beg);
+			soundReader->file.seekg(offset + (size_t)soundReader->location, std::ios_base::beg);
 			state = soundReader->file.good() ? 0 : -1;
 		}
 		else if(origin == SEEK_CUR) {
-			soundReader->file.seekg(offset, ios_base::cur);
+			soundReader->file.seekg(offset, std::ios_base::cur);
 			state = soundReader->file.good() ? 0 : -1;
 		}
 		else if(origin == SEEK_END) {
-			soundReader->file.seekg((size_t)soundReader->location + soundReader->size - offset, ios_base::beg);
+			soundReader->file.seekg((size_t)soundReader->location + soundReader->size - offset, std::ios_base::beg);
 			state = soundReader->file.good() ? 0 : -1;
 		}
 

@@ -20,8 +20,6 @@
 #include "../renderer/texture.h"
 #include "../util/time.h"
 
-using namespace std;
-
 namespace render {
 	enum PrimitiveType {
 		PRIMITIVE_POINTS,

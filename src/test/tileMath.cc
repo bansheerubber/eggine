@@ -3,8 +3,6 @@
 #include <cmath>
 #include <stdio.h>
 
-using namespace std;
-
 int64_t tilemath::coordinateToIndex(glm::ivec2 coordinate, int64_t size, tilemath::Rotation rotation) {
 	int64_t x = 0, y = 0;
 	switch(rotation) {

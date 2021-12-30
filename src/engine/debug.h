@@ -8,8 +8,6 @@
 #include "../renderer/vertexAttributes.h"
 #include "../renderer/vertexBuffer.h"
 
-using namespace std;
-
 #define EGGINE_DEBUG 1
 
 #ifndef __switch__
@@ -140,22 +138,22 @@ class Debug {
 	#endif
 
 	public:
-		void addInfoMessage(string message);
+		void addInfoMessage(std::string message);
 		void drawTexture(render::Texture* texture);
 	
 	private:
 		render::VertexBuffer* buffers[2];
 		render::VertexAttributes* attributes;
 		render::Program* program;
-		vector<string> infoMessages;
+		std::vector<std::string> infoMessages;
 
 		#ifndef __switch__
-		vector<GLDebugMessage> glDebugMessages;
+		std::vector<GLDebugMessage> glDebugMessages;
 		void flushGLDebugMessages();
 		#endif
 		
 		void logMessages();
-		string getInfoText();
+		std::string getInfoText();
 		void clearInfoMessages();
 
 };

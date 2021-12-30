@@ -2,9 +2,9 @@
 
 #include "../engine/engine.h"
 
-tsl::robin_map<string, tsl::robin_map<int, Font*>> Font::Fonts;
+tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Font::Fonts;
 
-Font* Font::GetFont(string family, int size) {
+Font* Font::GetFont(std::string family, int size) {
 	if(Font::Fonts[family][size] == nullptr) {
 		// TODO load this from the carton
 		#if defined(__switch__) || defined(_WIN32)
@@ -18,7 +18,7 @@ Font* Font::GetFont(string family, int size) {
 	}
 }
 
-Font::Font(string fileName, int size) {
+Font::Font(std::string fileName, int size) {
 	this->fileName = fileName;
 	this->size = size;
 
@@ -27,7 +27,7 @@ Font::Font(string fileName, int size) {
 
 	uint64_t amount = 128;
 
-	string name(this->face->family_name);
+	std::string name(this->face->family_name);
 	Font::Fonts[name][size] = this;
 
 	for(uint64_t i = 0; i < 256 * 256; i++) {

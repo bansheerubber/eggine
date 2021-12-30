@@ -4,8 +4,6 @@
 
 #include "../carton/metadata.h"
 
-using namespace std;
-
 namespace resources {
 	class ResourceObject { // keep track of resource usage via leasing
 		friend class ResourceManager;
@@ -24,7 +22,7 @@ namespace resources {
 		protected:
 			class ResourceManager* manager;
 			carton::Metadata* metadata = nullptr;
-			string fileName;
+			std::string fileName;
 			int leases = 0;
 	};
 };

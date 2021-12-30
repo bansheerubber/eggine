@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <vector>
 
-using namespace std;
-
 namespace render {
 	class Window;
 	
@@ -61,7 +59,7 @@ namespace render {
 				Piece* head = nullptr;
 				uint64_t size;
 				uint32_t flags;
-				vector<Piece*> deallocationList;
+				std::vector<Piece*> deallocationList;
 
 				void combinePieces();
 		};
@@ -77,7 +75,7 @@ namespace render {
 				uint64_t getAllocated();
 			
 			protected:
-				vector<Page*> pages;
+				std::vector<Page*> pages;
 				Window* window;
 				uint64_t allocated = 0;
 		};

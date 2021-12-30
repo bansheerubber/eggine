@@ -19,7 +19,7 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 		Text::Program->addShader(fragmentShader);
 	}
 
-	string filePrefix = "";
+	std::string filePrefix = "";
 	#ifdef __switch__
 	filePrefix = "romfs:/";
 	#endif
@@ -40,7 +40,7 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 	}
 }
 
-Text::Text(string family, int size, bool addToUiList) : Text(addToUiList) {
+Text::Text(std::string family, int size, bool addToUiList) : Text(addToUiList) {
 	this->font = Font::GetFont(family, size);
 }
 
@@ -121,12 +121,12 @@ void Text::updateBuffers() {
 	this->vertexBuffers[1]->setData(&uvs[0][0], sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 }
 
-void Text::setText(string text) {
+void Text::setText(std::string text) {
 	this->text = text;
 	this->updateBuffers();
 }
 
-string Text::getText() {
+std::string Text::getText() {
 	return this->text;
 }
 

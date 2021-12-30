@@ -29,6 +29,8 @@
 #endif
 
 int main(int argc, char* argv[]) {
+	setbuf(stdout, NULL);
+	
 	#ifdef __switch__
 	engine->setFilePrefix("romfs:/");
 	#endif

@@ -9,8 +9,6 @@
 #include "gameObject.h"
 #include "../renderer/texture.h"
 
-using namespace std;
-
 struct FontGlyph {
 	unsigned int width;
 	unsigned int height;
@@ -25,11 +23,11 @@ class Font : public GameObject {
 	friend class Text;
 	
 	public:
-		Font(string fileName, int size);
-		string fileName;
+		Font(std::string fileName, int size);
+		std::string fileName;
 
-		static tsl::robin_map<string, tsl::robin_map<int, Font*>> Fonts;
-		static Font* GetFont(string family, int size);
+		static tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Fonts;
+		static Font* GetFont(std::string family, int size);
 
 		int size = 0;
 		char atlas[256 * 256];

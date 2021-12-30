@@ -8,11 +8,9 @@
 #include "../util/png.h"
 #include "../renderer/texture.h"
 
-using namespace std;
-
 struct ConsoleEntry {
 	int level;
-	string contents;
+	std::string contents;
 };
 
 class DeveloperGui {
@@ -20,9 +18,9 @@ class DeveloperGui {
 		DeveloperGui();
 
 		png spritesheet;
-		vector<render::Texture*> spritesheetImages;
+		std::vector<render::Texture*> spritesheetImages;
 
-		vector<ConsoleEntry> console;
+		std::vector<ConsoleEntry> console;
 
 		bool focusConsole = false;
 		
@@ -30,9 +28,9 @@ class DeveloperGui {
 		void prerender();
 	
 	private:
-		vector<string> history;
+		std::vector<std::string> history;
 		int historyPosition = 0;
-		string incompleteCommand = "";
+		std::string incompleteCommand = "";
 		int consoleCallback(ImGuiInputTextCallbackData* data);
 };
 #endif

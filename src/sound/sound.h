@@ -12,8 +12,6 @@
 #include "buffer.h"
 #include "../resources/resourceObject.h"
 
-using namespace std;
-
 namespace resources {
 	class ResourceManager;
 };
@@ -63,7 +61,7 @@ namespace sound {
 			}
 
 		private:
-			string fileName;
+			std::string fileName;
 			uint64_t position; // position within the carton
 			uint64_t size; // full size of the file
 			Buffer buffers[SOUND_BUFFER_COUNT]; // initial buffers that we always keep in memory

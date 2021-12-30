@@ -10,8 +10,6 @@
 
 #include "memory.h"
 
-using namespace std;
-
 namespace render {
 	enum VertexAttributeType {
 		VERTEX_ATTRIB_BYTE,
@@ -221,12 +219,12 @@ namespace render {
 		protected:
 			Window* window = nullptr;
 
-			vector<VertexAttribute> attributes;
+			std::vector<VertexAttribute> attributes;
 
 			#ifdef __switch__
-			vector<VertexBuffer*> bufferBindOrder;
-			vector<DkVtxAttribState> attributeStates;
-			vector<DkVtxBufferState> bufferStates;
+			std::vector<VertexBuffer*> bufferBindOrder;
+			std::vector<DkVtxAttribState> attributeStates;
+			std::vector<DkVtxBufferState> bufferStates;
 			#else
 			GLuint vertexArrayObject = GL_INVALID_INDEX;
 			#endif

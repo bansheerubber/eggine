@@ -13,7 +13,7 @@ sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType 
 	this->location = location;
 	this->size = size;
 	this->type = type;
-	this->file = ifstream(engine->getFilePrefix() + "out.carton", ios::binary);
+	this->file = std::ifstream(engine->getFilePrefix() + "out.carton", std::ios::binary);
 	this->file.seekg(location);
 
 	switch(this->type) {
@@ -48,7 +48,7 @@ sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType 
 			uint32_t section = this->readNumber<uint32_t>();
 			uint32_t size = this->readNumber<uint32_t>();
 			while(section != 0x61746164) {
-				this->file.seekg(size, ios_base::cur);
+				this->file.seekg(size, std::ios_base::cur);
 				section = this->readNumber<uint32_t>();
 				size = this->readNumber<uint32_t>();
 			}
@@ -173,7 +173,7 @@ uint64_t sound::SoundReader::readIntoBuffer(char* buffer, uint64_t bufferSize) {
 
 		case WAV_FILE: {
 			uint64_t bytesLeft = this->wav.dataSize - ((uint64_t)this->file.tellg() - this->wav.dataLocation);
-			uint64_t readSize = min(bytesLeft, bufferSize);
+			uint64_t readSize = std::min(bytesLeft, bufferSize);
 			this->file.read(buffer, readSize);
 			return readSize;
 		}

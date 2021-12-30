@@ -10,20 +10,18 @@
 
 #include "memory.h"
 
-using namespace std;
-
 namespace std {
 	template<>
-	struct hash<pair<string, uint64_t>> {
-		size_t operator()(pair<string, uint64_t> const& source) const noexcept {
-			uint64_t result = hash<string>{}(source.first);
+	struct hash<pair<std::string, uint64_t>> {
+		size_t operator()(pair<std::string, uint64_t> const& source) const noexcept {
+			uint64_t result = hash<std::string>{}(source.first);
 			return result ^ (source.second + 0x9e3779b9 + (result << 6) + (result >> 2));
     }
 	};
 
 	template<>
-	struct equal_to<pair<string, uint64_t>> {
-		bool operator()(const pair<string, uint64_t>& x, const pair<string, uint64_t>& y) const {
+	struct equal_to<pair<std::string, uint64_t>> {
+		bool operator()(const pair<std::string, uint64_t>& x, const pair<std::string, uint64_t>& y) const {
 			return x.first == y.first && x.second == y.second;
 		}
 	};
@@ -35,23 +33,23 @@ namespace render {
 			Program(class Window* window);
 			void bind();
 			void addShader(class Shader* shader);
-			void bindUniform(string uniformName, void* data, unsigned int size, uint64_t cacheIndex = 0, bool setOnce = false);
-			void bindTexture(string uniformName, unsigned int texture);
+			void bindUniform(std::string uniformNamde, void* data, unsigned int size, uint64_t cacheIndex = 0, bool setOnce = false);
+			void bindTexture(std::string uniformName, unsigned int texture);
 		
 		protected:
-			vector<class Shader*> shaders;
+			std::vector<class Shader*> shaders;
 			Window* window = nullptr;
 
-			tsl::robin_map<string, unsigned int> uniformToBinding;
+			tsl::robin_map<std::string, unsigned int> uniformToBinding;
 
 			#ifdef __switch__
-			tsl::robin_map<string, switch_memory::Piece*> uniformToPiece;
-			void createUniformMemory(string uniformName, unsigned int size);
+			tsl::robin_map<std::string, switch_memory::Piece*> uniformToPiece;
+			void createUniformMemory(std::string uniformName, unsigned int size);
 			#else
 			GLuint program = GL_INVALID_INDEX;
-			tsl::robin_map< pair<string, uint64_t>, GLuint> uniformToBuffer;
+			tsl::robin_map<std::pair<std::string, uint64_t>, GLuint> uniformToBuffer;
 			static unsigned int UniformCount;
-			void createUniformBuffer(string uniformName, unsigned int size, uint64_t cacheIndex);
+			void createUniformBuffer(std::string uniformName, unsigned int size, uint64_t cacheIndex);
 			#endif
 	};
 };

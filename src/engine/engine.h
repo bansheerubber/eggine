@@ -23,22 +23,20 @@
 #include "../basic/ui.h"
 #include "../renderer/window.h"
 
-using namespace std;
-
 void engineInitRenderables(class Engine*, RenderObject** object);
 
 namespace std {
 	template<>
-	struct hash<pair<esObjectReferencePtr, string>> {
-		size_t operator()(pair<esObjectReferencePtr, string> const& source) const noexcept {
+	struct hash<pair<esObjectReferencePtr, std::string>> {
+		size_t operator()(pair<esObjectReferencePtr, std::string> const& source) const noexcept {
 			uint64_t result = hash<esObjectWrapperPtr>{}(source.first->objectWrapper);
-			return result ^ (hash<string>{}(source.second) + 0x9e3779b9 + (result << 6) + (result >> 2));
+			return result ^ (hash<std::string>{}(source.second) + 0x9e3779b9 + (result << 6) + (result >> 2));
     }
 	};
 
 	template<>
-	struct equal_to<pair<esObjectReferencePtr, string>> {
-		bool operator()(const pair<esObjectReferencePtr, string>& x, const pair<esObjectReferencePtr, string>& y) const {
+	struct equal_to<pair<esObjectReferencePtr, std::string>> {
+		bool operator()(const pair<esObjectReferencePtr, std::string>& x, const pair<esObjectReferencePtr, std::string>& y) const {
 			return x.first->objectWrapper == y.first->objectWrapper && x.second == y.second;
 		}
 	};
@@ -125,7 +123,7 @@ class Engine {
 		unsigned int nxlink = 0;
 		#endif
 
-		string filePrefix = "";
+		std::string filePrefix = "";
 		
 		int64_t cpuRenderTime = 0;
 		int64_t eggscriptTickTime = 0;

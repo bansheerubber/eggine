@@ -6,8 +6,6 @@
 #include "../engine/engine.h"
 #include "../basic/font.h"
 
-using namespace std;
-
 render::LiteHTMLContainer::LiteHTMLContainer() {}
 
 render::LiteHTMLContainer::~LiteHTMLContainer() {}
@@ -95,7 +93,7 @@ void render::LiteHTMLContainer::load_image(const litehtml::tchar_t* src, const l
     return;
   }
 
-  string filename = "html";
+  std::string filename = "html";
   filename += src;
   resources::Image* image = (resources::Image*)(engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", filename)->exec())[0]);
   this->sourceToImage[string(src)] = image;
@@ -192,7 +190,7 @@ std::shared_ptr<litehtml::element> render::LiteHTMLContainer::create_element(
 void render::LiteHTMLContainer::on_element_created(litehtml::element::ptr element) {
   engine->renderWindow.registerHTMLUpdate();
 
-  string className = "HTMLElement";
+  std::string className = "HTMLElement";
   const char* attributeClassName = element->get_attr("es-class");
   if(attributeClassName != nullptr) {
     className = attributeClassName;
