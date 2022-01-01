@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #endif
@@ -30,7 +31,13 @@ network::Client::~Client() {
 
 }
 
-void network::Client::open() {
+void network::Client::open(std::string ip, unsigned short port) {
+	if(ip.length() > 40 || port < 500) {
+		return;
+	}
+
+	std::string portString = std::to_string(port);
+	
 	#ifdef _WIN32
 	// setup tcp socket
 	{
@@ -43,7 +50,7 @@ void network::Client::open() {
 		hints.ai_protocol = IPPROTO_TCP;
 		hints.ai_flags = AI_PASSIVE;
 
-		getaddrinfo("localhost", "28000", &hints, &result);
+		getaddrinfo(ip.c_str(), portString.c_str(), &hints, &result);
 		
 		this->tcpSocket = socket(result->ai_family, SOCK_STREAM, IPPROTO_TCP);
 		if((SOCKET)this->tcpSocket == INVALID_SOCKET) {
@@ -77,7 +84,7 @@ void network::Client::open() {
 		hints.ai_protocol = IPPROTO_UDP;
 		hints.ai_flags = AI_PASSIVE;
 
-		getaddrinfo("localhost", "28000", &hints, &result);
+		getaddrinfo(ip.c_str(), portString.c_str(), &hints, &result);
 		
 		this->udpSocket = socket(result->ai_family, SOCK_DGRAM, IPPROTO_UDP);
 		if((SOCKET)this->udpSocket == INVALID_SOCKET) {
@@ -97,21 +104,26 @@ void network::Client::open() {
 		this->ip = *(sockaddr_in6*)result->ai_addr;
 	}
 	#else
-	sockaddr_in6 serverAddress;
-
-	serverAddress.sin6_family = AF_INET6;
-	serverAddress.sin6_addr = in6addr_any;
-	serverAddress.sin6_port = htons(28000);
-	
 	// ininitalize tcp socket
 	{
+		addrinfo* result = nullptr;
+		addrinfo hints;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET6;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = AI_PASSIVE;
+
+		getaddrinfo(ip.c_str(), portString.c_str(), &hints, &result);
+		
 		this->tcpSocket = socket(AF_INET6, SOCK_STREAM, 0);
 		if(this->tcpSocket < 0) {
 			printf("could not instantiate tcp socket\n");
 			return;
 		}
 
-		if(connect(this->tcpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
+		if(connect(this->tcpSocket, result->ai_addr, result->ai_addrlen) < 0) {
 			printf("could not connect tcp socket\n");
 			this->tcpSocket = -1;
 			return;
@@ -127,22 +139,33 @@ void network::Client::open() {
 
 	// initialize udp socket
 	{
+		addrinfo* result = nullptr;
+		addrinfo hints;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET6;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		hints.ai_flags = AI_PASSIVE;
+
+		getaddrinfo(ip.c_str(), portString.c_str(), &hints, &result);
+		
 		this->udpSocket = socket(AF_INET6, SOCK_DGRAM, 0);
 		if(this->udpSocket < 0) {
 			printf("could not instantiate udp socket\n");
 			return;
 		}
 
-		if(connect(this->udpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
+		if(connect(this->udpSocket, result->ai_addr, result->ai_addrlen) < 0) {
 			printf("could not udp socket\n");
 			this->udpSocket = -1;
 			return;
 		}
 
 		fcntl(this->udpSocket, F_SETFL, O_NONBLOCK);
-	}
 
-	this->ip = serverAddress;
+		this->ip = *((sockaddr_in6*)result->ai_addr);
+	}
 	#endif
 }
 

@@ -92,7 +92,7 @@ namespace network {
 
 			const IPAddress getHostIPAddress();
 
-			void openServer();
+			void openServer(unsigned short port);
 			void closeServer();
 			void acceptServer();
 

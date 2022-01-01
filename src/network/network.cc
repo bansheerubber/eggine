@@ -32,11 +32,12 @@ const network::IPAddress network::Network::getHostIPAddress() {
 	return this->ip;
 }
 
-void network::Network::openServer() {
+void network::Network::openServer(unsigned short port) {
 	this->mode = NETWORK_SERVER;
 	
 	#ifdef _WIN32
-	
+	std::string stringPort = std::to_string(port);
+
 	// setup tcp socket
 	{
 		addrinfo* result = nullptr;
@@ -48,7 +49,7 @@ void network::Network::openServer() {
 		hints.ai_protocol = IPPROTO_TCP;
 		hints.ai_flags = AI_PASSIVE;
 
-		getaddrinfo("localhost", "28000", &hints, &result);
+		getaddrinfo("localhost", stringPort.c_str(), &hints, &result);
 
 		this->ip = *(sockaddr_in6*)result->ai_addr;
 
@@ -83,7 +84,7 @@ void network::Network::openServer() {
 		hints.ai_protocol = IPPROTO_UDP;
 		hints.ai_flags = AI_PASSIVE;
 
-		getaddrinfo("localhost", "28000", &hints, &result);
+		getaddrinfo("localhost", stringPort.c_str(), &hints, &result);
 
 		this->udp.socket = socket(result->ai_family, SOCK_DGRAM, IPPROTO_UDP);
 		if((SOCKET)this->udp.socket == INVALID_SOCKET) {
@@ -112,7 +113,7 @@ void network::Network::openServer() {
 
 	serverAddress.sin6_family = AF_INET6;
 	serverAddress.sin6_addr = in6addr_any;
-	serverAddress.sin6_port = htons(28000);
+	serverAddress.sin6_port = htons(port);
 
 	// setup tcp socket
 	{
@@ -202,7 +203,7 @@ void network::Network::acceptServer() {
 
 void network::Network::openClient() {
 	this->mode = NETWORK_CLIENT;
-	this->client.open();
+	this->client.open("localhost", 28000);
 }
 
 void network::Network::closeClient() {

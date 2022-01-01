@@ -14,7 +14,7 @@ namespace network {
 			Client();
 			~Client();
 			
-			void open();
+			void open(std::string ip, unsigned short port);
 			void close();
 
 			void receive();

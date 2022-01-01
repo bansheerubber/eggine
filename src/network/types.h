@@ -21,6 +21,7 @@ namespace network {
 
 	struct IPAddress {
 		unsigned char address[16];
+		unsigned short port = 0;
 
 		IPAddress() {
 			for(unsigned int i = 0; i < 16; i++) {
@@ -36,11 +37,13 @@ namespace network {
 				this->address[i] = address.sin6_addr.s6_addr[i];
 				#endif
 			}
+
+			this->port = ntohs(address.sin6_port);
 		}
 
 		std::string toString() const {
 			return fmt::format(
-				"{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}:{:x}{:x}",
+				"[{:02x}{:02x}:{:02x}{:02x}:{:02x}{:02x}:{:02x}{:02x}:{:02x}{:02x}:{:02x}{:02x}:{:02x}{:02x}:{:02x}{:02x}]:{}",
 				this->address[0],
 				this->address[1],
 				this->address[2],
@@ -56,7 +59,8 @@ namespace network {
 				this->address[12],
 				this->address[13],
 				this->address[14],
-				this->address[15]
+				this->address[15],
+				this->port
 			);
 		}
 	};
