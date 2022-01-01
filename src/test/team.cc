@@ -1,13 +1,21 @@
 #include "team.h"
 
 #include "chunkContainer.h"
+#include "../util/cloneString.h"
 #include "../engine/engine.h"
 #include "tileMath.h"
 #include "unit.h"
 
+std::vector<Team*> Team::Teams = std::vector<Team*>();
+
 Team::Team() {
 	// create torquescript object
 	this->reference = esInstantiateObject(engine->eggscript, "Team", this);
+	Team::Teams.push_back(this);
+}
+
+Team::~Team() {
+	Team::Teams.erase(std::find(Team::Teams.begin(), Team::Teams.end(), this));
 }
 
 void Team::add(Unit* unit) {
@@ -49,6 +57,15 @@ void es::defineTeam() {
 
 	esEntryType hasArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Team__has, "Team", "has", 2, hasArguments);
+
+	esEntryType setNameArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_STRING};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Team__setName, "Team", "setName", 2, setNameArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_STRING, es::Team__getName, "Team", "getName", 1, sizeArguments);
+
+	esRegisterFunction(engine->eggscript, ES_ENTRY_NUMBER, es::getTeamCount, "getTeamCount", 0, nullptr);
+
+	esEntryType getTeamArguments[1] = {ES_ENTRY_NUMBER};
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, es::getTeam, "getTeam", 1, getTeamArguments);
 }
 
 esEntryPtr es::Team__size(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -82,6 +99,40 @@ esEntryPtr es::Team__has(esEnginePtr esEngine, unsigned int argc, esEntry* args)
 				return esCreateNumber(1);
 			}
 		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Team__setName(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
+		Team* team = (Team*)args[0].objectData->objectWrapper->data;
+		team->name = std::string(args[1].stringData);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Team__getName(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
+		Team* team = (Team*)args[0].objectData->objectWrapper->data;
+		return esCreateString(cloneString(team->name.c_str()));
+	}
+	return nullptr;
+}
+
+esEntryPtr es::getTeamCount(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 0) {
+		return esCreateNumber(Team::Teams.size());
+	}
+	return nullptr;
+}
+
+esEntryPtr es::getTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1) {
+		unsigned int index = (unsigned int)args[0].numberData;
+		if((uint64_t)index >= Team::Teams.size()) {
+			return nullptr;
+		}
+		return esCreateObject(Team::Teams[index]->reference);
 	}
 	return nullptr;
 }

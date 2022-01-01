@@ -33,7 +33,7 @@ esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 			esExecFileFromContents(esEngine, path.c_str(), file->script.c_str());	
 		}
 		else {
-			printf("could not find file to execute\n");
+			printf("could not find file '%s' to execute\n", path.c_str());
 		}
 	}
 	return nullptr;

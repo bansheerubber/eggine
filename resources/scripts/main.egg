@@ -6,6 +6,7 @@ exec("team.egg");
 exec("unit.egg");
 exec("editor.egg");
 exec("targetting.egg");
+exec("turn.egg");
 
 function r() {
 	hotReload();

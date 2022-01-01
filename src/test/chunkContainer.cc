@@ -78,7 +78,10 @@ ChunkContainer::ChunkContainer() {
 	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);
 
 	this->playerTeam = new Team();
+	this->playerTeam->name = "Player";
+
 	this->enemyTeam = new Team();
+	this->enemyTeam->name = "Alien";
 }
 
 ChunkContainer::~ChunkContainer() {

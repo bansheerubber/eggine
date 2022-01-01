@@ -14,6 +14,9 @@ function SwitchTeamElement::onClick(%this) {
 		getChunkContainer().setEnemyTeam($Team::Enemy);
 		echo("set player team as primary");
 	}
+
+	getHTMLElementById("team-name").clear();
+	getHTMLElementById("team-name").createChild("Team:" SPC getChunkContainer().getPlayerTeam().getName());
 }
 
 function Team::selectNextCharacter(%this, %state) {
