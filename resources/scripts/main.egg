@@ -1,6 +1,7 @@
 exec("ability.egg");
 exec("tile.egg");
 exec("abilities/snapshot.egg");
+exec("abilities/trainedshot.egg");
 exec("team.egg");
 exec("unit.egg");
 exec("editor.egg");

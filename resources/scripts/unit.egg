@@ -1,8 +1,13 @@
 function Unit::onAdd(%this) {
 	%this.abilities = new Array();
-	%ability = new SnapshotAbility();
-	%ability.owner = %this;
-	%this.abilities.push(%ability);
+
+	%ability1 = new SnapshotAbility();
+	%ability1.owner = %this;
+	%this.abilities.push(%ability1);
+
+	%ability2 = new TrainedShotAbility();
+	%ability2.owner = %this;
+	%this.abilities.push(%ability2);
 
 	%this.maxMoves = 5;
 	%this.maxSprintMoves = 15;
@@ -121,12 +126,16 @@ function Unit::updateTargettingUI(%this) {
 	for(%i = 0; %i < %team.size(); %i++) {
 		%enemy = %team.get(%i);
 		// check if any of our abilities are usable against the enemy
+		%usable = false;
 		for(%j = 0; %j < %this.abilities.size(); %j++) {
 			%ability = %this.abilities[%j];
 			if(!%ability.usable(%enemy)) {
 				continue;
 			}
+			%usable = true;
+		}
 
+		if(%usable) {
 			%html = %html @ "<img enemy-id=\"" @ %i @ "\" es-class=\"EnemyIconElement\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
 		}
 	}
@@ -171,6 +180,7 @@ function Unit::selectAbility(%this, %index) {
 
 	if(%this.abilities[%index]) {
 		%ability = %this.abilities[%index];
+		echo(%index SPC %ability);
 		%name.createChild(%ability.name);
 		%description.createChild(%ability.description($Unit::SelectedTarget));
 
