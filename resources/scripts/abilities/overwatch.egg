@@ -1,0 +1,49 @@
+class OverwatchAbility inherits Ability;
+
+function OverwatchAbility::onAdd(%this) {
+	Parent::onAdd(%this);
+
+	%this.name = "Overwatch";
+	%this.icon = "overwatch.png";
+}
+
+function OverwatchAbility::use(%this, %target) {
+	Parent::use(%this, %target);
+	%this.owner.overwatch = true;
+
+	playSound("OverwatchUse");
+}
+
+function OverwatchAbility::accuracy(%this, %target) {
+	if(!%target) {
+		return 0;
+	}
+	
+	%range = 20;
+	%accuracy = (-1 / %range) * distance(%target.getPosition(), %this.owner.getPosition()) + 1;
+	if(%accuracy < 0.03) {
+		return 0.03;
+	}
+	return %accuracy;
+}
+
+function OverwatchAbility::cost(%this, %target) {
+	%ap = %this.owner.ap;
+	if(%ap == 0) {
+		return %ap = 1;
+	}
+	return %ap;
+}
+
+function OverwatchAbility::usable(%this, %target) {
+	%result = Parent::usable(%this, %target);
+	return %result;
+}
+
+function OverwatchAbility::description(%this, %target) {
+	return "<div>Take a shot at an enemy after they have finished moving.</div>";
+}
+
+function OverwatchAbility::actionName(%this, %target) {
+	return "Overwatch";
+}

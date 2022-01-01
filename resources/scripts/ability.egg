@@ -46,7 +46,8 @@ function Ability::cost(%this, %target) {
 
 // whether or not the ability can be used
 function Ability::usable(%this, %target) {
-	return %this.owner.ap >= %this.cost(%target);
+	%result = %this.owner.ap >= %this.cost(%target);
+	return %result;
 }
 
 // generate the HTML description of the ability

@@ -9,6 +9,10 @@ function Unit::onAdd(%this) {
 	%ability2.owner = %this;
 	%this.abilities.push(%ability2);
 
+	%ability3 = new OverwatchAbility();
+	%ability3.owner = %this;
+	%this.abilities.push(%ability3);
+
 	%this.maxMoves = 5;
 	%this.maxSprintMoves = 15;
 	%this.moves = 5;
