@@ -190,6 +190,8 @@ void es::defineUnit() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addMaxHealth, "Unit", "addMaxHealth", 2, setHealthArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getHealth, "Unit", "getHealth", 1, getPathArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getMaxHealth, "Unit", "getMaxHealth", 1, getPathArguments);
+
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getTeam, "Unit", "getTeam", 1, getPathArguments);
 }
 
 esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -293,6 +295,14 @@ esEntryPtr es::Unit__getMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		return esCreateNumber(unit->maxHealth);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__getTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		return esCreateObject(unit->team->reference);
 	}
 	return nullptr;
 }

@@ -23,6 +23,7 @@ namespace es { // order = 4
 	esEntryPtr Unit__addMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__getHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Unit__getMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Unit__getTeam(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
 class Unit: public Character {
@@ -37,6 +38,7 @@ class Unit: public Character {
 	friend esEntryPtr es::Unit__addMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__getHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::Unit__getMaxHealth(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	friend esEntryPtr es::Unit__getTeam(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend class Team;
 	
 	public:

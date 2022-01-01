@@ -249,6 +249,30 @@ function Unit::selectPreviousAbility(%this) {
 	%this.selectAbility(%prev);
 }
 
+function Unit::triggerOverwatch(%this, %target) {
+	for(%i = 0; %i < %this.abilities.size(); %i++) {
+		if(%this.abilities[%i].name == "Overwatch") {
+			 %this.abilities[%i].overwatch(%target);
+		}
+	}
+}
+
+function fireOverwatch(%target) {
+	for(%i = 0; %i < getTeamCount(); %i++) {
+		%team = getTeam(%i);
+		if(%target.getTeam() == %team) {
+			continue;
+		}
+
+		for(%j = 0; %j < %team.size(); %j++) {
+			%guy = %team.get(%j);
+			if(%guy.overwatch) {
+				%guy.triggerOverwatch(%target);
+			}
+		}
+	}
+}
+
 package unit {
 	function Unit::setPosition(%this, %position) {
 		Parent::setPosition(%this, %position);
@@ -260,6 +284,8 @@ package unit {
 				%this.path.showDots();
 			}
 		}
+
+		fireOverwatch(%this);
 	}
 
 	function ChunkContainer::selectCharacter(%this, %character) {

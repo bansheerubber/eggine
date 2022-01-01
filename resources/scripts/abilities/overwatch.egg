@@ -7,6 +7,10 @@ function OverwatchAbility::onAdd(%this) {
 	%this.icon = "overwatch.png";
 }
 
+function OverwatchAbility::overwatch(%this, %target) {
+	%this.owner.overwatch = false;
+}
+
 function OverwatchAbility::use(%this, %target) {
 	Parent::use(%this, %target);
 	%this.owner.overwatch = true;

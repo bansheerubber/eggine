@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// enemies
-	unsigned int enemyPositionsSize = 0;
+	unsigned int enemyPositionsSize = 1;
 	glm::uvec3 enemyPositions[enemyPositionsSize] = {
 		glm::uvec3(2, 10, 1),
 		glm::uvec3(4, 6, 1),
