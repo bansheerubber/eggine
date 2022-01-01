@@ -12,12 +12,12 @@ render::LiteHTMLContainer::LiteHTMLContainer() {}
 render::LiteHTMLContainer::~LiteHTMLContainer() {}
 
 Text* render::LiteHTMLContainer::getText(Font* font, string input) {
-  auto found = this->stringToText.find(input);
+  auto found = this->stringToText.find(std::pair(font, input));
   if(found == this->stringToText.end()) {
     Text* text = new Text(false);
     text->font = font;
     text->setText(input);
-    this->stringToText[input] = {
+    this->stringToText[std::pair(font, input)] = {
       text: text,
       lastUsed: 0,
     };

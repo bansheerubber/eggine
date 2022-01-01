@@ -8,6 +8,23 @@
 #include "../resources/image.h"
 #include "../basic/text.h"
 
+namespace std {
+	template<>
+	struct hash<pair<class Font*, std::string>> {
+		size_t operator()(pair<class Font*, std::string> const& source) const noexcept {
+			uint64_t result = (uint64_t)source.first;
+			return result ^ (hash<std::string>{}(source.second) + 0x9e3779b9 + (result << 6) + (result >> 2));
+    }
+	};
+	
+	template<>
+	struct equal_to<pair<class Font*, std::string>> {
+		bool operator()(const pair<class Font*, std::string>& x, const pair<class Font*, std::string>& y) const {
+			return x.first == y.first && x.second == y.second;
+		}
+	};
+};
+
 namespace render {
 	struct LiteHTMLTextWrapper {
 		Text* text;
@@ -88,7 +105,7 @@ namespace render {
 			render::Box box;
 
 			Text* getText(class Font* font, string text);
-			tsl::robin_map<string, LiteHTMLTextWrapper> stringToText;
+			tsl::robin_map<std::pair<class Font*, string>, LiteHTMLTextWrapper> stringToText;
 			tsl::robin_map<string, resources::Image*> sourceToImage;
 			tsl::robin_map<string, litehtml::element::ptr> idToElement;
 			tsl::robin_map<litehtml::element*, esObjectReferencePtr> elementToESObject;
