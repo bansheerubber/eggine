@@ -31,6 +31,7 @@ namespace es {
 	esEntryPtr ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__getWall(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -45,6 +46,7 @@ class ChunkContainer : public RenderObject {
 	friend esEntryPtr es::ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__getTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	friend esEntryPtr es::ChunkContainer__getWall(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend class Engine;
 	
 	public:

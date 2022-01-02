@@ -36,7 +36,7 @@ function TrainedShotAbility::cost(%this, %target) {
 }
 
 function TrainedShotAbility::usable(%this, %target) {
-	%result = %target != null && %target.inCover(%this.owner) != 2 && Parent::usable(%this, %target);
+	%result = %target != null && %target.inCover(%this.owner) != $Cover::Full && Parent::usable(%this, %target);
 	return %result;
 }
 

@@ -39,3 +39,12 @@ function Tile::isTile(%position) {
 		return false;
 	}
 }
+
+function Tile::isWall(%position) {
+	if(getChunkContainer().getWall(%position) != 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}

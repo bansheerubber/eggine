@@ -45,6 +45,12 @@ function init() {
 	$Editor::LastEnd = null;
 	$Editor::LastDirection = null;
 	$Editor::LastAxis  = null;
+
+	// cover enums
+	$Cover::None = 0;
+	$Cover::HalfPartial = 1;
+	$Cover::Half = 2;
+	$Cover::Full = 3;
 	
 	addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
 	addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");

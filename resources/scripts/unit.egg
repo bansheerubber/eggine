@@ -48,12 +48,12 @@ function Unit::onDeSelect(%this) {
 function Unit::inCover(%this, %attacker) {
 	%result = raycast(%attacker.getPosition(), %this.getPosition());
 	if(%result == null) {
-		return 0;
+		return $Cover::None;
 	}
 
 	%direction = Tile::getAdjacentDirectionIndex(%this.getPosition(), %result);
 	if(%direction == -1) { // if not directly adjacent, then we can't shoot past the cover
-		return 2;
+		return $Cover::Full;
 	}
 
 	%leftTile = $Tile::Directions[%direction - 1 < 0 ? 3 : %direction - 1] + %result;
@@ -63,21 +63,61 @@ function Unit::inCover(%this, %attacker) {
 	%rightTileDistance = distance(%rightTile, %attacker.getPosition());
 
 	if(Tile::isTile(%leftTile) && Tile::isTile(%rightTile)) {
-		return 2;
+		if(Tile::isWall(%result)) {
+			return $Cover::Full; // fully impenterable
+		}
+		else {
+			return $Cover::Half; // unit is behind a half-height wall, but has cover on both sides
+		}
 	}
 	else if(%leftTileDistance == %rightTileDistance) {
-		return 1;
+		if(Tile::isWall(%result)) {
+			return $Cover::Half;
+		}
+		else {
+			return $Cover::HalfPartial;
+		}
 	}
 	// if the left tile exists and the attacker is closer to that tile, then they don't have a line of fire on us
 	else if(Tile::isTile(%leftTile) && %leftTileDistance < %rightTileDistance) {
-		return 2;
+		if(Tile::isWall(%result)) {
+			return $Cover::Full;
+		}
+		else {
+			return $Cover::Half;
+		}
 	}
 	// if the right tile exists and the attacker is closer to that tile, then they don't have a line of fire on us
 	else if(Tile::isTile(%rightTile) && %rightTileDistance < %leftTileDistance) {
-		return 2;
+		if(Tile::isWall(%result)) {
+			return $Cover::Full;
+		}
+		else {
+			return $Cover::Half;
+		}
 	}
 	else { // if one of the tiles is empty, then we're partially in cover
+		if(Tile::isWall(%result)) {
+			return $Cover::Half;
+		}
+		else {
+			return $Cover::HalfPartial;
+		}
+	}
+}
+
+function getCoverAccuracyMod(%cover) {
+	if(%cover == $Cover::None) {
 		return 1;
+	}
+	else if(%cover == $Cover::HalfPartial) {
+		return 1 / 1.5;
+	}
+	else if(%cover == $Cover::Half) {
+		return 1 / 2;
+	}
+	else if(%cover == $Cover::Full) {
+		return 0;
 	}
 }
 
@@ -270,18 +310,6 @@ function fireOverwatch(%target) {
 				%guy.triggerOverwatch(%target);
 			}
 		}
-	}
-}
-
-function getCoverAccuracyMod(%cover) {
-	if(%cover == 0) {
-		return 1;
-	}
-	else if(%cover == 1) {
-		return 1 / 1.5;
-	}
-	else if(%cover == 2) {
-		return 0;
 	}
 }
 

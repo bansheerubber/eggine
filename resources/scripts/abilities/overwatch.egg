@@ -8,6 +8,10 @@ function OverwatchAbility::onAdd(%this) {
 }
 
 function OverwatchAbility::overwatch(%this, %target) {
+	if(%target.inCover(%this.owner) == $Cover::Full) {
+		return;
+	}
+	
 	%this.owner.overwatch = false;
 
 	if(%this.roll(%target)) {
