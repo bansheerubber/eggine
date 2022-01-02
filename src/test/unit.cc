@@ -16,6 +16,10 @@ Unit::Unit(bool createReference) : Character(false) {
 Unit::~Unit() {
 	esDeleteObject(this->reference);
 
+	if(engine->chunkContainer->getSelectedCharacter() == this) {
+		engine->chunkContainer->selectCharacter(nullptr);
+	}
+
 	if(this->team != nullptr) {
 		this->team->remove(this);
 	}

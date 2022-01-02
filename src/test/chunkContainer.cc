@@ -218,6 +218,10 @@ void ChunkContainer::selectCharacter(Character* character) {
 	}
 }
 
+Character* ChunkContainer::getSelectedCharacter() {
+	return this->selectedCharacter;
+}
+
 // called by the selected character when the characters position/etc changes
 void ChunkContainer::updateCharacterPosition(Character* character, glm::uvec3 newPosition) {
 	this->positionToCharacter.erase(character->getPosition());

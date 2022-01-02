@@ -9,6 +9,12 @@ function OverwatchAbility::onAdd(%this) {
 
 function OverwatchAbility::overwatch(%this, %target) {
 	%this.owner.overwatch = false;
+
+	if(%this.roll(%target)) {
+		%target.addHealth(-2);
+	}
+
+	playSound("SnapshotFire");
 }
 
 function OverwatchAbility::use(%this, %target) {
@@ -24,7 +30,8 @@ function OverwatchAbility::accuracy(%this, %target) {
 	}
 	
 	%range = 20;
-	%accuracy = (-1 / %range) * distance(%target.getPosition(), %this.owner.getPosition()) + 1;
+	%accuracy = (-1 / mPow(%range, 0.7)) * mPow(distance(%target.getPosition(), %this.owner.getPosition()), 0.7) + 1;
+	%accuracy *= getCoverAccuracyMod(%target.inCover(%this.owner));
 	if(%accuracy < 0.03) {
 		return 0.03;
 	}

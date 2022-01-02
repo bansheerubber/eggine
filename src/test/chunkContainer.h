@@ -55,6 +55,7 @@ class ChunkContainer : public RenderObject {
 		Map map = Map(this);
 
 		void selectCharacter(class Character* character);
+		class Character* getSelectedCharacter();
 		void selectTile(glm::ivec3 position, bool browsing);
 
 		void setSize(unsigned int size);

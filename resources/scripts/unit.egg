@@ -273,6 +273,18 @@ function fireOverwatch(%target) {
 	}
 }
 
+function getCoverAccuracyMod(%cover) {
+	if(%cover == 0) {
+		return 1;
+	}
+	else if(%cover == 1) {
+		return 1 / 1.5;
+	}
+	else if(%cover == 2) {
+		return 0;
+	}
+}
+
 package unit {
 	function Unit::setPosition(%this, %position) {
 		Parent::setPosition(%this, %position);

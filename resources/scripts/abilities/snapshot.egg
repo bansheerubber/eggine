@@ -24,6 +24,7 @@ function SnapshotAbility::accuracy(%this, %target) {
 	
 	%range = 20;
 	%accuracy = (-1 / %range) * distance(%target.getPosition(), %this.owner.getPosition()) + 1;
+	%accuracy *= getCoverAccuracyMod(%target.inCover(%this.owner));
 	if(%accuracy < 0.03) {
 		return 0.03;
 	}
