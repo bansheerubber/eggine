@@ -4,6 +4,7 @@
 #include <regex>
 #include <sstream>
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 #include "sound.h"
 #include "../util/trim.h"
@@ -44,14 +45,14 @@ sound::SoundCollection::SoundCollection(
 				this->sounds.push_back(engine->soundEngine.fileToSound[fileName]);
 			}
 			else {
-				printf("Cannot create sound collection from '%s' using missing sound file '%s'\n", metadata->getMetadata("fileName").c_str(), fileName.c_str());
+				console::error("Cannot create sound collection from '%s' using missing sound file '%s'\n", metadata->getMetadata("fileName").c_str(), fileName.c_str());
 				exit(1);
 			}
 		}
 	}
 
 	if(this->name == "") {
-		printf("Cannot create sound collection from '%s' with no name\n", metadata->getMetadata("fileName").c_str());
+		console::error("Cannot create sound collection from '%s' with no name\n", metadata->getMetadata("fileName").c_str());
 		exit(1);
 	}
 

@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "../util/align.h"
+#include "../engine/console.h"
 #include "vertexBuffer.h"
 #include "window.h"
 
@@ -80,20 +81,20 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 
 void render::VertexBuffer::setSubData(void* data, unsigned int size, unsigned int offset) {
 	if(this->size < size) {
-		printf("vertex data must be subset of data in setSubData\n");
+		console::error("vertex data must be subset of data in setSubData\n");
 		return;
 	}
 
 	#ifdef __switch__
 	if(this->memory == nullptr) {
-		printf("vertex data must be initialized in setSubData\n");
+		console::error("vertex data must be initialized in setSubData\n");
 		return;
 	}
 	
 	memcpy((void*)((uintptr_t)this->memory->cpuAddr() + offset), data, size);
 	#else
 	if(this->bufferId == GL_INVALID_INDEX) {
-		printf("vertex data must be initialized in setSubData\n");
+		console::error("vertex data must be initialized in setSubData\n");
 		return;
 	}
 	

@@ -10,6 +10,8 @@
 #include <png.h>
 #include <string>
 
+#include "../engine/console.h"
+
 class DeveloperGui;
 
 namespace render {
@@ -42,7 +44,7 @@ namespace render {
 					}
 
 					case 3: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
@@ -63,7 +65,7 @@ namespace render {
 					}
 
 					case 3: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
@@ -76,22 +78,22 @@ namespace render {
 			case 32: {
 				switch(channels) {
 					case 1: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
 					case 2: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
 					case 3: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
 					case 4: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 				}

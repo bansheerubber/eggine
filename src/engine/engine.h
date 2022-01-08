@@ -92,7 +92,7 @@ class Engine {
 		#endif
 
 		#ifdef EGGINE_DEVELOPER_MODE
-		class DeveloperGui* developerGui;
+		class DeveloperGui* developerGui = nullptr;
 		#endif
 		
 		void initialize();

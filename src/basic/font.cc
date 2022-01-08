@@ -1,5 +1,6 @@
 #include "font.h"
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 
 tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Font::Fonts;
@@ -38,7 +39,7 @@ Font::Font(std::string fileName, int size) {
 	int atlasX = padding, atlasY = padding; // keep track of where we are during generation of the atlas
 	for(unsigned char c = 0; c < amount; c++) {
 		if(FT_Load_Char(this->face, c, FT_LOAD_RENDER)) {
-			printf("could not load gylph %c from %s\n", c, this->fileName.c_str());
+			console::error("could not load gylph %c from %s\n", c, this->fileName.c_str());
 			continue;
 		}
 

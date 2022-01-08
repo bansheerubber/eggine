@@ -32,9 +32,7 @@ void es::defineDOM() {
 
 esEntryPtr es::getHTMLElementById(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
-		// printf("a\n");
 		esObjectReferencePtr object = engine->renderWindow.htmlContainer->getESObject(string(args[0].stringData));
-		// printf("%p b\n", object);
 		if(object != nullptr) {
 			return esCreateObject(object);
 		}

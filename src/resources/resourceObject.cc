@@ -1,5 +1,6 @@
 #include "resourceObject.h"
 
+#include "../engine/console.h"
 #include "resourceManager.h"
 
 resources::ResourceObject::ResourceObject(ResourceManager* manager, carton::Metadata* metadata) {
@@ -19,7 +20,7 @@ void resources::ResourceObject::release() {
 	this->leases--;
 
 	if(this->leases < 0) {
-		printf("negative leases on resource object\n");
+		console::error("negative leases on resource object\n");
 		exit(1);
 	}
 }

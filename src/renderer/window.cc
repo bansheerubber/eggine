@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "../util/align.h"
+#include "../engine/console.h"
 #include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "../resources/html.h"
@@ -106,7 +107,7 @@ void render::Window::initialize() {
 	padInitializeDefault(&this->pad);
 	#else // else for ifdef __switch__
 	if(!glfwInit()) {
-		printf("failed to initialize glfw\n");
+		console::error("failed to initialize glfw\n");
 		exit(1);
 	}
 

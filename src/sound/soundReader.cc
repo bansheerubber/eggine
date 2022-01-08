@@ -1,5 +1,6 @@
 #include "soundReader.h"
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 
 static ov_callbacks OV_CALLBACKS_IFSTREAM = {
@@ -20,7 +21,7 @@ sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType 
 		case OGG_FILE: {
 			this->ogg.file = new OggVorbis_File;
 			if(ov_open_callbacks(this, this->ogg.file, NULL, 0, OV_CALLBACKS_IFSTREAM) < 0) {
-				printf("Could not read .ogg sound\n");
+				console::error("Could not read .ogg sound\n");
 				exit(1);
 			}
 
@@ -31,7 +32,7 @@ sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType 
 		case WAV_FILE: {
 			uint32_t riffId = this->readNumber<uint32_t>();
 			if(riffId != 0x46464952) {
-				printf("Could not read .wav sound\n");
+				console::error("Could not read .wav sound\n");
 				exit(1);
 			}
 
@@ -39,7 +40,7 @@ sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType 
 
 			uint32_t waveMagicNumber = this->readNumber<uint32_t>();
 			if(waveMagicNumber != 0x45564157) {
-				printf("Could not read .wav magic number\n");
+				console::error("Could not read .wav magic number\n");
 				exit(1);
 			}
 
@@ -58,7 +59,7 @@ sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType 
 				this->wav.dataSize = size;
 			}
 			else {
-				printf("Could not find .wav data section\n");
+				console::error("Could not find .wav data section\n");
 				exit(1);
 			}
 			

@@ -17,6 +17,7 @@
 #endif
 
 #include "callbacks.h"
+#include "console.h"
 #include "../test/developerGui.h"
 #include "eggscript.h"
 #include "../basic/renderContext.h"
@@ -26,12 +27,17 @@
 Engine* engine = new Engine();
 
 void Engine::initialize() {
+	this->eggscript = esCreateEngine(false);
+	esSetPrintFunction(engine->eggscript, console::print, console::warning, console::error);
+	esSetVPrintFunction(engine->eggscript, console::vprint, console::vwarning, console::verror);
+	es::eggscriptDefinitions();
+
 	#ifdef _WIN32
 	// initialize Winsock
 	WSADATA wsaData;
 	int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
 	if(iResult != 0) {
-		printf("could not initialize winsock2\n");
+		console::error("could not initialize winsock2\n");
 		::exit(1);
 	}
 	#endif
@@ -43,14 +49,11 @@ void Engine::initialize() {
 
 	Result romfsResult = romfsInit();
 	if(R_FAILED(romfsResult)) {
-		printf("romfs failure: %d\n", romfsResult);
+		console::error("romfs failure: %d\n", romfsResult);
 	}
 	#endif
 
 	FT_Init_FreeType(&this->ft);
-
-	this->eggscript = esCreateEngine(false);
-	es::eggscriptDefinitions();
 
 	this->manager = new resources::ResourceManager(this->filePrefix + "out.carton");
 

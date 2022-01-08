@@ -58,8 +58,6 @@ void TileNeighborIterator::iterateTile() {
 			}
 
 			glm::ivec3 offset = offsets[(unsigned int)direction - 1]; // look up the offset in the dictionary
-			// printf("%u, %d %d %d\n", (unsigned int)direction, offset.x, offset.y, offset.z);
-			
 			if(this->testTile(this->position + offset, direction)) {
 				this->foundPosition = this->position + offset;
 				this->index++;

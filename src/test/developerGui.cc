@@ -109,8 +109,7 @@ int vDeveloperError(const char* buffer, va_list args) {
 }
 
 DeveloperGui::DeveloperGui() {
-	esSetPrintFunction(engine->eggscript, developerPrint, developerWarning, developerError);
-	esSetVPrintFunction(engine->eggscript, vDeveloperPrint, vDeveloperWarning, vDeveloperError);
+	
 }
 
 int DeveloperGui::consoleCallback(ImGuiInputTextCallbackData* data) {

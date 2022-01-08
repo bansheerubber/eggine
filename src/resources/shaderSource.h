@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../engine/console.h"
 #include "resourceObject.h"
 
 namespace resources {
@@ -13,7 +14,7 @@ namespace resources {
 
 			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				ResourceObject::reload(metadata, buffer, bufferSize);
-				printf("shader source reload not implemented\n");
+				console::warning("shader source reload not implemented\n");
 			}
 			unsigned int getBytesUsed();
 	};

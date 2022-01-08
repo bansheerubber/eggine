@@ -17,6 +17,7 @@
 
 
 #include "connection.h"
+#include "../engine/console.h"
 #include "../engine/engine.h"
 #include "packet.h"
 #include "../basic/remoteObject.h"
@@ -54,12 +55,12 @@ void network::Client::open(std::string ip, unsigned short port) {
 		
 		this->tcpSocket = socket(result->ai_family, SOCK_STREAM, IPPROTO_TCP);
 		if((SOCKET)this->tcpSocket == INVALID_SOCKET) {
-			printf("could not instantiate tcp socket: %d\n", WSAGetLastError());
+			console::error("could not instantiate tcp socket: %d\n", WSAGetLastError());
 			return;
 		}
 
 		if(connect((SOCKET)this->tcpSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
-			printf("could not connect tcp socket: %d\n", WSAGetLastError());
+			console::error("could not connect tcp socket: %d\n", WSAGetLastError());
 			this->tcpSocket = (uint64_t)INVALID_SOCKET;
 			return;
 		}
@@ -88,12 +89,12 @@ void network::Client::open(std::string ip, unsigned short port) {
 		
 		this->udpSocket = socket(result->ai_family, SOCK_DGRAM, IPPROTO_UDP);
 		if((SOCKET)this->udpSocket == INVALID_SOCKET) {
-			printf("could not instantiate udp socket: %d\n", WSAGetLastError());
+			console::error("could not instantiate udp socket: %d\n", WSAGetLastError());
 			return;
 		}
 
 		if(connect((SOCKET)this->udpSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
-			printf("could not udp socket: %d\n", WSAGetLastError());
+			console::error("could not udp socket: %d\n", WSAGetLastError());
 			this->udpSocket = (uint64_t)INVALID_SOCKET;
 			return;
 		}
@@ -119,12 +120,12 @@ void network::Client::open(std::string ip, unsigned short port) {
 		
 		this->tcpSocket = socket(AF_INET6, SOCK_STREAM, 0);
 		if(this->tcpSocket < 0) {
-			printf("could not instantiate tcp socket\n");
+			console::error("could not instantiate tcp socket\n");
 			return;
 		}
 
 		if(connect(this->tcpSocket, result->ai_addr, result->ai_addrlen) < 0) {
-			printf("could not connect tcp socket\n");
+			console::error("could not connect tcp socket\n");
 			this->tcpSocket = -1;
 			return;
 		}
@@ -152,12 +153,12 @@ void network::Client::open(std::string ip, unsigned short port) {
 		
 		this->udpSocket = socket(AF_INET6, SOCK_DGRAM, 0);
 		if(this->udpSocket < 0) {
-			printf("could not instantiate udp socket\n");
+			console::error("could not instantiate udp socket\n");
 			return;
 		}
 
 		if(connect(this->udpSocket, result->ai_addr, result->ai_addrlen) < 0) {
-			printf("could not udp socket\n");
+			console::error("could not udp socket\n");
 			this->udpSocket = -1;
 			return;
 		}
@@ -337,32 +338,32 @@ void network::Client::handlePacket() {
 	//    with the packet that could be a). a data corruption problem which means the server has gone haywire or
 	//    b). the client and server are somehow out of sync on which remote class id matches to which remote class
 	catch(RemoteObjectInstantiateException &e) {
-		printf("%s\n", e.what());
+		console::error("%s\n", e.what());
 	}
 	// if we couldn't look up a remote object, then just log it, drop the packet, and continue.
 	// TODO is there a better behavior for this? i don't want to read the full packet, but dropping data is bad. maybe
 	//      ask the server to create a rescue packet for us?
 	catch(RemoteObjectLookupException &e) {
-		printf("%s\n", e.what());
+		console::error("%s\n", e.what());
 	}
 	// if we over-read the stream, then terminate the connection. something has gone really bad
 	catch(StreamOverReadException &e) {
-		printf("%s\n", e.what());
+		console::error("%s\n", e.what());
 	}
 	// this is thrown when a setter doesn't like the data it given during the unpacking phase. this could be caused
 	// by straight up bad data, or something as simple as out-of-bounds values. log the error and continue, since we
 	// don't know which it could be. if its straight up bad data and the server has gone crazy, then there's many other
 	// checks in place for us to discover that
 	catch(RemoteObjectUnpackException &e) {
-		printf("%s\n", e.what());
+		console::error("%s\n", e.what());
 	}
 	// if the remote object id supplied at the end of a update chunk does not match the id we read at the beginning, then
 	// this is enough evidence to say that the server has gone crazy. terminate the connection
 	catch(RemoteObjectIdMisMatchException &e) {
-		printf("%s\n", e.what());
+		console::error("%s\n", e.what());
 	}
 	catch(...) {
-		printf("epic fail\n");
+		console::error("epic fail\n");
 	}
 }
 

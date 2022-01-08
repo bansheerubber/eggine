@@ -2,6 +2,7 @@
 
 #include "../engine/developer.h"
 
+#include "../engine/console.h"
 #include "../util/crop.h"
 #include "css.h"
 #include "../test/developerGui.h"
@@ -149,7 +150,7 @@ DynamicArray<resources::ResourceObject*> resources::ResourceManager::loadResourc
 	DynamicArray<ResourceObject*> output(resources.head);
 	for(uint64_t i = 0; i < resources.head; i++) {
 		if(resources[i]->getMetadata("stream") == "true") {
-			printf("Cannot load streamed file '%s' into memory\n", resources[i]->getMetadata("fileName").c_str());
+			console::error("Cannot load streamed file '%s' into memory\n", resources[i]->getMetadata("fileName").c_str());
 			continue;
 		}
 

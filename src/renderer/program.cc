@@ -4,6 +4,7 @@
 
 #include "program.h"
 
+#include "../engine/console.h"
 #include "shader.h"
 #include "window.h"
 
@@ -39,7 +40,7 @@ void render::Program::bind() {
 		
 		for(Shader* shader: this->shaders) {
 			if(shader->shader == GL_INVALID_INDEX) {
-				printf("shaders not compiled\n");
+				console::error("shaders not compiled\n");
 				return;
 			}
 
@@ -59,7 +60,7 @@ void render::Program::bind() {
 			glGetProgramInfoLog(program, logLength, &logLength, log);
 
 			glDeleteProgram(program);
-			printf("failed to link program:\n%.*s\n", logLength, log);
+			console::error("failed to link program:\n%.*s\n", logLength, log);
 
 			this->program = GL_INVALID_INDEX - 1;
 		}

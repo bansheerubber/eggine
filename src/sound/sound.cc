@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 #include "soundReader.h"
 
@@ -155,14 +156,14 @@ void sound::Sound::play(SoundSourceProperties properties) {
 	Result result = threadCreate(thread, (void (*)(void*))::_play, context, NULL, 0x10000, 0x2C, 1);
 
 	if(!R_SUCCEEDED(result)) {
-		printf("failed to create sound thread\n");
+		console::error("failed to create sound thread\n");
 		return;
 	}
 	
 	result = threadStart(thread);
 
 	if(!R_SUCCEEDED(result)) {
-		printf("failed to start sound thread\n");
+		console::error("failed to start sound thread\n");
 		return;
 	}
 	#else

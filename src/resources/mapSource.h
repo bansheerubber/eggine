@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../engine/console.h"
 #include "resourceObject.h"
 
 class Map;
@@ -11,7 +12,7 @@ namespace resources {
 			void loadIntoMap(Map* map);
 			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				ResourceObject::reload(metadata, buffer, bufferSize);
-				printf("map source reload not implemented\n");
+				console::warning("map source reload not implemented\n");
 			}
 			unsigned int getBytesUsed();
 		

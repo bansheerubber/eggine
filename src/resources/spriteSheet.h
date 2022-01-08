@@ -2,6 +2,7 @@
 
 #include <tsl/robin_map.h>
 
+#include "../engine/console.h"
 #include "../util/dynamicArray.h"
 #include "resourceObject.h"
 #include "../renderer/texture.h"
@@ -66,7 +67,7 @@ namespace resources {
 
 			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				ResourceObject::reload(metadata, buffer, bufferSize);
-				printf("spritesheet reload not implemented\n");
+				console::warning("spritesheet reload not implemented\n");
 			}
 
 			unsigned int getBytesUsed() {

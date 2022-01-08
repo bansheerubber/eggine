@@ -13,6 +13,14 @@ struct ConsoleEntry {
 	std::string contents;
 };
 
+int developerPrint(const char* buffer, ...);
+int developerWarning(const char* buffer, ...);
+int developerError(const char* buffer, ...);
+
+int vDeveloperPrint(const char* buffer, va_list args);
+int vDeveloperWarning(const char* buffer, va_list args);
+int vDeveloperError(const char* buffer, va_list args);
+
 class DeveloperGui {
 	public:
 		DeveloperGui();

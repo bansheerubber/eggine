@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../engine/console.h"
+
 struct PNGBuffer {
 	const unsigned char* buffer;
 	size_t currentIndex;
@@ -12,7 +14,7 @@ struct PNGBuffer {
 void copyToPNGBuffer(png_structp png, png_bytep output, png_size_t size) {
 	PNGBuffer* buffer = (PNGBuffer*)png_get_io_ptr(png);
 	if(buffer == NULL) {
-		printf("could not load PNG io pointer\n");
+		console::error("could not load PNG io pointer\n");
 		return;
 	}
 
@@ -22,7 +24,7 @@ void copyToPNGBuffer(png_structp png, png_bytep output, png_size_t size) {
 
 png loadPng(const unsigned char* buffer, unsigned int size) {
 	if(png_sig_cmp((unsigned char*)buffer, 0, 8)) {
-		printf("could not recognize as PNG\n");
+		console::error("could not recognize as PNG\n");
 		return {
 			buffer: nullptr,
 		};
@@ -32,7 +34,7 @@ png loadPng(const unsigned char* buffer, unsigned int size) {
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
 	if(!png) {
-		printf("could not initialize PNG reader\n");
+		console::error("could not initialize PNG reader\n");
 		return {
 			buffer: nullptr,
 		};
@@ -40,14 +42,14 @@ png loadPng(const unsigned char* buffer, unsigned int size) {
 
 	png_infop info = png_create_info_struct(png);
 	if(!info) {
-		printf("could not load PNG info\n");
+		console::error("could not load PNG info\n");
 		return {
 			buffer: nullptr,
 		};
 	}
 
 	if(setjmp(png_jmpbuf(png))) {
-		printf("error reading PNG info");
+		console::error("error reading PNG info");
 		return {
 			buffer: nullptr,
 		};
@@ -86,7 +88,7 @@ png loadPng(const unsigned char* buffer, unsigned int size) {
 
 	/* read file */
 	if(setjmp(png_jmpbuf(png))) {
-		printf("could not read PNG image\n");
+		console::error("could not read PNG image\n");
 		return {
 			buffer: nullptr,
 		};

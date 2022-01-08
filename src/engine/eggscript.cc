@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "console.h"
 #include "engine.h"
 #include "../resources/scriptFile.h"
 
@@ -14,6 +15,8 @@ void es::eggscriptDefinitions() {
 
 	esEntryType execArguments[1] = {ES_ENTRY_STRING};
 	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &exec, "exec", 1, execArguments);
+
+	esRegisterFunction(engine->eggscript, ES_ENTRY_NUMBER, &probeGarbage, "probeGarbage", 1, execArguments);
 }
 
 esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
@@ -31,9 +34,10 @@ esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 
 		if(file != nullptr) {
 			esExecFileFromContents(esEngine, path.c_str(), file->script.c_str());	
+			console::print("executed '%s'\n", path.c_str());
 		}
 		else {
-			printf("could not find file '%s' to execute\n", path.c_str());
+			console::error("could not find file '%s' to execute\n", path.c_str());
 		}
 	}
 	return nullptr;
@@ -49,6 +53,13 @@ esEntryPtr es::addKeybind(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 esEntryPtr es::SimObject__addKeybind(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 4) {
 		engine->registerTSKeybindObjectCallback(args[0].objectData, args[1].stringData, args[2].stringData, args[3].stringData);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::probeGarbage(esEnginePtr engine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1) {
+		return esCreateNumber(esProbeGarbage(engine, args[0].stringData));
 	}
 	return nullptr;
 }

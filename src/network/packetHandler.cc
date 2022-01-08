@@ -1,5 +1,6 @@
 #include "packetHandler.h"
 
+#include "../engine/console.h"
 #include "packet.h"
 
 network::PacketHandler::~PacketHandler() {
@@ -21,16 +22,16 @@ void network::PacketHandler::readPacket() {
 	this->ackMask <<= receivedSequence - this->lastSequenceReceived; // update our mask
 	this->ackMask |= 1;
 
-	printf("-----------------------------------------------\n");
-	printf("packet check:\n");
-	printf("packets in list: %u\n", this->packetListSize());
-	printf("their last ack: %u\n", receivedHighestSequenceAck);
-	printf("our remembered last ack: %u\n", lastHighestAckReceived);
-	printf("their ack mask: ");
+	console::print("-----------------------------------------------\n");
+	console::print("packet check:\n");
+	console::print("packets in list: %u\n", this->packetListSize());
+	console::print("their last ack: %u\n", receivedHighestSequenceAck);
+	console::print("our remembered last ack: %u\n", lastHighestAckReceived);
+	console::print("their ack mask: ");
 	for(uint64_t i = 0; i < 64; i++) {
-		printf("%d", (receivedAckMask & ((uint64_t)1 << i)) > 0);
+		console::print("%d", (receivedAckMask & ((uint64_t)1 << i)) > 0);
 	}
-	printf("\n");
+	console::print("\n");
 
 	if(lastHighestAckReceived == 0) {
 		lastHighestAckReceived = receivedHighestSequenceAck - 1;
@@ -40,30 +41,30 @@ void network::PacketHandler::readPacket() {
 	for(unsigned int i = lastHighestAckReceived + 1; i <= receivedHighestSequenceAck; i++) {
 		unsigned int checkBit = receivedHighestSequenceAck - i;
 		if(checkBit >= 64) {
-			printf("dropped packet from outside the ack window #%u\n", i);
+			console::print("dropped packet from outside the ack window #%u\n", i);
 			this->resendPacket(i);
 		}
 		else if(receivedAckMask & (1 << checkBit)) {
-			printf("acked packet #%u\n", i);
+			console::print("acked packet #%u\n", i);
 			this->ackPacket(i);
 		}
 		else {
-			printf("dropped packet #%u\n", i);
+			console::print("dropped packet #%u\n", i);
 			this->resendPacket(i);
 		}
 	}
 
-	printf("packets left in list: %u\n", this->packetListSize());
+	console::print("packets left in list: %u\n", this->packetListSize());
 
 	this->lastHighestAckReceived = receivedHighestSequenceAck;
 	this->lastSequenceReceived = receivedSequence;
-	printf("-----------------------------------------------\n");
-	printf("packet recieved: %u %ld\n", this->lastSequenceReceived, this->receiveStream->size());
-	printf("our ack mask: ");
+	console::print("-----------------------------------------------\n");
+	console::print("packet recieved: %u %ld\n", this->lastSequenceReceived, this->receiveStream->size());
+	console::print("our ack mask: ");
 	for(uint64_t i = 0; i < 64; i++) {
-		printf("%d", (this->ackMask & ((uint64_t)1 << i)) > 0);
+		console::print("%d", (this->ackMask & ((uint64_t)1 << i)) > 0);
 	}
-	printf("\n");
+	console::print("\n");
 
 	this->handlePacket();
 }

@@ -9,6 +9,7 @@
 #include <unistd.h>
 #endif
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 #include "packet.h"
 #include "../util/random.h"
@@ -29,7 +30,7 @@ network::Connection::~Connection() {
 		::close(this->_socket);
 	}
 
-	printf("dropped connection %s\n", this->ip.toString().c_str());
+	console::print("dropped connection %s\n", this->ip.toString().c_str());
 
 	engine->network.removeConnection(this);
 }
@@ -61,7 +62,7 @@ void network::Connection::receiveTCP() {
 	}
 	#endif
 
-	printf("got a communication\n");
+	console::print("got a communication\n");
 
 	this->receiveStream->buffer.head = length;
 
@@ -83,11 +84,11 @@ void network::Connection::receiveTCP() {
 					this->sendTCP(stream.size(), stream.start());
 					this->handshake = WAIT_FOR_SECRET;
 
-					printf("checksum pass\n");
+					console::print("checksum pass\n");
 				}
 				else {
 					// TODO disconnect the client
-					printf("wrong checksum, bye\n");
+					console::error("wrong checksum, bye\n");
 					const char* error = "E:Wrong checksum";
 					this->sendTCP(16, error);
 					delete this;
@@ -116,7 +117,7 @@ void network::Connection::receiveUDP(Stream &stream) {
 		this->readPacket();
 	}
 	catch(StreamOverReadException &e) {
-		printf("%s\n", e.what());
+		console::error("%s\n", e.what());
 	}
 	this->receiveStream = oldStream;
 }
@@ -164,7 +165,7 @@ void network::Connection::initializeUDP(sockaddr_in6 address) {
 	this->sendTCP(stream.size(), stream.start());
 	this->initialized = true;
 
-	printf("initialized udp connection for %s\n", this->ip.toString().c_str());
+	console::print("initialized udp connection for %s\n", this->ip.toString().c_str());
 }
 
 void network::Connection::handlePacket() {

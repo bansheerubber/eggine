@@ -1,6 +1,7 @@
 #include "map.h"
 
 #include "chunkContainer.h"
+#include "../engine/console.h"
 #include "tileMath.h"
 
 Map::Map(ChunkContainer* container) {
@@ -11,7 +12,7 @@ void Map::loadFromFile(string filename) {
 	ifstream file(filename, ios::binary);
 
 	if(file.bad() || file.fail()) {
-		printf("failed to open file for map %s\n", filename.c_str());
+		console::error("failed to open file for map %s\n", filename.c_str());
 		file.close();
 		return;
   }
@@ -32,14 +33,14 @@ void Map::load(unsigned char* buffer, uint64_t size) {
 	uint64_t index = 0;
 	for(; index < sizeof(header); index++) {
 		if(buffer[index] != header[index]) {
-			printf("invalid map header\n");
+			console::error("invalid map header\n");
 			exit(0);
 		}
 	}
 
 	uint64_t version = this->readNumber<uint64_t>(&buffer[index], &index);
 	if(version != Version) {
-		printf("invalid map version %#016lx\n", version);
+		console::error("invalid map version %#016lx\n", version);
 		exit(1);
 	}
 	
@@ -75,7 +76,7 @@ void Map::load(unsigned char* buffer, uint64_t size) {
 			}
 
 			default: {
-				printf("error reading map\n");
+				console::error("error reading map\n");
 				exit(0);
 			}
 		}

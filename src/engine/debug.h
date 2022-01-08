@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "../engine/console.h"
 #include "../renderer/program.h"
 #include "../renderer/texture.h"
 #include "../renderer/vertexAttributes.h"
@@ -23,110 +24,110 @@ struct GLDebugMessage {
 	const void* parameter;
 
 	void print() {
-		printf("OpenGL error (%u): ", this->id);
+		console::error("OpenGL error (%u): ", this->id);
 		
 		switch(this->source) {
 			case GL_DEBUG_SOURCE_API: {
-				printf("source = api, ");
+				console::error("source = api, ");
 				break;
 			}
 
 			case GL_DEBUG_SOURCE_WINDOW_SYSTEM: {
-				printf("source = window, ");
+				console::error("source = window, ");
 				break;
 			}
 
 			case GL_DEBUG_SOURCE_SHADER_COMPILER: {
-				printf("source = shader compiler, ");
+				console::error("source = shader compiler, ");
 				break;
 			}
 
 			case GL_DEBUG_SOURCE_THIRD_PARTY: {
-				printf("source = third party, ");
+				console::error("source = third party, ");
 				break;
 			}
 
 			case GL_DEBUG_SOURCE_APPLICATION: {
-				printf("source = application, ");
+				console::error("source = application, ");
 				break;
 			}
 
 			case GL_DEBUG_SOURCE_OTHER: {
-				printf("source = other, ");
+				console::error("source = other, ");
 				break;
 			}
 		}
 
 		switch(this->type) {
 			case GL_DEBUG_TYPE_ERROR: {
-				printf("type = error, ");
+				console::error("type = error, ");
 				break;
 			}
 			
 			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: {
-				printf("type = deprecated, ");
+				console::error("type = deprecated, ");
 				break;
 			}
 
 			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: {
-				printf("type = undefined behavior, ");
+				console::error("type = undefined behavior, ");
 				break;
 			}
 
 			case GL_DEBUG_TYPE_PORTABILITY: {
-				printf("type = portability, ");
+				console::error("type = portability, ");
 				break;
 			}
 
 			case GL_DEBUG_TYPE_PERFORMANCE: {
-				printf("type = performance, ");
+				console::error("type = performance, ");
 				break;
 			}
 
 			case GL_DEBUG_TYPE_MARKER: {
-				printf("type = marker, ");
+				console::error("type = marker, ");
 				break;
 			}
 
 			case GL_DEBUG_TYPE_PUSH_GROUP: {
-				printf("type = push group, ");
+				console::error("type = push group, ");
 				break;
 			}
 
 			case GL_DEBUG_TYPE_POP_GROUP: {
-				printf("type = pop group, ");
+				console::error("type = pop group, ");
 				break;
 			}
 
 			case GL_DEBUG_TYPE_OTHER: {
-				printf("type = other, ");
+				console::error("type = other, ");
 				break;
 			}
 		}
 		
 		switch(this->severity) {
 			case GL_DEBUG_SEVERITY_HIGH: {
-				printf("severity = high; ");
+				console::error("severity = high; ");
 				break;
 			}
 
 			case GL_DEBUG_SEVERITY_MEDIUM: {
-				printf("severity = medium; ");
+				console::error("severity = medium; ");
 				break;
 			}
 
 			case GL_DEBUG_SEVERITY_LOW: {
-				printf("severity = low; ");
+				console::error("severity = low; ");
 				break;
 			}
 
 			case GL_DEBUG_SEVERITY_NOTIFICATION: {
-				printf("severity = notification; ");
+				console::error("severity = notification; ");
 				break;
 			}
 		}
 
-		printf("'%.*s'\n", length, message);
+		console::error("'%.*s'\n", length, message);
 	}
 };
 #endif

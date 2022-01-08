@@ -11,6 +11,7 @@
 #include "../basic/camera.h"
 #include "character.h"
 #include "chunk.h"
+#include "../engine/console.h"
 #include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "overlappingTile.h"
@@ -146,7 +147,7 @@ Chunk* ChunkContainer::addChunk(glm::uvec2 position) {
 
 Chunk* ChunkContainer::getChunk(uint64_t index) {
 	if(index >= this->size * this->size) {
-		printf("ChunkContainer::getChunk(): chunk index out of bounds\n");
+		console::error("ChunkContainer::getChunk(): chunk index out of bounds\n");
 		exit(1);
 	}
 

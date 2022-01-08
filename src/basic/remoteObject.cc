@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "../engine/engine.h"
+#include "../engine/console.h"
 
 network::RemoteObject::RemoteObject() {
 	engine->network.addRemoteObject(this);
@@ -64,9 +65,9 @@ void network::RemoteObject::printUpdateMask() {
 	}
 	
 	for(unsigned char i = 0; i < this->updateMaskSize * sizeof(char) * 8; i++) {
-		printf("%d", this->readUpdateMask(i));
+		console::print("%d", this->readUpdateMask(i));
 	}
-	printf("\n");
+	console::print("\n");
 }
 
 bool network::RemoteObject::hasUpdate() {

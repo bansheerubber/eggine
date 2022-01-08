@@ -16,6 +16,7 @@
 #include <thread>
 
 #include "connection.h"
+#include "../engine/console.h"
 #include "../util/ipv6ToString.h"
 #include "packet.h"
 #include "../basic/remoteObject.h"
@@ -55,7 +56,7 @@ void network::Network::openServer(unsigned short port) {
 
 		this->tcpSocket = socket(result->ai_family, SOCK_STREAM, IPPROTO_TCP);
 		if((SOCKET)this->tcpSocket == INVALID_SOCKET) {
-			printf("could not instantiate tcp socket\n");
+			console::error("could not instantiate tcp socket\n");
 			return;
 		}
 
@@ -63,7 +64,7 @@ void network::Network::openServer(unsigned short port) {
 		setsockopt((SOCKET)this->tcpSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
 
 		if(::bind((SOCKET)this->tcpSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
-			printf("could not bind tcp socket\n");
+			console::error("could not bind tcp socket\n");
 			return;
 		}
 
@@ -88,7 +89,7 @@ void network::Network::openServer(unsigned short port) {
 
 		this->udp.socket = socket(result->ai_family, SOCK_DGRAM, IPPROTO_UDP);
 		if((SOCKET)this->udp.socket == INVALID_SOCKET) {
-			printf("could not instantiate udp socket\n");
+			console::error("could not instantiate udp socket\n");
 			return;
 		}
 
@@ -96,7 +97,7 @@ void network::Network::openServer(unsigned short port) {
 		setsockopt((SOCKET)this->udp.socket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
 
 		if(::bind((SOCKET)this->udp.socket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
-			printf("could not bind udp socket\n");
+			console::error("could not bind udp socket\n");
 			return;
 		}
 
@@ -119,7 +120,7 @@ void network::Network::openServer(unsigned short port) {
 	{
 		this->tcpSocket = socket(AF_INET6, SOCK_STREAM, 0);
 		if(this->tcpSocket < 0) {
-			printf("could not instantiate tcp socket\n");
+			console::error("could not instantiate tcp socket\n");
 			return;
 		}
 
@@ -127,7 +128,7 @@ void network::Network::openServer(unsigned short port) {
 		setsockopt(this->tcpSocket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
 
 		if(bind(this->tcpSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
-			printf("could not bind tcp socket\n");
+			console::error("could not bind tcp socket\n");
 			return;
 		}
 
@@ -140,7 +141,7 @@ void network::Network::openServer(unsigned short port) {
 	{
 		this->udp.socket = socket(AF_INET6, SOCK_DGRAM, 0);
 		if(this->udp.socket < 0) {
-			printf("could not instantiate udp socket\n");
+			console::error("could not instantiate udp socket\n");
 			return;
 		}
 
@@ -148,7 +149,7 @@ void network::Network::openServer(unsigned short port) {
 		setsockopt(this->udp.socket, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(int));
 
 		if(bind(this->udp.socket, (sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
-			printf("could not bind tcp socket\n");
+			console::error("could not bind tcp socket\n");
 			return;
 		}
 

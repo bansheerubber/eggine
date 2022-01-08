@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../engine/console.h"
 #include "../resources/resourceObject.h"
 
 namespace resources {
@@ -17,7 +18,7 @@ namespace sound {
 
 			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				resources::ResourceObject::reload(metadata, buffer, bufferSize);
-				printf("sound collection reload not implemented\n");
+				console::warning("sound collection reload not implemented\n");
 			}
 			
 			unsigned int getBytesUsed() {

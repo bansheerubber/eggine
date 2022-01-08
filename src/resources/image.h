@@ -3,6 +3,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
 
+#include "../engine/console.h"
 #include "../renderer/program.h"
 #include "resourceObject.h"
 #include "../renderer/texture.h"
@@ -22,7 +23,7 @@ namespace resources {
 			unsigned int getHeight();
 			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				ResourceObject::reload(metadata, buffer, bufferSize);
-				printf("image reload not implemented\n");
+				console::warning("image reload not implemented\n");
 			}
 			unsigned int getBytesUsed() {
 				return 0;

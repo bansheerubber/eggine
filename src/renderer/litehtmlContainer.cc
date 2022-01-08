@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 
+#include "../engine/console.h"
 #include "../resources/css.h"
 #include "../engine/engine.h"
 #include "../basic/font.h"
@@ -208,7 +209,7 @@ void render::LiteHTMLContainer::on_element_created(litehtml::element::ptr elemen
   esObjectReferencePtr test = this->elementToESObject[&*element] = esInstantiateObject(engine->eggscript, className.c_str(), this);
 
   if(test == nullptr) {
-    printf("could not create es html element with class %s\n", className.c_str());
+    console::error("could not create es html element with class %s\n", className.c_str());
   }
   else {
     this->esObjectToElement[test->objectWrapper] = element;

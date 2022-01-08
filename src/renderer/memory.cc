@@ -4,6 +4,7 @@
 #include <string>
 
 #include "../util/align.h"
+#include "../engine/console.h"
 #include "window.h"
 
 render::switch_memory::Page* TEST_PAGE = nullptr;
@@ -13,15 +14,15 @@ render::switch_memory::Piece::Piece(Page* parent) {
 }
 
 void render::switch_memory::Piece::print() {
-	printf("  Piece %p {\n", this);
-	printf("    allocated: %d,\n", this->allocated);
-	printf("    next: %p,\n", this->next);
-	printf("    prev: %p,\n", this->prev);
-	printf("    start: %ld,\n", this->start);
-	printf("    end: %ld,\n", this->end);
-	printf("    align: %ld,\n", this->align);
-	printf("    size: %ld,\n", this->end - this->start + 1);
-	printf("  };\n");
+	console::print("  Piece %p {\n", this);
+	console::print("    allocated: %d,\n", this->allocated);
+	console::print("    next: %p,\n", this->next);
+	console::print("    prev: %p,\n", this->prev);
+	console::print("    start: %ld,\n", this->start);
+	console::print("    end: %ld,\n", this->end);
+	console::print("    align: %ld,\n", this->align);
+	console::print("    size: %ld,\n", this->end - this->start + 1);
+	console::print("  };\n");
 }
 
 uint64_t render::switch_memory::Piece::size() {
@@ -196,13 +197,13 @@ void render::switch_memory::Page::print() {
 		}
 	}
 
-	printf("Page %p (\n%s) {\n", this, flags.c_str());
+	console::print("Page %p (\n%s) {\n", this, flags.c_str());
 	Piece* current = this->head;
 	while(current != nullptr) {
 		current->print();
 		current = current->next;
 	}
-	printf("};\n\n");
+	console::print("};\n\n");
 }
 
 render::switch_memory::Manager::Manager(Window* window) {
@@ -241,7 +242,7 @@ void render::switch_memory::Manager::print() {
 	for(Page* page: this->pages) {
 		page->print();
 	}
-	printf("allocated: %ld\n", this->allocated);
+	console::print("allocated: %ld\n", this->allocated);
 }
 
 uint64_t render::switch_memory::Manager::getAllocated() {

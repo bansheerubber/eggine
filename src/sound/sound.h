@@ -10,6 +10,7 @@
 #include <vorbis/vorbisfile.h>
 
 #include "buffer.h"
+#include "../engine/console.h"
 #include "../resources/resourceObject.h"
 
 namespace resources {
@@ -53,7 +54,7 @@ namespace sound {
 
 			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
 				resources::ResourceObject::reload(metadata, buffer, bufferSize);
-				printf("sound reload not implemented\n");
+				console::warning("sound reload not implemented\n");
 			}
 
 			unsigned int getBytesUsed() {
