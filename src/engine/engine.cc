@@ -31,6 +31,8 @@ void Engine::initialize() {
 	esSetPrintFunction(engine->eggscript, console::print, console::warning, console::error);
 	esSetVPrintFunction(engine->eggscript, console::vprint, console::vwarning, console::verror);
 	es::eggscriptDefinitions();
+	
+	console::openFile("console.log");
 
 	#ifdef _WIN32
 	// initialize Winsock
