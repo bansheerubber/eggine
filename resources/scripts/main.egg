@@ -47,10 +47,10 @@ function init() {
 	$Editor::LastAxis  = null;
 
 	// cover enums
-	$Cover::None = 0;
-	$Cover::HalfPartial = 1;
-	$Cover::Half = 2;
-	$Cover::Full = 3;
+	$Cover::None = 0;					// the unit is not behind any cover
+	$Cover::Half = 1;					// the unit is behind a half-height wall
+	$Cover::FullPartial = 2;	// the unit is behind a wall, but is on a corner and is still visible
+	$Cover::Full = 3;					// the unit is not visible and is completely behind a wall
 	
 	addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
 	addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");

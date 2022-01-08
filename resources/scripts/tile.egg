@@ -48,3 +48,36 @@ function Tile::isWall(%position) {
 		return false;
 	}
 }
+
+// get the direction normal to the wall
+function Tile::wallNormal(%position) {
+	%index = getChunkContainer().getWall(%position);
+	if(%index == 0 || %index >= 5) { // TODO handle corner walls
+		return null;
+	}
+
+	%index -= 1;
+	return $Tile::Directions[%index];
+}
+
+// get the direction along the wall
+function Tile::wallAlong(%position) {
+	%index = getChunkContainer().getWall(%position);
+	if(%index == 0 || %index >= 5) {
+		return null;
+	}
+
+	%index -= 1;
+	return $Tile::Directions[(%index + 1) % 4];
+}
+
+// given the direction along the wall, see if the position is a part of that wall
+function Tile::wallTest(%position, %wallPosition, %wallDirection) {
+	%result = true;
+	for(%i = 0; %i < 2; %i++) { // TODO generalize this for 3 dimensions
+		if(%wallDirection[%i] == 0 && %position[%i] != %wallPosition[%i]) {
+			%result = false;
+		}
+	}
+	return %result;
+}
