@@ -28,8 +28,9 @@ Engine* engine = new Engine();
 
 void Engine::initialize() {
 	this->eggscript = esCreateEngine(false);
-	esSetPrintFunction(engine->eggscript, console::print, console::warning, console::error);
-	esSetVPrintFunction(engine->eggscript, console::vprint, console::vwarning, console::verror);
+	esSetPrintFunction(this->eggscript, console::print, console::warning, console::error);
+	esSetVPrintFunction(this->eggscript, console::vprint, console::vwarning, console::verror);
+	esSetInstructionDebug(this->eggscript, true);
 	es::eggscriptDefinitions();
 	
 	console::openFile("console.log");
@@ -296,7 +297,7 @@ void Engine::initialize() {
 	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
 		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
 	)[0];
-	esExecFileFromContents(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
+	esExecVirtualFile(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
 	esCallFunction(this->eggscript, "init", 0, nullptr);
 
 	this->renderWindow.initializeHTML();

@@ -33,7 +33,7 @@ esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 		)[0];
 
 		if(file != nullptr) {
-			esExecFileFromContents(esEngine, path.c_str(), file->script.c_str());	
+			esExecVirtualFile(esEngine, path.c_str(), file->script.c_str());	
 			console::print("executed '%s'\n", path.c_str());
 		}
 		else {
