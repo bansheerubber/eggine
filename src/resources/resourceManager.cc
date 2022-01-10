@@ -1,5 +1,14 @@
 #include "resourceManager.h"
 
+
+#ifdef __linux__
+#include <fcntl.h>
+#include <sys/inotify.h>
+#include <unistd.h>
+
+#include "../util/md5hash.h"
+#endif
+
 #include "../engine/developer.h"
 
 #include "../engine/console.h"
@@ -102,8 +111,78 @@ resources::ShaderSource* getShaderSource(string fileName) {
 }
 
 resources::ResourceManager::ResourceManager(string fileName) {
+	#ifdef __linux__
+	this->inotify = inotify_init();
+	if(this->inotify < 0) {
+		console::error("could not init inotify\n");
+	}
+	
+	fcntl(this->inotify, F_SETFL, fcntl(this->inotify, F_GETFL, 0) | O_NONBLOCK);
+
+	this->watch = inotify_add_watch(this->inotify, fileName.c_str(), IN_CREATE | IN_DELETE | IN_MODIFY);
+
+	if(this->watch < 0) {
+		console::error("could not add inotify watch\n");
+	}
+
+	console::print("watching %s for changes\n", fileName.c_str());
+	#endif
+	
 	this->fileName = fileName;
 	this->reload();
+}
+
+resources::ResourceManager::~ResourceManager() {
+	#ifdef __linux__
+	if(this->watch >= 0) {
+		inotify_rm_watch(this->inotify, this->watch);
+	}
+	
+	if(this->inotify >= 0) {
+		close(this->inotify);
+	}
+	#endif
+}
+
+void resources::ResourceManager::tick() {
+	#ifdef __linux__
+	inotify_event event;
+	int result = -100;
+	while((result = read(this->inotify, (void*)&event, sizeof(event))) > 0) {
+		char* name = nullptr;
+		if(event.len > 0) {
+			name = new char[event.len];
+			read(this->inotify, name, event.len);
+		}
+
+		this->lastEvent = getMicrosecondsNow();
+		this->hashed = false;
+	}
+
+	if(result < 0 && errno != EAGAIN) {
+		console::error("failed to read from inotify\n");
+	}
+
+	if(getMicrosecondsNow() - this->lastEvent > 100000 && !this->hashed) {
+		md5hash(this->fileName, this->hash.hash);
+		this->hashed = true;
+	}
+
+	if(!(this->carton->hash == this->hash)) {
+		console::print("----------------------------------------------------------------------\n");
+
+		string hash = "";
+		for(unsigned int i = 0; i < MD5_DIGEST_LENGTH; i++) {
+			hash += fmt::format("{:x}", this->hash.hash[i]);
+		}
+
+		console::print("reloading %s (%s) after detecting changes...\n", this->fileName.c_str(), hash.c_str());
+		this->reload();
+
+		console::print("successfully reloaded\n");
+		console::print("----------------------------------------------------------------------\n");
+	}
+	#endif
 }
 
 void resources::ResourceManager::reload() {
@@ -124,6 +203,9 @@ void resources::ResourceManager::reload() {
 			object->reload(metadata, buffer.buffer, buffer.size);
 			free((void*)buffer.buffer);
 		}
+	}
+	else {
+		this->hash = this->carton->hash;
 	}
 
 	this->carton->addExtensionHandler(".ss", handleSpritesheets, this);

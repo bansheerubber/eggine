@@ -41,6 +41,7 @@ namespace resources {
 		
 		public:
 			ResourceManager(string fileName);
+			~ResourceManager();
 			
 			carton::Carton* carton = nullptr;
 			string fileName;
@@ -48,8 +49,17 @@ namespace resources {
 			DynamicArray<ResourceObject*> metadataToResources(DynamicArray<carton::Metadata*> resources);
 			unsigned int getBytesUsed();
 			void reload();
+			void tick();
 		
 		private:
+			#ifdef __linux__
+			int inotify = -1;
+			int watch = -1;
+			uint64_t lastEvent = 0;
+			carton::CartonHash hash;
+			bool hashed = false;
+			#endif
+
 			tsl::robin_set<ResourceObject*> objects;
 			tsl::robin_map<carton::Metadata*, ResourceObject*> metadataToResource;
 	};

@@ -311,6 +311,7 @@ void Engine::exit() {
 	FT_Done_FreeType(ft);
 
 	this->renderWindow.deinitialize();
+	delete this->manager;
 
 	#ifdef __switch__
 	close(this->nxlink);
@@ -471,6 +472,8 @@ void Engine::tick() {
 	if(this->network.isServer()) {
 		this->network.tick();
 	}
+
+	this->manager->tick();
 
 	goto start_tick;
 }
