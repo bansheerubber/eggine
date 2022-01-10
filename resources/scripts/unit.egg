@@ -54,6 +54,7 @@ function Unit::coverList(%this) {
 // return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
 function Unit::inCover(%this, %attacker) {
 	%result = raycast(%attacker.getPosition(), %this.getPosition());
+	%result = %result[0];
 	if(%result == null) {
 		return $Cover::None;
 	}
