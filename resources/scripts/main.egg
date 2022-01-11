@@ -73,6 +73,21 @@ function HTMLElement::onClick(%this) {
 	
 }
 
+function length(%a) {
+	return mSqrt(mPow(%a[0], 2) + mPow(%a[1], 2) + mPow(%a[2], 2));
+}
+
+function normalize(%a) {
+	%length = length(%a);
+	%matrix = { %a[0] / %length; %a[1] / %length; %a[2] / %length };
+	return %matrix;
+}
+
+function dot(%a, %b) {
+	%result = %a[0] * %b[0] + %a[1] * %b[1] + %a[2] * %b[2];
+	return %result;
+}
+
 function distance(%a, %b) {
 	return mSqrt(mPow(%a[0] - %b[0], 2) + mPow(%a[1] - %b[1], 2) + mPow(%a[2] - %b[2], 2));
 }

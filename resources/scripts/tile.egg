@@ -52,7 +52,7 @@ function Tile::isWall(%position) {
 // get the direction normal to the wall
 function Tile::wallNormal(%position) {
 	%index = getChunkContainer().getWall(%position);
-	if(%index == 0 || %index >= 5) { // TODO handle corner walls
+	if(%index == 0 || %index >= 5 || %index == null) { // TODO handle corner walls
 		return null;
 	}
 
@@ -63,7 +63,7 @@ function Tile::wallNormal(%position) {
 // get the direction along the wall
 function Tile::wallAlong(%position) {
 	%index = getChunkContainer().getWall(%position);
-	if(%index == 0 || %index >= 5) {
+	if(%index == 0 || %index >= 5 || %index == null) {
 		return null;
 	}
 

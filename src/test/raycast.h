@@ -1,6 +1,11 @@
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL
+#define GLM_GTX_hash
+
 #include <eggscript/egg.h>
+#include <glm/gtx/hash.hpp>
+#include <tsl/robin_set.h>
 #include <glm/vec3.hpp>
 #include <vector>
 
@@ -41,6 +46,7 @@ class RaycastMarcher {
 		glm::vec3 delta;
 		bool _finished = false;
 		std::vector<RaycastResult> results;
+		tsl::robin_set<glm::ivec3> currentHits;
 		glm::vec3 currentNormal;
 };
 

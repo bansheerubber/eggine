@@ -74,10 +74,16 @@ RaycastMarcher& RaycastMarcher::operator++() {
 			position: position,
 			normal: this->currentNormal,
 		});
-		return *this;
+
+		this->currentHits.insert(position);
+
+		if(!(this->options & RAYCAST_PENETRATE)) {
+			return *this;
+		}
 	}
 	else if(
-		engine->chunkContainer->isValidTilePosition(this->position + offset)
+		this->currentHits.find(this->position) == this->currentHits.end()
+		&& engine->chunkContainer->isValidTilePosition(this->position + offset)
 		&& engine->chunkContainer->getSpriteInfo(this->position).wall != resources::NO_WALL
 		&& engine->chunkContainer->getTile(this->position + offset) != 0
 	) { // check for walls
@@ -89,9 +95,15 @@ RaycastMarcher& RaycastMarcher::operator++() {
 			position: position + offset,
 			normal: this->currentNormal,
 		});
-		return *this;
+
+		this->currentHits.insert(position);
+
+		if(!(this->options & RAYCAST_PENETRATE)) {
+			return *this;
+		}
 	}
-	else if(this->useEnd && this->position == this->end) {
+	
+	if(this->useEnd && this->position == this->end) {
 		this->_finished = true;
 		this->currentNormal = glm::vec3();
 		return *this;
@@ -161,7 +173,10 @@ esEntryPtr es::raycast(esEnginePtr esEngine, unsigned int argc, esEntryPtr args)
 		}
 
 		esObjectReferencePtr array = esCreateArray(engine->eggscript);
-		esArrayPush(array, esCreateVector(3, (double)result[0].position.x, (double)result[0].position.y, (double)result[0].position.z));
+		for(size_t i = 0; i < result.size(); i++) {
+			esArrayPush(array, esCreateVector(3, (double)result[i].position.x, (double)result[i].position.y, (double)result[i].position.z));
+		}
+		
 		return esCreateObject(array);
 	}
 	return nullptr;
