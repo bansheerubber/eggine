@@ -1,7 +1,6 @@
 #include "neighbors.h"
 
 #include "chunkContainer.h"
-#include "../util/lsb.h"
 
 TileNeighborIterator::TileNeighborIterator(ChunkContainer* container, glm::ivec3 position) {
 	this->container = container; 
@@ -48,11 +47,7 @@ void TileNeighborIterator::iterateTile() {
 	resources::SpriteSheetInfo info = this->container->getSpriteInfo(this->position + glm::ivec3(0, 0, 1), true);
 	if(info.wall != resources::NO_WALL) {
 		for(; this->index < 3; this->index++) {
-			if(lsb(info.wall) < 0) {
-				continue;
-			}
-			
-			NeighborDirection direction = directionsForWall[(unsigned char)lsb(info.wall)][this->index];
+			NeighborDirection direction = directionsForWall[info.wall - 1][this->index];
 			if(direction == INVALID_DIRECTION) {
 				continue;
 			}
@@ -104,11 +99,7 @@ bool TileNeighborIterator::testTile(glm::ivec3 position, NeighborDirection direc
 	// test for invalid walls
 	if(info.wall != resources::NO_WALL) {
 		for(unsigned int i = 0; i < 2; i++) {
-			char index = lsb(info.wall);
-			if(index < 0) {
-				continue;
-			}
-
+			char index = info.wall - 1;
 			if(invalidDirectionsForWall[(unsigned char)index][i] == direction) {
 				return false;
 			}
