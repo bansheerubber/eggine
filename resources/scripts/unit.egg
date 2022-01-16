@@ -34,7 +34,8 @@ function Unit::coverList(%this) {
 		%map["position"] = %position;
 		%map["vector"] = Tile::wallAlong(%position);
 		%map["normal"] = Tile::wallNormal(%position);
-		%map["isWall"] = true;
+		%map["isFull"] = true;
+		%map["sameTile"] = true;
 		%array.push(%map);
 		return %array;
 	}
@@ -42,11 +43,12 @@ function Unit::coverList(%this) {
 	for(%i = 0; %i < 4; %i++) {
 		%direction = $Tile::Directions[%i];
 		%position = %direction + %this.getPosition();
-		if(Tile::isTile(%position) && !Tile::isWall(%position)) {
+		if(Tile::isTile(%position)) {
 			%map = new Map();
 			%map["position"] = %position;
 			%map["vector"] = $Tile::Directions[(%i + 1) % 4]; // rotate vector by 90 degrees to get "along the wall" vector
-			%map["isWall"] = Tile::isWall(%map["position"]);
+			%map["isFull"] = Tile::isWall(%map["position"]);
+			%map["sameTile"] = false;
 			%array.push(%map);
 		}
 	}
@@ -55,60 +57,16 @@ function Unit::coverList(%this) {
 
 // return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
 function Unit::inCover(%this, %attacker) {
-	%debug = false;
-
-	if(%debug) {
-		echo("------------------------------------------------------------------");
-		echo("report for unit cover:");
-	}
-	
 	%direction = normalize(%this.getPosition() - %attacker.getPosition());
 	%resultArray = raycast(%attacker.getPosition(), %this.getPosition(), 1);
 	if(%resultArray == null) {
-		if(%debug) {
-			echo("none 1");
-			echo("------------------------------------------------------------------");
-		}
 		return $Cover::None;
 	}
 
 	%result = %resultArray[%resultArray.size() - 1];
 
-	// test the hit tile against our cover list to see if they have line of sight
 	%coverList = %this.coverList();
-	if(%coverList.size() == 0) { // TODO do additional tests to see if a half-height wall is obscuring us/etc
-		for(%i = 0; %i < %resultArray.size(); %i++) {
-			if(Tile::isWall(%resultArray[%i])) { // see if there's any walls inbetween us and the enemy
-				if(%debug) {
-					echo("full 1");
-					echo("------------------------------------------------------------------");
-				}
-				return $Cover::Full;
-			}
-		}
-		
-		if(%debug) {
-			echo("none 2");
-			echo("------------------------------------------------------------------");
-		}
-		return $Cover::None;
-	}
-
-	// see if there's any walls that aren't a part of the cover wall inbetween us and the enemy
-	for(%i = 0; %i < %resultArray.size() - 1; %i++) {
-		for(%j = 0; %j < %coverList.size(); %j++) {
-			%cover = %coverList[%j];
-			if(Tile::isWall(%resultArray[%i]) && !Tile::wallTest(%resultArray[%i], %cover["position"], %cover["vector"])) {
-				if(%debug) {
-					echo("full 2");
-					echo("------------------------------------------------------------------");
-				}
-				return $Cover::Full;
-			}
-		}
-	}
-
-	%hitCover = null;
+	%hitCover = null; // hit cover determines the strength of the cover modifier applied to accuracy
 	for(%i = 0; %i < %coverList.size(); %i++) {
 		%cover = %coverList[%i];
 		if(Tile::wallTest(%result, %cover["position"], %cover["vector"])) {
@@ -117,86 +75,44 @@ function Unit::inCover(%this, %attacker) {
 		}
 	}
 
-	if(%hitCover == null) { // TODO is this right?
-		if(%debug) {
-			echo("none 3");
-			echo("------------------------------------------------------------------");
-		}
+	if(%hitCover == null) {
 		return $Cover::None;
 	}
 
-	if(%hitCover["isWall"] && %hitCover["position"] != %this.getPosition()) {
-		if(%debug) {
-			echo("full 3");
-			echo("------------------------------------------------------------------");
-		}
-		return $Cover::Full;
+	%candidateTiles = new Array();
+	%candidateTile1 = %this.getPosition() + %hitCover["vector"];
+	%candidateTile2 = %this.getPosition() - %hitCover["vector"];
+	%candidateTiles.push(%this.getPosition());
+
+	if(distance(%attacker.getPosition(), %candidateTile1) < distance(%attacker.getPosition(), %candidateTile2)) {
+		%candidateTiles.push(%candidateTile1);
+	}
+	else if(distance(%attacker.getPosition(), %candidateTile1) > distance(%attacker.getPosition(), %candidateTile2)) {
+		%candidateTiles.push(%candidateTile2);
 	}
 
-	// wall test: if our unit is on the edge of a wall, do some tests to see if we're still hit by the enemy. an enemy that can see us at an angle
-	// because we're at the edge of a wall can shoot at us and hit
-	if(%hitCover["isWall"]) {
-		if(dot(%direction, %hitCover["normal"]) > 0) {
-			if(%debug) {
-				echo("none 4");
-				echo("------------------------------------------------------------------");
-			}
-			return $Cover::None;
+	%hit = true;
+	for(%i = 0; %i < %candidateTiles.size(); %i++) {
+		if(Tile::raycastIgnoreStrays(%attacker.getPosition(), %candidateTiles[%i], 1, %hitCover["position"], %hitCover["vector"]) == null) {
+			%hit = false;
+			break;
 		}
-		
-		// if the attacker hits a wall that isn't our cover, then the attacker can't hit us https://bansheerubber.com/i/f/c3cks.png
-		if(%result != %hitCover["position"] && Tile::isWall(%result)) {
-			if(%debug) {
-				echo("full 4");
-				echo("------------------------------------------------------------------");
-			}
-			return $Cover::Full;
-		}
+	}
 
-		// get the tiles adjacent to our cover
-		%attackerPosition = %attacker.getPosition();
-		%adjacentLeft = %hitCover["position"] + %hitCover["vector"];
-		%adjacentRight = %hitCover["position"] - %hitCover["vector"];
-		%adjacentLeftDistance = distance(%adjacentLeft, %attackerPosition);
-		%adjacentRightDistance = distance(%adjacentRight, %attackerPosition);
-
-		if(%adjacentLeftDistance == %adjacentRightDistance) { // if the attacker is directly facing our cover, then they can't hit us
-			if(%debug) {
-				echo("full 5");
-				echo("------------------------------------------------------------------");
-			}
-			return $Cover::Full;
-		}
-		// next two if statements test for this: https://bansheerubber.com/i/f/w0Iqt.png
-		else if(%adjacentLeftDistance < %adjacentRightDistance && Tile::isWall(%adjacentLeft)) {
-			if(%debug) {
-				echo("full 6");
-				echo("------------------------------------------------------------------");
-			}
-			return $Cover::Full;
-		}
-		else if(%adjacentLeftDistance > %adjacentRightDistance && Tile::isWall(%adjacentRight)) {
-			if(%debug) {
-				echo("full 7");
-				echo("------------------------------------------------------------------");
-			}
+	if(%hit) {
+		if(%hitCover["isFull"]) {
 			return $Cover::Full;
 		}
 		else {
-			if(%debug) {
-				echo("full partial 1");
-				echo("------------------------------------------------------------------");
-			}
-			return $Cover::FullPartial;
+			return $Cover::Half;
 		}
 	}
-
-	// if our cover is not a wall, then the attacker can hit us but with the half-height cover modifier 
-	if(%debug) {
-		echo("half 1");
-		echo("------------------------------------------------------------------");
+	else if(%hitCover["isFull"]) {
+		return $Cover::FullPartial;
 	}
-	return $Cover::Half;
+	else {
+		return $Cover::Half;
+	}
 }
 
 function getCoverAccuracyMod(%cover) {

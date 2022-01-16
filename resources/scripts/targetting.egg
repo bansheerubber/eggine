@@ -14,7 +14,9 @@ function selectTarget(%target) {
 		$Unit::SelectedTarget = %target;
 	}
 
-	getChunkContainer().getSelectedCharacter().updateUI();
+	if(getChunkContainer().getSelectedCharacter()) {
+		getChunkContainer().getSelectedCharacter().updateUI();
+	}
 }
 
 class EnemyIconElement inherits HTMLElement;

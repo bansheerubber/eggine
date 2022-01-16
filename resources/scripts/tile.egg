@@ -81,3 +81,46 @@ function Tile::wallTest(%position, %wallPosition, %wallDirection) {
 	}
 	return %result;
 }
+
+// cast a ray but do not include positions that are "stray" tiles
+// - we can shoot over/around stray tiles. stray tiles include half-height cover that is
+//   along the way, or loner full-height tiles
+function Tile::raycastIgnoreStrays(%start, %end, %flags, %coverPosition, %coverAlong) {
+	%array = raycast(%start, %end, %flags);
+	if(%array == null) {
+		return null;
+	}
+
+	for(%i = %array.size() - 1; %i >= 0; %i--) {
+		%exclude = true;
+		
+		%position = %array[%i];
+		if(Tile::isWall(%position)) { // full-height tile
+			for(%j = 0; %j < 4; %j++) {
+				if(Tile::isWall(Tile::getAdjacent(%position, %i))) { // if we're connected to another full-height tile, just assume that we can't shoot through this
+					%exclude = false;
+				}
+			}
+		}
+
+		if(Tile::isAdjacent(%position, %end)) {
+			%exclude = false;
+		}
+
+		if(%coverPosition != null) {
+			if(Tile::wallTest(%position, %coverPosition, %coverAlong)) {
+				%exclude = false;
+			}
+		}
+
+		if(%exclude) {
+			%array.remove(%i);
+		}
+	}
+
+	if(%array.size() == 0) {
+		return null;
+	}
+
+	return %array;
+}
