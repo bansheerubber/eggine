@@ -13,6 +13,10 @@ function r() {
 	hotReload();
 }
 
+function onReload() {
+	exec("scripts/main.egg");
+}
+
 function init() {
 	// unit stuff
 	$Unit::HoveredTile = null;

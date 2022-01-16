@@ -203,6 +203,8 @@ void resources::ResourceManager::reload() {
 			object->reload(metadata, buffer.buffer, buffer.size);
 			free((void*)buffer.buffer);
 		}
+
+		esCallFunction(engine->eggscript, "onReload", 0, nullptr);
 	}
 	#ifndef __switch__
 	else {
