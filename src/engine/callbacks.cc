@@ -232,6 +232,10 @@ void onMousePress(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void onMouseMove(GLFWwindow* window, double x, double y) {
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui_ImplGlfw_CursorPosCallback(window, x, y);
+	#endif
+	
 	esEntry arguments1[2];
 	arguments1[0].type = ES_ENTRY_NUMBER;
 	arguments1[0].numberData = binds::MOUSE_AXIS_X;
