@@ -34,11 +34,14 @@ class DeveloperGui {
 		
 		void render();
 		void prerender();
+		void addEntry(ConsoleEntry entry);
 	
 	private:
 		std::vector<std::string> history;
 		int historyPosition = 0;
 		std::string incompleteCommand = "";
+		bool jumpToBottom = false;
+		bool consoleFullSize = false; // whether or not the console takes up the full extent of its scroll
 		int consoleCallback(ImGuiInputTextCallbackData* data);
 };
 #endif

@@ -17,8 +17,8 @@ int developerPrint(const char* buffer, ...) {
 	vsnprintf(output, 1024, buffer, argptr);
 	va_end(argptr);
 
-	engine->developerGui->console.push_back(ConsoleEntry {
-		level: 0,
+	engine->developerGui->addEntry(ConsoleEntry {
+		level: 2,
 		contents: string(output),
 	});
 	
@@ -36,7 +36,7 @@ int developerWarning(const char* buffer, ...) {
 	vsnprintf(output, 1024, buffer, argptr);
 	va_end(argptr);
 
-	engine->developerGui->console.push_back(ConsoleEntry {
+	engine->developerGui->addEntry(ConsoleEntry {
 		level: 1,
 		contents: string(output),
 	});
@@ -55,7 +55,7 @@ int developerError(const char* buffer, ...) {
 	vsnprintf(output, 1024, buffer, argptr);
 	va_end(argptr);
 
-	engine->developerGui->console.push_back(ConsoleEntry {
+	engine->developerGui->addEntry(ConsoleEntry {
 		level: 2,
 		contents: string(output),
 	});
@@ -70,7 +70,7 @@ int vDeveloperPrint(const char* buffer, va_list args) {
 	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
-	engine->developerGui->console.push_back(ConsoleEntry {
+	engine->developerGui->addEntry(ConsoleEntry {
 		level: 0,
 		contents: string(output),
 	});
@@ -85,7 +85,7 @@ int vDeveloperWarning(const char* buffer, va_list args) {
 	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
-	engine->developerGui->console.push_back(ConsoleEntry {
+	engine->developerGui->addEntry(ConsoleEntry {
 		level: 1,
 		contents: string(output),
 	});
@@ -100,7 +100,7 @@ int vDeveloperError(const char* buffer, va_list args) {
 	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
-	engine->developerGui->console.push_back(ConsoleEntry {
+	engine->developerGui->addEntry(ConsoleEntry {
 		level: 2,
 		contents: string(output),
 	});
@@ -227,6 +227,21 @@ void DeveloperGui::render() {
 			}
 		}
 		ImGui::PopStyleVar();
+
+		if(this->jumpToBottom) {
+			if(ImGui::GetScrollMaxY() - ImGui::GetScrollY() < 15 || !this->consoleFullSize) {
+				ImGui::SetScrollHereY(1.0f);
+			}
+			this->jumpToBottom = false;
+		}
+
+		if(ImGui::GetScrollMaxY() < 400.f) {
+			this->consoleFullSize = false;
+		}
+		else {
+			this->consoleFullSize = true;
+		}
+
 		ImGui::EndChild();
 		
 		char buffer[1024];
@@ -248,7 +263,7 @@ void DeveloperGui::render() {
 				this
 			)
 		) {
-			this->console.push_back(ConsoleEntry {
+			this->addEntry(ConsoleEntry {
 				level: 0,
 				contents: "> " + string(buffer),
 			});
@@ -271,6 +286,11 @@ void DeveloperGui::prerender() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+}
+
+void DeveloperGui::addEntry(ConsoleEntry entry) {
+	this->jumpToBottom = true;
+	this->console.push_back(entry);
 }
 
 #endif
