@@ -1,9 +1,10 @@
 #include "neighbors.h"
 
 #include "chunkContainer.h"
+#include "../engine/engine.h"
 
-TileNeighborIterator::TileNeighborIterator(ChunkContainer* container, glm::ivec3 position) {
-	this->container = container; 
+TileNeighborIterator::TileNeighborIterator(glm::ivec3 position) {
+	this->container = engine->chunkContainer; 
 	this->position = position;
 	this->iterateTile();
 }

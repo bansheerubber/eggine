@@ -55,9 +55,20 @@ function Unit::coverList(%this) {
 
 // return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
 function Unit::inCover(%this, %attacker) {
+	%debug = false;
+
+	if(%debug) {
+		echo("------------------------------------------------------------------");
+		echo("report for unit cover:");
+	}
+	
 	%direction = normalize(%this.getPosition() - %attacker.getPosition());
 	%resultArray = raycast(%attacker.getPosition(), %this.getPosition(), 1);
 	if(%resultArray == null) {
+		if(%debug) {
+			echo("none 1");
+			echo("------------------------------------------------------------------");
+		}
 		return $Cover::None;
 	}
 
@@ -68,10 +79,18 @@ function Unit::inCover(%this, %attacker) {
 	if(%coverList.size() == 0) { // TODO do additional tests to see if a half-height wall is obscuring us/etc
 		for(%i = 0; %i < %resultArray.size(); %i++) {
 			if(Tile::isWall(%resultArray[%i])) { // see if there's any walls inbetween us and the enemy
+				if(%debug) {
+					echo("full 1");
+					echo("------------------------------------------------------------------");
+				}
 				return $Cover::Full;
 			}
 		}
 		
+		if(%debug) {
+			echo("none 2");
+			echo("------------------------------------------------------------------");
+		}
 		return $Cover::None;
 	}
 
@@ -80,6 +99,10 @@ function Unit::inCover(%this, %attacker) {
 		for(%j = 0; %j < %coverList.size(); %j++) {
 			%cover = %coverList[%j];
 			if(Tile::isWall(%resultArray[%i]) && !Tile::wallTest(%resultArray[%i], %cover["position"], %cover["vector"])) {
+				if(%debug) {
+					echo("full 2");
+					echo("------------------------------------------------------------------");
+				}
 				return $Cover::Full;
 			}
 		}
@@ -95,18 +118,38 @@ function Unit::inCover(%this, %attacker) {
 	}
 
 	if(%hitCover == null) { // TODO is this right?
+		if(%debug) {
+			echo("none 3");
+			echo("------------------------------------------------------------------");
+		}
 		return $Cover::None;
+	}
+
+	if(%hitCover["isWall"] && %hitCover["position"] != %this.getPosition()) {
+		if(%debug) {
+			echo("full 3");
+			echo("------------------------------------------------------------------");
+		}
+		return $Cover::Full;
 	}
 
 	// wall test: if our unit is on the edge of a wall, do some tests to see if we're still hit by the enemy. an enemy that can see us at an angle
 	// because we're at the edge of a wall can shoot at us and hit
 	if(%hitCover["isWall"]) {
 		if(dot(%direction, %hitCover["normal"]) > 0) {
+			if(%debug) {
+				echo("none 4");
+				echo("------------------------------------------------------------------");
+			}
 			return $Cover::None;
 		}
 		
 		// if the attacker hits a wall that isn't our cover, then the attacker can't hit us https://bansheerubber.com/i/f/c3cks.png
 		if(%result != %hitCover["position"] && Tile::isWall(%result)) {
+			if(%debug) {
+				echo("full 4");
+				echo("------------------------------------------------------------------");
+			}
 			return $Cover::Full;
 		}
 
@@ -118,21 +161,41 @@ function Unit::inCover(%this, %attacker) {
 		%adjacentRightDistance = distance(%adjacentRight, %attackerPosition);
 
 		if(%adjacentLeftDistance == %adjacentRightDistance) { // if the attacker is directly facing our cover, then they can't hit us
+			if(%debug) {
+				echo("full 5");
+				echo("------------------------------------------------------------------");
+			}
 			return $Cover::Full;
 		}
 		// next two if statements test for this: https://bansheerubber.com/i/f/w0Iqt.png
 		else if(%adjacentLeftDistance < %adjacentRightDistance && Tile::isWall(%adjacentLeft)) {
+			if(%debug) {
+				echo("full 6");
+				echo("------------------------------------------------------------------");
+			}
 			return $Cover::Full;
 		}
 		else if(%adjacentLeftDistance > %adjacentRightDistance && Tile::isWall(%adjacentRight)) {
+			if(%debug) {
+				echo("full 7");
+				echo("------------------------------------------------------------------");
+			}
 			return $Cover::Full;
 		}
 		else {
+			if(%debug) {
+				echo("full partial 1");
+				echo("------------------------------------------------------------------");
+			}
 			return $Cover::FullPartial;
 		}
 	}
 
 	// if our cover is not a wall, then the attacker can hit us but with the half-height cover modifier 
+	if(%debug) {
+		echo("half 1");
+		echo("------------------------------------------------------------------");
+	}
 	return $Cover::Half;
 }
 
@@ -388,6 +451,8 @@ package unit {
 		
 		Parent::selectCharacter(%this, %character);
 
-		%character.onSelect();
+		if(isObject(%character)) {
+			%character.onSelect();
+		}
 	}
 };

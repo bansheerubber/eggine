@@ -289,7 +289,7 @@ void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
 }
 
 TileNeighborIterator ChunkContainer::getNeighbors(glm::ivec3 position) {
-	return TileNeighborIterator(this, position);
+	return TileNeighborIterator(position);
 }
 
 void ChunkContainer::rightClickTile(glm::ivec3 position) {

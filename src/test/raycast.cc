@@ -19,6 +19,28 @@ RaycastMarcher::RaycastMarcher(glm::ivec3 start, glm::vec3 direction, unsigned i
 	this->steps = glm::ivec3(sign(direction.x), sign(direction.y), sign(direction.z));
 	this->bounds = glm::vec3(0.5 / abs(direction.x), 0.5 / abs(direction.y), 0.5 / abs(direction.z));
 	this->delta = glm::vec3(steps.x / direction.x, steps.y / direction.y, steps.z / direction.z);
+
+	// initialize direction/normal
+	if(this->bounds.x < this->bounds.y && this->bounds.x < this->bounds.z) {
+		this->currentNormal = glm::vec3(-this->steps.x, 0, 0);
+		
+		if(this->steps.x < 0) {
+			this->direction = DIRECTION_WEST;
+		}
+		else if(this->steps.x > 0) {
+			this->direction = DIRECTION_EAST;
+		}
+	}
+	else if(this->bounds.y <= this->bounds.x && this->bounds.y < this->bounds.z) {
+		this->currentNormal = glm::vec3(0, -this->steps.y, 0);
+
+		if(this->steps.y < 0) {
+			this->direction = DIRECTION_NORTH;
+		}
+		else if(this->steps.y > 0) {
+			this->direction = DIRECTION_SOUTH;
+		}
+	}
 }
 
 RaycastMarcher::RaycastMarcher(glm::ivec3 start, glm::ivec3 end, unsigned int options) {
@@ -58,6 +80,17 @@ RaycastMarcher& RaycastMarcher::operator++() {
 		return *this;
 	}
 
+	const NeighborDirection invalidDirectionsForWall[8][2] = {
+		{DIRECTION_SOUTH, INVALID_DIRECTION}, // north-facing wall
+		{DIRECTION_WEST, INVALID_DIRECTION}, // east-facing wall
+		{DIRECTION_NORTH, INVALID_DIRECTION}, // south-facing wall
+		{DIRECTION_EAST, INVALID_DIRECTION}, // west-facing wall
+		{DIRECTION_SOUTH, DIRECTION_WEST}, // north-east corner wall
+		{DIRECTION_NORTH, DIRECTION_WEST}, // south-east corner wall
+		{DIRECTION_NORTH, DIRECTION_EAST}, // south-west corner wall
+		{DIRECTION_SOUTH, DIRECTION_EAST}, // north-west corner wall
+	};
+
 	const glm::ivec3 offset(0, 0, -1);
 
 	if(!engine->chunkContainer->isValidTilePosition(this->position)) {
@@ -65,43 +98,125 @@ RaycastMarcher& RaycastMarcher::operator++() {
 		this->currentNormal = glm::vec3();
 		return *this;
 	}
-	else if(engine->chunkContainer->getTile(this->position) != 0) {
-		if(!(this->options & RAYCAST_PENETRATE)) {
-			this->_finished = true;
+
+	// determine heading before we do any tile checks
+	if(this->bounds.x < this->bounds.y && this->bounds.x < this->bounds.z) {
+		this->currentNormal = glm::vec3(-this->steps.x, 0, 0);
+		
+		if(this->steps.x < 0) {
+			this->direction = DIRECTION_WEST;
 		}
-
-		this->results.push_back({
-			position: position,
-			normal: this->currentNormal,
-		});
-
-		this->currentHits.insert(position);
-
-		if(!(this->options & RAYCAST_PENETRATE)) {
-			return *this;
+		else if(this->steps.x > 0) {
+			this->direction = DIRECTION_EAST;
 		}
 	}
-	else if(
-		this->currentHits.find(this->position) == this->currentHits.end()
-		&& engine->chunkContainer->isValidTilePosition(this->position + offset)
-		&& engine->chunkContainer->getSpriteInfo(this->position).wall != resources::NO_WALL
-		&& engine->chunkContainer->getTile(this->position + offset) != 0
-	) { // check for walls
-		if(!(this->options & RAYCAST_PENETRATE)) {
-			this->_finished = true;
+	else if(this->bounds.y <= this->bounds.x && this->bounds.y < this->bounds.z) {
+		this->currentNormal = glm::vec3(0, -this->steps.y, 0);
+
+		if(this->steps.y < 0) {
+			this->direction = DIRECTION_NORTH;
 		}
-
-		this->results.push_back({
-			position: position + offset,
-			normal: this->currentNormal,
-		});
-
-		this->currentHits.insert(position);
-
-		if(!(this->options & RAYCAST_PENETRATE)) {
-			return *this;
+		else if(this->steps.y > 0) {
+			this->direction = DIRECTION_SOUTH;
 		}
 	}
+
+	// check position
+	{
+		resources::SpriteSheetInfo info;
+		if(this->currentHits.find(this->position) != this->currentHits.end()) {
+			goto normal_skip;
+		}
+		
+		info = engine->chunkContainer->getSpriteInfo(this->position, true);
+
+		if(info.index == 0) {
+			goto normal_skip;
+		}
+
+		if(info.wall == 0) {
+			if(!(this->options & RAYCAST_PENETRATE)) {
+				this->_finished = true;
+			}
+
+			this->results.push_back({
+				position: this->position,
+				normal: this->currentNormal,
+			});
+
+			this->currentHits.insert(this->position);
+
+			if(!(this->options & RAYCAST_PENETRATE)) {
+				return *this;
+			}
+		}
+		else {
+			for(unsigned int i = 0; i < 2; i++) {
+				char index = info.wall - 1;
+				if(
+					invalidDirectionsForWall[(unsigned char)index][i] == this->direction
+					|| invalidDirectionsForWall[(unsigned char)index][i] == (this->direction + 2) % 4
+				) {
+					if(!(this->options & RAYCAST_PENETRATE)) {
+						this->_finished = true;
+					}
+
+					this->results.push_back({
+						position: this->position,
+						normal: this->currentNormal,
+					});
+
+					this->currentHits.insert(this->position);
+
+					if(!(this->options & RAYCAST_PENETRATE)) {
+						return *this;
+					}
+				}
+			}
+		}
+	}
+	normal_skip:
+
+	// check position below current position (special double-height tile case)
+	{
+		resources::SpriteSheetInfo info;
+		if(
+			this->currentHits.find(this->position + offset) != this->currentHits.end()
+			|| !engine->chunkContainer->isValidTilePosition(this->position + offset)
+		) {
+			goto wall_skip;
+		}
+		
+		info = engine->chunkContainer->getSpriteInfo(this->position + offset, true);
+
+		if(info.wall == 0) {
+			goto wall_skip;
+		}
+
+		for(unsigned int i = 0; i < 2; i++) {
+			char index = info.wall - 1;
+			if(
+				invalidDirectionsForWall[(unsigned char)index][i] == this->direction
+				|| invalidDirectionsForWall[(unsigned char)index][i] == (this->direction + 2) % 4
+			) {
+				if(!(this->options & RAYCAST_PENETRATE)) {
+					this->_finished = true;
+				}
+
+				this->results.push_back({
+					position: this->position,
+					normal: this->currentNormal,
+				});
+
+				this->currentHits.insert(this->position);
+
+				if(!(this->options & RAYCAST_PENETRATE)) {
+					return *this;
+				}
+			}
+		}
+	}
+	wall_skip:
 	
 	if(this->useEnd && this->position == this->end) {
 		this->_finished = true;

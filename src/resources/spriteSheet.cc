@@ -32,6 +32,7 @@ resources::SpriteSheet::SpriteSheet(
 	for(uint64_t i = 0; i < this->spriteSheetAmount; i++) {
 		string info = metadata->getMetadata("sprite" + to_string(i));
 		this->spriteInfo[i].wall = NO_WALL;
+		this->spriteInfo[i].index = (unsigned int)i;
 		if(info.size()) {
 			do {
 				uint64_t position = info.find(' ');
@@ -107,6 +108,9 @@ resources::SpriteSheetInfo resources::SpriteSheet::getSpriteInfo(uint64_t index)
 	}
 
 	return {
+		facingsMap: nullptr,
+		facing: FACING_INVALID,
+		index: 0,
 		wall: NO_WALL,
 	};
 }

@@ -9,6 +9,8 @@
 #include <glm/vec3.hpp>
 #include <vector>
 
+#include "neighbors.h"
+
 namespace es {
 	void defineRaycast();
 	esEntryPtr raycast(esEnginePtr engine, unsigned int argc, esEntryPtr args);
@@ -40,6 +42,7 @@ class RaycastMarcher {
 		unsigned int options = 0;
 		unsigned int length;
 		bool useEnd = false;
+		NeighborDirection direction = INVALID_DIRECTION;
 		glm::ivec3 position;
 		glm::ivec3 steps;
 		glm::vec3 bounds;

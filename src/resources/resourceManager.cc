@@ -204,9 +204,11 @@ void resources::ResourceManager::reload() {
 			free((void*)buffer.buffer);
 		}
 	}
+	#ifndef __switch__
 	else {
 		this->hash = this->carton->hash;
 	}
+	#endif
 
 	this->carton->addExtensionHandler(".ss", handleSpritesheets, this);
 	this->carton->addExtensionHandler(".png", handlePNGs, this);

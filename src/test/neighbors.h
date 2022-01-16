@@ -12,7 +12,7 @@ enum NeighborDirection {
 
 class TileNeighborIterator {
 	public:
-		TileNeighborIterator(class ChunkContainer* container, glm::ivec3 position);
+		TileNeighborIterator(glm::ivec3 position);
 		
 		glm::ivec3& value();
 		bool atEnd();

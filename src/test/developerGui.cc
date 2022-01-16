@@ -163,7 +163,7 @@ void DeveloperGui::render() {
 		ImGui::BeginChild("scrolling", ImVec2(amount * size + (amount - 1) * margin + margin * 2.0f + scrollbar, 600.f), true, 0);
 		ImGui::PopStyleVar(2);
 
-		float width = ImGui::GetContentRegionAvailWidth();
+		float width = ImGui::GetContentRegionAvail().x;
 		int count = 0;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(margin, margin));
 		for(render::Texture* texture: this->spritesheetImages) {
