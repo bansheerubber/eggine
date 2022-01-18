@@ -9,6 +9,8 @@ exec("editor.egg");
 exec("targetting.egg");
 exec("turn.egg");
 
+printCompilationErrors();
+
 function r() {
 	hotReload();
 }
