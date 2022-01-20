@@ -27,6 +27,8 @@
 Engine* engine = new Engine();
 
 void Engine::initialize() {
+	// ## version.py
+	
 	this->eggscript = esCreateEngine(false);
 	esSetPrintFunction(this->eggscript, console::print, console::warning, console::error);
 	esSetVPrintFunction(this->eggscript, console::vprint, console::vwarning, console::verror);
@@ -402,6 +404,7 @@ void Engine::tick() {
 	#endif
 	
 	this->debug.clearInfoMessages();
+	this->debug.addInfoMessage(fmt::format("Version: {}", this->version));
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for CPU render time", this->cpuRenderTime));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->eggscriptTickTime));

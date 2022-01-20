@@ -87,6 +87,14 @@ class Engine {
 		class ChunkContainer* chunkContainer = nullptr;
 		UI ui;
 
+		// versioning system: v0-9.0-9.branch_name#0-9
+		// first number: major version for big content releases
+		// second number: minor changes that do not introduce a lot of content
+		// branch name: the name of the branch that the repo is currently checked out on. all releases should have 'master' for the branch
+		// third number: number of commits since the last major-minor release. major-minor releases do not include patches, which are signified by
+	  //      the number of commits since the last major-minor release
+		std::string version;
+
 		#ifdef EGGINE_DEBUG
 		Debug debug;
 		#endif
