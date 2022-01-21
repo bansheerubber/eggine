@@ -56,16 +56,35 @@ function Unit::coverList(%this) {
 }
 
 // return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
-function Unit::inCover(%this, %attacker) {
-	%direction = normalize(%this.getPosition() - %attacker.getPosition());
-	%resultArray = raycast(%attacker.getPosition(), %this.getPosition(), 1);
+function Unit::testInCoverFromPosition(%this, %attacker, %attackerPosition) {
+	%direction = normalize(%this.getPosition() - %attackerPosition);
+	%resultArray = raycast(%attackerPosition, %this.getPosition(), 1);
 	if(%resultArray == null) {
 		return $Cover::None;
 	}
 
+	%coverList = %this.coverList();
+	if(%coverList.size() == 0) { // TODO do additional tests to see if a half-height wall is obscuring us/etc
+		for(%i = 0; %i < %resultArray.size(); %i++) {
+			if(Tile::isWall(%resultArray[%i])) { // see if there's any walls inbetween us and the enemy
+				return $Cover::Full;
+			}
+		}
+		return $Cover::None;
+	}
+
+	// see if there's any walls that aren't a part of the cover wall inbetween us and the enemy
+	for(%i = 0; %i < %resultArray.size() - 1; %i++) {
+		for(%j = 0; %j < %coverList.size(); %j++) {
+			%cover = %coverList[%j];
+			if(Tile::isWall(%resultArray[%i]) && !Tile::wallTest(%resultArray[%i], %cover["position"], %cover["vector"])) {
+				return $Cover::Full;
+			}
+		}
+	}
+
 	%result = %resultArray[%resultArray.size() - 1];
 
-	%coverList = %this.coverList();
 	%hitCover = null; // hit cover determines the strength of the cover modifier applied to accuracy
 	for(%i = 0; %i < %coverList.size(); %i++) {
 		%cover = %coverList[%i];
@@ -84,16 +103,16 @@ function Unit::inCover(%this, %attacker) {
 	%candidateTile2 = %this.getPosition() - %hitCover["vector"];
 	%candidateTiles.push(%this.getPosition());
 
-	if(distance(%attacker.getPosition(), %candidateTile1) < distance(%attacker.getPosition(), %candidateTile2)) {
+	if(distance(%attackerPosition, %candidateTile1) < distance(%attackerPosition, %candidateTile2)) {
 		%candidateTiles.push(%candidateTile1);
 	}
-	else if(distance(%attacker.getPosition(), %candidateTile1) > distance(%attacker.getPosition(), %candidateTile2)) {
+	else if(distance(%attackerPosition, %candidateTile1) > distance(%attackerPosition, %candidateTile2)) {
 		%candidateTiles.push(%candidateTile2);
 	}
 
 	%hit = true;
 	for(%i = 0; %i < %candidateTiles.size(); %i++) {
-		if(Tile::raycastIgnoreStrays(%attacker.getPosition(), %candidateTiles[%i], 1, %hitCover["position"], %hitCover["vector"]) == null) {
+		if(Tile::raycastIgnoreStrays(%attackerPosition, %candidateTiles[%i], 1, %hitCover["position"], %hitCover["vector"]) == null) {
 			%hit = false;
 			break;
 		}
@@ -113,6 +132,28 @@ function Unit::inCover(%this, %attacker) {
 	else {
 		return $Cover::Half;
 	}
+}
+
+// return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
+function Unit::inCover(%this, %attacker) {
+	%result = %this.testInCoverFromPosition(%attacker, %attacker.getPosition());
+	if(%result != $Cover::Full) {
+		return %result;
+	}
+
+	for(%i = 0; %i < 4; %i++) { // TODO handle this better
+		%adjacent = Tile::getAdjacent(%attacker.getPosition(), %i);
+		if(Tile::isTile(%adjacent)) {
+			continue;
+		}
+
+		%result = %this.testInCoverFromPosition(%attacker, %adjacent);
+		if(%result != $Cover::Full) {
+			return %result;
+		}
+	}
+
+	return $Cover::Full;
 }
 
 function getCoverAccuracyMod(%cover) {
