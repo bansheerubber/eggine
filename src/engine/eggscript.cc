@@ -5,6 +5,7 @@
 #include "console.h"
 #include "engine.h"
 #include "../resources/scriptFile.h"
+#include "../util/time.h"
 
 void es::eggscriptDefinitions() {
 	esEntryType addKeybindArguments[3] = {ES_ENTRY_STRING, ES_ENTRY_STRING, ES_ENTRY_STRING};
@@ -17,6 +18,9 @@ void es::eggscriptDefinitions() {
 	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &exec, "exec", 1, execArguments);
 
 	esRegisterFunction(engine->eggscript, ES_ENTRY_NUMBER, &probeGarbage, "probeGarbage", 1, execArguments);
+
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &startBenchmark, "startBenchmark", 0, nullptr);
+	esRegisterFunction(engine->eggscript, ES_ENTRY_EMPTY, &endBenchmark, "endBenchmark", 0, nullptr);
 }
 
 esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
@@ -61,5 +65,17 @@ esEntryPtr es::probeGarbage(esEnginePtr engine, unsigned int argc, esEntryPtr ar
 	if(argc == 1) {
 		return esCreateNumber(esProbeGarbage(engine, args[0].stringData));
 	}
+	return nullptr;
+}
+
+uint64_t startTime;
+
+esEntryPtr es::startBenchmark(esEnginePtr engine, unsigned int argc, esEntryPtr args) {
+	startTime = getMicrosecondsNow();
+	return nullptr;
+}
+
+esEntryPtr es::endBenchmark(esEnginePtr engine, unsigned int argc, esEntryPtr args) {
+	console::print("%lld\n", getMicrosecondsNow() - startTime);
 	return nullptr;
 }
