@@ -57,12 +57,14 @@ function Unit::coverList(%this) {
 
 // return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
 function Unit::testInCoverFromPosition(%this, %attacker, %attackerPosition) {
+	// next section takes approx 20 us
 	%direction = normalize(%this.getPosition() - %attackerPosition);
 	%resultArray = raycast(%attackerPosition, %this.getPosition(), 1);
 	if(%resultArray == null) {
 		return $Cover::None;
 	}
 
+	// next section takes approx 70 us
 	%coverList = %this.coverList();
 	if(%coverList.size() == 0) { // TODO do additional tests to see if a half-height wall is obscuring us/etc
 		for(%i = 0; %i < %resultArray.size(); %i++) {
@@ -72,6 +74,7 @@ function Unit::testInCoverFromPosition(%this, %attacker, %attackerPosition) {
 		}
 		return $Cover::None;
 	}
+	// end section
 
 	// see if there's any walls that aren't a part of the cover wall inbetween us and the enemy
 	for(%i = 0; %i < %resultArray.size() - 1; %i++) {
@@ -98,6 +101,7 @@ function Unit::testInCoverFromPosition(%this, %attacker, %attackerPosition) {
 		return $Cover::None;
 	}
 
+	// next section takes approx 70 microsections
 	%candidateTiles = new Array();
 	%candidateTile1 = %this.getPosition() + %hitCover["vector"];
 	%candidateTile2 = %this.getPosition() - %hitCover["vector"];
@@ -110,6 +114,7 @@ function Unit::testInCoverFromPosition(%this, %attacker, %attackerPosition) {
 		%candidateTiles.push(%candidateTile2);
 	}
 
+	// this is the part that takes up a disproportionate amount of time
 	%hit = true;
 	for(%i = 0; %i < %candidateTiles.size(); %i++) {
 		if(Tile::raycastIgnoreStrays(%attackerPosition, %candidateTiles[%i], 1, %hitCover["position"], %hitCover["vector"]) == null) {
@@ -143,7 +148,7 @@ function Unit::inCover(%this, %attacker) {
 
 	for(%i = 0; %i < 4; %i++) { // TODO handle this better
 		%adjacent = Tile::getAdjacent(%attacker.getPosition(), %i);
-		if(Tile::isTile(%adjacent)) {
+		if(Tile::isTile(%adjacent) || raycast(%attacker.getPosition(), %adjacent) != null) {
 			continue;
 		}
 
