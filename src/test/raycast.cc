@@ -155,7 +155,7 @@ RaycastMarcher& RaycastMarcher::operator++() {
 				char index = info.wall - 1;
 				if(
 					invalidDirectionsForWall[(unsigned char)index][i] == this->direction
-					|| invalidDirectionsForWall[(unsigned char)index][i] == (this->direction + 2) % 4
+					|| invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
 				) {
 					if(!(this->options & RAYCAST_PENETRATE)) {
 						this->_finished = true;
