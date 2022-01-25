@@ -72,6 +72,8 @@ function init() {
 
 	addKeybind("unit.previousAbility", "x-button", "onPreviousAbility");
 
+	addKeybind("unit.resetAP", "delete", "resetUnitAP");
+
 	addKeybind("editor.mouseDown", "left-mouse-button", "onEditorMouseDown");	
 }
 
@@ -173,6 +175,14 @@ function onPreviousAbility(%state) {
 		%character.selectPreviousAbility();
 		playSound("Flip");
 	}
+}
+
+function resetUnitAP(%state) {
+	if(!%state) {
+		return;
+	}
+
+	getChunkContainer().getSelectedCharacter().setAP(2);
 }
 
 function onSelectTile(%position, %browsing) {
