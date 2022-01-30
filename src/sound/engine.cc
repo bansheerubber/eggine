@@ -10,7 +10,7 @@
 #ifdef __switch__
 Mutex FinishedThreadsWrite;
 #else
-mutex FinishedThreadsWrite;
+std::mutex FinishedThreadsWrite;
 #endif
 
 sound::Engine::Engine() {
@@ -24,14 +24,14 @@ void sound::Engine::initialize() {
 
 	// do special stuff for extensions meant for streaming
 	auto resources = engine->manager->carton->database.get()->equals("extension", ".ogg")->exec();
-	for(size_t i = 0; i < resources.head; i++) {
-		string fileName = resources[i]->getMetadata("fileName");
+	for(uint64_t i = 0; i < resources.head; i++) {
+		std::string fileName = resources[i]->getMetadata("fileName");
 		engine->soundEngine.addSound(new sound::Sound(engine->manager, resources[i]));
 	}
 
 	auto resources2 = engine->manager->carton->database.get()->equals("extension", ".wav")->exec();
-	for(size_t i = 0; i < resources2.head; i++) {
-		string fileName = resources2[i]->getMetadata("fileName");
+	for(uint64_t i = 0; i < resources2.head; i++) {
+		std::string fileName = resources2[i]->getMetadata("fileName");
 		engine->soundEngine.addSound(new sound::Sound(engine->manager, resources2[i]));
 	}
 
@@ -39,7 +39,7 @@ void sound::Engine::initialize() {
 }
 
 void sound::Engine::tick() {
-	size_t size = this->finishedThreads.size();
+	uint64_t size = this->finishedThreads.size();
 	for(unsigned int i = 0; i < size; i++) {
 		SoundThreadContext* context = this->finishedThreads[i];
 		
@@ -53,13 +53,13 @@ void sound::Engine::tick() {
 
 	#ifdef __switch__
 	mutexLock(&FinishedThreadsWrite);
-	for(size_t i = 0; i < size; i++) {
+	for(uint64_t i = 0; i < size; i++) {
 		this->finishedThreads.pop_front();
 	}
 	mutexUnlock(&FinishedThreadsWrite);
 	#else
 	FinishedThreadsWrite.lock();
-	for(size_t i = 0; i < size; i++) {
+	for(uint64_t i = 0; i < size; i++) {
 		this->finishedThreads.pop_front();
 	}
 	FinishedThreadsWrite.unlock();
@@ -80,11 +80,11 @@ void sound::Engine::addCollection(class SoundCollection* collection) {
 	this->nameToCollection[collection->name] = collection;
 }
 
-void sound::Engine::playSoundByFileName(string fileName) {
+void sound::Engine::playSoundByFileName(std::string fileName) {
 	this->fileToSound[fileName]->play();
 }
 
-void sound::Engine::playSoundByCollectionName(string collectionName) {
+void sound::Engine::playSoundByCollectionName(std::string collectionName) {
 	if(this->nameToCollection.find(collectionName) != this->nameToCollection.end()) {
 		this->nameToCollection[collectionName]->play();
 	}
@@ -109,7 +109,7 @@ void es::defineSoundEngine() {
 
 esEntryPtr es::playSound(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
-		engine->soundEngine.playSoundByCollectionName(string(args[0].stringData));
+		engine->soundEngine.playSoundByCollectionName(std::string(args[0].stringData));
 	}
 	return nullptr;
 }

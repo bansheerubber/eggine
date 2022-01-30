@@ -7,18 +7,17 @@
 #include "gameObject.h.gen"
 #include "../engine/keybind.h"
 
-using namespace std;
-
 class GameObject {
 	public:
 		GameObject();
+		virtual ~GameObject();
 		
 		virtual GameObjectType getType() {
 			return INVALID;
 		}
 
-		virtual void onBind(string &bind, binds::Action action) {}
-		virtual void onAxis(string &bind, double axis) {};
+		virtual void onBind(std::string &bind, binds::Action action) {}
+		virtual void onAxis(std::string &bind, double axis) {};
 
 		int operator==(const GameObject &other) {
 			return this->id == other.id;
@@ -27,6 +26,6 @@ class GameObject {
 		esObjectReferencePtr reference = nullptr;
 	
 	protected:
-		size_t id;
-		static size_t maxId;
+		uint64_t id;
+		static uint64_t maxId;
 };

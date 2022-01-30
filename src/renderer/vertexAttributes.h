@@ -10,8 +10,6 @@
 
 #include "memory.h"
 
-using namespace std;
-
 namespace render {
 	enum VertexAttributeType {
 		VERTEX_ATTRIB_BYTE,
@@ -55,6 +53,10 @@ namespace render {
 
 			case VERTEX_ATTRIB_DOUBLE: {
 				return 8;
+			}
+
+			default: {
+				return 0;
 			}
 		}
 	}
@@ -137,10 +139,13 @@ namespace render {
 				}
 			}
 		}
+
+		return DkVtxAttribSize_1x8;
 	}
 
 	inline DkVtxAttribType attributeTypeToDkAttribType(VertexAttributeType type) {
 		switch(type) {
+			default:
 			case VERTEX_ATTRIB_UNSIGNED_BYTE:
 			case VERTEX_ATTRIB_UNSIGNED_SHORT:
 			case VERTEX_ATTRIB_UNSIGNED_INT: {
@@ -196,6 +201,10 @@ namespace render {
 			case VERTEX_ATTRIB_DOUBLE: {
 				return GL_DOUBLE;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 	#endif
@@ -210,12 +219,12 @@ namespace render {
 		protected:
 			Window* window = nullptr;
 
-			vector<VertexAttribute> attributes;
+			std::vector<VertexAttribute> attributes;
 
 			#ifdef __switch__
-			vector<VertexBuffer*> bufferBindOrder;
-			vector<DkVtxAttribState> attributeStates;
-			vector<DkVtxBufferState> bufferStates;
+			std::vector<VertexBuffer*> bufferBindOrder;
+			std::vector<DkVtxAttribState> attributeStates;
+			std::vector<DkVtxBufferState> bufferStates;
 			#else
 			GLuint vertexArrayObject = GL_INVALID_INDEX;
 			#endif

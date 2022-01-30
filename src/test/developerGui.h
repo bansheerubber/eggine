@@ -8,14 +8,40 @@
 #include "../util/png.h"
 #include "../renderer/texture.h"
 
-using namespace std;
+struct ConsoleEntry {
+	int level;
+	std::string contents;
+};
+
+int developerPrint(const char* buffer, ...);
+int developerWarning(const char* buffer, ...);
+int developerError(const char* buffer, ...);
+
+int vDeveloperPrint(const char* buffer, va_list args);
+int vDeveloperWarning(const char* buffer, va_list args);
+int vDeveloperError(const char* buffer, va_list args);
 
 class DeveloperGui {
 	public:
+		DeveloperGui();
+
 		png spritesheet;
-		vector<render::Texture*> spritesheetImages;
+		std::vector<render::Texture*> spritesheetImages;
+
+		std::vector<ConsoleEntry> console;
+
+		bool focusConsole = false;
 		
 		void render();
 		void prerender();
+		void addEntry(ConsoleEntry entry);
+	
+	private:
+		std::vector<std::string> history;
+		int historyPosition = 0;
+		std::string incompleteCommand = "";
+		bool jumpToBottom = false;
+		bool consoleFullSize = false; // whether or not the console takes up the full extent of its scroll
+		int consoleCallback(ImGuiInputTextCallbackData* data);
 };
 #endif

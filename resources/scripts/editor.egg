@@ -1,14 +1,3 @@
-$Editor::Enabled = false;
-
-$Editor::GhostTile = null;
-$Editor::GhostLine = new Array();
-$Editor::MouseDown = false;
-
-$Editor::LastStart = null;
-$Editor::LastEnd = null;
-$Editor::LastDirection = null;
-$Editor::LastAxis  = null;
-
 function onEditorMouseDown(%state) {
 	$Editor::MouseDown = %state;
 
@@ -156,5 +145,3 @@ function OverlappingTile::blink(%this) {
 	%this.setColor({1; 1; 1; %this.opacity});
 	%this.schedule(16, "blink");
 }
-
-addKeybind("editor.mouseDown", "left-mouse-button", "onEditorMouseDown");

@@ -10,9 +10,8 @@
 #include <vorbis/vorbisfile.h>
 
 #include "buffer.h"
+#include "../engine/console.h"
 #include "../resources/resourceObject.h"
-
-using namespace std;
 
 namespace resources {
 	class ResourceManager;
@@ -52,14 +51,20 @@ namespace sound {
 			Sound(resources::ResourceManager* manager, carton::Metadata* metadata);
 
 			void play(SoundSourceProperties properties = SoundSourceProperties());
+
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
+				resources::ResourceObject::reload(metadata, buffer, bufferSize);
+				console::warning("sound reload not implemented\n");
+			}
+
 			unsigned int getBytesUsed() {
 				return SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT;
 			}
 
 		private:
-			string fileName;
-			streampos position; // position within the carton
-			size_t size; // full size of the file
+			std::string fileName;
+			uint64_t position; // position within the carton
+			uint64_t size; // full size of the file
 			Buffer buffers[SOUND_BUFFER_COUNT]; // initial buffers that we always keep in memory
 			unsigned int bufferCount = 0;
 			bool filled = true; // whether both buffers are filled all the way

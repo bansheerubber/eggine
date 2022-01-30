@@ -1,0 +1,49 @@
+target = game
+cclibs = -lpthread -llitehtml -lgumbo -lglfw3 -lpng -leggscript -lz -lopenal -lvorbisfile -lvorbis -logg -lfreetype -lbrotlidec -lbrotlicommon -lbz2 -lharfbuzz -lgraphite2 -lfreetype -lwinmm -dsound -lole32 -loleaut32 -lgdi32 -lrpcrt4 -lWs2_32 -lssl
+ccinclude = -Iinclude/pc/glm/ -Iinclude/common/ -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ -Iinclude/pc/ -Iimgui -Llib
+CXX = g++
+CPPFLAGS = -std=c++17 -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -DGLFW_INCLUDE_GLEXT -DAL_LIBTYPE_STATIC -DLITEHTML_UTF8
+ldflags = --static -fPIE
+
+cpp_source = $(shell find imgui -type f -name "*.cc") $(shell find src -type f -name "*.cc" ! -path "src/include*")
+cpp_source_tmp = $(subst src, tmp, $(cpp_source))
+cpp_source_without = $(subst src\/, , $(cpp_source))
+
+cpp_headers = $(shell find imgui -type f -name "*.h") $(shell find src -type f -name "*.h" ! -path "src/include*") 
+cpp_headers_tmp = $(subst src, tmp, $(cpp_headers))
+
+cpp_objects = $(patsubst %.cc, %.o, $(cpp_source))
+cpp_objects_tmp = $(patsubst %.cc, %.o, $(cpp_source_tmp))
+cpp_objects_without = $(patsubst src\/, , $(cpp_source))
+
+.PHONY: default clean
+
+# force synchronization for preprocessor
+default:
+	@"$(MAKE)" preprocessor -f Makefile.win --no-print-directory
+	@"$(MAKE)" dist/$(target) -f Makefile.win --no-print-directory
+
+preprocessor:
+	@echo -e "   PY      tools/preprocessor.py"
+	@python3 tools/preprocessor.py
+
+glad/gl.o: glad/gl.c
+	@echo -e "   CXX     $@"
+	@$(CXX) $(CPPFLAGS) $(ccinclude) -c $< -o $@
+
+$(cpp_objects_tmp) : %.o : %.cc
+	@mkdir -p $(dir $@)
+	@echo -e "   CXX     $<"
+	@$(CXX) $(CPPFLAGS) $(ccinclude) -c $< -o $@
+
+dist/$(target): $(cpp_objects_tmp) glad/gl.o
+	@mkdir -p $(dir dist/$(target))
+	@echo -e "   CXX     $@"
+	@$(CXX) $(cpp_objects_tmp) glad/gl.o -Wall $(ccinclude) $(cclibs) $(ldflags) -o $@
+
+clean:
+	@echo -e "   RM      tmp"
+	@rm -Rf tmp
+
+	@echo -e "   RM      dist/$(target)"
+	@rm -f dist/$(target)

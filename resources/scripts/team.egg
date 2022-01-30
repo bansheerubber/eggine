@@ -1,8 +1,25 @@
-function Team::selectNextCharacter(%this, %state) {
-	if(!%state) {
-		return;
+class SwitchTeamElement inherits HTMLElement {
+	function onClick(%this) {
+		getChunkContainer().selectCharacter(null);
+		selectTarget(null);
+		
+		if($Team::Player == getChunkContainer().getPlayerTeam()) {
+			getChunkContainer().setPlayerTeam($Team::Enemy);
+			getChunkContainer().setEnemyTeam($Team::Player);
+			echo("set enemy team as primary");
+		}
+		else {
+			getChunkContainer().setPlayerTeam($Team::Player);
+			getChunkContainer().setEnemyTeam($Team::Enemy);
+			echo("set player team as primary");
+		}
+
+		getHTMLElementById("team-name").clear();
+		getHTMLElementById("team-name").createChild("Team:" SPC getChunkContainer().getPlayerTeam().getName());
 	}
-	
+};
+
+function Team::selectNextCharacter(%this) {
 	%this.selectedIndex = (%this.selectedIndex + 1) % %this.size();
 	
 	%character = %this.get(%this.selectedIndex);
@@ -12,11 +29,7 @@ function Team::selectNextCharacter(%this, %state) {
 	playSound("SwapUnit");
 }
 
-function Team::selectPreviousCharacter(%this, %state) {
-	if(!%state) {
-		return;
-	}
-	
+function Team::selectPreviousCharacter(%this) {
 	%this.selectedIndex--;
 	if(%this.selectedIndex < 0) {
 		%this.selectedIndex = %this.size() - 1;
@@ -29,12 +42,28 @@ function Team::selectPreviousCharacter(%this, %state) {
 	playSound("SwapUnit");
 }
 
-function team() {
-	%team = getChunkContainer().getPlayerTeam();
-	%team.addKeybind("team.selectPreviousCharacter", "[", "selectPreviousCharacter");
-	%team.addKeybind("team.selectNextCharacter", "]", "selectNextCharacter");
-	%team.addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
-	%team.addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
+function selectNextCharacter(%state) {
+	if(!%state) {
+		return;
+	}
+
+	getChunkContainer().getPlayerTeam().selectNextCharacter();
 }
 
-schedule(100, "team");
+function selectPreviousCharacter(%state) {
+	if(!%state) {
+		return;
+	}
+
+	getChunkContainer().getPlayerTeam().selectPreviousCharacter();
+}
+
+function teamInit() {
+	addKeybind("team.selectPreviousCharacter", "[", "selectPreviousCharacter");
+	addKeybind("team.selectNextCharacter", "]", "selectNextCharacter");
+	addKeybind("team.selectPreviousCharacter", "left-button", "selectPreviousCharacter");
+	addKeybind("team.selectNextCharacter", "right-button", "selectNextCharacter");
+
+	$Team::Player = getChunkContainer().getPlayerTeam();
+	$Team::Enemy = getChunkContainer().getEnemyTeam();
+}

@@ -101,13 +101,6 @@ TileSet* TileSet::pathfind(glm::ivec3 start, glm::ivec3 end) {
 		return nullptr;
 	}
 
-	glm::ivec3 offsets[4] = {
-		glm::ivec3(1, 0, 0),
-		glm::ivec3(-1, 0, 0),
-		glm::ivec3(0, 1, 0),
-		glm::ivec3(0, -1, 0),
-	};
-
 	tsl::robin_map<glm::ivec3, unsigned int> distances;
 	tsl::robin_map<glm::ivec3, glm::ivec3> cameFrom;
 	priority_queue<AStarEntry> queue;

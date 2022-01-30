@@ -1,5 +1,13 @@
 #include "engine.h"
 
+#ifdef EGGINE_DEVELOPER_MODE
+#include "imgui_impl_glfw.h"
+#endif
+
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <glm/vec3.hpp>
@@ -9,6 +17,7 @@
 #endif
 
 #include "callbacks.h"
+#include "console.h"
 #include "../test/developerGui.h"
 #include "eggscript.h"
 #include "../basic/renderContext.h"
@@ -18,6 +27,26 @@
 Engine* engine = new Engine();
 
 void Engine::initialize() {
+	// ## version.py
+	
+	this->eggscript = esCreateEngine(false);
+	esSetPrintFunction(this->eggscript, console::print, console::warning, console::error);
+	esSetVPrintFunction(this->eggscript, console::vprint, console::vwarning, console::verror);
+	esSetInstructionDebug(this->eggscript, true);
+	es::eggscriptDefinitions();
+	
+	console::openFile("console.log");
+
+	#ifdef _WIN32
+	// initialize Winsock
+	WSADATA wsaData;
+	int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+	if(iResult != 0) {
+		console::error("could not initialize winsock2\n");
+		::exit(1);
+	}
+	#endif
+
 	// initialize nxlink and romfs right away
 	#ifdef __switch__
 	socketInitializeDefault();
@@ -25,14 +54,11 @@ void Engine::initialize() {
 
 	Result romfsResult = romfsInit();
 	if(R_FAILED(romfsResult)) {
-		printf("romfs failure: %d\n", romfsResult);
+		console::error("romfs failure: %d\n", romfsResult);
 	}
 	#endif
 
 	FT_Init_FreeType(&this->ft);
-
-	this->eggscript = esCreateEngine(false);
-	es::eggscriptDefinitions();
 
 	this->manager = new resources::ResourceManager(this->filePrefix + "out.carton");
 
@@ -51,6 +77,14 @@ void Engine::initialize() {
 	glfwSetKeyCallback(this->renderWindow.window, onKeyPress);
 	glfwSetMouseButtonCallback(this->renderWindow.window, onMousePress);
 	glfwSetCursorPosCallback(this->renderWindow.window, onMouseMove);
+	#endif
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	glfwSetWindowFocusCallback(this->renderWindow.window, ImGui_ImplGlfw_WindowFocusCallback);
+	glfwSetCursorEnterCallback(this->renderWindow.window, ImGui_ImplGlfw_CursorEnterCallback);
+	glfwSetScrollCallback(this->renderWindow.window, ImGui_ImplGlfw_ScrollCallback);
+	glfwSetCharCallback(this->renderWindow.window, ImGui_ImplGlfw_CharCallback);
+	glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 	#endif
 
 	#ifdef EGGINE_DEBUG
@@ -265,7 +299,8 @@ void Engine::initialize() {
 	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
 		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
 	)[0];
-	esExecFileFromContents(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
+	esExecVirtualFile(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
+	esCallFunction(this->eggscript, "init", 0, nullptr);
 
 	this->renderWindow.initializeHTML();
 
@@ -278,6 +313,7 @@ void Engine::exit() {
 	FT_Done_FreeType(ft);
 
 	this->renderWindow.deinitialize();
+	delete this->manager;
 
 	#ifdef __switch__
 	close(this->nxlink);
@@ -289,9 +325,14 @@ void Engine::exit() {
 void Engine::tick() {
 	start_tick:
 
+	// handle client
+	if(this->network.isClient() || this->network.isServer()) {
+		this->network.receive();
+	}
+
 	this->soundEngine.tick(); // handle sounds
 
-	long long startTime = getMicrosecondsNow();
+	int64_t startTime = getMicrosecondsNow();
 	double deltaTime = (startTime - this->lastRenderTime) / 1000000.0;
 	this->lastRenderTime = getMicrosecondsNow();
 
@@ -316,7 +357,7 @@ void Engine::tick() {
 		onAxisMove(axis, value);
 
 		binds::GamepadButtons buttons[16] = {binds::B_BUTTON, binds::A_BUTTON, binds::Y_BUTTON, binds::X_BUTTON, binds::INVALID_BUTTON, binds::INVALID_BUTTON, binds::LEFT_BUTTON, binds::RIGHT_BUTTON, binds::LEFT_TRIGGER, binds::RIGHT_TRIGGER, binds::SPECIAL_RIGHT, binds::SPECIAL_LEFT, binds::D_PAD_LEFT, binds::D_PAD_UP, binds::D_PAD_RIGHT, binds::D_PAD_DOWN};
-		for(unsigned long i = 0; i < 16; i++) {
+		for(uint64_t i = 0; i < 16; i++) {
 			bool pressed = (this->renderWindow.buttons >> i) & 1;
 			if(buttons[i] != binds::INVALID_BUTTON && ((this->lastGamepadButtons >> i) & 1) != pressed) {
 				onGamepadButton(buttons[i], pressed);
@@ -363,11 +404,21 @@ void Engine::tick() {
 	#endif
 	
 	this->debug.clearInfoMessages();
+	this->debug.addInfoMessage(fmt::format("Version: {}", this->version));
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for CPU render time", this->cpuRenderTime));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->eggscriptTickTime));
 	this->debug.addInfoMessage(fmt::format("{} renderables", this->renderables.head + this->renderableUIs.head));
 	this->debug.addInfoMessage(fmt::format("{} zoom", this->camera->getZoom()));
+
+	if(this->network.isClient()) {
+		this->debug.addInfoMessage(fmt::format("Client: connected to {}", this->network.client.getIPAddress().toString()));
+	}
+	else if(this->network.isServer()) {
+		this->debug.addInfoMessage(fmt::format("Server: hosting on {}", this->network.getHostIPAddress().toString()));
+		this->debug.addInfoMessage(fmt::format("{} connections", this->network.getConnectionCount()));
+	}
+
 	#endif
 
 	if(deltaTime > 1.0) {
@@ -383,7 +434,7 @@ void Engine::tick() {
 	// }
 
 	// handle eggscript
-	long long esStartTime = getMicrosecondsNow();
+	int64_t esStartTime = getMicrosecondsNow();
 	esTick(this->eggscript);
 	this->eggscriptTickTime = getMicrosecondsNow() - esStartTime;
 
@@ -400,8 +451,8 @@ void Engine::tick() {
 	};
 
 	// render everything
-	long long startRenderTime = getMicrosecondsNow();
-	for(size_t i = 0; i < this->renderables.head; i++) {
+	int64_t startRenderTime = getMicrosecondsNow();
+	for(uint64_t i = 0; i < this->renderables.head; i++) {
 		this->renderables[i]->render(deltaTime, context);
 	}
 
@@ -409,7 +460,7 @@ void Engine::tick() {
 	this->debugText->setText(this->debug.getInfoText());
 	#endif
 
-	for(size_t i = 0; i < this->renderableUIs.head; i++) {
+	for(uint64_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
 	}
 
@@ -420,6 +471,12 @@ void Engine::tick() {
 	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
 
 	this->renderWindow.render();
+
+	if(this->network.isServer()) {
+		this->network.tick();
+	}
+
+	this->manager->tick();
 
 	goto start_tick;
 }

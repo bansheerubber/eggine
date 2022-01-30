@@ -24,12 +24,12 @@ void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 }
 #endif
 
-void Debug::addInfoMessage(string message) {
+void Debug::addInfoMessage(std::string message) {
 	this->infoMessages.push_back(message);
 }
 
-string Debug::getInfoText() {
-	string output;
+std::string Debug::getInfoText() {
+	std::string output;
 	for(string &message: this->infoMessages) {
 		output += message + '\n';
 	}
@@ -42,7 +42,7 @@ void Debug::clearInfoMessages() {
 
 #ifndef __switch__
 void Debug::flushGLDebugMessages() {
-	for(size_t i = 0; i < this->glDebugMessages.size(); i++) {
+	for(uint64_t i = 0; i < this->glDebugMessages.size(); i++) {
 		// only print groups if they actually captured some sort of message
 		if(
 			this->glDebugMessages[i].id == 1

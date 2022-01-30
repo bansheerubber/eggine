@@ -1,0 +1,32 @@
+// prepare the buffers
+%%stream%%.flush();
+%%stream%%.buffer.head = %%length%%;
+
+if(%%stream%%.buffer.head < 8) { // if the message isn't even big enough to hold a secret, discard the packet
+	console::warning("discard because of small length\n");
+	continue;
+}
+
+if(
+	this->udpAddressToConnection.find(%%address%%) == this->udpAddressToConnection.end()
+) {
+	// if we can't find a secret, discard the packet
+	uint64_t secret = %%stream%%.readNumber<uint64_t>();
+	if(this->secretToConnection.find(secret) == this->secretToConnection.end()) {
+		console::warning("discard because of invalid secret\n");
+		continue;
+	}
+
+	this->udpAddressToConnection[%%address%%] = this->secretToConnection[secret];
+	this->secretToConnection[secret]->initializeUDP(%%address%%);
+
+	std::thread t(&Network::sendInitialData, this, this->secretToConnection[secret]);
+	t.detach();
+}
+
+// the minimum header length for a packet is always greater than 8. if we got a length of 8, its probably a redundant secret
+if(%%stream%%.buffer.head == 8) {
+	continue;
+}
+
+this->udpAddressToConnection[%%address%%]->receiveUDP(%%stream%%);

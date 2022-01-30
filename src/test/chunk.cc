@@ -16,7 +16,7 @@
 
 glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
-tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<long>>();
+tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>>();
 
 void initInterweavedTileWrapper(Chunk* chunk, InterweavedTileWrapper* tile) {
 	*tile = {};
@@ -52,7 +52,7 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 					Chunk::Rotations[rotationPair].resize(Chunk::Size * Chunk::Size);
 					for(unsigned int oldIndex = 0; oldIndex < Chunk::Size * Chunk::Size; oldIndex++) {
 						glm::ivec2 intermediatePosition = tilemath::indexToCoordinate(oldIndex, Chunk::Size, (tilemath::Rotation)a);
-						long newIndex = tilemath::coordinateToIndex(intermediatePosition, Chunk::Size, (tilemath::Rotation)b);
+						int64_t newIndex = tilemath::coordinateToIndex(intermediatePosition, Chunk::Size, (tilemath::Rotation)b);
 						Chunk::Rotations[rotationPair][oldIndex] = newIndex;
 					}
 				}
@@ -135,7 +135,7 @@ glm::uvec2& Chunk::getPosition() {
 void Chunk::defineBounds() {
 	tilemath::Rotation rotation = this->container->getRotation();
 	int topHeight = 0, rightHeight = 0, bottomHeight = 0, leftHeight = 0;
-	glm::vec2 bias;
+	glm::vec2 bias(0, 0);
 	switch(rotation) {
 		case tilemath::ROTATION_0_DEG: {
 			bias = glm::vec2(-0.5, -(32.0 / 2.0 + 39.0 * 2.0 + 2) / 128.0);
@@ -216,7 +216,7 @@ void Chunk::updateRotation(tilemath::Rotation rotation) {
 	int* newTextureIndices = (int*)calloc(Chunk::Size * Chunk::Size * Chunk::MaxHeight, sizeof(int)); // this is slightly faster than new
 	for(unsigned int i = 0;  i < Chunk::Size * Chunk::Size * Chunk::MaxHeight; i++) {
 		unsigned int height = i / (Chunk::Size * Chunk::Size);
-		long newIndex = Chunk::Rotations[pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
+		int64_t newIndex = Chunk::Rotations[pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
 
 		resources::SpriteFacingInfo* facingsMap;
 		if((facingsMap = ChunkContainer::Image->getSpriteInfo(this->textureIndices[i]).facingsMap) != nullptr) {
@@ -250,15 +250,14 @@ void Chunk::updateRotation(tilemath::Rotation rotation) {
 	this->oldRotation = rotation;
 }
 
-size_t Chunk::renderWithInterweavedTiles(size_t startInterweavedIndex, size_t startIndex, size_t amount, double deltaTime, RenderContext &context) {
-	unsigned int total = Chunk::Size * Chunk::Size * this->height;
+uint64_t Chunk::renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint64_t startIndex, uint64_t amount, double deltaTime, RenderContext &context) {
 	unsigned int lastIndex = startIndex;
-	size_t leftOff = startInterweavedIndex;
-	size_t limit = startIndex + amount;
+	uint64_t leftOff = startInterweavedIndex;
+	uint64_t limit = startIndex + amount;
 	InterweavedTileWrapper* tile = nullptr;
 
 	for(
-		size_t i = startInterweavedIndex;
+		uint64_t i = startInterweavedIndex;
 		i < this->interweavedTiles.array.head && (tile = &this->interweavedTiles.array[i])->index < limit;
 		i++
 	) { // go through interweaved tiles
@@ -294,8 +293,6 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	this->drawCalls = 0;
 	#endif
 
-	int interweavedIndex = 0;
-
 	struct VertexBlock {
 		glm::mat4 projection;
 		glm::vec2 chunkScreenSpace;
@@ -330,7 +327,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		// try to draw as many layers at once as we can
 		unsigned int start = 0;
 		unsigned int end = 0;
-		size_t interweavedIndex = 0;
+		uint64_t interweavedIndex = 0;
 		bool rendered = false;
 		for(unsigned int i = 0; i < this->height; i++) {
 			end = i;
@@ -363,7 +360,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		}
 
 		// draw overlapping tiles above the height of the chunk
-		for(size_t i = interweavedIndex; i < this->interweavedTiles.array.head; i++) {
+		for(uint64_t i = interweavedIndex; i < this->interweavedTiles.array.head; i++) {
 			this->interweavedTiles.array[i].tile->render(deltaTime, context);
 		}
 
@@ -429,7 +426,7 @@ void Chunk::updateInterweavedTile(InterweavedTile* tile) {
 	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
 	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, this->container->getRotation()) + Chunk::Size * Chunk::Size * tile->getPosition().z;
 
-	for(size_t i = 0; i < this->interweavedTiles.array.head; i++) {
+	for(uint64_t i = 0; i < this->interweavedTiles.array.head; i++) {
 		if(this->interweavedTiles.array[i].tile == tile) {
 			this->interweavedTiles.array[i].index = index;
 		}
@@ -475,7 +472,7 @@ int Chunk::getTileTexture(glm::uvec3 position) {
 	return this->textureIndices[index];
 }
 
-void Chunk::setTileTextureByIndex(size_t index, unsigned int spritesheetIndex) {
+void Chunk::setTileTextureByIndex(uint64_t index, unsigned int spritesheetIndex) {
 	if(index < Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
 		unsigned int height = index / (Chunk::Size * Chunk::Size);
 		this->height = max(this->height, height + 1);
@@ -484,7 +481,7 @@ void Chunk::setTileTextureByIndex(size_t index, unsigned int spritesheetIndex) {
 	}
 }
 
-int Chunk::getTileTextureByIndex(size_t index) {
+int Chunk::getTileTextureByIndex(uint64_t index) {
 	if(index < Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
 		return this->textureIndices[index];
 	}

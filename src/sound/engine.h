@@ -11,8 +11,6 @@
 #include <glm/vec3.hpp>
 #include <vector>
 
-using namespace std;
-
 namespace es {
 	void defineSoundEngine();
 	esEntryPtr playSound(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
@@ -32,8 +30,8 @@ namespace sound {
 			void setPosition(glm::vec3 position);
 			void addSound(class Sound* file);
 			void addCollection(class SoundCollection* collection);
-			void playSoundByFileName(string fileName);
-			void playSoundByCollectionName(string collectionName);
+			void playSoundByFileName(std::string fileName);
+			void playSoundByCollectionName(std::string collectionName);
 
 			void finishThread(struct SoundThreadContext* context);
 		
@@ -41,12 +39,12 @@ namespace sound {
 			ALCdevice* device;
 			ALCcontext* context;
 
-			vector<class Sound*> sounds;
-			tsl::robin_map<string, class Sound*> fileToSound;
+			std::vector<class Sound*> sounds;
+			tsl::robin_map<std::string, class Sound*> fileToSound;
 
-			vector<class SoundCollection*> soundCollections;
-			tsl::robin_map<string, class SoundCollection*> nameToCollection;
+			std::vector<class SoundCollection*> soundCollections;
+			tsl::robin_map<std::string, class SoundCollection*> nameToCollection;
 
-			deque<struct SoundThreadContext*> finishedThreads;
+			std::deque<struct SoundThreadContext*> finishedThreads;
 	};
 }

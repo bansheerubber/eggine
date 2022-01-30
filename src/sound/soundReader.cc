@@ -1,19 +1,27 @@
 #include "soundReader.h"
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 
-sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType type) {
+static ov_callbacks OV_CALLBACKS_IFSTREAM = {
+	(size_t (*)(void *, size_t, size_t, void *))  sound::ifstream_read,
+	(int (*)(void *, ogg_int64_t, int))           sound::ifstream_seek,
+	(int (*)(void *))                             nullptr,
+	(long (*)(void *))                            sound::ifstream_tell
+};
+
+sound::SoundReader::SoundReader(uint64_t location, uint64_t size, SoundFileType type) {
 	this->location = location;
 	this->size = size;
 	this->type = type;
-	this->file = ifstream(engine->getFilePrefix() + "out.carton");
+	this->file = std::ifstream(engine->getFilePrefix() + "out.carton", std::ios::binary);
 	this->file.seekg(location);
 
 	switch(this->type) {
 		case OGG_FILE: {
 			this->ogg.file = new OggVorbis_File;
 			if(ov_open_callbacks(this, this->ogg.file, NULL, 0, OV_CALLBACKS_IFSTREAM) < 0) {
-				printf("Could not read .ogg sound\n");
+				console::error("Could not read .ogg sound\n");
 				exit(1);
 			}
 
@@ -24,15 +32,15 @@ sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType t
 		case WAV_FILE: {
 			uint32_t riffId = this->readNumber<uint32_t>();
 			if(riffId != 0x46464952) {
-				printf("Could not read .wav sound\n");
+				console::error("Could not read .wav sound\n");
 				exit(1);
 			}
 
-			uint32_t fileSize = this->readNumber<uint32_t>();
+			this->readNumber<uint32_t>(); // file size
 
 			uint32_t waveMagicNumber = this->readNumber<uint32_t>();
 			if(waveMagicNumber != 0x45564157) {
-				printf("Could not read .wav magic number\n");
+				console::error("Could not read .wav magic number\n");
 				exit(1);
 			}
 
@@ -41,17 +49,17 @@ sound::SoundReader::SoundReader(streampos location, size_t size, SoundFileType t
 			uint32_t section = this->readNumber<uint32_t>();
 			uint32_t size = this->readNumber<uint32_t>();
 			while(section != 0x61746164) {
-				this->file.seekg(size, ios_base::cur);
+				this->file.seekg(size, std::ios_base::cur);
 				section = this->readNumber<uint32_t>();
 				size = this->readNumber<uint32_t>();
 			}
 			
 			if(!this->file.eof()) {
-				this->wav.dataLocation = this->file.tellg();
+				this->wav.dataLocation = (uint64_t)this->file.tellg();
 				this->wav.dataSize = size;
 			}
 			else {
-				printf("Could not find .wav data section\n");
+				console::error("Could not find .wav data section\n");
 				exit(1);
 			}
 			
@@ -82,6 +90,10 @@ unsigned int sound::SoundReader::getSampleRate() {
 		case WAV_FILE: {
 			return this->wav.format.sampleRate;
 		}
+
+		default: {
+			return 0;
+		}
 	}
 }
 
@@ -94,6 +106,10 @@ unsigned short sound::SoundReader::getBitDepth() {
 		case WAV_FILE: {
 			return this->wav.format.bitdepth;
 		}
+
+		default: {
+			return 0;
+		}
 	}
 }
 
@@ -105,6 +121,10 @@ unsigned short sound::SoundReader::getChannels() {
 
 		case WAV_FILE: {
 			return this->wav.format.channels;
+		}
+
+		default: {
+			return 0;
 		}
 	}
 }
@@ -128,12 +148,12 @@ ALenum sound::SoundReader::getType() {
 	}
 }
 
-size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
+uint64_t sound::SoundReader::readIntoBuffer(char* buffer, uint64_t bufferSize) {
 	switch(this->type) {
 		case OGG_FILE: {
-			unsigned long pointer = 0;
+			uint64_t pointer = 0;
 			while(pointer < bufferSize) {
-				long result = ov_read(this->ogg.file, &buffer[pointer], bufferSize - pointer, 0, 2, 1, &this->ogg.currentSection);
+				int64_t result = ov_read(this->ogg.file, &buffer[pointer], bufferSize - pointer, 0, 2, 1, &this->ogg.currentSection);
 				if(result == OV_HOLE) {
 					return -1;
 				}
@@ -153,15 +173,19 @@ size_t sound::SoundReader::readIntoBuffer(char* buffer, size_t bufferSize) {
 		}
 
 		case WAV_FILE: {
-			size_t bytesLeft = this->wav.dataSize - (this->file.tellg() - this->wav.dataLocation);
-			size_t readSize = min(bytesLeft, bufferSize);
+			uint64_t bytesLeft = this->wav.dataSize - ((uint64_t)this->file.tellg() - this->wav.dataLocation);
+			uint64_t readSize = std::min(bytesLeft, bufferSize);
 			this->file.read(buffer, readSize);
 			return readSize;
+		}
+
+		default: {
+			return 0;
 		}
 	}
 }
 
-void sound::SoundReader::seek(size_t location) {
+void sound::SoundReader::seek(uint64_t location) {
 	switch(this->type) {
 		case OGG_FILE: {
 			ov_pcm_seek(this->ogg.file, location);
@@ -169,7 +193,7 @@ void sound::SoundReader::seek(size_t location) {
 		}
 
 		case WAV_FILE: {
-			this->file.seekg(this->wav.dataLocation + location);
+			this->file.seekg((uint64_t)this->wav.dataLocation + location);
 			break;
 		}
 	}

@@ -1,7 +1,11 @@
 #include "gameObject.h"
 
-size_t GameObject::maxId = 0;
+uint64_t GameObject::maxId = 0;
 
 GameObject::GameObject() {
 	this->id = this->maxId++;
+}
+
+GameObject::~GameObject() {
+	
 }

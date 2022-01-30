@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../engine/console.h"
 #include "../util/png.h"
 #include "window.h"
 
@@ -26,17 +27,17 @@ void render::Texture::setWrap(TextureWrap uWrap, TextureWrap vWrap) {
 }
 
 void render::Texture::loadPNGFromFile(string filename) {
-	ifstream file(filename);
+	ifstream file(filename, ios::binary);
 
 	if(file.bad() || file.fail()) {
-		printf("failed to open file for png %s\n", filename.c_str());
+		console::error("failed to open file for png %s\n", filename.c_str());
 		file.close();
 		this->window->addError();
 		return;
 	}
 
 	file.seekg(0, file.end);
-	unsigned long length = file.tellg();
+	uint64_t length = (uint64_t)file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);
@@ -77,12 +78,12 @@ void render::Texture::load(
 	this->channels = channels;
 	
 	if(this->minFilter == TEXTURE_FILTER_INVALID || this->magFilter == TEXTURE_FILTER_INVALID) {
-		printf("invalid texture filters\n");
+		console::error("invalid texture filters\n");
 		return;
 	}
 
 	if(this->uWrap == TEXTURE_WRAP_INVALID || this->vWrap == TEXTURE_WRAP_INVALID) {
-		printf("invalid texture wraps\n");
+		console::error("invalid texture wraps\n");
 		return;
 	}
 

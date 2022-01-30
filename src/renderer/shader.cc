@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string.h>
 
+#include "../engine/console.h"
 #include "window.h"
 
 #ifdef __switch__
@@ -35,17 +36,17 @@ void render::Shader::loadFromFile(string filename, ShaderType type) {
 	filename += ".dksh";
 	#endif
 	
-	ifstream file(filename);
+	ifstream file(filename, ios::binary);
 
 	if(file.bad() || file.fail()) {
-		printf("failed to open file for shader %s\n", filename.c_str());
+		console::error("failed to open file for shader %s\n", filename.c_str());
 		file.close();
 		this->window->addError();
 		return;
   }
 
 	file.seekg(0, file.end);
-	unsigned long length = file.tellg();
+	uint64_t length = (uint64_t)file.tellg();
 	file.seekg(0, file.beg);
 	char* buffer = new char[length];
 	file.read((char*)buffer, length);
@@ -63,7 +64,7 @@ void render::Shader::load(string buffer, ShaderType type) {
 
 void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 	if(source == nullptr) {
-		printf("shader source is nullptr\n");
+		console::error("shader source is nullptr\n");
 		return;
 	}
 	
@@ -75,7 +76,7 @@ void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 	#endif
 }
 
-void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
+void render::Shader::load(const char* buffer, uint64_t length, ShaderType type) {
 	this->type = type;
 	#ifdef __switch__
 	DkshHeader header {
@@ -89,7 +90,7 @@ void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
 	memcpy(&header, buffer, sizeof(header));
 
 	if(header.magic != 0x48534b44) {
-		printf("couldn't load dksh\n");
+		console::error("couldn't load dksh\n");
 		return;
 	}
 
@@ -104,13 +105,13 @@ void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
 
 	memcpy(this->memory->cpuAddr(), &buffer[header.controlSize], header.codeSize); // read code straight into code memory
 
-	dk::ShaderMaker{this->memory->parent->block, this->memory->start}
+	dk::ShaderMaker{this->memory->parent->block, (uint32_t)this->memory->start}
 		.setControl(controlBuffer.data())
 		.setProgramId(0)
 		.initialize(this->shader);
 	
 	if(!this->shader.isValid()) {
-		printf("shader not valid\n");
+		console::error("shader not valid\n");
 		exit(1);
 	}
 	#else
@@ -133,7 +134,7 @@ void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
 
 		glDeleteShader(shader);
 
-		printf("failed to compile shader:\n%.*s\n", logLength, log);
+		console::error("failed to compile shader:\n%.*s\n", logLength, log);
 	}
 	else {
 		this->shader = shader;
@@ -141,9 +142,9 @@ void render::Shader::load(const char* buffer, size_t length, ShaderType type) {
 	#endif
 }
 
-void render::Shader::processUniforms(const char* buffer, size_t bufferSize) {
+void render::Shader::processUniforms(const char* buffer, uint64_t bufferSize) {
 	string line;
-	size_t index = 0;
+	uint64_t index = 0;
 	while(index < bufferSize) {
 		// read a line
 		line = "";
@@ -152,11 +153,11 @@ void render::Shader::processUniforms(const char* buffer, size_t bufferSize) {
 		}
 		index++; // skip the newline
 
-		size_t uniformLocation = line.find("uniform");
+		uint64_t uniformLocation = line.find("uniform");
 		if(uniformLocation != string::npos) {
-			size_t bindingLocation = line.find("binding");
+			uint64_t bindingLocation = line.find("binding");
 			if(bindingLocation == string::npos) {
-				printf("could not find binding for uniform\n");
+				console::error("could not find binding for uniform\n");
 				return;
 			}
 
@@ -215,11 +216,11 @@ void render::Shader::processUniforms(string filename) {
 
 	string line;
 	while(getline(file, line)) {
-		size_t uniformLocation = line.find("uniform");
+		uint64_t uniformLocation = line.find("uniform");
 		if(uniformLocation != string::npos) {
-			size_t bindingLocation = line.find("binding");
+			uint64_t bindingLocation = line.find("binding");
 			if(bindingLocation == string::npos) {
-				printf("could not find binding for uniform\n");
+				console::error("could not find binding for uniform\n");
 				file.close();
 				return;
 			}

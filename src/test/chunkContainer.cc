@@ -2,10 +2,16 @@
 
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI       3.14159265358979323846
+#endif
 
 #include "../basic/camera.h"
 #include "character.h"
 #include "chunk.h"
+#include "../engine/console.h"
 #include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "overlappingTile.h"
@@ -73,11 +79,14 @@ ChunkContainer::ChunkContainer() {
 	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);
 
 	this->playerTeam = new Team();
+	this->playerTeam->name = "Player";
+
 	this->enemyTeam = new Team();
+	this->enemyTeam->name = "Alien";
 }
 
 ChunkContainer::~ChunkContainer() {
-	for(size_t i = 0; i < this->renderOrder.head; i++) {
+	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
 		delete this->renderOrder[i];
 	}
 }
@@ -128,7 +137,7 @@ tilemath::Rotation ChunkContainer::getRotation() {
 }
 
 Chunk* ChunkContainer::addChunk(glm::uvec2 position) {
-	long index = tilemath::coordinateToIndex(position, this->size, this->getRotation());
+	int64_t index = tilemath::coordinateToIndex(position, this->size, this->getRotation());
 	if(this->renderOrder[index] == nullptr) {
 		this->renderOrder[index] = new Chunk(this);
 	}
@@ -136,16 +145,16 @@ Chunk* ChunkContainer::addChunk(glm::uvec2 position) {
 	return this->renderOrder[index];
 }
 
-Chunk* ChunkContainer::getChunk(size_t index) {
+Chunk* ChunkContainer::getChunk(uint64_t index) {
 	if(index >= this->size * this->size) {
-		printf("ChunkContainer::getChunk(): chunk index out of bounds\n");
+		console::error("ChunkContainer::getChunk(): chunk index out of bounds\n");
 		exit(1);
 	}
 
 	return this->renderOrder[index];
 }
 
-size_t ChunkContainer::getChunkCount() {
+uint64_t ChunkContainer::getChunkCount() {
 	return this->renderOrder.head;
 }
 
@@ -156,14 +165,14 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	ChunkContainer::Image->texture->bind(0);
 
 	#ifdef EGGINE_DEBUG
-	size_t chunksRendered = 0;
-	size_t tilesRendered = 0;
-	size_t tiles = 0;
-	size_t drawCalls = 0;
-	size_t overlappingCalls = 0;
+	uint64_t chunksRendered = 0;
+	uint64_t tilesRendered = 0;
+	uint64_t tiles = 0;
+	uint64_t drawCalls = 0;
+	uint64_t overlappingCalls = 0;
 	#endif
 
-	for(size_t i = 0; i < this->renderOrder.head; i++) {
+	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
 		Chunk* chunk = this->renderOrder[i];
 		chunk->renderChunk(deltaTime, context);
 
@@ -186,13 +195,11 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	#endif
 }
 
-bool ChunkContainer::isValidTilePosition(glm::ivec3 position) {
+bool ChunkContainer::isValidTilePosition(glm::uvec3 position) {
 	if(
 		position.x >= this->size * Chunk::Size 
-		|| position.x < 0
 		|| position.y >= this->size * Chunk::Size
-		|| position.y < 0
-		|| position.z < 0
+		|| position.z >= 50
 	) {
 		return false;
 	}
@@ -202,12 +209,18 @@ bool ChunkContainer::isValidTilePosition(glm::ivec3 position) {
 void ChunkContainer::selectCharacter(Character* character) {
 	this->selectedCharacter = character;
 
-	glm::uvec3 position = character->getPosition();
-	if(position.z != 0) {
-		position.z -= 1;
-	}
+	if(character != nullptr) {
+		glm::uvec3 position = character->getPosition();
+		if(position.z != 0) {
+			position.z -= 1;
+		}
 
-	this->characterSelectionSprite->setPosition(position);
+		this->characterSelectionSprite->setPosition(position);
+	}
+}
+
+Character* ChunkContainer::getSelectedCharacter() {
+	return this->selectedCharacter;
 }
 
 // called by the selected character when the characters position/etc changes
@@ -230,7 +243,7 @@ void ChunkContainer::setTile(glm::ivec3 position, int texture) {
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
-	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
+	int64_t index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
 	this->renderOrder[index]->setTileTexture(position, texture);
 }
 
@@ -240,7 +253,7 @@ int ChunkContainer::getTile(glm::ivec3 position) {
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
-	long index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
+	int64_t index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
 	return this->renderOrder[index]->getTileTexture(position);
 }
 
@@ -276,7 +289,7 @@ void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
 }
 
 TileNeighborIterator ChunkContainer::getNeighbors(glm::ivec3 position) {
-	return TileNeighborIterator(this, position);
+	return TileNeighborIterator(position);
 }
 
 void ChunkContainer::rightClickTile(glm::ivec3 position) {
@@ -304,8 +317,8 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 		-cosine45deg * 2.0f, cosine45deg * 2.0f
 	);
 	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f - glm::vec2(-1, 1), 0);
-	glm::ivec3 coordinates;
-	glm::ivec3 directionTowardsCamera;
+	glm::ivec3 coordinates(0, 0, 0);
+	glm::ivec3 directionTowardsCamera(0, 0, 0);
 	switch(this->getRotation()) {
 		case tilemath::ROTATION_0_DEG: {
 			coordinates = glm::ivec3(floor(_.x), floor(_.y), _.z);
@@ -371,14 +384,14 @@ void ChunkContainer::onAxis(string &bind, double value) {
 
 void ChunkContainer::commit() {
 	if(this->tileSelectionSprite == nullptr) {
-		this->tileSelectionSprite = (new OverlappingTile(this))
+		this->tileSelectionSprite = (new OverlappingTile())
 			->setTexture(18)
 			->setPosition(glm::uvec3(0, 0, 0))
 			->setZIndex(1);
 	}
 
 	if(this->characterSelectionSprite == nullptr) {
-		this->characterSelectionSprite = (new OverlappingTile(this))
+		this->characterSelectionSprite = (new OverlappingTile())
 			->setTexture(18)
 			->setColor(glm::vec4(0.0, 0.55, 1.0, 1.0))
 			->setPosition(glm::uvec3(0, 0, 0))
@@ -386,8 +399,16 @@ void ChunkContainer::commit() {
 	}
 }
 
+void ChunkContainer::setPlayerTeam(Team* team) {
+	this->playerTeam = team;
+}
+
 Team* ChunkContainer::getPlayerTeam() {
 	return this->playerTeam;
+}
+
+void ChunkContainer::setEnemyTeam(Team* team) {
+	this->enemyTeam = team;
 }
 
 Team* ChunkContainer::getEnemyTeam() {
@@ -408,12 +429,17 @@ void es::defineChunkContainer() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getPlayerTeam, "ChunkContainer", "getPlayerTeam", 1, getPlayerTeamArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getEnemyTeam, "ChunkContainer", "getEnemyTeam", 1, getPlayerTeamArguments);
 
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setPlayerTeam, "ChunkContainer", "setPlayerTeam", 2, selectCharacterArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_INVALID, es::ChunkContainer__setEnemyTeam, "ChunkContainer", "setEnemyTeam", 2, selectCharacterArguments);
+
 	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::ChunkContainer__getSelectedCharacter, "ChunkContainer", "getSelectedCharacter", 1, getPlayerTeamArguments);
 
 	esRegisterFunction(engine->eggscript, ES_ENTRY_OBJECT, es::getChunkContainer, "getChunkContainer", 0, nullptr);
 
 	esEntryType setTileArguments[3] = {ES_ENTRY_OBJECT, ES_ENTRY_MATRIX, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::ChunkContainer__setTile, "ChunkContainer", "setTile", 3, setTileArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::ChunkContainer__getTile, "ChunkContainer", "getTile", 2, getCharacterArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::ChunkContainer__getWall, "ChunkContainer", "getWall", 2, getCharacterArguments);
 
 	esEntryType setRotationArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::ChunkContainer__setRotation, "ChunkContainer", "setRotation", 2, setRotationArguments);
@@ -448,10 +474,23 @@ esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int a
 }
 
 esEntryPtr es::ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
-	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObjectParents(args[1].objectData, "Character")) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
-		Character* character = (Character*)args[1].objectData->objectWrapper->data;
-		container->selectCharacter(character);
+
+		if(esCompareNamespaceToObjectParents(args[1].objectData, "Character")) {
+			Character* character = (Character*)args[1].objectData->objectWrapper->data;
+			container->selectCharacter(character);
+		}
+		else {
+			container->selectCharacter(nullptr);
+		}
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__setPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObject(args[1].objectData, "Team")) {
+		((ChunkContainer*)args[0].objectData->objectWrapper->data)->setPlayerTeam((Team*)args[1].objectData->objectWrapper->data);
 	}
 	return nullptr;
 }
@@ -460,6 +499,13 @@ esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int 
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer")) {
 		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
 		return esCreateObject(container->getPlayerTeam()->reference);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__setEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && esCompareNamespaceToObject(args[1].objectData, "Team")) {
+		((ChunkContainer*)args[0].objectData->objectWrapper->data)->setEnemyTeam((Team*)args[1].objectData->objectWrapper->data);
 	}
 	return nullptr;
 }
@@ -493,6 +539,34 @@ esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, 
 		);
 
 		container->setTile(position, args[2].numberData);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		glm::ivec3 position(
+			args[1].matrixData->data[0][0].numberData,
+			args[1].matrixData->data[1][0].numberData,
+			args[1].matrixData->data[2][0].numberData
+		);
+
+		return esCreateNumber(container->getTile(position));
+	}
+	return nullptr;
+}
+
+esEntryPtr es::ChunkContainer__getWall(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "ChunkContainer") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {
+		ChunkContainer* container = (ChunkContainer*)args[0].objectData->objectWrapper->data;
+		glm::ivec3 position(
+			args[1].matrixData->data[0][0].numberData,
+			args[1].matrixData->data[1][0].numberData,
+			args[1].matrixData->data[2][0].numberData
+		);
+
+		return esCreateNumber(container->getSpriteInfo(position).wall);
 	}
 	return nullptr;
 }

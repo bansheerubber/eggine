@@ -20,8 +20,6 @@
 #include "../renderer/texture.h"
 #include "../util/time.h"
 
-using namespace std;
-
 namespace render {
 	enum PrimitiveType {
 		PRIMITIVE_POINTS,
@@ -44,6 +42,7 @@ namespace render {
 
 	inline DkPrimitive primitiveToDkPrimitive(PrimitiveType type) {
 		switch(type) {
+			default:
 			case PRIMITIVE_POINTS: {
 				return DkPrimitive_Points;
 			}
@@ -143,6 +142,10 @@ namespace render {
 			case PRIMITIVE_PATCHES: {
 				return GL_PATCHES;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 	#endif
@@ -179,7 +182,7 @@ namespace render {
 
 			HidAnalogStickState leftStick;
 			HidAnalogStickState rightStick;
-			unsigned long buttons;
+			uint64_t buttons;
 
 			void addTexture(switch_memory::Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height);
 			void bindTexture(unsigned int location, class Texture* texture);
@@ -194,11 +197,11 @@ namespace render {
 
 			glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-			unsigned long long lastRenderTime = getMicrosecondsNow();
+			uint64_t lastRenderTime = getMicrosecondsNow();
 
 			litehtml::context htmlContext;
-			size_t htmlChecksum = 0;
-			size_t lastHTMLChecksum = 0;
+			uint64_t htmlChecksum = 0;
+			uint64_t lastHTMLChecksum = 0;
 			
 			#ifdef __switch__
 			switch_memory::Piece* imageDescriptorMemory;

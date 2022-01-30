@@ -3,6 +3,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
 
+#include "../engine/console.h"
 #include "../renderer/program.h"
 #include "resourceObject.h"
 #include "../renderer/texture.h"
@@ -12,7 +13,7 @@
 namespace resources {
 	class Image: public ResourceObject {
 		public:
-			Image(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, size_t bufferSize);
+			Image(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
 
 			glm::vec2 position;
 			glm::vec2 size;
@@ -20,6 +21,10 @@ namespace resources {
 			void render();
 			unsigned int getWidth();
 			unsigned int getHeight();
+			void reload(carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize) {
+				ResourceObject::reload(metadata, buffer, bufferSize);
+				console::warning("image reload not implemented\n");
+			}
 			unsigned int getBytesUsed() {
 				return 0;
 			}

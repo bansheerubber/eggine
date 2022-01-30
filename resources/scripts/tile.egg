@@ -1,0 +1,126 @@
+// returns a vector pointing from the origin tile to the tile that is adjacent to it
+function Tile::getAdjacentDirection(%origin, %position) {
+	for(%i = 0; %i < 4; %i++) {
+		if(Tile::getAdjacent(%origin, %i) == %position) {
+			return $Tile::Directions[%i];
+		}
+	}
+	return null;
+}
+
+function Tile::getAdjacentDirectionIndex(%origin, %position) {
+	for(%i = 0; %i < 4; %i++) {
+		if(Tile::getAdjacent(%origin, %i) == %position) {
+			return %i;
+		}
+	}
+	return -1;
+}
+
+function Tile::getAdjacent(%position, %index) {
+	return %position + $Tile::Directions[%index];
+}
+
+function Tile::isAdjacent(%origin, %position) {
+	for(%i = 0; %i < 4; %i++) {
+		if(Tile::getAdjacent(%origin, %i) == %position) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// return whether or not this position has a tile
+function Tile::isTile(%position) {
+	if(getChunkContainer().getTile(%position) != 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function Tile::isWall(%position) {
+	if(getChunkContainer().getWall(%position) != 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+// get the direction normal to the wall
+function Tile::wallNormal(%position) {
+	%index = getChunkContainer().getWall(%position);
+	if(%index == 0 || %index >= 5 || %index == null) { // TODO handle corner walls
+		return null;
+	}
+
+	%index -= 1;
+	return $Tile::Directions[%index];
+}
+
+// get the direction along the wall
+function Tile::wallAlong(%position) {
+	%index = getChunkContainer().getWall(%position);
+	if(%index == 0 || %index >= 5 || %index == null) {
+		return null;
+	}
+
+	%index -= 1;
+	return $Tile::Directions[(%index + 1) % 4];
+}
+
+// given the direction along the wall, see if the position is a part of that wall
+function Tile::wallTest(%position, %wallPosition, %wallDirection) {
+	%result = true;
+	for(%i = 0; %i < 2; %i++) { // TODO generalize this for 3 dimensions
+		if(%wallDirection[%i] == 0 && %position[%i] != %wallPosition[%i]) {
+			%result = false;
+		}
+	}
+	return %result;
+}
+
+// cast a ray but do not include positions that are "stray" tiles
+// - we can shoot over/around stray tiles. stray tiles include half-height cover that is
+//   along the way, or loner full-height tiles
+function Tile::raycastIgnoreStrays(%start, %end, %flags, %coverPosition, %coverAlong) {
+	%array = raycast(%start, %end, %flags);
+	if(%array == null) {
+		return null;
+	}
+
+	for(%i = %array.size() - 1; %i >= 0; %i--) {
+		%exclude = true;
+		
+		%position = %array[%i];
+		if(Tile::isWall(%position)) { // full-height tile
+			for(%j = 0; %j < 4; %j++) {
+				if(Tile::isWall(Tile::getAdjacent(%position, %i))) { // if we're connected to another full-height tile, just assume that we can't shoot through this
+					%exclude = false;
+				}
+			}
+		}
+
+		if(Tile::isAdjacent(%position, %end)) {
+			%exclude = false;
+		}
+
+		if(%coverPosition != null) {
+			if(Tile::wallTest(%position, %coverPosition, %coverAlong)) {
+				%exclude = false;
+			}
+		}
+
+		if(%exclude) {
+			%array.remove(%i);
+		}
+	}
+
+	if(%array.size() == 0) {
+		return null;
+	}
+
+	return %array;
+}

@@ -8,8 +8,6 @@
 #include "../renderer/vertexAttributes.h"
 #include "../renderer/vertexBuffer.h"
 
-using namespace std;
-
 class Line: public RenderObject {
 	public:
 		Line();
@@ -26,7 +24,7 @@ class Line: public RenderObject {
 		render::VertexBuffer* buffer;
 		render::VertexAttributes* attributes;
 
-		vector<glm::vec2> positions;
+		std::vector<glm::vec2> positions;
 
 		glm::vec2* positionBuffer = nullptr;
 };

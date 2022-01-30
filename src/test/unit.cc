@@ -7,7 +7,7 @@
 #include "../util/minHeap.h"
 #include "team.h"
 
-Unit::Unit(ChunkContainer* chunkContainer, bool createReference) : Character(chunkContainer, false) {
+Unit::Unit(bool createReference) : Character(false) {
 	if(createReference) {
 		this->reference = esInstantiateObject(engine->eggscript, "Unit", this);
 	}
@@ -15,6 +15,10 @@ Unit::Unit(ChunkContainer* chunkContainer, bool createReference) : Character(chu
 
 Unit::~Unit() {
 	esDeleteObject(this->reference);
+
+	if(engine->chunkContainer->getSelectedCharacter() == this) {
+		engine->chunkContainer->selectCharacter(nullptr);
+	}
 
 	if(this->team != nullptr) {
 		this->team->remove(this);
@@ -119,6 +123,10 @@ OverlappingTile* Unit::setPosition(glm::uvec3 position) {
 }
 
 void Unit::setHealth(int health) {
+	if(this->unpacking && health <= 0) {
+		throw network::RemoteObjectUnpackException(this, "Unit: invalid max health");
+	}
+	
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], health);
@@ -126,6 +134,10 @@ void Unit::setHealth(int health) {
 }
 
 void Unit::setMaxHealth(int maxHealth) {
+	if(this->unpacking && maxHealth <= 0) {
+		throw network::RemoteObjectUnpackException(this, "Unit: invalid max health");
+	}
+	
 	esEntry arguments[2];
 	esCreateObjectAt(&arguments[0], this->reference);
 	esCreateNumberAt(&arguments[1], maxHealth);
@@ -182,6 +194,8 @@ void es::defineUnit() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Unit__addMaxHealth, "Unit", "addMaxHealth", 2, setHealthArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getHealth, "Unit", "getHealth", 1, getPathArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::Unit__getMaxHealth, "Unit", "getMaxHealth", 1, getPathArguments);
+
+	esRegisterMethod(engine->eggscript, ES_ENTRY_OBJECT, es::Unit__getTeam, "Unit", "getTeam", 1, getPathArguments);
 }
 
 esEntryPtr es::Unit__getDestinations(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -231,6 +245,8 @@ esEntryPtr es::Unit__setHealth(esEnginePtr esEngine, unsigned int argc, esEntryP
 		unit->health = (int)args[1].numberData;
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 
+		unit->writeUpdateMask("health");
+
 		if(unit->health <= 0) {
 			unit->kill();
 		}
@@ -244,6 +260,8 @@ esEntryPtr es::Unit__setMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 		unit->maxHealth = (int)args[1].numberData;
 		unit->health = max(unit->maxHealth, unit->health);
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
+
+		unit->writeUpdateMask("maxHealth");
 	}
 	return nullptr;
 }
@@ -281,6 +299,14 @@ esEntryPtr es::Unit__getMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		return esCreateNumber(unit->maxHealth);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::Unit__getTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
+	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
+		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
+		return esCreateObject(unit->team->reference);
 	}
 	return nullptr;
 }

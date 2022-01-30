@@ -2,6 +2,11 @@
 
 #include "../engine/developer.h"
 
+#ifdef EGGINE_DEVELOPER_MODE
+#include "imgui_impl_glfw.h"
+#include "../test/developerGui.h"
+#endif
+
 #include <stdio.h>
 
 #include "engine.h"
@@ -22,11 +27,11 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	if(argc != 2) {
 		return nullptr;
 	}
-	
+
+	#ifndef __switch__
 	int key = engine->keyToScancode[string(arguments[0].stringData)];
 	int action = (int)arguments[1].numberData;
 
-	#ifndef __switch__
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow)) {
 		return nullptr;
@@ -71,11 +76,11 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 	if(argc != 2) {
 		return nullptr;
 	}
-	
+
+	#ifndef __switch__
 	int button = (int)arguments[0].numberData;
 	int action = (int)arguments[1].numberData;
 
-	#ifndef __switch__
 	if(action == GLFW_PRESS) {
 		litehtml::position::vector redraw;
 		engine->renderWindow.htmlDocument->on_lbutton_down(engine->mouse.x, engine->mouse.y, engine->mouse.x, engine->mouse.y, redraw);
@@ -195,6 +200,16 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 
 #ifndef __switch__
 void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods) {
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui_ImplGlfw_KeyCallback(window, key, scanCode, action, mods);
+	#endif
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	if(key == GLFW_KEY_GRAVE_ACCENT) {
+		engine->developerGui->focusConsole = true;
+	}
+	#endif
+	
 	esEntry arguments[2];
 	arguments[0].type = ES_ENTRY_STRING;
 	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
@@ -204,6 +219,10 @@ void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods)
 }
 
 void onMousePress(GLFWwindow* window, int button, int action, int mods) {
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+	#endif
+	
 	esEntry arguments[2];
 	arguments[0].type = ES_ENTRY_NUMBER;
 	arguments[0].numberData = button;
@@ -213,6 +232,10 @@ void onMousePress(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void onMouseMove(GLFWwindow* window, double x, double y) {
+	#ifdef EGGINE_DEVELOPER_MODE
+	ImGui_ImplGlfw_CursorPosCallback(window, x, y);
+	#endif
+	
 	esEntry arguments1[2];
 	arguments1[0].type = ES_ENTRY_NUMBER;
 	arguments1[0].numberData = binds::MOUSE_AXIS_X;

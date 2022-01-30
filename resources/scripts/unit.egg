@@ -1,11 +1,20 @@
-$Unit::SelectedAbility = null; // try to use the same ability when we cycle through units
-$Unit::SprintBorderColor = {0; 0; 1; 1};
-
 function Unit::onAdd(%this) {
 	%this.abilities = new Array();
-	%ability = new SnapshotAbility();
-	%ability.owner = %this;
-	%this.abilities.push(%ability);
+
+	%ability1 = new SnapshotAbility() {
+		owner = %this;
+	};
+	%this.abilities.push(%ability1);
+
+	%ability2 = new TrainedShotAbility() {
+		owner = %this;
+	};
+	%this.abilities.push(%ability2);
+
+	%ability3 = new OverwatchAbility() {
+		owner = %this;
+	};
+	%this.abilities.push(%ability3);
 
 	%this.maxMoves = 5;
 	%this.maxSprintMoves = 15;
@@ -16,6 +25,158 @@ function Unit::onAdd(%this) {
 
 	%this.setMaxHealth(getRandom(3, 8));
 	%this.setHealth(getRandom(2, %this.getMaxHealth() - 1));
+}
+
+function Unit::coverList(%this) {
+	%array = new Array();
+
+	// if our unit is on a wall tile
+	if(Tile::isWall(%this.getPosition())) {
+		%map = new Map();
+		%position = %this.getPosition();
+		%map["position"] = %position;
+		%map["vector"] = Tile::wallAlong(%position);
+		%map["normal"] = Tile::wallNormal(%position);
+		%map["isFull"] = true;
+		%map["sameTile"] = true;
+		%array.push(%map);
+		return %array;
+	}
+
+	for(%i = 0; %i < 4; %i++) {
+		%direction = $Tile::Directions[%i];
+		%position = %direction + %this.getPosition();
+		if(Tile::isTile(%position)) {
+			%map = new Map();
+			%map["position"] = %position;
+			%map["vector"] = $Tile::Directions[(%i + 1) % 4]; // rotate vector by 90 degrees to get "along the wall" vector
+			%map["isFull"] = Tile::isWall(%map["position"]);
+			%map["sameTile"] = false;
+			%array.push(%map);
+		}
+	}
+	return %array;
+}
+
+// return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
+function Unit::testInCoverFromPosition(%this, %attacker, %attackerPosition) {
+	// next section takes approx 20 us
+	%direction = normalize(%this.getPosition() - %attackerPosition);
+	%resultArray = raycast(%attackerPosition, %this.getPosition(), 1);
+	if(%resultArray == null) {
+		return $Cover::None;
+	}
+
+	// next section takes approx 70 us
+	%coverList = %this.coverList();
+	if(%coverList.size() == 0) { // TODO do additional tests to see if a half-height wall is obscuring us/etc
+		for(%i = 0; %i < %resultArray.size(); %i++) {
+			if(Tile::isWall(%resultArray[%i])) { // see if there's any walls inbetween us and the enemy
+				return $Cover::Full;
+			}
+		}
+		return $Cover::None;
+	}
+	// end section
+
+	// see if there's any walls that aren't a part of the cover wall inbetween us and the enemy
+	for(%i = 0; %i < %resultArray.size() - 1; %i++) {
+		for(%j = 0; %j < %coverList.size(); %j++) {
+			%cover = %coverList[%j];
+			if(Tile::isWall(%resultArray[%i]) && !Tile::wallTest(%resultArray[%i], %cover["position"], %cover["vector"])) {
+				return $Cover::Full;
+			}
+		}
+	}
+
+	%result = %resultArray[%resultArray.size() - 1];
+
+	%hitCover = null; // hit cover determines the strength of the cover modifier applied to accuracy
+	for(%i = 0; %i < %coverList.size(); %i++) {
+		%cover = %coverList[%i];
+		if(Tile::wallTest(%result, %cover["position"], %cover["vector"])) {
+			%hitCover = %cover;
+			break;
+		}
+	}
+
+	if(%hitCover == null) {
+		return $Cover::None;
+	}
+
+	// next section takes approx 70 microsections
+	%candidateTiles = new Array();
+	%candidateTile1 = %this.getPosition() + %hitCover["vector"];
+	%candidateTile2 = %this.getPosition() - %hitCover["vector"];
+	%candidateTiles.push(%this.getPosition());
+
+	if(distance(%attackerPosition, %candidateTile1) < distance(%attackerPosition, %candidateTile2)) {
+		%candidateTiles.push(%candidateTile1);
+	}
+	else if(distance(%attackerPosition, %candidateTile1) > distance(%attackerPosition, %candidateTile2)) {
+		%candidateTiles.push(%candidateTile2);
+	}
+
+	// this is the part that takes up a disproportionate amount of time
+	%hit = true;
+	for(%i = 0; %i < %candidateTiles.size(); %i++) {
+		if(Tile::raycastIgnoreStrays(%attackerPosition, %candidateTiles[%i], 1, %hitCover["position"], %hitCover["vector"]) == null) {
+			%hit = false;
+			break;
+		}
+	}
+
+	if(%hit) {
+		if(%hitCover["isFull"]) {
+			return $Cover::Full;
+		}
+		else {
+			return $Cover::Half;
+		}
+	}
+	else if(%hitCover["isFull"]) {
+		return $Cover::FullPartial;
+	}
+	else {
+		return $Cover::Half;
+	}
+}
+
+// return 2 if behind impenetrable cover, return 1 if behind cover but can still be shot, return 0 if no cover at all
+function Unit::inCover(%this, %attacker) {
+	%result = %this.testInCoverFromPosition(%attacker, %attacker.getPosition());
+	if(%result != $Cover::Full) {
+		return %result;
+	}
+
+	for(%i = 0; %i < 4; %i++) { // TODO handle this better
+		%adjacent = Tile::getAdjacent(%attacker.getPosition(), %i);
+		if(Tile::isTile(%adjacent) || raycast(%attacker.getPosition(), %adjacent) != null) {
+			continue;
+		}
+
+		%result = %this.testInCoverFromPosition(%attacker, %adjacent);
+		if(%result != $Cover::Full) {
+			return %result;
+		}
+	}
+
+	return $Cover::Full;
+}
+
+function getCoverAccuracyMod(%cover) {
+	if(%cover == $Cover::None) {
+		return 1;
+	}
+	else if(%cover == $Cover::Half) {
+		return 1 / 1.5;
+	}
+	else if(%cover == $Cover::FullPartial) {
+		return 1 / 2;
+	}
+	else if(%cover == $Cover::Full) {
+		return 0;
+	}
 }
 
 function Unit::updateUI(%this) { // if we're selected, then update the UI
@@ -35,6 +196,10 @@ function Unit::onDeSelect(%this) {
 	%this.getDestinations().hideBorder();
 	%this.getSprintDestinations().hideBorder();
 	%this.path = %this.getPath($Unit::HoveredTile);
+
+	if(%this.path) {
+		%this.path.hideBorder();
+	}
 }
 
 function Unit::addAP(%this, %ap) {
@@ -86,12 +251,16 @@ function Unit::updateTargettingUI(%this) {
 	for(%i = 0; %i < %team.size(); %i++) {
 		%enemy = %team.get(%i);
 		// check if any of our abilities are usable against the enemy
+		%usable = false;
 		for(%j = 0; %j < %this.abilities.size(); %j++) {
 			%ability = %this.abilities[%j];
 			if(!%ability.usable(%enemy)) {
 				continue;
 			}
+			%usable = true;
+		}
 
+		if(%usable) {
 			%html = %html @ "<img enemy-id=\"" @ %i @ "\" es-class=\"EnemyIconElement\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
 		}
 	}
@@ -200,6 +369,30 @@ function Unit::selectPreviousAbility(%this) {
 	%this.selectAbility(%prev);
 }
 
+function Unit::triggerOverwatch(%this, %target) {
+	for(%i = 0; %i < %this.abilities.size(); %i++) {
+		if(%this.abilities[%i].name == "Overwatch") {
+			 %this.abilities[%i].overwatch(%target);
+		}
+	}
+}
+
+function fireOverwatch(%target) {
+	for(%i = 0; %i < getTeamCount(); %i++) {
+		%team = getTeam(%i);
+		if(%target.getTeam() == %team) {
+			continue;
+		}
+
+		for(%j = 0; %j < %team.size(); %j++) {
+			%guy = %team.get(%j);
+			if(%guy.overwatch) {
+				%guy.triggerOverwatch(%target);
+			}
+		}
+	}
+}
+
 package unit {
 	function Unit::setPosition(%this, %position) {
 		Parent::setPosition(%this, %position);
@@ -211,6 +404,8 @@ package unit {
 				%this.path.showDots();
 			}
 		}
+
+		fireOverwatch(%this);
 	}
 
 	function ChunkContainer::selectCharacter(%this, %character) {
@@ -221,6 +416,8 @@ package unit {
 		
 		Parent::selectCharacter(%this, %character);
 
-		%character.onSelect();
+		if(isObject(%character)) {
+			%character.onSelect();
+		}
 	}
 };

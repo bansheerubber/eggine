@@ -19,21 +19,7 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 		Text::Program->addShader(fragmentShader);
 	}
 
-	glm::vec2 triangleVertices[] = {
-		glm::vec2(-0.5, 1.0),
-		glm::vec2(-0.5, -1.0),
-		glm::vec2(0.5, 1.0),
-		glm::vec2(0.5, -1.0),
-	};
-
-	glm::vec2 triangleUVs[] = {
-		glm::vec2(0.0, 0.0),
-		glm::vec2(0.0, 1.0),
-		glm::vec2(1.0, 0.0),
-		glm::vec2(1.0, 1.0),
-	};
-
-	string filePrefix = "";
+	std::string filePrefix = "";
 	#ifdef __switch__
 	filePrefix = "romfs:/";
 	#endif
@@ -54,7 +40,7 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 	}
 }
 
-Text::Text(string family, int size, bool addToUiList) : Text(addToUiList) {
+Text::Text(std::string family, int size, bool addToUiList) : Text(addToUiList) {
 	this->font = Font::GetFont(family, size);
 }
 
@@ -68,14 +54,14 @@ void Text::updateBuffers() {
 	glm::vec2 uvs[this->text.size() * 6];
 
 	// iterate through all characters
-	size_t total = 0;
-	for(size_t i = 0; i < this->text.size(); i++) {
+	uint64_t total = 0;
+	for(uint64_t i = 0; i < this->text.size(); i++) {
 		if(this->text[i] == '\n') {
 			x = 0;
 			y += this->font->size;
 		}
 		else {
-			FontGlyph ch = this->font->characterToGlyph[this->text[i]];
+			FontGlyph ch = this->font->characterToGlyph[(unsigned char)this->text[i]];
 
 			float xpos = x + ch.left * scale;
 			float ypos = y - ch.top;
@@ -131,16 +117,16 @@ void Text::updateBuffers() {
 	this->vertexBuffers[0]->reallocate();
 	this->vertexBuffers[1]->reallocate();
 
-	this->vertexBuffers[0]->setData(&vertices[0][0], sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
-	this->vertexBuffers[1]->setData(&uvs[0][0], sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
+	this->vertexBuffers[0]->setData(&vertices[0][0], sizeof(glm::vec2) * total, alignof(glm::vec2));
+	this->vertexBuffers[1]->setData(&uvs[0][0], sizeof(glm::vec2) * total, alignof(glm::vec2));
 }
 
-void Text::setText(string text) {
+void Text::setText(std::string text) {
 	this->text = text;
 	this->updateBuffers();
 }
 
-string Text::getText() {
+std::string Text::getText() {
 	return this->text;
 }
 

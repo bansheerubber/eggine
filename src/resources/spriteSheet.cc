@@ -16,7 +16,7 @@ resources::SpriteSheet::SpriteSheet(
 	ResourceManager* manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
-	size_t bufferSize
+	uint64_t bufferSize
 ) : ResourceObject(manager, metadata) {
 	this->texture = new render::Texture(&engine->renderWindow);
 	this->texture->setFilters(render::TEXTURE_FILTER_NEAREST, render::TEXTURE_FILTER_NEAREST);
@@ -29,12 +29,13 @@ resources::SpriteSheet::SpriteSheet(
 	// allocate memory
 	this->spriteInfo.allocate(this->spriteSheetAmount);
 
-	for(size_t i = 0; i < this->spriteSheetAmount; i++) {
+	for(uint64_t i = 0; i < this->spriteSheetAmount; i++) {
 		string info = metadata->getMetadata("sprite" + to_string(i));
 		this->spriteInfo[i].wall = NO_WALL;
+		this->spriteInfo[i].index = (unsigned int)i;
 		if(info.size()) {
 			do {
-				size_t position = info.find(' ');
+				uint64_t position = info.find(' ');
 				position = position != string::npos
 					? position
 					: info.size();
@@ -81,7 +82,7 @@ resources::SpriteSheet::SpriteSheet(
 				}
 
 				// handle spritesheet roots/facing
-				size_t rootPos = 0;
+				uint64_t rootPos = 0;
 				if((rootPos = word.find("root")) != string::npos) {
 					unsigned int root = stoi(word.substr(0, rootPos));
 					if(this->spriteFacingInfo.find(root) == this->spriteFacingInfo.end()) {
@@ -101,17 +102,20 @@ resources::SpriteSheet::SpriteSheet(
 	}
 }
 
-resources::SpriteSheetInfo resources::SpriteSheet::getSpriteInfo(size_t index) {
+resources::SpriteSheetInfo resources::SpriteSheet::getSpriteInfo(uint64_t index) {
 	if(index < this->spriteInfo.head) {
 		return this->spriteInfo[index];
 	}
 
 	return {
+		facingsMap: nullptr,
+		facing: FACING_INVALID,
+		index: 0,
 		wall: NO_WALL,
 	};
 }
 
-bool resources::SpriteSheet::drawOntopOfOverlap(size_t spriteIndex) {
+bool resources::SpriteSheet::drawOntopOfOverlap(uint64_t spriteIndex) {
 	switch(this->spriteInfo[spriteIndex].wall) {
 		case WALL_NORTH: {
 			return false;

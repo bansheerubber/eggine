@@ -1,14 +1,99 @@
 exec("ability.egg");
+exec("tile.egg");
 exec("abilities/snapshot.egg");
+exec("abilities/trainedshot.egg");
+exec("abilities/overwatch.egg");
 exec("team.egg");
 exec("unit.egg");
 exec("editor.egg");
 exec("targetting.egg");
+exec("turn.egg");
 
-$Unit::HoveredTile = null;
+printCompilationErrors();
+
+function r() {
+	hotReload();
+}
+
+function onReload() {
+	exec("scripts/main.egg");
+}
+
+function init() {
+	// unit stuff
+	$Unit::HoveredTile = null;
+
+	$Unit::TargetSprite = null;
+	$Unit::SelectedTarget = null;
+
+	$Unit::SelectedAbility = null; // try to use the same ability when we cycle through units
+	$Unit::SprintBorderColor = {0; 0; 1; 1};
+
+	schedule(100, "teamInit");
+
+	// tile stuff
+	$Tile::Directions = new Array();
+	$Tile::Directions.push(
+		{0; -1; 0}, // north
+		{1; 0; 0}, // east
+		{0; 1; 0}, // south
+		{-1; 0; 0} // west
+	);
+
+	// editor stuff
+	$Editor::Enabled = false;
+
+	$Editor::GhostTile = null;
+	$Editor::GhostLine = new Array();
+	$Editor::MouseDown = false;
+
+	$Editor::LastStart = null;
+	$Editor::LastEnd = null;
+	$Editor::LastDirection = null;
+	$Editor::LastAxis  = null;
+
+	// cover enums
+	$Cover::None = 0;					// the unit is not behind any cover
+	$Cover::Half = 1;					// the unit is behind a half-height wall
+	$Cover::FullPartial = 2;	// the unit is behind a wall, but is on a corner and is still visible
+	$Cover::Full = 3;					// the unit is not visible and is completely behind a wall
+	
+	addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
+	addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");
+
+	addKeybind("chunk.rotateCounterClockwise", "e", "onRotateCounterClockwise");
+	addKeybind("chunk.rotateCounterClockwise", "d-pad-right", "onRotateCounterClockwise");
+
+	addKeybind("unit.gamepadPressTile", "b-button", "onGamepadPressTile");
+
+	addKeybind("unit.gamepadUseAbility", "a-button", "onGamepadUseAbility");
+
+	addKeybind("unit.nextAbility", "y-button", "onNextAbility");
+
+	addKeybind("unit.previousAbility", "x-button", "onPreviousAbility");
+
+	addKeybind("unit.resetAP", "delete", "resetUnitAP");
+
+	addKeybind("editor.mouseDown", "left-mouse-button", "onEditorMouseDown");	
+}
 
 function HTMLElement::onClick(%this) {
 	
+}
+
+function length(%a) {
+	return mSqrt(mPow(%a[0], 2) + mPow(%a[1], 2) + mPow(%a[2], 2));
+}
+
+function normalize(%a) {
+	%length = length(%a);
+	%matrix = { %a[0] / %length; %a[1] / %length; %a[2] / %length };
+	return %matrix;
+}
+
+function dot(%a, %b) {
+	%result = %a[0] * %b[0] + %a[1] * %b[1] + %a[2] * %b[2];
+	return %result;
 }
 
 function distance(%a, %b) {
@@ -23,16 +108,12 @@ function isTileSelectable(%position) {
 	return 0;
 }
 
-addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
-addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");
 function onRotateClockwise(%state) {
 	if(%state) {
 		getChunkContainer().setRotation((getChunkContainer().getRotation() + 1) % 4);
 	}
 }
 
-addKeybind("chunk.rotateCounterClockwise", "e", "onRotateCounterClockwise");
-addKeybind("chunk.rotateCounterClockwise", "d-pad-right", "onRotateCounterClockwise");
 function onRotateCounterClockwise(%state) {
 	if(%state) {
 		%rotation = getChunkContainer().getRotation() - 1;
@@ -43,7 +124,6 @@ function onRotateCounterClockwise(%state) {
 	}
 }
 
-addKeybind("unit.gamepadPressTile", "b-button", "onGamepadPressTile");
 function onGamepadPressTile(%state) {
 	if(!%state) {
 		return;
@@ -58,7 +138,6 @@ function onGamepadPressTile(%state) {
 	}
 }
 
-addKeybind("unit.gamepadUseAbility", "a-button", "onGamepadUseAbility");
 function onGamepadUseAbility(%state) {
 	if(!%state) {
 		return;
@@ -74,7 +153,6 @@ function onGamepadUseAbility(%state) {
 	}
 }
 
-addKeybind("unit.nextAbility", "y-button", "onNextAbility");
 function onNextAbility(%state) {
 	if(!%state) {
 		return;
@@ -87,7 +165,6 @@ function onNextAbility(%state) {
 	}
 }
 
-addKeybind("unit.previousAbility", "x-button", "onPreviousAbility");
 function onPreviousAbility(%state) {
 	if(!%state) {
 		return;
@@ -98,6 +175,14 @@ function onPreviousAbility(%state) {
 		%character.selectPreviousAbility();
 		playSound("Flip");
 	}
+}
+
+function resetUnitAP(%state) {
+	if(!%state) {
+		return;
+	}
+
+	getChunkContainer().getSelectedCharacter().setAP(2);
 }
 
 function onSelectTile(%position, %browsing) {

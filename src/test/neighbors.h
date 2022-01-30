@@ -7,12 +7,36 @@ enum NeighborDirection {
 	DIRECTION_NORTH,
 	DIRECTION_EAST,
 	DIRECTION_SOUTH,
-	DIRECTION_WEST
+	DIRECTION_WEST,
 };
+
+inline NeighborDirection flipDirection(NeighborDirection direction) {
+	switch(direction) {
+		case DIRECTION_NORTH: {
+			return DIRECTION_SOUTH;
+		}
+
+		case DIRECTION_EAST: {
+			return DIRECTION_WEST;
+		}
+
+		case DIRECTION_SOUTH: {
+			return DIRECTION_NORTH;
+		}
+
+		case DIRECTION_WEST: {
+			return DIRECTION_EAST;
+		}
+		
+		default: {
+			return INVALID_DIRECTION;
+		}
+	}
+}
 
 class TileNeighborIterator {
 	public:
-		TileNeighborIterator(class ChunkContainer* container, glm::ivec3 position);
+		TileNeighborIterator(glm::ivec3 position);
 		
 		glm::ivec3& value();
 		bool atEnd();

@@ -2,8 +2,6 @@
 
 #include <string>
 
-using namespace std;
-
 namespace binds {
 	enum Axes { // corresponds to GLFW axes
 		LEFT_AXIS_X = 0,
@@ -38,6 +36,6 @@ namespace binds {
 	};
 	
 	struct Keybind {
-		string bind;
+		std::string bind;
 	};
 }

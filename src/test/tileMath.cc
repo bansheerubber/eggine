@@ -3,10 +3,8 @@
 #include <cmath>
 #include <stdio.h>
 
-using namespace std;
-
-long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size, tilemath::Rotation rotation) {
-	long x = 0, y = 0;
+int64_t tilemath::coordinateToIndex(glm::ivec2 coordinate, int64_t size, tilemath::Rotation rotation) {
+	int64_t x = 0, y = 0;
 	switch(rotation) {
 		case ROTATION_0_DEG: {
 			x = size - coordinate.x - 1;
@@ -49,7 +47,7 @@ long tilemath::coordinateToIndex(glm::ivec2 coordinate, long size, tilemath::Rot
 	}
 }
 
-glm::uvec2 tilemath::indexToCoordinate(long index, long size, tilemath::Rotation rotation) {
+glm::uvec2 tilemath::indexToCoordinate(int64_t index, int64_t size, tilemath::Rotation rotation) {
 	double threshold = size * (size + 1.0) / 2.0;
 	double x = 0.0, y = 0.0;
 	if(index < threshold) {
@@ -64,6 +62,7 @@ glm::uvec2 tilemath::indexToCoordinate(long index, long size, tilemath::Rotation
 	}
 
 	switch(rotation) {
+		default:
 		case ROTATION_0_DEG: {
 			return glm::uvec2(
 				lround(size - x - 1),
@@ -96,6 +95,7 @@ glm::uvec2 tilemath::indexToCoordinate(long index, long size, tilemath::Rotation
 
 glm::vec2 tilemath::tileToScreen(glm::vec3 coordinate, tilemath::Rotation rotation) {
 	switch(rotation) {
+		default:
 		case ROTATION_0_DEG: {
 			return glm::vec2(
 				coordinate.x * 1.0f / 2 + coordinate.y * 1.0f / 2,
@@ -129,7 +129,7 @@ glm::vec2 tilemath::tileToScreen(glm::vec3 coordinate, tilemath::Rotation rotati
 glm::ivec2 tilemath::textureIndexToXY(unsigned int index, unsigned int width, unsigned int height) {
 	int spriteWidth = 64.0;
 	int spriteHeight = 128.0;
-	float padding = 1;
+	// float padding = 1;
 	int spritesOnRow = (int)width / (int)spriteWidth;
 	int x = index % spritesOnRow;
 	int y = index / spritesOnRow;
@@ -140,7 +140,7 @@ glm::ivec2 tilemath::textureIndexToXY(unsigned int index, unsigned int width, un
 tilemath::TileUV tilemath::textureIndexToUV(unsigned int index, unsigned int width, unsigned int height) {
 	float spriteWidth = 64.0;
 	float spriteHeight = 128.0;
-	float padding = 1;
+	// float padding = 1;
 	int spritesOnRow = (int)width / (int)spriteWidth;
 	int x = index % spritesOnRow;
 	int y = index / spritesOnRow;

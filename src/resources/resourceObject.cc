@@ -1,10 +1,12 @@
 #include "resourceObject.h"
 
+#include "../engine/console.h"
 #include "resourceManager.h"
 
 resources::ResourceObject::ResourceObject(ResourceManager* manager, carton::Metadata* metadata) {
 	this->manager = manager;
 	this->metadata = metadata;
+	this->fileName = this->metadata->getMetadata("fileName");
 	if(manager != nullptr) {
 		manager->objects.insert(this);
 	}
@@ -18,7 +20,7 @@ void resources::ResourceObject::release() {
 	this->leases--;
 
 	if(this->leases < 0) {
-		printf("negative leases on resource object\n");
+		console::error("negative leases on resource object\n");
 		exit(1);
 	}
 }

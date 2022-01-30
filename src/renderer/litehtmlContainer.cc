@@ -1,24 +1,24 @@
 #include "litehtmlContainer.h"
 
+#include <cmath>
 #include <string>
 
+#include "../engine/console.h"
 #include "../resources/css.h"
 #include "../engine/engine.h"
 #include "../basic/font.h"
-
-using namespace std;
 
 render::LiteHTMLContainer::LiteHTMLContainer() {}
 
 render::LiteHTMLContainer::~LiteHTMLContainer() {}
 
 Text* render::LiteHTMLContainer::getText(Font* font, string input) {
-  auto found = this->stringToText.find(input);
+  auto found = this->stringToText.find(std::pair(font, input));
   if(found == this->stringToText.end()) {
     Text* text = new Text(false);
     text->font = font;
     text->setText(input);
-    this->stringToText[input] = {
+    this->stringToText[std::pair(font, input)] = {
       text: text,
       lastUsed: 0,
     };
@@ -54,9 +54,9 @@ void render::LiteHTMLContainer::delete_font(litehtml::uint_ptr hFont) {
 int render::LiteHTMLContainer::text_width(const litehtml::tchar_t* text, litehtml::uint_ptr hFont) {
   Font* font = (Font*)hFont;
   int x = 0;
-  size_t length = strlen(text);
-  for(size_t i = 0; i < length; i++) {
-    FontGlyph ch = font->characterToGlyph[text[i]];
+  uint64_t length = strlen(text);
+  for(uint64_t i = 0; i < length; i++) {
+    FontGlyph ch = font->characterToGlyph[(unsigned char)text[i]]; // TODO sign check
     x += (ch.advance >> 6);
   }
   return x;
@@ -75,6 +75,10 @@ void render::LiteHTMLContainer::draw_text(
 		ui: &engine->ui,
 	};
   foundText->position.x = pos.left();
+  if(foundText->position.x < 0) {
+    foundText->position.x = pos.left() + engine->renderWindow.width;
+  }
+  
   foundText->position.y = pos.top() - ((Font*)hFont)->descent;
   foundText->color.r = (float)color.red / 255.0f;
   foundText->color.g = (float)color.green / 255.0f;
@@ -95,7 +99,7 @@ void render::LiteHTMLContainer::load_image(const litehtml::tchar_t* src, const l
     return;
   }
 
-  string filename = "html";
+  std::string filename = "html";
   filename += src;
   resources::Image* image = (resources::Image*)(engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", filename)->exec())[0]);
   this->sourceToImage[string(src)] = image;
@@ -110,7 +114,11 @@ void render::LiteHTMLContainer::get_image_size(const litehtml::tchar_t* src, con
 
 void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg) {
   if(bg.color.alpha) {
-    this->box.position.x = bg.clip_box.x;
+    this->box.position.x = bg.clip_box.left();
+    if(this->box.position.x < 0) {
+      this->box.position.x = bg.clip_box.left() + engine->renderWindow.width;
+    }
+
     this->box.position.y = bg.clip_box.y;
     this->box.size.x = bg.clip_box.width;
     this->box.size.y = bg.clip_box.height;
@@ -192,7 +200,7 @@ std::shared_ptr<litehtml::element> render::LiteHTMLContainer::create_element(
 void render::LiteHTMLContainer::on_element_created(litehtml::element::ptr element) {
   engine->renderWindow.registerHTMLUpdate();
 
-  string className = "HTMLElement";
+  std::string className = "HTMLElement";
   const char* attributeClassName = element->get_attr("es-class");
   if(attributeClassName != nullptr) {
     className = attributeClassName;
@@ -201,7 +209,7 @@ void render::LiteHTMLContainer::on_element_created(litehtml::element::ptr elemen
   esObjectReferencePtr test = this->elementToESObject[&*element] = esInstantiateObject(engine->eggscript, className.c_str(), this);
 
   if(test == nullptr) {
-    printf("could not create es html element with class %s\n", className.c_str());
+    console::error("could not create es html element with class %s\n", className.c_str());
   }
   else {
     this->esObjectToElement[test->objectWrapper] = element;

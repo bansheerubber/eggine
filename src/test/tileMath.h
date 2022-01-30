@@ -12,9 +12,9 @@ namespace tilemath {
 	};
 	
 	// convert an x y coordinate into a opengl buffer index
-	long coordinateToIndex(glm::ivec2 coordinate, long size, Rotation rotation);
+	int64_t coordinateToIndex(glm::ivec2 coordinate, int64_t size, Rotation rotation);
 	// convert an opengl buffer index into x y coordinates
-	glm::uvec2 indexToCoordinate(long index, long size, Rotation rotation);
+	glm::uvec2 indexToCoordinate(int64_t index, int64_t size, Rotation rotation);
 
 	// convert tile coordinates to screenspace
 	glm::vec2 tileToScreen(glm::vec3 coordinate, Rotation rotation);

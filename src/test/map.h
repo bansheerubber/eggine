@@ -6,8 +6,6 @@
 #include <string.h>
 #include <type_traits>
 
-using namespace std;
-
 enum MapCommand {
 	MAP_INFO = 0,
 	MAP_CHUNK = 1,
@@ -17,26 +15,26 @@ enum MapCommand {
 class Map {
 	public:
 		Map(class ChunkContainer* container);
-		void loadFromFile(string filename);
-		void load(unsigned char* buffer, unsigned long size);
-		void save(string filename);
+		void loadFromFile(std::string filename);
+		void load(unsigned char* buffer, uint64_t size);
+		void save(std::string filename);
 	
 	private:
 		class ChunkContainer* container;
 
-		tsl::robin_map<string, string> info;
+		tsl::robin_map<std::string, std::string> info;
 
-		static constexpr unsigned long Version = 1;
+		static constexpr uint64_t Version = 1;
 		
 		template<class T>
-		T readNumber(unsigned char* buffer, unsigned long* index) {
+		T readNumber(unsigned char* buffer, uint64_t* index) {
 			*index += sizeof(T);
 			
-			if constexpr(is_same<float, T>::value || is_same<double, T>::value) {
+			if constexpr(std::is_same<float, T>::value || std::is_same<double, T>::value) {
 				uint32_t temp1 = 0;
 				uint64_t temp2 = 0;
 				for(uint64_t i = 0, shift = (sizeof(T) - 1) * 8; i < sizeof(T); i++, shift -= 8) {
-					if constexpr(is_same<float, T>::value) {
+					if constexpr(std::is_same<float, T>::value) {
 						temp1 |= (uint64_t)buffer[i] << shift;
 					}
 					else {
@@ -45,7 +43,7 @@ class Map {
 				}
 
 				T output;
-				if constexpr(is_same<float, T>::value) {
+				if constexpr(std::is_same<float, T>::value) {
 					memcpy(&output, &temp1, sizeof(T));
 				}
 				else {
@@ -62,22 +60,22 @@ class Map {
 			}
 		}
 
-		string readString(unsigned char* buffer, unsigned long* index) {
+		std::string readString(unsigned char* buffer, uint64_t* index) {
 			uint16_t size = this->readNumber<uint16_t>(buffer, index);
 			char output[size];
 			for(unsigned int i = 0; i < size; i++) {
 				output[i] = buffer[sizeof(uint16_t) + i];
 				(*index)++;
 			}
-			return string(output, size);
+			return std::string(output, size);
 		}
 
 		template<class T>
-		void writeNumber(ofstream &file, T number) {
-			if constexpr(is_same<float, T>::value || is_same<double, T>::value) {
+		void writeNumber(std::ofstream &file, T number) {
+			if constexpr(std::is_same<float, T>::value || std::is_same<double, T>::value) {
 				uint32_t temp1 = 0;
 				uint64_t temp2 = 0;
-				if constexpr(is_same<float, T>::value) {
+				if constexpr(std::is_same<float, T>::value) {
 					memcpy(&temp1, &number, sizeof(T));
 				}
 				else {
@@ -85,7 +83,7 @@ class Map {
 				}
 
 				for(uint64_t i = 0, shift = (sizeof(T) - 1) * 8; i < sizeof(T); i++, shift -= 8) {
-					if constexpr(is_same<float, T>::value) {
+					if constexpr(std::is_same<float, T>::value) {
 						file.put((temp1 >> shift) & 0xFF);
 					}
 					else {
@@ -100,7 +98,7 @@ class Map {
 			}
 		}
 
-		void writeString(ofstream &file, string input) {
+		void writeString(std::ofstream &file, std::string input) {
 			this->writeNumber(file, (uint16_t)input.size());
 			file.write(input.c_str(), (uint16_t)input.size());
 		}

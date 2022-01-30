@@ -5,8 +5,8 @@
 #include "../engine/engine.h"
 #include "tileMath.h"
 
-OverlappingTile::OverlappingTile(ChunkContainer* container, bool createReference) : GameObject() {
-	this->container = container;
+OverlappingTile::OverlappingTile(bool createReference) : GameObject() {
+	this->container = engine->chunkContainer;
 
 	if(createReference) {
 		this->reference = esInstantiateObject(engine->eggscript, "OverlappingTile", this);

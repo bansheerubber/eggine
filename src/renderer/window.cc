@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "../util/align.h"
+#include "../engine/console.h"
 #include "../engine/debug.h"
 #include "../engine/engine.h"
 #include "../resources/html.h"
@@ -106,7 +107,7 @@ void render::Window::initialize() {
 	padInitializeDefault(&this->pad);
 	#else // else for ifdef __switch__
 	if(!glfwInit()) {
-		printf("failed to initialize glfw\n");
+		console::error("failed to initialize glfw\n");
 		exit(1);
 	}
 
@@ -140,7 +141,7 @@ void render::Window::initialize() {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(this->window, true);
+	ImGui_ImplGlfw_InitForOpenGL(this->window, false);
 	ImGui_ImplOpenGL3_Init("#version 150");
 	#endif
 
@@ -189,7 +190,7 @@ void render::Window::deinitialize() {
 }
 
 void render::Window::prerender() {
-	long long startTime = getMicrosecondsNow();
+	int64_t startTime = getMicrosecondsNow();
 	this->deltaTime = (startTime - this->lastRenderTime) / 1000000.0;
 	this->lastRenderTime = getMicrosecondsNow();
 	

@@ -1,0 +1,9 @@
+inline void pack(network::Packet* packet) {
+	packet->stream.startWriteRemoteObject(this);
+	packet->stream.writeUpdateMask(this->updateMaskSize, this->updateMask);
+
+%%sends%%
+
+	packet->stream.finishWriteRemoteObject(this);
+	this->zeroUpdateMask();
+}

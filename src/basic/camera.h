@@ -15,8 +15,8 @@ class Camera : public GameObject {
 		void see(double deltaTime);
 		glm::mat4 projectionMatrix;
 
-		void onBind(string &bind, binds::Action action);
-		void onAxis(string &bind, double value);
+		void onBind(std::string &bind, binds::Action action);
+		void onAxis(std::string &bind, double value);
 
 		void setZoomLevel(float zoomLevel);
 		float getZoom();

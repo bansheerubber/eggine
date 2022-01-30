@@ -10,7 +10,7 @@
 #include <png.h>
 #include <string>
 
-using namespace std;
+#include "../engine/console.h"
 
 class DeveloperGui;
 
@@ -44,7 +44,7 @@ namespace render {
 					}
 
 					case 3: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
@@ -65,7 +65,7 @@ namespace render {
 					}
 
 					case 3: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
@@ -78,31 +78,36 @@ namespace render {
 			case 32: {
 				switch(channels) {
 					case 1: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
 					case 2: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
 					case 3: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 
 					case 4: {
-						printf("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
+						console::error("error: deko3d does not support %u channels and %u bitdepth", channels, bitDepth);
 						exit(1);
 					}
 				}
+			}
+
+			default: {
+				return DkImageFormat_None;
 			}
 		}
 	}
 	
 	inline DkFilter textureFilterToDkFilter(TextureFilter type) {
 		switch(type) {
+			default:
 			case TEXTURE_FILTER_NEAREST: {
 				return DkFilter_Nearest;
 			}
@@ -115,6 +120,7 @@ namespace render {
 
 	inline DkWrapMode textureWrapToDkWrap(TextureWrap wrap) {
 		switch(wrap) {
+			default:
 			case TEXTURE_WRAP_REPEAT: {
 				return DkWrapMode_Repeat;
 			}
@@ -154,6 +160,10 @@ namespace render {
 			case 4: {
 				return GL_RGBA;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 
@@ -170,6 +180,10 @@ namespace render {
 			case 32: {
 				return GL_UNSIGNED_INT;
 			}
+			
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 
@@ -181,6 +195,10 @@ namespace render {
 
 			case TEXTURE_FILTER_LINEAR: {
 				return GL_LINEAR;
+			}
+
+			default: {
+				return GL_INVALID_ENUM;
 			}
 		}
 	}
@@ -206,6 +224,10 @@ namespace render {
 			case TEXTURE_WRAP_MIRROR_CLAMP_TO_EDGE: {
 				return GL_MIRROR_CLAMP_TO_EDGE;
 			}
+
+			default: {
+				return GL_INVALID_ENUM;
+			}
 		}
 	}
 	#endif
@@ -220,7 +242,7 @@ namespace render {
 			void setFilters(TextureFilter minFilter, TextureFilter magFilter);
 			void setWrap(TextureWrap uWrap, TextureWrap vWrap);
 
-			void loadPNGFromFile(string filename);
+			void loadPNGFromFile(std::string filename);
 			void loadPNG(const unsigned char* buffer, unsigned int size);
 			void bind(unsigned int location);
 			void load(

@@ -5,8 +5,6 @@
 #include "renderContext.h"
 #include "renderObject.h"
 
-using namespace std;
-
 template<class T>
 class InstancedRenderObjectContainer : public RenderObject {
 	public:
@@ -26,5 +24,5 @@ class InstancedRenderObjectContainer : public RenderObject {
 		virtual void render(double deltaTime, RenderContext &context) = 0;
 	
 	protected:
-		vector<T*> objects;
+		std::vector<T*> objects;
 };

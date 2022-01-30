@@ -11,32 +11,32 @@
 
 #include "../basic/camera.h"
 #include "callbacks.h"
+#include "../network/client.h"
 #include "debug.h"
 #include "../util/dynamicArray.h"
 #include "../sound/engine.h"
 #include "keybind.h"
+#include "../network/network.h"
 #include "../basic/text.h"
 #include "../basic/renderObject.h"
 #include "../resources/resourceManager.h"
 #include "../basic/ui.h"
 #include "../renderer/window.h"
 
-using namespace std;
-
 void engineInitRenderables(class Engine*, RenderObject** object);
 
 namespace std {
 	template<>
-	struct hash<pair<esObjectReferencePtr, string>> {
-		size_t operator()(pair<esObjectReferencePtr, string> const& source) const noexcept {
-			size_t result = hash<esObjectWrapperPtr>{}(source.first->objectWrapper);
-			return result ^ (hash<string>{}(source.second) + 0x9e3779b9 + (result << 6) + (result >> 2));
+	struct hash<pair<esObjectReferencePtr, std::string>> {
+		size_t operator()(pair<esObjectReferencePtr, std::string> const& source) const noexcept {
+			uint64_t result = hash<esObjectWrapperPtr>{}(source.first->objectWrapper);
+			return result ^ (hash<std::string>{}(source.second) + 0x9e3779b9 + (result << 6) + (result >> 2));
     }
 	};
 
 	template<>
-	struct equal_to<pair<esObjectReferencePtr, string>> {
-		bool operator()(const pair<esObjectReferencePtr, string>& x, const pair<esObjectReferencePtr, string>& y) const {
+	struct equal_to<pair<esObjectReferencePtr, std::string>> {
+		bool operator()(const pair<esObjectReferencePtr, std::string>& x, const pair<esObjectReferencePtr, std::string>& y) const {
 			return x.first->objectWrapper == y.first->objectWrapper && x.second == y.second;
 		}
 	};
@@ -79,6 +79,7 @@ class Engine {
 		resources::ResourceManager* manager;
 		render::Window renderWindow;
 		sound::Engine soundEngine;
+		network::Network network;
 
 		glm::vec2 mouse;
 
@@ -86,12 +87,20 @@ class Engine {
 		class ChunkContainer* chunkContainer = nullptr;
 		UI ui;
 
+		// versioning system: v0-9.0-9.branch_name#0-9
+		// first number: major version for big content releases
+		// second number: minor changes that do not introduce a lot of content
+		// branch name: the name of the branch that the repo is currently checked out on. all releases should have 'master' for the branch
+		// third number: number of commits since the last major-minor release. major-minor releases do not include patches, which are signified by
+	  //      the number of commits since the last major-minor release
+		std::string version;
+
 		#ifdef EGGINE_DEBUG
 		Debug debug;
 		#endif
 
 		#ifdef EGGINE_DEVELOPER_MODE
-		class DeveloperGui* developerGui;
+		class DeveloperGui* developerGui = nullptr;
 		#endif
 		
 		void initialize();
@@ -122,13 +131,13 @@ class Engine {
 		unsigned int nxlink = 0;
 		#endif
 
-		string filePrefix = "";
+		std::string filePrefix = "";
 		
-		long long cpuRenderTime = 0;
-		long long eggscriptTickTime = 0;
+		int64_t cpuRenderTime = 0;
+		int64_t eggscriptTickTime = 0;
 		
 		class Shader* boundShader = nullptr;
-		long long lastRenderTime;
+		int64_t lastRenderTime;
 
 		#ifdef EGGINE_DEBUG
 		Text* debugText;
@@ -155,7 +164,7 @@ class Engine {
 		tsl::robin_map<string, int> mouseToEnum;
 
 		#ifdef __switch__
-		unsigned long lastGamepadButtons = 0;
+		uint64_t lastGamepadButtons = 0;
 		#else
 		unsigned char* lastGamepadButtons = new unsigned char[15]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		#endif

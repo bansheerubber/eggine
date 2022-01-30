@@ -13,12 +13,10 @@
 #include "../renderer/vertexBuffer.h"
 #include "renderObject.h"
 
-using namespace std;
-
 class Text : public RenderObject {
 	public:
 		Text(bool addToUiList = true);
-		Text(string family, int size, bool addToUiList = true);
+		Text(std::string family, int size, bool addToUiList = true);
 		~Text();
 
 		glm::vec3 color = glm::vec3(1, 1, 1);
@@ -26,14 +24,14 @@ class Text : public RenderObject {
 		Font* font = nullptr;
 
 		void render(double deltaTime, RenderContext &context);
-		void setText(string text);
-		string getText();
+		void setText(std::string text);
+		std::string getText();
 	
 	protected:
 
 		render::VertexBuffer* vertexBuffers[2];
 		render::VertexAttributes* vertexAttributes;
-		string text;
+		std::string text;
 
 		void updateBuffers();
 		

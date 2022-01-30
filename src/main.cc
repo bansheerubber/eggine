@@ -20,6 +20,8 @@
 #include "test/tileMath.h"
 #include "test/unit.h"
 
+#include "network/stream.h"
+
 #include "sound/sound.h"
 
 #ifdef __switch__
@@ -27,6 +29,8 @@
 #endif
 
 int main(int argc, char* argv[]) {
+	setbuf(stdout, NULL);
+	
 	#ifdef __switch__
 	engine->setFilePrefix("romfs:/");
 	#endif
@@ -45,30 +49,30 @@ int main(int argc, char* argv[]) {
 
 	unsigned int positionsSize = 4;
 	glm::uvec3 positions[positionsSize] = {
-		glm::uvec3(0, 0, 1),
-		glm::uvec3(2, 0, 1),
-		glm::uvec3(3, 4, 1),
-		glm::uvec3(15, 8, 1),
+		glm::uvec3(7, 4, 1),
+		glm::uvec3(4, 8, 1),
+		glm::uvec3(8, 10, 1),
+		glm::uvec3(3, 15, 1),
 	};
 
 	for(unsigned int i = 0; i < positionsSize; i++) {
-		Unit* unit = new Unit(&container);
-		unit->setTexture(5);
+		Unit* unit = new Unit();
+		unit->setAppearance(5);
 		unit->setPosition(positions[i]);
 		container.getPlayerTeam()->add(unit);
 	}
 
 	// enemies
-	unsigned int enemyPositionsSize = 4;
-	glm::uvec3 enemyPositions[enemyPositionsSize] = {
-		glm::uvec3(2, 10, 1),
+	unsigned int enemyPositionsSize = 1;
+	glm::uvec3 enemyPositions[] = {
+		glm::uvec3(6, 21, 1),
 		glm::uvec3(4, 6, 1),
 		glm::uvec3(3, 8, 1),
 		glm::uvec3(1, 9, 1),
 	};
 
 	for(unsigned int i = 0; i < enemyPositionsSize; i++) {
-		Unit* unit = new Unit(&container);
+		Unit* unit = new Unit();
 		unit->setPosition(enemyPositions[i]);
 		container.getEnemyTeam()->add(unit);
 	}

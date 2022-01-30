@@ -1,13 +1,14 @@
 #include "font.h"
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 
-tsl::robin_map<string, tsl::robin_map<int, Font*>> Font::Fonts;
+tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Font::Fonts;
 
-Font* Font::GetFont(string family, int size) {
+Font* Font::GetFont(std::string family, int size) {
 	if(Font::Fonts[family][size] == nullptr) {
 		// TODO load this from the carton
-		#ifdef __switch__
+		#if defined(__switch__) || defined(_WIN32)
 		return new Font(engine->filePrefix + "arial.ttf", size);
 		#else
 		return new Font("/usr/share/fonts/TTF/arial.ttf", size);
@@ -18,27 +19,27 @@ Font* Font::GetFont(string family, int size) {
 	}
 }
 
-Font::Font(string fileName, int size) {
+Font::Font(std::string fileName, int size) {
 	this->fileName = fileName;
 	this->size = size;
 
 	FT_New_Face(engine->ft, fileName.c_str(), 0, &this->face);
 	FT_Set_Pixel_Sizes(this->face, 0, size);
 
-	size_t amount = 128;
+	uint64_t amount = 128;
 
-	string name(this->face->family_name);
+	std::string name(this->face->family_name);
 	Font::Fonts[name][size] = this;
 
-	for(size_t i = 0; i < 256 * 256; i++) {
+	for(uint64_t i = 0; i < 256 * 256; i++) {
 		this->atlas[i] = 0;
 	}
 
 	int padding = 1;
 	int atlasX = padding, atlasY = padding; // keep track of where we are during generation of the atlas
-	for(char c = 0; c < amount; c++) {
+	for(unsigned char c = 0; c < amount; c++) {
 		if(FT_Load_Char(this->face, c, FT_LOAD_RENDER)) {
-			printf("could not load gylph %c from %s\n", c, this->fileName.c_str());
+			console::error("could not load gylph %c from %s\n", c, this->fileName.c_str());
 			continue;
 		}
 
@@ -56,9 +57,9 @@ Font::Font(string fileName, int size) {
 			(float)(atlasY + this->face->glyph->bitmap.rows) / 256.0f
 		);
 
-		for(size_t x = 0; x < this->face->glyph->bitmap.width; x++) {
-			for(size_t y = 0; y < this->face->glyph->bitmap.rows; y++) {
-				size_t index = y * this->face->glyph->bitmap.pitch + x;
+		for(uint64_t x = 0; x < this->face->glyph->bitmap.width; x++) {
+			for(uint64_t y = 0; y < this->face->glyph->bitmap.rows; y++) {
+				uint64_t index = y * this->face->glyph->bitmap.pitch + x;
 				this->atlas[(y + atlasY) * 256 + (x + atlasX) % 256] = this->face->glyph->bitmap.buffer[index];
 			}
 		}

@@ -4,6 +4,7 @@
 
 #include "program.h"
 
+#include "../engine/console.h"
 #include "shader.h"
 #include "window.h"
 
@@ -39,7 +40,7 @@ void render::Program::bind() {
 		
 		for(Shader* shader: this->shaders) {
 			if(shader->shader == GL_INVALID_INDEX) {
-				printf("shaders not compiled\n");
+				console::error("shaders not compiled\n");
 				return;
 			}
 
@@ -59,7 +60,7 @@ void render::Program::bind() {
 			glGetProgramInfoLog(program, logLength, &logLength, log);
 
 			glDeleteProgram(program);
-			printf("failed to link program:\n%.*s\n", logLength, log);
+			console::error("failed to link program:\n%.*s\n", logLength, log);
 
 			this->program = GL_INVALID_INDEX - 1;
 		}
@@ -87,7 +88,7 @@ void render::Program::bind() {
 	#endif
 }
 
-void render::Program::bindUniform(string uniformName, void* data, unsigned int size, size_t cacheIndex, bool setOnce) {
+void render::Program::bindUniform(string uniformName, void* data, unsigned int size, uint64_t cacheIndex, bool setOnce) {
 	#ifdef __switch__
 	if(this->uniformToPiece.find(uniformName) == this->uniformToPiece.end()) {
 		this->createUniformMemory(uniformName, size);
@@ -114,11 +115,11 @@ void render::Program::bindUniform(string uniformName, void* data, unsigned int s
 		}
 	}
 	#else
-	auto found = this->uniformToBuffer.find(pair<string, size_t>(uniformName, cacheIndex));
+	auto found = this->uniformToBuffer.find(pair<string, uint64_t>(uniformName, cacheIndex));
 	bool created = false;
 	if(found == this->uniformToBuffer.end()) {
 		this->createUniformBuffer(uniformName, size, cacheIndex);
-		found = this->uniformToBuffer.find(pair<string, size_t>(uniformName, cacheIndex));
+		found = this->uniformToBuffer.find(pair<string, uint64_t>(uniformName, cacheIndex));
 		created = true;
 	}
 
@@ -148,12 +149,12 @@ void render::Program::createUniformMemory(string uniformName, unsigned int size)
 	);
 }
 #else
-void render::Program::createUniformBuffer(string uniformName, unsigned int size, size_t cacheIndex) {
+void render::Program::createUniformBuffer(string uniformName, unsigned int size, uint64_t cacheIndex) {
 	GLuint bufferId;
 	glGenBuffers(1, &bufferId);
-	this->uniformToBuffer[pair<string, size_t>(uniformName, cacheIndex)] = bufferId;
+	this->uniformToBuffer[pair<string, uint64_t>(uniformName, cacheIndex)] = bufferId;
 
-	glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[pair<string, size_t>(uniformName, cacheIndex)]);
+	glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[pair<string, uint64_t>(uniformName, cacheIndex)]);
 	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), bufferId);
 }

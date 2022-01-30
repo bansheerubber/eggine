@@ -1,5 +1,6 @@
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL
 #define GLM_GTX_hash
 
 #include <glm/gtx/hash.hpp>
@@ -16,8 +17,6 @@
 #include "../resources/spriteSheet.h"
 #include "tileMath.h"
 
-using namespace std;
-
 void initChunk(class ChunkContainer* container, class Chunk** chunk);
 
 namespace es {
@@ -25,10 +24,14 @@ namespace es {
 	esEntryPtr getChunkContainer(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr ChunkContainer__selectCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__setPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__setEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__getTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	esEntryPtr ChunkContainer__getWall(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__setRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr ChunkContainer__getRotation(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	esEntryPtr tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -42,6 +45,8 @@ class ChunkContainer : public RenderObject {
 	friend esEntryPtr es::ChunkContainer__getEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__getSelectedCharacter(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__setTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	friend esEntryPtr es::ChunkContainer__getTile(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+	friend esEntryPtr es::ChunkContainer__getWall(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend class Engine;
 	
 	public:
@@ -52,6 +57,7 @@ class ChunkContainer : public RenderObject {
 		Map map = Map(this);
 
 		void selectCharacter(class Character* character);
+		class Character* getSelectedCharacter();
 		void selectTile(glm::ivec3 position, bool browsing);
 
 		void setSize(unsigned int size);
@@ -61,20 +67,23 @@ class ChunkContainer : public RenderObject {
 		tilemath::Rotation getRotation();
 		
 		Chunk* addChunk(glm::uvec2 position);
-		Chunk* getChunk(size_t index);
-		size_t getChunkCount();
+		Chunk* getChunk(uint64_t index);
+		uint64_t getChunkCount();
 
 		void render(double deltaTime, RenderContext &context);
 
 		void commit();
 
-		void onBind(string &bind, binds::Action action);
-		void onAxis(string &bind, double value);
+		void onBind(std::string &bind, binds::Action action);
+		void onAxis(std::string &bind, double value);
 
+		void setPlayerTeam(class Team*);
 		class Team* getPlayerTeam();
+
+		void setEnemyTeam(class Team*);
 		class Team* getEnemyTeam();
 
-		bool isValidTilePosition(glm::ivec3 position);
+		bool isValidTilePosition(glm::uvec3 position);
 
 		void setTile(glm::ivec3 position, int texture);
 		int getTile(glm::ivec3 position);

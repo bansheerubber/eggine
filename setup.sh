@@ -22,35 +22,14 @@ cp -v tmp-setup/glad/include/KHR/khrplatform.h include/pc/KHR
 echo -e "\033[0;32mFinished GLAD"
 tput sgr0
 
-# configure glfw
-pushd .
-cd tmp-setup
-[[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
-
-git clone https://github.com/glfw/glfw
-cd glfw
-[[ "$PWD" != *glfw* ]] && echo "\033[0;31mNot in glfw" && exit 1
-
-cmake -S . -B build
-cd build
-make
-popd
-rm lib/libglfw3.a
-mkdir -p lib
-cp -v tmp-setup/glfw/build/src/libglfw3.a lib
-rm -Rf include/pc/GLFW
-mv -v tmp-setup/glfw/include/GLFW include/pc/GLFW # make GLFW lowercase
-echo -e "\033[0;32mFinished GLFW"
-tput sgr0
-
 # configure freetype
 cd tmp-setup
 [[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
 
 git clone https://github.com/freetype/freetype
 cd ..
-rm -Rf include/pc/freetype
-rm include/pc/ft2build.h
+rm -Rf include/common/freetype
+rm include/common/ft2build.h
 mv -v tmp-setup/freetype/include/* include/common/
 echo -e "\033[0;32mFinished freetype"
 tput sgr0
@@ -71,12 +50,16 @@ tput sgr0
 make -j 8 library
 popd
 cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a lib
-pushd .
-cd tmp-setup/eggscript-interpreter
-make clean
-make -f Makefile.nx -j 8 library
-popd
-cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a libnx
+
+if [ -f /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc ]; then
+	pushd .
+	cd tmp-setup/eggscript-interpreter
+	make clean
+	make -f Makefile.nx -j 8 library
+	popd
+	cp -v tmp-setup/eggscript-interpreter/dist/libeggscript.a libnx
+fi
+
 rm -Rf include/common/eggscript
 mkdir -p include/common/eggscript
 cp -v tmp-setup/eggscript-interpreter/dist/include.cpp/egg.h include/common/eggscript/egg.h
@@ -88,7 +71,10 @@ cd tmp-setup
 [[ "$PWD" != *tmp-setup* ]] && echo "\033[0;31mNot in tmp-setup" && exit 1
 
 git clone https://github.com/bansheerubber/eggine-carton
-cd ..
+cd eggine-carton
+[[ "$PWD" != *eggine-carton* ]] && echo "\033[0;31mNot in eggine-carton" && exit 1
+
+cd ../../
 rm -Rf src/carton
 mkdir -p src/carton
 mv -v tmp-setup/eggine-carton/src/carton/* src/carton/
@@ -101,6 +87,8 @@ pushd .
 cd tmp-setup
 git clone https://github.com/ocornut/imgui
 cd imgui
+[[ "$PWD" != *imgui* ]] && echo "\033[0;31mNot in imgui" && exit 1
+
 cp -v imgui.cpp ../../imgui/imgui.cc
 cp -v imgui.h ../../imgui/imgui.h
 cp -v imgui_draw.cpp ../../imgui/imgui_draw.cc
@@ -125,21 +113,27 @@ pushd .
 cd tmp-setup
 git clone https://github.com/bansheerubber/litehtml
 cd litehtml
+[[ "$PWD" != *litehtml* ]] && echo "\033[0;31mNot in litehtml" && exit 1
+
 mkdir build
 cd build
-CFLAGS="-O2" cmake ..
+CFLAGS="-O2" cmake .. -D LITEHTML_UTF8=ON
 cmake --build . --target litehtml
 popd
 cp -v tmp-setup/litehtml/build/liblitehtml.a lib
-pushd .
-cd tmp-setup/litehtml
-rm -Rf build
-mkdir build
-cd build
-CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc CXX=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ CFLAGS="-O2 -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" CXXFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" LDFLAGS="-fPIE" cmake ..
-cmake --build . --target litehtml
-popd
-cp -v tmp-setup/litehtml/build/liblitehtml.a libnx
+
+if [ -f /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc ]; then
+	pushd .
+	cd tmp-setup/litehtml
+	rm -Rf build
+	mkdir build
+	cd build
+	CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc CXX=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ CFLAGS="-O2 -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" CXXFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIC" LDFLAGS="-fPIE" cmake ..
+	cmake --build . --target litehtml
+	popd
+	cp -v tmp-setup/litehtml/build/liblitehtml.a libnx
+fi
+
 rm -Rf include/common/litehtml
 mv -v tmp-setup/litehtml/include/* include/common/
 echo -e "\033[0;32mFinished litehtml"
@@ -150,14 +144,20 @@ pushd .
 cd tmp-setup
 git clone https://github.com/google/gumbo-parser
 cd gumbo-parser
+[[ "$PWD" != *gumbo-parser* ]] && echo "\033[0;31mNot in gumbo-parser" && exit 1
+
 ./autogen.sh
 ./configure
 make
 cp -v .libs/libgumbo.a ../../lib
-./configure CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc LD=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-ld AR=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc-ar CFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -Wall -fPIC" LDFLAGS="-fPIE"
-make clean
-make
-cp -v .libs/libgumbo.a ../../libnx
+
+if [ -f /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc ]; then
+	./configure CC=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc LD=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-ld AR=/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc-ar CFLAGS="-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -Wall -fPIC" LDFLAGS="-fPIE"
+	make clean
+	make
+	cp -v .libs/libgumbo.a ../../libnx
+fi
+
 popd
 echo -e "\033[0;32mFinished gumbo"
 tput sgr0

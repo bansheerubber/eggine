@@ -1,5 +1,6 @@
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL
 #define GLM_GTX_hash
 
 #include <glm/gtx/hash.hpp>

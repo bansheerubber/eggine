@@ -1,10 +1,10 @@
 #include "neighbors.h"
 
 #include "chunkContainer.h"
-#include "../util/lsb.h"
+#include "../engine/engine.h"
 
-TileNeighborIterator::TileNeighborIterator(ChunkContainer* container, glm::ivec3 position) {
-	this->container = container; 
+TileNeighborIterator::TileNeighborIterator(glm::ivec3 position) {
+	this->container = engine->chunkContainer; 
 	this->position = position;
 	this->iterateTile();
 }
@@ -48,14 +48,12 @@ void TileNeighborIterator::iterateTile() {
 	resources::SpriteSheetInfo info = this->container->getSpriteInfo(this->position + glm::ivec3(0, 0, 1), true);
 	if(info.wall != resources::NO_WALL) {
 		for(; this->index < 3; this->index++) {
-			NeighborDirection direction = directionsForWall[lsb(info.wall)][this->index];
+			NeighborDirection direction = directionsForWall[info.wall - 1][this->index];
 			if(direction == INVALID_DIRECTION) {
 				continue;
 			}
 
 			glm::ivec3 offset = offsets[(unsigned int)direction - 1]; // look up the offset in the dictionary
-			// printf("%u, %d %d %d\n", (unsigned int)direction, offset.x, offset.y, offset.z);
-			
 			if(this->testTile(this->position + offset, direction)) {
 				this->foundPosition = this->position + offset;
 				this->index++;
@@ -102,7 +100,8 @@ bool TileNeighborIterator::testTile(glm::ivec3 position, NeighborDirection direc
 	// test for invalid walls
 	if(info.wall != resources::NO_WALL) {
 		for(unsigned int i = 0; i < 2; i++) {
-			if(invalidDirectionsForWall[lsb(info.wall)][i] == direction) {
+			char index = info.wall - 1;
+			if(invalidDirectionsForWall[(unsigned char)index][i] == direction) {
 				return false;
 			}
 		}

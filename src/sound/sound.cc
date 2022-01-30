@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 
+#include "../engine/console.h"
 #include "../engine/engine.h"
 #include "soundReader.h"
 
@@ -24,9 +25,8 @@ sound::Sound::Sound(
 	// read data into the buffers
 	char* buffer = new char[SOUND_BUFFER_SIZE * reader.getChannels()];
 
-	int currentSection = 0;
-	for(size_t i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
-		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
+	for(uint64_t i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
+		uint64_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
 		alBufferData(this->buffers[i].bufferId, reader.getType(), (void*)buffer, result, reader.getSampleRate());
 
 		if(result != SOUND_BUFFER_SIZE * reader.getChannels()) {
@@ -90,8 +90,6 @@ void _play(sound::SoundThreadContext* context) {
 		reader.seek(SOUND_BUFFER_SIZE * SOUND_BUFFER_COUNT * reader.getChannels());
 	}
 
-	int currentSection = 0;
-
 	ALuint buffers[SOUND_BUFFER_CIRCULAR_COUNT];
 	for(unsigned int i = 0; i < SOUND_BUFFER_CIRCULAR_COUNT; i++) {
 		buffers[i] = sound->buffers[i].bufferId; // load up pre-loaded buffers
@@ -129,7 +127,7 @@ void _play(sound::SoundThreadContext* context) {
 			bufferIndex++;
 		}
 		
-		size_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
+		uint64_t result = reader.readIntoBuffer(buffer, SOUND_BUFFER_SIZE * reader.getChannels());
 		if(result < 0) { // error
 			break;
 		}
@@ -158,14 +156,14 @@ void sound::Sound::play(SoundSourceProperties properties) {
 	Result result = threadCreate(thread, (void (*)(void*))::_play, context, NULL, 0x10000, 0x2C, 1);
 
 	if(!R_SUCCEEDED(result)) {
-		printf("failed to create sound thread\n");
+		console::error("failed to create sound thread\n");
 		return;
 	}
 	
 	result = threadStart(thread);
 
 	if(!R_SUCCEEDED(result)) {
-		printf("failed to start sound thread\n");
+		console::error("failed to start sound thread\n");
 		return;
 	}
 	#else
