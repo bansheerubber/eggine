@@ -1,8 +1,8 @@
-class EndTurnElement inherits HTMLElement;
-
-function EndTurnElement::onClick(%this) {
-	endTurn();
-}
+class EndTurnElement inherits HTMLElement {
+	function onClick(%this) {
+		endTurn();
+	}
+};
 
 function endTurn() {
 	echo("ended the turn");

@@ -1,56 +1,56 @@
-class SnapshotAbility inherits Ability;
+class SnapshotAbility inherits Ability {
+	function onAdd(%this) {
+		Parent::onAdd(%this);
 
-function SnapshotAbility::onAdd(%this) {
-	Parent::onAdd(%this);
-
-	%this.name = "Snapshot";
-	%this.icon = "snapshot.png";
-}
-
-function SnapshotAbility::use(%this, %target) {
-	Parent::use(%this, %target);
-
-	if(%this.roll(%target)) {
-		%target.addHealth(-5);
+		%this.name = "Snapshot";
+		%this.icon = "snapshot.png";
 	}
 
-	playSound("SnapshotFire");
-}
+	function use(%this, %target) {
+		Parent::use(%this, %target);
 
-function SnapshotAbility::accuracy(%this, %target) {
-	if(!%target) {
-		return 0;
+		if(%this.roll(%target)) {
+			%target.addHealth(-5);
+		}
+
+		playSound("SnapshotFire");
 	}
-	
-	%range = 20;
-	%accuracy = (-1 / %range) * distance(%target.getPosition(), %this.owner.getPosition()) + 1;
-	%accuracy *= getCoverAccuracyMod(%target.inCover(%this.owner));
-	if(%accuracy < 0.03) {
-		return 0.03;
+
+	function accuracy(%this, %target) {
+		if(!%target) {
+			return 0;
+		}
+		
+		%range = 20;
+		%accuracy = (-1 / %range) * distance(%target.getPosition(), %this.owner.getPosition()) + 1;
+		%accuracy *= getCoverAccuracyMod(%target.inCover(%this.owner));
+		if(%accuracy < 0.03) {
+			return 0.03;
+		}
+		return %accuracy;
 	}
-	return %accuracy;
-}
 
-function SnapshotAbility::cost(%this, %target) {
-	return 1;
-}
-
-function SnapshotAbility::usable(%this, %target) {
-	%result = %target != null && %target.inCover(%this.owner) != $Cover::Full && Parent::usable(%this, %target);
-	return %result;
-}
-
-function SnapshotAbility::description(%this, %target) {
-	%table = "<table class=\"ability-stats-table\"><tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr><tr><td>Damage: 5</td></tr></table>";
-	%html = "<div>A quick, inaccurate attack against an enemy</div>";
-	if(%this.usable(%target)) {
-		return %html @ %table;
+	function cost(%this, %target) {
+		return 1;
 	}
-	else {
-		return %html;
-	}
-}
 
-function SnapshotAbility::actionName(%this, %target) {
-	return "Fire";
-}
+	function usable(%this, %target) {
+		%result = %target != null && %target.inCover(%this.owner) != $Cover::Full && Parent::usable(%this, %target);
+		return %result;
+	}
+
+	function description(%this, %target) {
+		%table = "<table class=\"ability-stats-table\"><tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr><tr><td>Damage: 5</td></tr></table>";
+		%html = "<div>A quick, inaccurate attack against an enemy</div>";
+		if(%this.usable(%target)) {
+			return %html @ %table;
+		}
+		else {
+			return %html;
+		}
+	}
+
+	function actionName(%this, %target) {
+		return "Fire";
+	}
+};

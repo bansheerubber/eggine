@@ -1,23 +1,23 @@
-class SwitchTeamElement inherits HTMLElement;
+class SwitchTeamElement inherits HTMLElement {
+	function onClick(%this) {
+		getChunkContainer().selectCharacter(null);
+		selectTarget(null);
+		
+		if($Team::Player == getChunkContainer().getPlayerTeam()) {
+			getChunkContainer().setPlayerTeam($Team::Enemy);
+			getChunkContainer().setEnemyTeam($Team::Player);
+			echo("set enemy team as primary");
+		}
+		else {
+			getChunkContainer().setPlayerTeam($Team::Player);
+			getChunkContainer().setEnemyTeam($Team::Enemy);
+			echo("set player team as primary");
+		}
 
-function SwitchTeamElement::onClick(%this) {
-	getChunkContainer().selectCharacter(null);
-	selectTarget(null);
-	
-	if($Team::Player == getChunkContainer().getPlayerTeam()) {
-		getChunkContainer().setPlayerTeam($Team::Enemy);
-		getChunkContainer().setEnemyTeam($Team::Player);
-		echo("set enemy team as primary");
+		getHTMLElementById("team-name").clear();
+		getHTMLElementById("team-name").createChild("Team:" SPC getChunkContainer().getPlayerTeam().getName());
 	}
-	else {
-		getChunkContainer().setPlayerTeam($Team::Player);
-		getChunkContainer().setEnemyTeam($Team::Enemy);
-		echo("set player team as primary");
-	}
-
-	getHTMLElementById("team-name").clear();
-	getHTMLElementById("team-name").createChild("Team:" SPC getChunkContainer().getPlayerTeam().getName());
-}
+};
 
 function Team::selectNextCharacter(%this) {
 	%this.selectedIndex = (%this.selectedIndex + 1) % %this.size();

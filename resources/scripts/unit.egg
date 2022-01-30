@@ -1,16 +1,19 @@
 function Unit::onAdd(%this) {
 	%this.abilities = new Array();
 
-	%ability1 = new SnapshotAbility();
-	%ability1.owner = %this;
+	%ability1 = new SnapshotAbility() {
+		owner = %this;
+	};
 	%this.abilities.push(%ability1);
 
-	%ability2 = new TrainedShotAbility();
-	%ability2.owner = %this;
+	%ability2 = new TrainedShotAbility() {
+		owner = %this;
+	};
 	%this.abilities.push(%ability2);
 
-	%ability3 = new OverwatchAbility();
-	%ability3.owner = %this;
+	%ability3 = new OverwatchAbility() {
+		owner = %this;
+	};
 	%this.abilities.push(%ability3);
 
 	%this.maxMoves = 5;

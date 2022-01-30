@@ -19,15 +19,15 @@ function selectTarget(%target) {
 	}
 }
 
-class EnemyIconElement inherits HTMLElement;
-
-function EnemyIconElement::onClick(%this) {
-	Parent::onClick(%this);
-	%enemy = %this.getAttribute("enemy-id");
-	if(%enemy) {
-		%enemy = getChunkContainer().getEnemyTeam().get(number(%enemy));
-		selectTarget(%enemy);
-		getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%enemy.getPosition()), 0.2);
-		playSound("SelectEnemy");
+class EnemyIconElement inherits HTMLElement {
+	function onClick(%this) {
+		Parent::onClick(%this);
+		%enemy = %this.getAttribute("enemy-id");
+		if(%enemy) {
+			%enemy = getChunkContainer().getEnemyTeam().get(number(%enemy));
+			selectTarget(%enemy);
+			getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%enemy.getPosition()), 0.2);
+			playSound("SelectEnemy");
+		}
 	}
-}
+};
