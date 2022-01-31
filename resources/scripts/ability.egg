@@ -16,10 +16,8 @@ class AbilityUseButtonElement inherits HTMLElement {
 };
 
 class Ability inherits SimObject {
-	function onAdd(%this) {
-		%this.name = "Ability";
-		%this.icon = "";
-	}
+	name = "Ability";
+	icon = "";
 
 	function roll(%this, %target) {
 		if(getRandom() < %this.accuracy(%target)) {

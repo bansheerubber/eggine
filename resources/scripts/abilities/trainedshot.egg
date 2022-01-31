@@ -1,10 +1,6 @@
 class TrainedShotAbility inherits Ability {
-	function onAdd(%this) {
-		Parent::onAdd(%this);
-
-		%this.name = "Trained Shot";
-		%this.icon = "accuracy.png";
-	}
+	name = "Trained Shot";
+	icon = "accuracy.png";
 
 	function use(%this, %target) {
 		Parent::use(%this, %target);

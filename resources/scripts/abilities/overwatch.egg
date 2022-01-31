@@ -1,10 +1,6 @@
 class OverwatchAbility inherits Ability {
-	function onAdd(%this) {
-		Parent::onAdd(%this);
-
-		%this.name = "Overwatch";
-		%this.icon = "overwatch.png";
-	}
+	name = "Overwatch";
+	icon = "overwatch.png";
 
 	function overwatch(%this, %target) {
 		if(%target.inCover(%this.owner) == $Cover::Full) {
