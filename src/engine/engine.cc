@@ -320,6 +320,8 @@ void Engine::exit() {
 	romfsExit();
 	socketExit();
 	#endif
+
+	::exit(0);
 }
 
 void Engine::tick() {

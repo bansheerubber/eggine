@@ -242,6 +242,10 @@ void render::Window::render() {
 
 	this->queue.presentImage(this->swapchain, index);
 	#else
+	if(glfwWindowShouldClose(this->window)) {
+		engine->exit();
+	}
+	
 	glfwSwapBuffers(this->window);
 	#endif
 }
