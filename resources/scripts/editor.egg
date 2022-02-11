@@ -48,7 +48,6 @@ function onHoverTile(%position) {
 	}
 	
 	if($Editor::GhostTile == null) {
-		// echo("should create tile at " SPC %position);
 		$Editor::GhostTile = new InterweavedTile();
 		$Editor::GhostTile.setPosition({2; 2; 5});
 		$Editor::GhostTile.setTexture(2);

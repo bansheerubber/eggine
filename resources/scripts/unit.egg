@@ -23,8 +23,8 @@ function Unit::onAdd(%this) {
 
 	%this.ap = 2;
 
-	%this.setMaxHealth(getRandom(3, 8));
-	%this.setHealth(getRandom(2, %this.getMaxHealth() - 1));
+	%this.setMaxHealth(7);
+	%this.setHealth(7);
 }
 
 function Unit::coverList(%this) {

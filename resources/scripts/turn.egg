@@ -5,5 +5,13 @@ class EndTurnElement inherits HTMLElement {
 };
 
 function endTurn() {
-	echo("ended the turn");
+	%team = getChunkContainer().getPlayerTeam();
+	for(%i = 0; %i < %team.size(); %i++) {
+		%team.get(%i).setAP(2);
+	}
+
+	%team = getChunkContainer().getEnemyTeam();
+	for(%i = 0; %i < %team.size(); %i++) {
+		%team.get(%i).setAP(2);
+	}
 }

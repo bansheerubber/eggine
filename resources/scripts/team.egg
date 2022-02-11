@@ -6,12 +6,10 @@ class SwitchTeamElement inherits HTMLElement {
 		if($Team::Player == getChunkContainer().getPlayerTeam()) {
 			getChunkContainer().setPlayerTeam($Team::Enemy);
 			getChunkContainer().setEnemyTeam($Team::Player);
-			echo("set enemy team as primary");
 		}
 		else {
 			getChunkContainer().setPlayerTeam($Team::Player);
 			getChunkContainer().setEnemyTeam($Team::Enemy);
-			echo("set player team as primary");
 		}
 
 		getHTMLElementById("team-name").clear();
