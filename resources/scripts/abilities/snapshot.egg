@@ -31,8 +31,7 @@ class SnapshotAbility inherits Ability {
 	}
 
 	function usable(%this, %target) {
-		%result = %target != null && %target.inCover(%this.owner) != $Cover::Full && Parent::usable(%this, %target);
-		return %result;
+		return %target != null && %target.inCover(%this.owner) != $Cover::Full && Parent::usable(%this, %target);
 	}
 
 	function description(%this, %target) {

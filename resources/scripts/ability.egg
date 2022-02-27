@@ -45,8 +45,7 @@ class Ability inherits SimObject {
 
 	// whether or not the ability can be used
 	function usable(%this, %target) {
-		%result = %this.owner.ap >= %this.cost(%target);
-		return %result;
+		return %this.owner.ap >= %this.cost(%target);
 	}
 
 	// generate the HTML description of the ability

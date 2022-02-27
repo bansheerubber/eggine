@@ -46,8 +46,7 @@ class OverwatchAbility inherits Ability {
 	}
 
 	function usable(%this, %target) {
-		%result = Parent::usable(%this, %target);
-		return %result;
+		return Parent::usable(%this, %target);
 	}
 
 	function description(%this, %target) {
