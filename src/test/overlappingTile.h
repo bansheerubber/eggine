@@ -45,6 +45,8 @@ class OverlappingTile : public GameObject {
 		class ChunkContainer* getContainer();
 		class Layer* getLayer();
 
+		bool isOccluded();
+
 	protected:
 		class ChunkContainer* container = nullptr;
 		

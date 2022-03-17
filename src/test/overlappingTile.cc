@@ -77,6 +77,17 @@ Layer* OverlappingTile::getLayer() {
 	return this->layer;
 }
 
+bool OverlappingTile::isOccluded() {
+	unsigned int tile = this->container->getTile(
+		(glm::ivec3)this->getPosition() + glm::ivec3(tilemath::directionTowardsCamera(this->container->getRotation()), 0)
+	);
+
+	unsigned int ourTile = this->container->getTile(this->getPosition());
+	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(ourTile);
+	return (tile != 0 && ChunkContainer::Image->getSpriteInfo(tile).wall != resources::NO_WALL)
+		|| (drawOntop == true && ChunkContainer::Image->getSpriteInfo(ourTile).wall != resources::NO_WALL);
+}
+
 OverlappingTile* OverlappingTile::setTexture(unsigned int index) {
 	this->textureIndex = index;
 	if(this->chunk != nullptr) {

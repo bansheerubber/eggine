@@ -5,6 +5,7 @@ layout(location = 1) in vec2 vUV;
 layout(location = 2) in vec2 vOffset;
 layout(location = 3) in int vTextureIndex;
 layout(location = 4) in vec4 vColor;
+layout(location = 5) in int vIsOccluded;
 
 layout(std140, binding = 0) uniform vertexBlock
 {
@@ -15,10 +16,14 @@ layout(std140, binding = 0) uniform vertexBlock
 	float spriteWidth;
 	float spriteHeight;
 	float spritesOnRow;
+	int timer;
 } vb;
 
 out vec2 uv;
 out vec4 tileColor;
+flat out int occluded;
+out float height;
+flat out int timer;
 
 void main() {
 	gl_Position = vb.projection * vec4(vPosition + vOffset + vb.chunkScreenSpace, 0.0f, 1.0f);
@@ -38,4 +43,7 @@ void main() {
 
 	uv = mix(minUV, maxUV, vUV);
 	tileColor = vColor;
+	occluded = vIsOccluded;
+	height = vb.spriteHeight;
+	timer = vb.timer;
 }

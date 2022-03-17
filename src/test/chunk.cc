@@ -97,6 +97,11 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 		this->vertexAttributes->addVertexAttribute(ChunkContainer::Colors, 4, 4, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec4), 0);
 	}
 
+	// load occluded
+	{
+		this->vertexAttributes->addVertexAttribute(ChunkContainer::Occluded, 5, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 0);
+	}
+
 	this->defineBounds();
 }
 
@@ -301,6 +306,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		float spriteWidth;
 		float spriteHeight;
 		float spritesOnRow;
+		int timer;
 	} vb;
 	vb.projection = context.camera->projectionMatrix;
 	vb.chunkScreenSpace = this->screenSpacePosition;
@@ -309,6 +315,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	vb.spriteWidth = 64.0f;
 	vb.spriteHeight = 128.0f;
 	vb.spritesOnRow = floor(vb.spritesheetWidth / vb.spriteWidth);
+	vb.timer = this->container->timer;
 
 	struct FragmentBlock {
 		glm::vec4 color;
@@ -373,6 +380,41 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		this->isCulled = true;
 	}
 	#endif
+}
+
+void Chunk::renderOccluded(double deltaTime, RenderContext &context) {
+	struct VertexBlock {
+		glm::mat4 projection;
+		glm::vec2 chunkScreenSpace;
+		float spritesheetWidth;
+		float spritesheetHeight;
+		float spriteWidth;
+		float spriteHeight;
+		float spritesOnRow;
+		int timer;
+	} vb;
+	vb.projection = context.camera->projectionMatrix;
+	vb.chunkScreenSpace = this->screenSpacePosition;
+	vb.spritesheetWidth = 1057;
+	vb.spritesheetHeight = 391;
+	vb.spriteWidth = 64.0f;
+	vb.spriteHeight = 128.0f;
+	vb.spritesOnRow = floor(vb.spritesheetWidth / vb.spriteWidth);
+	vb.timer = this->container->timer;
+	ChunkContainer::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
+	
+	for(uint64_t i = 0; i < this->interweavedTiles.array.head; i++) {
+		InterweavedTile* tile = this->interweavedTiles.array[i].tile;
+		if(tile->isOccluded()) {
+			tile->renderOccluded(deltaTime, context);
+		}
+	}
+	
+	for(unsigned int i = 0; i < this->maxLayer; i++) {
+		if(this->getLayer(i) != nullptr) {
+			this->getLayer(i)->renderOccluded(deltaTime, context);
+		}
+	}
 }
 
 void Chunk::addOverlappingTile(OverlappingTile* tile) {

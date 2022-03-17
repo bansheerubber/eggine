@@ -26,4 +26,6 @@ namespace tilemath {
 
 	glm::ivec2 textureIndexToXY(unsigned int index, unsigned int width, unsigned int height);
 	TileUV textureIndexToUV(unsigned int index, unsigned int width, unsigned int height);
+
+	glm::ivec2 directionTowardsCamera(Rotation rotation);
 }

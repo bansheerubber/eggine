@@ -65,6 +65,11 @@ Layer::Layer(Chunk* chunk) {
 		this->buffers[2]->setData(nullptr, 0, sizeof(glm::vec4));
 		this->attributes->addVertexAttribute(this->buffers[2], 4, 4, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec4), 1);
 	}
+
+	// load occluded
+	{
+		this->attributes->addVertexAttribute(ChunkContainer::Occluded, 5, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 0);
+	}
 }
 
 void Layer::rebuildBuffers() {
@@ -125,4 +130,8 @@ void Layer::render(double deltaTime, RenderContext &context) {
 	
 	this->attributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, this->tiles.array.head);
+}
+
+void Layer::renderOccluded(double deltaTime, RenderContext &context) {
+	// TODO implement this
 }

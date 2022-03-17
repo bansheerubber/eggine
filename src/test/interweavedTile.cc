@@ -9,6 +9,7 @@ InterweavedTile::InterweavedTile(bool createReference) : OverlappingTile(false) 
 	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
 	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
 	this->vertexBuffers[2] = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexBuffers[3] = new render::VertexBuffer(&engine->renderWindow);
 
 	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
 
@@ -41,6 +42,13 @@ InterweavedTile::InterweavedTile(bool createReference) : OverlappingTile(false) 
 		this->vertexBuffers[2]->setDynamicDraw(true);
 		this->vertexBuffers[2]->setData(&this->color, sizeof(this->color), sizeof(this->color));
 		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[2], 4, 4, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
+	}
+
+	// configure occluded buffer
+	{
+		this->vertexBuffers[3]->setDynamicDraw(true);
+		this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
+		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[3], 5, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 1);
 	}
 }
 
@@ -135,6 +143,21 @@ OverlappingTile* InterweavedTile::setZIndex(unsigned int zIndex) {
 }
 
 void InterweavedTile::render(double deltaTime, RenderContext &context) {
+	if(this->occluded != this->isOccluded()) {
+		this->occluded = this->isOccluded();
+		this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
+	}
+	
+	this->vertexAttributes->bind();
+	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
+}
+
+void InterweavedTile::renderOccluded(double deltaTime, RenderContext &context) {
+	if(this->occluded != this->isOccluded()) {
+		this->occluded = this->isOccluded();
+		this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
+	}
+	
 	this->vertexAttributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }

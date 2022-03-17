@@ -24,6 +24,7 @@ resources::SpriteSheet* ChunkContainer::Image = nullptr;
 render::VertexBuffer* ChunkContainer::Vertices = nullptr;
 render::VertexBuffer* ChunkContainer::UVs = nullptr;
 render::VertexBuffer* ChunkContainer::Colors = nullptr;
+render::VertexBuffer* ChunkContainer::Occluded = nullptr;
 
 void initChunk(class ChunkContainer* container, class Chunk** chunk) {
 	*chunk = nullptr;
@@ -68,9 +69,14 @@ ChunkContainer::ChunkContainer() {
 		ChunkContainer::UVs->setData((glm::vec2*)&ChunkContainer::UVsSource[0], sizeof(ChunkContainer::UVsSource), alignof(glm::vec2));
 	}
 
-	if(ChunkContainer::Colors == nullptr) { // uvs for square
+	if(ChunkContainer::Colors == nullptr) { // colors for square
 		ChunkContainer::Colors = new render::VertexBuffer(&engine->renderWindow);
 		ChunkContainer::Colors->setData((glm::vec4*)&ChunkContainer::ColorsSource[0], sizeof(ChunkContainer::ColorsSource), alignof(glm::vec4));
+	}
+
+	if(ChunkContainer::Occluded == nullptr) {
+		ChunkContainer::Occluded = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::Occluded->setData((int*)&ChunkContainer::OccludedSource, sizeof(ChunkContainer::OccludedSource), alignof(int));
 	}
 
 	this->renderOrder.allocate(8);
@@ -159,6 +165,8 @@ uint64_t ChunkContainer::getChunkCount() {
 }
 
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
+	this->timer++;
+	
 	ChunkContainer::Program->bind();
 
 	ChunkContainer::Program->bindTexture("spriteTexture", 0);
@@ -172,6 +180,7 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	uint64_t overlappingCalls = 0;
 	#endif
 
+	// normal rendering
 	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
 		Chunk* chunk = this->renderOrder[i];
 		chunk->renderChunk(deltaTime, context);
@@ -186,6 +195,11 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 		
 		tiles += Chunk::Size * Chunk::Size * chunk->height;
 		#endif
+	}
+
+	// re-draw occluded tiles
+	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
+		this->renderOrder[i]->renderOccluded(deltaTime, context);
 	}
 
 	#ifdef EGGINE_DEBUG
@@ -318,29 +332,25 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 	);
 	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f - glm::vec2(-1, 1), 0);
 	glm::ivec3 coordinates(0, 0, 0);
-	glm::ivec3 directionTowardsCamera(0, 0, 0);
+	glm::ivec3 directionTowardsCamera(tilemath::directionTowardsCamera(this->getRotation()), 1);
 	switch(this->getRotation()) {
 		case tilemath::ROTATION_0_DEG: {
 			coordinates = glm::ivec3(floor(_.x), floor(_.y), _.z);
-			directionTowardsCamera = glm::ivec3(-1, 1, 1);
 			break;
 		}
 
 		case tilemath::ROTATION_90_DEG: {
 			coordinates = glm::ivec3(floor(-_.y + 1.0), floor(_.x), _.z);
-			directionTowardsCamera = glm::ivec3(-1, -1, 1);
 			break;
 		}
 
 		case tilemath::ROTATION_180_DEG: {
 			coordinates = glm::ivec3(floor(-_.x + 1.0), floor(-_.y + 1.0), _.z);
-			directionTowardsCamera = glm::ivec3(1, -1, 1);
 			break;
 		}
 
 		case tilemath::ROTATION_270_DEG: {
 			coordinates = glm::ivec3(floor(_.y), floor(-_.x + 1.0), _.z);
-			directionTowardsCamera = glm::ivec3(1, 1, 1);
 			break;
 		}
 	}

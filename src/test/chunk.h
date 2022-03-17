@@ -60,6 +60,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		void render(double deltaTime, RenderContext &context) {};
 		void renderChunk(double deltaTime, RenderContext &context);
+		void renderOccluded(double deltaTime, RenderContext &context);
 
 		void setPosition(glm::uvec2 position);
 		glm::uvec2& getPosition();

@@ -21,6 +21,7 @@ class Layer : public GameObject {
 		// ## game_object_definitions Layer
 
 		void render(double deltaTime, RenderContext &context);
+		void renderOccluded(double deltaTime, RenderContext &context);
 		void add(OverlappingTile* tile);
 		void update(OverlappingTile* tile);
 		void remove(OverlappingTile* tile);

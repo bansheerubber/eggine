@@ -156,3 +156,25 @@ tilemath::TileUV tilemath::textureIndexToUV(unsigned int index, unsigned int wid
 		),
 	};
 }
+
+glm::ivec2 tilemath::directionTowardsCamera(Rotation rotation) {
+	switch(rotation) {
+		case tilemath::ROTATION_0_DEG: {
+			return glm::ivec2(-1, 1);
+		}
+
+		case tilemath::ROTATION_90_DEG: {
+			return glm::ivec2(-1, -1);
+		}
+
+		case tilemath::ROTATION_180_DEG: {
+			return glm::ivec2(1, -1);
+		}
+
+		case tilemath::ROTATION_270_DEG: {
+			return glm::ivec2(1, 1);
+		}
+	}
+
+	return glm::ivec2(0, 0);
+}
