@@ -17,7 +17,7 @@ namespace tilemath {
 	glm::uvec2 indexToCoordinate(int64_t index, int64_t size, Rotation rotation);
 
 	// convert tile coordinates to screenspace
-	glm::vec2 tileToScreen(glm::vec3 coordinate, Rotation rotation);
+	glm::vec3 tileToScreen(glm::vec3 coordinate, int64_t size, Rotation rotation);
 
 	struct TileUV {
 		glm::vec2 minimum;

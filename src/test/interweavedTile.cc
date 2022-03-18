@@ -27,7 +27,7 @@ InterweavedTile::InterweavedTile(bool createReference) : OverlappingTile(false) 
 	{
 		this->vertexBuffers[0]->setDynamicDraw(true);
 		this->vertexBuffers[0]->setData(&this->position, sizeof(this->position), sizeof(this->position));
-		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[0], 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
+		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[0], 2, 3, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec3), 1);
 	}
 
 	// configure texture buffer
@@ -75,7 +75,12 @@ OverlappingTile* InterweavedTile::setPosition(glm::uvec3 position) {
 	glm::uvec3 relativePosition = this->position;
 	relativePosition.x -= chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
 	relativePosition.y -= chunk->position.y * Chunk::Size;
-	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, this->container->getRotation());
+	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, Chunk::Size, this->container->getRotation());
+	this->screenSpacePosition.z += 0.5;
+
+	if(this->isOccluded()) { // kick the sprite up a row
+		this->screenSpacePosition.z += 2;
+	}
 
 	bool initialized = false;
 	if(this->chunk != chunk) {
@@ -93,7 +98,7 @@ OverlappingTile* InterweavedTile::setPosition(glm::uvec3 position) {
 
 	this->layer = this->chunk->getLayer(position.z);
 
-	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->position), sizeof(this->position));
+	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->screenSpacePosition), sizeof(this->screenSpacePosition));
 
 	return this;
 }
@@ -102,8 +107,14 @@ void InterweavedTile::updateRotation(tilemath::Rotation oldRotation, tilemath::R
 	glm::uvec3 relativePosition = this->position;
 	relativePosition.x -= chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
 	relativePosition.y -= chunk->position.y * Chunk::Size;
-	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, this->container->getRotation());
-	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->position), sizeof(this->position));
+	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, Chunk::Size, this->container->getRotation());
+	this->screenSpacePosition.z += 0.5;
+
+	if(this->isOccluded()) { // kick the sprite up a row
+		this->screenSpacePosition.z += 2;
+	}
+	
+	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->screenSpacePosition), sizeof(this->screenSpacePosition));
 
 	resources::SpriteFacingInfo* facingsMap;
 	if((facingsMap = ChunkContainer::Image->getSpriteInfo(this->textureIndex).facingsMap) != nullptr) {

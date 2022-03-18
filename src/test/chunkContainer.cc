@@ -599,11 +599,15 @@ esEntryPtr es::ChunkContainer__getRotation(esEnginePtr esEngine, unsigned int ar
 
 esEntryPtr es::tileToScreen(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
 	if(args[0].matrixData->rows == 3 && args[0].matrixData->columns == 1) {
-		glm::vec2 position = tilemath::tileToScreen(glm::vec3(
-			args[0].matrixData->data[0][0].numberData,
-			args[0].matrixData->data[1][0].numberData,
-			args[0].matrixData->data[2][0].numberData
-		), engine->chunkContainer->getRotation());
+		glm::vec2 position = tilemath::tileToScreen(
+			glm::vec3(
+				args[0].matrixData->data[0][0].numberData,
+				args[0].matrixData->data[1][0].numberData,
+				args[0].matrixData->data[2][0].numberData
+			),
+			Chunk::Size * engine->chunkContainer->getSize(),
+			engine->chunkContainer->getRotation()
+		);
 		return esCreateVector(2, (double)position.x, (double)position.y);
 	}
 	return nullptr;

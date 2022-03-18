@@ -86,7 +86,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		unsigned int maxLayer = 0;
 
 		glm::uvec2 position = glm::uvec2(0, 0);
-		glm::vec2 screenSpacePosition = glm::vec2(0, 0);
+		glm::vec3 screenSpacePosition = glm::vec3(0, 0, 0);
 		
 		render::VertexBuffer* vertexBuffer;
 		render::VertexAttributes* vertexAttributes;
@@ -115,7 +115,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		void buildDebugLines();
 		void defineBounds();
 
-		static glm::vec2 OffsetsSource[];
+		static glm::vec3 OffsetsSource[];
 		static render::VertexBuffer* Offsets;
 		static tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Rotations;
 };

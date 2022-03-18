@@ -55,7 +55,7 @@ class OverlappingTile : public GameObject {
 		unsigned int zIndex = 0;
 		
 		glm::uvec3 position = glm::uvec3(0, 0, 0);
-		glm::vec2 screenSpacePosition = glm::vec2(0, 0);
+		glm::vec3 screenSpacePosition = glm::vec3(0, 0, 0);
 		class Layer* layer =  nullptr;
 		class Chunk* chunk = nullptr;
 

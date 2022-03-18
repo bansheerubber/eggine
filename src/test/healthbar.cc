@@ -25,7 +25,7 @@ void Healthbar::render(double deltaTime, RenderContext &context) {
 	this->box.size.y = height;
 	this->box.color = glm::vec4(0.2, 0.2, 0.2, 1);
 
-	this->box.position = tilemath::tileToScreen(this->position, engine->chunkContainer->getRotation());
+	this->box.position = tilemath::tileToScreen(this->position, 0, engine->chunkContainer->getRotation());
 	this->box.position.x -= width / 2;
 	this->box.position.y -= height / 2;
 

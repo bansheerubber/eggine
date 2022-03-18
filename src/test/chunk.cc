@@ -14,7 +14,7 @@
 #include "../resources/spriteSheet.h"
 #include "tileMath.h"
 
-glm::vec2 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
+glm::vec3 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
 tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>>();
 
@@ -83,7 +83,7 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 
 	// load offsets
 	{
-		this->vertexAttributes->addVertexAttribute(Chunk::Offsets, 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
+		this->vertexAttributes->addVertexAttribute(Chunk::Offsets, 2, 3, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec3), 1);
 	}
 
 	// load texture indices
@@ -117,19 +117,21 @@ void Chunk::BuildOffsets(tilemath::Rotation rotation) {
 	for(unsigned i = 0; i < Size * Size; i++) {
 		for(unsigned z = 0; z < Chunk::MaxHeight; z++) {
 			glm::ivec2 coordinate = tilemath::indexToCoordinate(i, Size, rotation);
-			Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z), rotation);
+			Chunk::OffsetsSource[i + z * Size * Size] = tilemath::tileToScreen(glm::vec3(coordinate, z), Chunk::Size, rotation);
 		}
 	}
 
 	if(Chunk::Offsets == nullptr) {
 		Chunk::Offsets = new render::VertexBuffer(&engine->renderWindow);
 	}
-	Chunk::Offsets->setData(&Chunk::OffsetsSource[0], sizeof(glm::vec2) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(glm::vec2));
+	Chunk::Offsets->setData(&Chunk::OffsetsSource[0], sizeof(glm::vec3) * Chunk::Size * Chunk::Size * Chunk::MaxHeight, alignof(glm::vec3));
 }
 
 void Chunk::setPosition(glm::uvec2 position) {
 	this->position = position;
-	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0), this->container->getRotation());
+	this->screenSpacePosition = tilemath::tileToScreen(glm::vec3((unsigned int)Size * this->position, 0.0), 0, this->container->getRotation());
+	int depth = tilemath::tileToScreen(glm::vec3(this->position, 0.0), this->container->getSize() + 1, this->container->getRotation()).z;
+	this->screenSpacePosition.z = depth;
 	this->defineBounds();
 }
 
@@ -167,10 +169,10 @@ void Chunk::defineBounds() {
 		}
 	}
 
-	glm::vec2 top = tilemath::tileToScreen(glm::vec3(Size, 0, topHeight), rotation) + this->screenSpacePosition + bias;
-	glm::vec2 right = tilemath::tileToScreen(glm::vec3(Size, Size, rightHeight), rotation) + this->screenSpacePosition + bias;
-	glm::vec2 bottom = tilemath::tileToScreen(glm::vec3(0, Size, bottomHeight), rotation) + this->screenSpacePosition + bias;
-	glm::vec2 left = tilemath::tileToScreen(glm::vec3(0, 0, leftHeight), rotation) + this->screenSpacePosition + bias;
+	glm::vec2 top = glm::vec2(tilemath::tileToScreen(glm::vec3(Size, 0, topHeight), 0, rotation)) + glm::vec2(this->screenSpacePosition) + bias;
+	glm::vec2 right = glm::vec2(tilemath::tileToScreen(glm::vec3(Size, Size, rightHeight), 0, rotation)) + glm::vec2(this->screenSpacePosition) + bias;
+	glm::vec2 bottom = glm::vec2(tilemath::tileToScreen(glm::vec3(0, Size, bottomHeight), 0, rotation)) + glm::vec2(this->screenSpacePosition) + bias;
+	glm::vec2 left = glm::vec2(tilemath::tileToScreen(glm::vec3(0, 0, leftHeight), 0, rotation)) + glm::vec2(this->screenSpacePosition) + bias;
 
 	switch(rotation) {
 		case tilemath::ROTATION_0_DEG: {
@@ -277,7 +279,9 @@ uint64_t Chunk::renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint6
 			#endif
 		}
 
-		tile->tile->render(deltaTime, context);
+		if(!tile->tile->isOccluded()) {
+			tile->tile->render(deltaTime, context);
+		}
 
 		lastIndex = tile->index + overlapBias;
 
@@ -300,7 +304,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 	struct VertexBlock {
 		glm::mat4 projection;
-		glm::vec2 chunkScreenSpace;
+		glm::vec3 chunkScreenSpace;
 		float spritesheetWidth;
 		float spritesheetHeight;
 		float spriteWidth;
@@ -310,6 +314,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	} vb;
 	vb.projection = context.camera->projectionMatrix;
 	vb.chunkScreenSpace = this->screenSpacePosition;
+	vb.chunkScreenSpace.z = this->screenSpacePosition.z * Chunk::Size * 2.0;
 	vb.spritesheetWidth = 1057;
 	vb.spritesheetHeight = 391;
 	vb.spriteWidth = 64.0f;
@@ -385,7 +390,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 void Chunk::renderOccluded(double deltaTime, RenderContext &context) {
 	struct VertexBlock {
 		glm::mat4 projection;
-		glm::vec2 chunkScreenSpace;
+		glm::vec3 chunkScreenSpace;
 		float spritesheetWidth;
 		float spritesheetHeight;
 		float spriteWidth;
@@ -395,6 +400,7 @@ void Chunk::renderOccluded(double deltaTime, RenderContext &context) {
 	} vb;
 	vb.projection = context.camera->projectionMatrix;
 	vb.chunkScreenSpace = this->screenSpacePosition;
+	vb.chunkScreenSpace.z = this->screenSpacePosition.z * Chunk::Size * 2.0;
 	vb.spritesheetWidth = 1057;
 	vb.spritesheetHeight = 391;
 	vb.spriteWidth = 64.0f;

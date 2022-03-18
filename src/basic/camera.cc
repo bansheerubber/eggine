@@ -87,8 +87,8 @@ void Camera::see(double deltaTime) {
 		this->right,
 		this->bottom,
 		this->top,
-		-10.0,
-		10.0
+		-100.0,
+		1000.0
 	);
 }
 

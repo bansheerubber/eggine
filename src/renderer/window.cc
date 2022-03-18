@@ -123,6 +123,7 @@ void render::Window::initialize() {
 	glfwSetWindowSizeCallback(this->window, onWindowResize);
 
 	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 	// glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

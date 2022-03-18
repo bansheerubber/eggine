@@ -29,7 +29,7 @@ class Layer : public GameObject {
 	private:
 		class Chunk* chunk = nullptr;
 		SortedArray<class OverlappingTile*> tiles = SortedArray<class OverlappingTile*>(layerTilesCompare);
-		DynamicArray<glm::vec2> offsets = DynamicArray<glm::vec2>(4); // CPU storage for tile offsets
+		DynamicArray<glm::vec3> offsets = DynamicArray<glm::vec3>(4); // CPU storage for tile offsets
 		DynamicArray<int> textureIndices = DynamicArray<int>(4); // CPU storage for tile texture indices
 		DynamicArray<glm::vec4> colors = DynamicArray<glm::vec4>(4); // CPU storage for color offsets
 

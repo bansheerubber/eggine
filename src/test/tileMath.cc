@@ -93,34 +93,52 @@ glm::uvec2 tilemath::indexToCoordinate(int64_t index, int64_t size, tilemath::Ro
 	}
 }
 
-glm::vec2 tilemath::tileToScreen(glm::vec3 coordinate, tilemath::Rotation rotation) {
+glm::vec3 tilemath::tileToScreen(glm::vec3 coordinate, int64_t size, tilemath::Rotation rotation) {
+	int depth = 0;
+	if(size != 0) {
+		uint64_t index = tilemath::coordinateToIndex(coordinate, size, rotation);
+		double threshold = size * (size + 1.0) / 2.0;
+		int row;
+		if(index < threshold) {
+			row = floor((sqrt(8.0 * index + 1.0) - 1.0) / 2.0);
+		}
+		else {
+			row = (size - 1) - (ceil((sqrt(8.0 * -(index - pow(size, 2)) + 1) - 1) / 2.0) - 1) + (size - 1);
+		}
+		depth = row + coordinate.z * size * size;
+	}
+	
 	switch(rotation) {
 		default:
 		case ROTATION_0_DEG: {
-			return glm::vec2(
+			return glm::vec3(
 				coordinate.x * 1.0f / 2 + coordinate.y * 1.0f / 2,
-				-(coordinate.x * -1.0f / 4 + coordinate.y * 1.0f / 4 - coordinate.z * 39.0 / 64.0)
+				-(coordinate.x * -1.0f / 4 + coordinate.y * 1.0f / 4 - coordinate.z * 39.0 / 64.0),
+				depth
 			);
 		}
 
 		case ROTATION_90_DEG: {
-			return glm::vec2(
+			return glm::vec3(
 				-(coordinate.x * 1.0f / 2 + coordinate.y * -1.0f / 2),
-				-(coordinate.x * -1.0f / 4 + coordinate.y * -1.0f / 4 - coordinate.z * 39.0 / 64.0)
+				-(coordinate.x * -1.0f / 4 + coordinate.y * -1.0f / 4 - coordinate.z * 39.0 / 64.0),
+				depth
 			);
 		}
 
 		case ROTATION_180_DEG: {
-			return glm::vec2(
+			return glm::vec3(
 				coordinate.x * -1.0f / 2 + coordinate.y * -1.0f / 2,
-				-(coordinate.x * 1.0f / 4 + coordinate.y * -1.0f / 4 - coordinate.z * 39.0 / 64.0)
+				-(coordinate.x * 1.0f / 4 + coordinate.y * -1.0f / 4 - coordinate.z * 39.0 / 64.0),
+				depth
 			);
 		}
 
 		case ROTATION_270_DEG: {
-			return glm::vec2(
+			return glm::vec3(
 				-(coordinate.x * -1.0f / 2 + coordinate.y * 1.0f / 2),
-				-(coordinate.x * 1.0f / 4 + coordinate.y * 1.0f / 4 - coordinate.z * 39.0 / 64.0)
+				-(coordinate.x * 1.0f / 4 + coordinate.y * 1.0f / 4 - coordinate.z * 39.0 / 64.0),
+				depth
 			);
 		}
 	}

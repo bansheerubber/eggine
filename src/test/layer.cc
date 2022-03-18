@@ -48,8 +48,8 @@ Layer::Layer(Chunk* chunk) {
 	// load offsets
 	{
 		this->buffers[0]->setDynamicDraw(true);
-		this->buffers[0]->setData(nullptr, 0, sizeof(glm::vec2));
-		this->attributes->addVertexAttribute(this->buffers[0], 2, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
+		this->buffers[0]->setData(nullptr, 0, sizeof(glm::vec3));
+		this->attributes->addVertexAttribute(this->buffers[0], 2, 3, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec3), 1);
 	}
 
 	// load texture indices
@@ -85,7 +85,7 @@ void Layer::rebuildBuffers() {
 		this->colors[i] = tile->getColor();
 	}
 
-	this->buffers[0]->setData(&this->offsets[0], sizeof(glm::vec2) * this->tiles.array.head, sizeof(glm::vec2));
+	this->buffers[0]->setData(&this->offsets[0], sizeof(glm::vec3) * this->tiles.array.head, sizeof(glm::vec3));
 	this->buffers[1]->setData(&this->textureIndices[0], sizeof(int) * this->tiles.array.head, sizeof(int));
 	this->buffers[2]->setData(&this->colors[0], sizeof(glm::vec4) * this->tiles.array.head, sizeof(glm::vec4));
 }
