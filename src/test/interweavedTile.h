@@ -27,6 +27,8 @@ class InterweavedTile: public OverlappingTile {
 
 		void render(double deltaTime, RenderContext &context);
 		void renderOccluded(double deltaTime, RenderContext &context);
+
+		bool isOccluded();
 	
 	protected:
 		render::VertexBuffer* vertexBuffers[4];

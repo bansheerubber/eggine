@@ -29,14 +29,27 @@ class Layer : public GameObject {
 	private:
 		class Chunk* chunk = nullptr;
 		SortedArray<class OverlappingTile*> tiles = SortedArray<class OverlappingTile*>(layerTilesCompare);
-		DynamicArray<glm::vec3> offsets = DynamicArray<glm::vec3>(4); // CPU storage for tile offsets
-		DynamicArray<int> textureIndices = DynamicArray<int>(4); // CPU storage for tile texture indices
-		DynamicArray<glm::vec4> colors = DynamicArray<glm::vec4>(4); // CPU storage for color offsets
 
 		render::VertexBuffer* buffers[3];
+		render::VertexBuffer* occludedBuffers[4];
 		render::VertexAttributes* attributes;
+		render::VertexAttributes* occludedAttributes;
 		bool needsUpdate = false;
 		bool needsSort = false;
+
+		unsigned int occludedCount = 0;
+
+		// temporary storage for buffers
+		static DynamicArray<glm::vec3> Offsets;
+		static DynamicArray<int> TextureIndices;
+		static DynamicArray<glm::vec4> Colors;
+
+		static DynamicArray<glm::vec3> OccludedOffsets;
+		static DynamicArray<int> OccludedTextureIndices;
+		static DynamicArray<glm::vec4> OccludedColors;
+		static DynamicArray<int> OccludedEnabled;
+
+		constexpr static int Occluded = 2;
 
 		void rebuildBuffers();
 		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);

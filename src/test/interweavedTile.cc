@@ -167,6 +167,17 @@ void InterweavedTile::renderOccluded(double deltaTime, RenderContext &context) {
 	engine->renderWindow.enableDepthTest(true);
 }
 
+bool InterweavedTile::isOccluded() {
+	unsigned int tile = this->container->getTile(
+		(glm::ivec3)this->getPosition() + glm::ivec3(tilemath::directionTowardsCamera(this->container->getRotation()), 0)
+	);
+
+	unsigned int ourTile = this->container->getTile(this->getPosition());
+	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(ourTile);
+	return (tile != 0 && ChunkContainer::Image->getSpriteInfo(tile).wall != resources::NO_WALL)
+		|| (drawOntop == true && ChunkContainer::Image->getSpriteInfo(ourTile).wall != resources::NO_WALL);
+}
+
 void es::defineInterweavedTile() {
 	esRegisterNamespace(engine->eggscript, "InterweavedTile");
 	esNamespaceInherit(engine->eggscript, "OverlappingTile", "InterweavedTile");

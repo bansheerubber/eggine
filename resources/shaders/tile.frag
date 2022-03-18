@@ -24,9 +24,10 @@ void main() {
 			color = (color * tileColor * vec4(0.7, 0.7, 0.7, 0.9) + vec4(0.0, 0.1, 0.2, 0.0)) * vec4(1.3, 1.3, 1.3, 1.0);
 		}
 	}
+	else if(occluded == 2) {
+		color = color * tileColor * vec4(1.0, 1.0, 1.0, 0.5);
+	}
 	else {
 		color = color * tileColor;
 	}
-
-	// color = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);
 }

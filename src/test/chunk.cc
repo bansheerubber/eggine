@@ -429,7 +429,7 @@ void Chunk::renderOccluded(double deltaTime, RenderContext &context) {
 
 	engine->renderWindow.setStencilFunction(render::STENCIL_ALWAYS, 0, 0b0);
 	
-	for(unsigned int i = 0; i < this->maxLayer; i++) {
+	for(unsigned int i = 0; i <= this->maxLayer; i++) {
 		if(this->getLayer(i) != nullptr) {
 			this->getLayer(i)->renderOccluded(deltaTime, context);
 		}
