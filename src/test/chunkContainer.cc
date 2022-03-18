@@ -108,15 +108,14 @@ unsigned int ChunkContainer::getSize() {
 }
 
 void ChunkContainer::setRotation(tilemath::Rotation rotation) {
-	unsigned int direction = rotation - this->rotation;
-	glm::mat2 rotationMatrix = glm::mat2(
-		cos(M_PI / 2.0f * direction), sin(M_PI / 2.0f * direction),
-		-sin(M_PI / 2.0f * direction), cos(M_PI / 2.0f * direction)
-	);
-
-	engine->camera->setPosition(rotationMatrix * engine->camera->getPosition());
+	glm::vec2 camera = engine->camera->getPosition();
+	camera.x += 0.5;
+	camera.y = -camera.y;
+	glm::vec3 position = this->screenToTile(camera);
 	
 	this->rotation = rotation;
+
+	engine->camera->setPosition(tilemath::tileToScreen(position, Chunk::Size * Chunk::Size * this->getSize(), rotation));
 
 	Chunk::BuildOffsets(rotation);
 
@@ -318,39 +317,33 @@ void ChunkContainer::hoverTile(glm::ivec3 position) {
 	esDeleteEntry(esCallFunction(engine->eggscript, "onHoverTile", 1, arguments));
 }
 
-glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
-	// glm::mat2 basis = glm::mat2(
-	// 	cos(atan(1/2)), sin(atan(1/2)),
-	// 	cos(atan(1/2)), -sin(atan(1/2))
-	// );
-
-	// inverse the basis and normalize the axes to get transformation matrix
+glm::vec3 ChunkContainer::screenToTile(glm::vec2 screen) {
 	double cosine45deg = cos(M_PI / 4.0f);
 	glm::mat2 inverseBasis = glm::mat2(
 		cosine45deg, cosine45deg,
 		-cosine45deg * 2.0f, cosine45deg * 2.0f
 	);
-	glm::vec3 _((inverseBasis * world) * (float)cosine45deg * 2.0f - glm::vec2(-1, 1), 0);
-	glm::ivec3 coordinates(0, 0, 0);
-	glm::ivec3 directionTowardsCamera(tilemath::directionTowardsCamera(this->getRotation()), 1);
+	glm::vec3 _((inverseBasis * screen) * (float)cosine45deg * 2.0f - glm::vec2(-1, 1), 0);
+	glm::vec3 coordinates(0, 0, 0);
+	glm::vec3 directionTowardsCamera(tilemath::directionTowardsCamera(this->getRotation()), 1);
 	switch(this->getRotation()) {
 		case tilemath::ROTATION_0_DEG: {
-			coordinates = glm::ivec3(floor(_.x), floor(_.y), _.z);
+			coordinates = glm::vec3(_.x, _.y, _.z);
 			break;
 		}
 
 		case tilemath::ROTATION_90_DEG: {
-			coordinates = glm::ivec3(floor(-_.y + 1.0), floor(_.x), _.z);
+			coordinates = glm::vec3(-_.y + 1.0, _.x, _.z);
 			break;
 		}
 
 		case tilemath::ROTATION_180_DEG: {
-			coordinates = glm::ivec3(floor(-_.x + 1.0), floor(-_.y + 1.0), _.z);
+			coordinates = glm::vec3(-_.x + 1.0, -_.y + 1.0, _.z);
 			break;
 		}
 
 		case tilemath::ROTATION_270_DEG: {
-			coordinates = glm::ivec3(floor(_.y), floor(-_.x + 1.0), _.z);
+			coordinates = glm::vec3(_.y, -_.x + 1.0, _.z);
 			break;
 		}
 	}
@@ -358,17 +351,11 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 	coordinates.x += directionTowardsCamera.x;
 	coordinates.y += directionTowardsCamera.y;
 
-	// coordinates.x += directionTowardsCamera.x * 50;
-	// coordinates.y += directionTowardsCamera.y * 50;
-	// coordinates.z += directionTowardsCamera.z * 49;
-
-	// for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 0; i++) {
-	// 	coordinates.x -= directionTowardsCamera.x;
-	// 	coordinates.y -= directionTowardsCamera.y;
-	// 	coordinates.z -= directionTowardsCamera.z;
-	// }
-
 	return coordinates;
+}
+
+glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 screen) {
+	return glm::ivec3(screenToTile(screen));
 }
 
 void ChunkContainer::onBind(string &bind, binds::Action action) {

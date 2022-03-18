@@ -114,6 +114,7 @@ class ChunkContainer : public RenderObject {
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
 
 		void updateCharacterPosition(class Character* character, glm::uvec3 newPosition);
+		glm::vec3 screenToTile(glm::vec2 screenSpace);
 		glm::ivec3 findCandidateSelectedTile(glm::vec2 screenSpace);
 		void rightClickTile(glm::ivec3 position);
 		void hoverTile(glm::ivec3 position);
