@@ -44,10 +44,10 @@ InterweavedTile::InterweavedTile(bool createReference) : OverlappingTile(false) 
 		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[2], 4, 4, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 1);
 	}
 
-	// configure occluded buffer
+	// configure xray buffer
 	{
 		this->vertexBuffers[3]->setDynamicDraw(true);
-		this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
+		this->vertexBuffers[3]->setData(&this->xrayBuffer, sizeof(this->xrayBuffer), sizeof(this->xrayBuffer));
 		this->vertexAttributes->addVertexAttribute(this->vertexBuffers[3], 5, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 1);
 	}
 }
@@ -150,32 +150,21 @@ OverlappingTile* InterweavedTile::setZIndex(unsigned int zIndex) {
 }
 
 void InterweavedTile::render(double deltaTime, RenderContext &context) {
-	this->occluded = false;
-	this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
+	this->xrayBuffer = false;
+	this->vertexBuffers[3]->setData(&this->xrayBuffer, sizeof(this->xrayBuffer), sizeof(this->xrayBuffer));
 	
 	this->vertexAttributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }
 
-void InterweavedTile::renderOccluded(double deltaTime, RenderContext &context) {
-	this->occluded = true;
-	this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
+void InterweavedTile::renderXRay(double deltaTime, RenderContext &context) {
+	this->xrayBuffer = true;
+	this->vertexBuffers[3]->setData(&this->xrayBuffer, sizeof(this->xrayBuffer), sizeof(this->xrayBuffer));
 
 	engine->renderWindow.enableDepthTest(false);
 	this->vertexAttributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 	engine->renderWindow.enableDepthTest(true);
-}
-
-bool InterweavedTile::isOccluded() {
-	unsigned int tile = this->container->getTile(
-		(glm::ivec3)this->getPosition() + glm::ivec3(tilemath::directionTowardsCamera(this->container->getRotation()), 0)
-	);
-
-	unsigned int ourTile = this->container->getTile(this->getPosition());
-	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(ourTile);
-	return (tile != 0 && ChunkContainer::Image->getSpriteInfo(tile).wall != resources::NO_WALL)
-		|| (drawOntop == true && ChunkContainer::Image->getSpriteInfo(ourTile).wall != resources::NO_WALL);
 }
 
 void es::defineInterweavedTile() {

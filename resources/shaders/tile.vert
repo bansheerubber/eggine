@@ -5,7 +5,7 @@ layout(location = 1) in vec2 vUV;
 layout(location = 2) in vec3 vOffset;
 layout(location = 3) in int vTextureIndex;
 layout(location = 4) in vec4 vColor;
-layout(location = 5) in int vIsOccluded;
+layout(location = 5) in int vIsXray;
 
 layout(std140, binding = 0) uniform vertexBlock
 {
@@ -21,7 +21,7 @@ layout(std140, binding = 0) uniform vertexBlock
 
 out vec2 uv;
 out vec4 tileColor;
-flat out int occluded;
+flat out int xray;
 out float height;
 flat out int timer;
 
@@ -43,7 +43,7 @@ void main() {
 
 	uv = mix(minUV, maxUV, vUV);
 	tileColor = vColor;
-	occluded = vIsOccluded;
+	xray = vIsXray;
 	height = vb.spriteHeight;
 	timer = vb.timer;
 }

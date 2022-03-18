@@ -21,7 +21,7 @@ class Layer : public GameObject {
 		// ## game_object_definitions Layer
 
 		void render(double deltaTime, RenderContext &context);
-		void renderOccluded(double deltaTime, RenderContext &context);
+		void renderXRay(double deltaTime, RenderContext &context);
 		void add(OverlappingTile* tile);
 		void update(OverlappingTile* tile);
 		void remove(OverlappingTile* tile);
@@ -31,25 +31,25 @@ class Layer : public GameObject {
 		SortedArray<class OverlappingTile*> tiles = SortedArray<class OverlappingTile*>(layerTilesCompare);
 
 		render::VertexBuffer* buffers[3];
-		render::VertexBuffer* occludedBuffers[4];
+		render::VertexBuffer* xrayBuffers[4];
 		render::VertexAttributes* attributes;
-		render::VertexAttributes* occludedAttributes;
+		render::VertexAttributes* xrayAttributes;
 		bool needsUpdate = false;
 		bool needsSort = false;
 
-		unsigned int occludedCount = 0;
+		unsigned int xrayCount = 0;
 
 		// temporary storage for buffers
 		static DynamicArray<glm::vec3> Offsets;
 		static DynamicArray<int> TextureIndices;
 		static DynamicArray<glm::vec4> Colors;
 
-		static DynamicArray<glm::vec3> OccludedOffsets;
-		static DynamicArray<int> OccludedTextureIndices;
-		static DynamicArray<glm::vec4> OccludedColors;
-		static DynamicArray<int> OccludedEnabled;
+		static DynamicArray<glm::vec3> XRayOffsets;
+		static DynamicArray<int> XRayTextureIndices;
+		static DynamicArray<glm::vec4> XRayColors;
+		static DynamicArray<int> XRayEnabled;
 
-		constexpr static int Occluded = 2;
+		constexpr static int XRay = 2;
 
 		void rebuildBuffers();
 		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);

@@ -96,7 +96,7 @@ class ChunkContainer : public RenderObject {
 		static render::VertexBuffer* Vertices;
 		static render::VertexBuffer* UVs;
 		static render::VertexBuffer* Colors;
-		static render::VertexBuffer* Occluded;
+		static render::VertexBuffer* XRay;
 
 		unsigned int timer = 0;
 	
@@ -139,5 +139,5 @@ class ChunkContainer : public RenderObject {
 			glm::vec4(1, 1, 1, 1)
 		};
 
-		static constexpr int OccludedSource = 0;
+		static constexpr int XRaySource = 0;
 };

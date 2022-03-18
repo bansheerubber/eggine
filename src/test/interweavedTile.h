@@ -26,15 +26,13 @@ class InterweavedTile: public OverlappingTile {
 		OverlappingTile* setZIndex(unsigned int zIndex);
 
 		void render(double deltaTime, RenderContext &context);
-		void renderOccluded(double deltaTime, RenderContext &context);
-
-		bool isOccluded();
+		void renderXRay(double deltaTime, RenderContext &context);
 	
 	protected:
 		render::VertexBuffer* vertexBuffers[4];
 		render::VertexAttributes* vertexAttributes;
 
-		int occluded = true;
+		int xrayBuffer = false;
 
 		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);
 };

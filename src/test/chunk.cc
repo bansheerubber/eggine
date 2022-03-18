@@ -97,9 +97,9 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 		this->vertexAttributes->addVertexAttribute(ChunkContainer::Colors, 4, 4, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec4), 0);
 	}
 
-	// load occluded
+	// load xray
 	{
-		this->vertexAttributes->addVertexAttribute(ChunkContainer::Occluded, 5, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 0);
+		this->vertexAttributes->addVertexAttribute(ChunkContainer::XRay, 5, 1, render::VERTEX_ATTRIB_INT, 0, sizeof(int), 0);
 	}
 
 	this->defineBounds();
@@ -395,7 +395,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	#endif
 }
 
-void Chunk::renderOccluded(double deltaTime, RenderContext &context) {
+void Chunk::renderXRay(double deltaTime, RenderContext &context) {
 	struct VertexBlock {
 		glm::mat4 projection;
 		glm::vec3 chunkScreenSpace;
@@ -422,8 +422,8 @@ void Chunk::renderOccluded(double deltaTime, RenderContext &context) {
 	
 	for(uint64_t i = 0; i < this->interweavedTiles.array.head; i++) {
 		InterweavedTile* tile = this->interweavedTiles.array[i].tile;
-		if(tile->isOccluded()) {
-			tile->renderOccluded(deltaTime, context);
+		if(tile->canXRay()) {
+			tile->renderXRay(deltaTime, context);
 		}
 	}
 
@@ -431,7 +431,7 @@ void Chunk::renderOccluded(double deltaTime, RenderContext &context) {
 	
 	for(unsigned int i = 0; i <= this->maxLayer; i++) {
 		if(this->getLayer(i) != nullptr) {
-			this->getLayer(i)->renderOccluded(deltaTime, context);
+			this->getLayer(i)->renderXRay(deltaTime, context);
 		}
 	}
 }

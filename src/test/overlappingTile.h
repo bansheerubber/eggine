@@ -21,6 +21,8 @@ namespace es { // order = 1
 	esEntryPtr OverlappingTile__getColor(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr OverlappingTile__setZIndex(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr OverlappingTile__getZIndex(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__setXRay(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr OverlappingTile__getXRay(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };
 
 class OverlappingTile : public GameObject {	
@@ -45,7 +47,8 @@ class OverlappingTile : public GameObject {
 		class ChunkContainer* getContainer();
 		class Layer* getLayer();
 
-		bool isOccluded();
+		OverlappingTile* setXRay(int xray);
+		int canXRay();
 
 	protected:
 		class ChunkContainer* container = nullptr;
@@ -58,6 +61,8 @@ class OverlappingTile : public GameObject {
 		glm::vec3 screenSpacePosition = glm::vec3(0, 0, 0);
 		class Layer* layer =  nullptr;
 		class Chunk* chunk = nullptr;
+
+		int xray = false;
 
 		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);
 };

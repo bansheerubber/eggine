@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
 
 	for(unsigned int i = 0; i < positionsSize; i++) {
 		Unit* unit = new Unit();
+		unit->setXRay(1);
 		unit->setAppearance(5);
 		unit->setPosition(positions[i]);
 		container.getPlayerTeam()->add(unit);
@@ -73,6 +74,7 @@ int main(int argc, char* argv[]) {
 
 	for(unsigned int i = 0; i < enemyPositionsSize; i++) {
 		Unit* unit = new Unit();
+		unit->setXRay(1);
 		unit->setPosition(enemyPositions[i]);
 		container.getEnemyTeam()->add(unit);
 	}

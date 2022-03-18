@@ -79,15 +79,13 @@ Layer* OverlappingTile::getLayer() {
 	return this->layer;
 }
 
-bool OverlappingTile::isOccluded() {
-	unsigned int tile = this->container->getTile(
-		(glm::ivec3)this->getPosition() + glm::ivec3(tilemath::directionTowardsCamera(this->container->getRotation()), 0) + glm::ivec3(0, 0, 1)
-	);
+OverlappingTile* OverlappingTile::setXRay(int xray) {
+	this->xray = xray;
+	return this;
+}
 
-	unsigned int ourTile = this->container->getTile(this->getPosition() + glm::uvec3(0, 0, 1));
-	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(ourTile);
-	return (tile != 0 && ChunkContainer::Image->getSpriteInfo(tile).wall != resources::NO_WALL)
-		|| (drawOntop == true && ChunkContainer::Image->getSpriteInfo(ourTile).wall != resources::NO_WALL);
+int OverlappingTile::canXRay() {
+	return this->xray;
 }
 
 OverlappingTile* OverlappingTile::setTexture(unsigned int index) {
@@ -148,6 +146,9 @@ void es::defineOverlappingTile() {
 
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::OverlappingTile__setZIndex, "OverlappingTile", "setZIndex", 2, setTextureArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::OverlappingTile__getZIndex, "OverlappingTile", "getZIndex", 1, getPositionArguments);
+
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::OverlappingTile__setXRay, "OverlappingTile", "setXRay", 2, setTextureArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_NUMBER, es::OverlappingTile__getXRay, "OverlappingTile", "getXRay", 1, getPositionArguments);
 }
 
 void es::OverlappingTile__constructor(esObjectWrapperPtr wrapper) {
@@ -221,6 +222,20 @@ esEntryPtr es::OverlappingTile__setZIndex(esEnginePtr esEngine, unsigned int arg
 esEntryPtr es::OverlappingTile__getZIndex(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
 	if(argc == 1 && esCompareNamespaceToObjectParents(args[0].objectData, "OverlappingTile")) {
 		return esCreateNumber(((OverlappingTile*)args[0].objectData->objectWrapper->data)->getZIndex());
+	}
+	return nullptr;
+}
+
+esEntryPtr es::OverlappingTile__setXRay(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 2 && esCompareNamespaceToObjectParents(args[0].objectData, "OverlappingTile")) {
+		((OverlappingTile*)args[0].objectData->objectWrapper->data)->setXRay(args[1].numberData);
+	}
+	return nullptr;
+}
+
+esEntryPtr es::OverlappingTile__getXRay(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 1 && esCompareNamespaceToObjectParents(args[0].objectData, "OverlappingTile")) {
+		return esCreateNumber(((OverlappingTile*)args[0].objectData->objectWrapper->data)->canXRay());
 	}
 	return nullptr;
 }

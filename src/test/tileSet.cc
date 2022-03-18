@@ -50,7 +50,8 @@ void TileSet::showDots() {
 		OverlappingTile* tile = (new OverlappingTile(engine->chunkContainer))
 			->setTexture(30)
 			->setPosition(position)
-			->setZIndex(1);
+			->setZIndex(1)
+			->setXRay(2);
 		this->border.insert(tile);
 	}
 }
@@ -73,7 +74,8 @@ void TileSet::showBorder(glm::vec4 color) {
 					->setTexture(tiles[textureIndex])
 					->setPosition(position)
 					->setZIndex(1)
-					->setColor(color);
+					->setColor(color)
+					->setXRay(2);
 				this->border.insert(tile);
 			}
 		}

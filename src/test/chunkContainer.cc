@@ -24,7 +24,7 @@ resources::SpriteSheet* ChunkContainer::Image = nullptr;
 render::VertexBuffer* ChunkContainer::Vertices = nullptr;
 render::VertexBuffer* ChunkContainer::UVs = nullptr;
 render::VertexBuffer* ChunkContainer::Colors = nullptr;
-render::VertexBuffer* ChunkContainer::Occluded = nullptr;
+render::VertexBuffer* ChunkContainer::XRay = nullptr;
 
 void initChunk(class ChunkContainer* container, class Chunk** chunk) {
 	*chunk = nullptr;
@@ -74,9 +74,9 @@ ChunkContainer::ChunkContainer() {
 		ChunkContainer::Colors->setData((glm::vec4*)&ChunkContainer::ColorsSource[0], sizeof(ChunkContainer::ColorsSource), alignof(glm::vec4));
 	}
 
-	if(ChunkContainer::Occluded == nullptr) {
-		ChunkContainer::Occluded = new render::VertexBuffer(&engine->renderWindow);
-		ChunkContainer::Occluded->setData((int*)&ChunkContainer::OccludedSource, sizeof(ChunkContainer::OccludedSource), alignof(int));
+	if(ChunkContainer::XRay == nullptr) {
+		ChunkContainer::XRay = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::XRay->setData((int*)&ChunkContainer::XRaySource, sizeof(ChunkContainer::XRaySource), alignof(int));
 	}
 
 	this->renderOrder.allocate(8);
@@ -197,9 +197,9 @@ void ChunkContainer::render(double deltaTime, RenderContext &context) {
 		#endif
 	}
 
-	// re-draw occluded tiles
+	// re-draw xray tiles
 	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
-		this->renderOrder[i]->renderOccluded(deltaTime, context);
+		this->renderOrder[i]->renderXRay(deltaTime, context);
 	}
 
 	#ifdef EGGINE_DEBUG
@@ -400,7 +400,8 @@ void ChunkContainer::commit() {
 		this->tileSelectionSprite = (new OverlappingTile())
 			->setTexture(18)
 			->setPosition(glm::uvec3(0, 0, 0))
-			->setZIndex(1);
+			->setZIndex(1)
+			->setXRay(2);
 	}
 
 	if(this->characterSelectionSprite == nullptr) {
@@ -408,7 +409,8 @@ void ChunkContainer::commit() {
 			->setTexture(18)
 			->setColor(glm::vec4(0.0, 0.55, 1.0, 1.0))
 			->setPosition(glm::uvec3(0, 0, 0))
-			->setZIndex(100);
+			->setZIndex(100)
+			->setXRay(2);
 	}
 }
 

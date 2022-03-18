@@ -4,7 +4,7 @@ layout(location = 0) out vec4 color;
 
 in vec2 uv;
 in vec4 tileColor;
-flat in int occluded;
+flat in int xray;
 in float height;
 flat in int timer;
 
@@ -16,7 +16,7 @@ void main() {
 		discard;
 	}
 	
-	if(occluded == 1) {
+	if(xray == 1) {
 		if(mod((int(uv.y * height * 10000) - timer * 500) / 20000, 2) == 0) {
 			color = (color * tileColor * vec4(0.7, 0.7, 0.7, 0.5) + vec4(0.0, 0.1, 0.2, 0.0)) * vec4(1.3, 1.3, 1.3, 1.0);
 		}
@@ -24,7 +24,7 @@ void main() {
 			color = (color * tileColor * vec4(0.7, 0.7, 0.7, 0.9) + vec4(0.0, 0.1, 0.2, 0.0)) * vec4(1.3, 1.3, 1.3, 1.0);
 		}
 	}
-	else if(occluded == 2) {
+	else if(xray == 2) {
 		color = color * tileColor * vec4(1.0, 1.0, 1.0, 0.5);
 	}
 	else {
