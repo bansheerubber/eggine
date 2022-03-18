@@ -123,7 +123,8 @@ void render::Window::initialize() {
 	glfwSetWindowSizeCallback(this->window, onWindowResize);
 
 	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
+	this->enableDepthTest(true);
+	this->enableStencilTest(true);
 	// glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -173,6 +174,51 @@ void render::Window::registerHTMLUpdate() {
 	this->htmlChecksum++;
 }
 
+void render::Window::setStencilFunction(render::StencilFunction func, unsigned int reference, unsigned int mask) {
+	#ifdef __switch__
+	#else
+	glStencilFunc(stencilToGLStencil(func), reference, mask);
+	#endif
+}
+
+void render::Window::setStencilMask(unsigned int mask) {
+	#ifdef __switch__
+	#else
+	glStencilMask(mask);
+	#endif
+}
+
+void render::Window::setStencilOperation(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) {
+	#ifdef __switch__
+	#else
+	glStencilOp(stencilOPToGLStencilOP(stencilFail), stencilOPToGLStencilOP(depthFail), stencilOPToGLStencilOP(pass));
+	#endif
+}
+
+void render::Window::enableStencilTest(bool enable) {
+	#ifdef __switch__
+	#else
+	if(enable) {
+		glEnable(GL_STENCIL_TEST);
+	}
+	else {
+		glDisable(GL_STENCIL_TEST);
+	}
+	#endif
+}
+
+void render::Window::enableDepthTest(bool enable) {
+	#ifdef __switch__
+	#else
+	if(enable) {
+		glEnable(GL_DEPTH_TEST);
+	}
+	else {
+		glDisable(GL_DEPTH_TEST);
+	}
+	#endif
+}
+
 void render::Window::deinitialize() {
 	#ifdef __switch__
 	this->queue.waitIdle();
@@ -212,7 +258,8 @@ void render::Window::prerender() {
 	this->buttons = padGetButtons(&this->pad);
 	#else
 	glClearColor(this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glStencilMask(0xFF);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glfwPollEvents();
 	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
 	#endif

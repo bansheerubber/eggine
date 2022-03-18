@@ -76,11 +76,9 @@ OverlappingTile* InterweavedTile::setPosition(glm::uvec3 position) {
 	relativePosition.x -= chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
 	relativePosition.y -= chunk->position.y * Chunk::Size;
 	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, Chunk::Size, this->container->getRotation());
-	this->screenSpacePosition.z += 0.5;
-
-	if(this->isOccluded()) { // kick the sprite up a row
-		this->screenSpacePosition.z += 2;
-	}
+	
+	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(this->container->getTile(this->position));
+	this->screenSpacePosition.z += drawOntop ? -0.5 : 0.5;
 
 	bool initialized = false;
 	if(this->chunk != chunk) {
@@ -108,12 +106,10 @@ void InterweavedTile::updateRotation(tilemath::Rotation oldRotation, tilemath::R
 	relativePosition.x -= chunk->position.x * Chunk::Size; // we add the chunk position to the tile in the shader
 	relativePosition.y -= chunk->position.y * Chunk::Size;
 	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, Chunk::Size, this->container->getRotation());
-	this->screenSpacePosition.z += 0.5;
 
-	if(this->isOccluded()) { // kick the sprite up a row
-		this->screenSpacePosition.z += 2;
-	}
-	
+	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(this->container->getTile(this->position));
+	this->screenSpacePosition.z += drawOntop ? -0.5 : 0.5;
+
 	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->screenSpacePosition), sizeof(this->screenSpacePosition));
 
 	resources::SpriteFacingInfo* facingsMap;
@@ -154,23 +150,21 @@ OverlappingTile* InterweavedTile::setZIndex(unsigned int zIndex) {
 }
 
 void InterweavedTile::render(double deltaTime, RenderContext &context) {
-	if(this->occluded != this->isOccluded()) {
-		this->occluded = this->isOccluded();
-		this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
-	}
+	this->occluded = false;
+	this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
 	
 	this->vertexAttributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }
 
 void InterweavedTile::renderOccluded(double deltaTime, RenderContext &context) {
-	if(this->occluded != this->isOccluded()) {
-		this->occluded = this->isOccluded();
-		this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
-	}
-	
+	this->occluded = true;
+	this->vertexBuffers[3]->setData(&this->occluded, sizeof(this->occluded), sizeof(this->occluded));
+
+	engine->renderWindow.enableDepthTest(false);
 	this->vertexAttributes->bind();
 	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
+	engine->renderWindow.enableDepthTest(true);
 }
 
 void es::defineInterweavedTile() {

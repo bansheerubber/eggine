@@ -462,7 +462,7 @@ void Engine::tick() {
 	this->debugText->setText(this->debug.getInfoText());
 	#endif
 
-	glDisable(GL_DEPTH_TEST);
+	this->renderWindow.enableDepthTest(false);
 
 	for(uint64_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
@@ -476,7 +476,7 @@ void Engine::tick() {
 
 	this->renderWindow.render();
 
-	glEnable(GL_DEPTH_TEST);
+	this->renderWindow.enableDepthTest(true);
 
 	if(this->network.isServer()) {
 		this->network.tick();

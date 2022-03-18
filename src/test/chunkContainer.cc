@@ -355,15 +355,18 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 world) {
 		}
 	}
 
-	coordinates.x += directionTowardsCamera.x * 50;
-	coordinates.y += directionTowardsCamera.y * 50;
-	coordinates.z += directionTowardsCamera.z * 49;
+	coordinates.x += directionTowardsCamera.x;
+	coordinates.y += directionTowardsCamera.y;
 
-	for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 0; i++) {
-		coordinates.x -= directionTowardsCamera.x;
-		coordinates.y -= directionTowardsCamera.y;
-		coordinates.z -= directionTowardsCamera.z;
-	}
+	// coordinates.x += directionTowardsCamera.x * 50;
+	// coordinates.y += directionTowardsCamera.y * 50;
+	// coordinates.z += directionTowardsCamera.z * 49;
+
+	// for(unsigned int i = 0; i < 50 && this->getTile(coordinates) == 0; i++) {
+	// 	coordinates.x -= directionTowardsCamera.x;
+	// 	coordinates.y -= directionTowardsCamera.y;
+	// 	coordinates.z -= directionTowardsCamera.z;
+	// }
 
 	return coordinates;
 }

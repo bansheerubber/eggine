@@ -105,7 +105,7 @@ glm::vec3 tilemath::tileToScreen(glm::vec3 coordinate, int64_t size, tilemath::R
 		else {
 			row = (size - 1) - (ceil((sqrt(8.0 * -(index - pow(size, 2)) + 1) - 1) / 2.0) - 1) + (size - 1);
 		}
-		depth = row + coordinate.z * size * size;
+		depth = (row - 1) + coordinate.z * size * size;
 	}
 	
 	switch(rotation) {
