@@ -228,11 +228,11 @@ function Unit::setAP(%this, %ap) {
 
 function Unit::move(%this, %position) {
 	%unitPosition = %this.getPosition();
-	%distance = (%this.path.size() - 1);
-
 	if(!isObject(%this.path)) {
 		return;
 	}
+
+	%distance = (%this.path.size() - 1);
 
 	if(%this.getDestinations().has(%position) && %this.moves >= %distance) {
 		%this.addAP(-1);
