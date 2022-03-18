@@ -7,6 +7,7 @@ function selectTarget(%target) {
 		if(!isObject($Unit::TargetSprite)) {
 			$Unit::TargetSprite = new InterweavedTile();
 			$Unit::TargetSprite.setZIndex(50);
+			$Unit::TargetSprite.setXRay(2);
 			$Unit::TargetSprite.setTexture(8);
 		}
 
