@@ -288,17 +288,16 @@ resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position, bo
 	}
 }
 
-void ChunkContainer::selectTile(glm::ivec3 position, bool browsing) {
+void ChunkContainer::selectTile(glm::ivec3 position, bool browsing, bool controller) {
 	if(!this->isValidTilePosition(position)) {
 		return;
 	}
-	
-	this->tileSelectionSprite->setPosition(position);
 
-	esEntry arguments[2];
+	esEntry arguments[3];
 	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
 	esCreateNumberAt(&arguments[1], browsing);
-	esDeleteEntry(esCallFunction(engine->eggscript, "onSelectTile", 2, arguments));
+	esCreateNumberAt(&arguments[2], controller);
+	esDeleteEntry(esCallFunction(engine->eggscript, "onSelectTile", 3, arguments));
 }
 
 TileNeighborIterator ChunkContainer::getNeighbors(glm::ivec3 position) {
@@ -360,13 +359,16 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 screen) {
 
 void ChunkContainer::onBind(string &bind, binds::Action action) {
 	if(bind == "chunk.mouseSelectTile" && action == binds::PRESS) {
-		this->selectTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)), false);
+		this->selectTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)), false, false);
 	}
 	else if(bind == "chunk.mouseRightClickTile" && action == binds::PRESS) {
 		this->rightClickTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)));
 	}
 	else if(bind == "chunk.selectTile" && action == binds::PRESS) {
-		this->selectTile(this->tileSelectionSprite->getPosition(), false);
+		glm::vec2 position = engine->camera->getPosition();
+		position.x += 0.5;
+		position.y = -position.y;
+		this->selectTile(this->findCandidateSelectedTile(position), false, true);
 	}
 }
 
@@ -375,7 +377,7 @@ void ChunkContainer::onAxis(string &bind, double value) {
 		glm::vec2 position = engine->camera->getPosition();
 		position.x += 0.5;
 		position.y = -position.y;
-		this->selectTile(this->findCandidateSelectedTile(position), true);
+		this->selectTile(this->findCandidateSelectedTile(position), true, true);
 	}
 	else if(bind == "chunk.mouseXAxis" || bind == "chunk.mouseYAxis") {
 		this->hoverTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)));
@@ -388,7 +390,8 @@ void ChunkContainer::commit() {
 			->setTexture(18)
 			->setPosition(glm::uvec3(0, 0, 0))
 			->setZIndex(1)
-			->setXRay(2);
+			->setXRay(2)
+			->setColor(glm::vec4(0, 0, 0, 0));
 	}
 
 	if(this->characterSelectionSprite == nullptr) {

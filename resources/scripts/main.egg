@@ -30,6 +30,7 @@ function init() {
 	$Unit::SprintBorderColor = {0; 0; 1; 1};
 
 	schedule(100, "teamInit");
+	schedule(100, "tileInit");
 
 	// tile stuff
 	$Tile::Directions = new Array();
@@ -183,7 +184,7 @@ function resetUnitAP(%state) {
 	getChunkContainer().getSelectedCharacter().setAP(2);
 }
 
-function onSelectTile(%position, %browsing) {
+function onSelectTile(%position, %browsing, %controller) {
 	if(%browsing) {
 		$Unit::HoveredTile = %position;
 		%character = getChunkContainer().getSelectedCharacter();
@@ -194,6 +195,9 @@ function onSelectTile(%position, %browsing) {
 				%path.showDots();
 			}
 		}
+
+		$Tile::TileSelectionIcon.setPosition(%position);
+		$Tile::TileSelectionIcon.setColor({1; 1; 1; 1});
 	}
 	else {
 		%character = isTileSelectable(%position);
@@ -206,6 +210,9 @@ function onSelectTile(%position, %browsing) {
 				selectTarget(%character);
 				playSound("SelectEnemy");
 			}
+
+			$Tile::TileSelectionIcon.setPosition(%position);
+			$Tile::TileSelectionIcon.setColor({1; 1; 1; 1});
 		}
 	}
 }

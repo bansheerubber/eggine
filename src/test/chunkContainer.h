@@ -58,7 +58,7 @@ class ChunkContainer : public RenderObject {
 
 		void selectCharacter(class Character* character);
 		class Character* getSelectedCharacter();
-		void selectTile(glm::ivec3 position, bool browsing);
+		void selectTile(glm::ivec3 position, bool browsing, bool controller);
 
 		void setSize(unsigned int size);
 		unsigned int getSize();

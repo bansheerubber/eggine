@@ -1,3 +1,12 @@
+function tileInit() {
+	$Tile::TileSelectionIcon = new OverlappingTile();
+	$Tile::TileSelectionIcon.setTexture(18);
+	$Tile::TileSelectionIcon.setPosition({0; 0; 0});
+	$Tile::TileSelectionIcon.setZIndex(1);
+	$Tile::TileSelectionIcon.setXRay(2);
+	$Tile::TileSelectionIcon.setColor({0; 0; 0; 0});
+}
+
 // returns a vector pointing from the origin tile to the tile that is adjacent to it
 function Tile::getAdjacentDirection(%origin, %position) {
 	for(%i = 0; %i < 4; %i++) {
