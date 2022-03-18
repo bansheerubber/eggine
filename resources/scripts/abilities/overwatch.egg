@@ -9,6 +9,10 @@ class OverwatchAbility inherits Ability {
 		
 		%this.owner.overwatch = false;
 
+		if(isObject(%this.owner.overwatchIcon)) {
+			%this.owner.overwatchIcon.delete();
+		}
+
 		if(%this.roll(%target)) {
 			%target.addHealth(-2);
 		}
@@ -19,6 +23,16 @@ class OverwatchAbility inherits Ability {
 	function use(%this, %target) {
 		Parent::use(%this, %target);
 		%this.owner.overwatch = true;
+
+		if(isObject(%this.owner.overwatchIcon)) {
+			%this.owner.overwatchIcon.delete();
+		}
+
+		%this.owner.overwatchIcon = new InterweavedTile();
+		%this.owner.overwatchIcon.setZIndex(50);
+		%this.owner.overwatchIcon.setXRay(2);
+		%this.owner.overwatchIcon.setTexture(36);
+		%this.owner.overwatchIcon.setPosition(%this.owner.getPosition());
 
 		playSound("OverwatchUse");
 	}
