@@ -185,6 +185,7 @@ function Unit::updateUI(%this) { // if we're selected, then update the UI
 		%this.getSprintDestinations().showBorder($Unit::SprintBorderColor);
 		%this.updateTargettingUI();
 		%this.updateAbilityList();
+		updatePlayerSoldiers();
 	}
 }
 
@@ -261,7 +262,12 @@ function Unit::updateTargettingUI(%this) {
 		}
 
 		if(%usable) {
-			%html = %html @ "<img enemy-id=\"" @ %i @ "\" es-class=\"EnemyIconElement\" class=\"enemy-icon\" src=\"/images/alien.png\" />";
+			%src = "/images/alien.png";
+			if(%enemy == $Unit::SelectedTarget) {
+				%src = "/images/alienSelected.png";
+			}
+			
+			%html = %html @ "<img enemy-id=\"" @ %i @ "\" es-class=\"EnemyIconElement\" class=\"enemy-icon\" src=\"" @ %src @ "\" />";
 		}
 	}
 	getHTMLElementById("enemy-icons").createChild(%html);
@@ -285,6 +291,21 @@ function Unit::updateAbilityList(%this) {
 
 	if(!%selected) { // if we couldn't select our selected ability, then it is missing from the HTML ability list and we should hide the ability UI
 		%this.selectAbility(-1);
+	}
+}
+
+function updatePlayerSoldiers() {
+	getHTMLElementById("player-soldiers").clear();
+	%team = getChunkContainer().getPlayerTeam();
+	for(%i = 0; %i < %team.size(); %i++) {
+		%unit = %team.get(%i);
+
+		%src = "/images/headshot.png";
+		if(getChunkContainer().getSelectedCharacter() == %unit) {
+			%src = "/images/headshotSelected.png";
+		}
+		
+		getHTMLElementById("player-soldiers").createChild("<img es-class=\"SoldierElement\" soldier-index=\"" @ %i @ "\" class=\"soldier-icon\" src=\"" @ %src @ "\" />");
 	}
 }
 
@@ -419,5 +440,14 @@ package unit {
 		if(isObject(%character)) {
 			%character.onSelect();
 		}
+	}
+};
+
+class SoldierElement inherits HTMLElement {
+	function onClick(%this) {
+		%character = getChunkContainer().getPlayerTeam().get(%this.getAttribute("soldier-index"));
+		getChunkContainer().selectCharacter(%character);
+		getActiveCamera().pan(getActiveCamera().getPosition(), tileToScreen(%character.getPosition()), 0.2);
+		playSound("SelectUnit");
 	}
 };

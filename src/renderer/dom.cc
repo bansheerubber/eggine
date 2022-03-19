@@ -136,6 +136,8 @@ esEntryPtr es::HTMLElement__setAttribute(esEnginePtr esEngine, unsigned int argc
 			return nullptr;
 		}
 		found.value()->set_attr(args[1].stringData, args[2].stringData);
+		found.value()->parse_attributes();
+		found.value()->parse_styles(true);
 		engine->renderWindow.registerHTMLUpdate();
 
 		esEntry arguments[3];
