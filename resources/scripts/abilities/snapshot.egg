@@ -35,7 +35,8 @@ class SnapshotAbility inherits Ability {
 	}
 
 	function description(%this, %target) {
-		%table = "<table class=\"ability-stats-table\"><tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr><tr><td>Damage: 5</td></tr></table>";
+		%pips = %this.getAPPips(1);
+		%table = "<table class=\"ability-stats-table\"><tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr><tr><td>Damage: 5</td></tr><tr><td>" @ %pips @ "</td></tr></table>";
 		%html = "<div>A quick, inaccurate attack against an enemy</div>";
 		if(%this.usable(%target)) {
 			return %html @ %table;

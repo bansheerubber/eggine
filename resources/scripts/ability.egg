@@ -57,4 +57,12 @@ class Ability inherits SimObject {
 	function actionName(%this, %target) {
 		return "Fire";
 	}
+
+	function getAPPips(%this, %pipCount) {
+		%pips = "AP: ";
+		for(%i = 0; %i < %pipCount; %i++) {
+			%pips = %pips @ "<img class=\"ability-pip\" src=\"/images/apPip.png\" />";
+		}
+		return %pips;
+	}
 };

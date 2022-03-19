@@ -315,7 +315,7 @@ function updatePlayerSoldiers() {
 			}
 		}
 		
-		getHTMLElementById("player-soldiers").createChild("<div es-class=\"SoldierElement\" soldier-index=\"" @ %i @ "\" class=\"soldier-icon\"><img class=\"avatar\" src=\"" @ %src @ "\" /><div class=\"info\">Danny Has A Gun<div class=\"pips\">" @ %pips @ "</div></div></div>");
+		getHTMLElementById("player-soldiers").createChild("<div es-class=\"SoldierElement\" soldier-index=\"" @ %i @ "\" class=\"soldier-icon\"><img class=\"avatar\" src=\"" @ %src @ "\" /><div class=\"info\">Max Blast<div class=\"pips\">" @ %pips @ "</div></div></div>");
 	}
 }
 
