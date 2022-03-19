@@ -307,6 +307,8 @@ void Engine::initialize() {
 	#ifdef EGGINE_DEVELOPER_MODE
 	this->developerGui = new DeveloperGui();
 	#endif
+
+	glfwUpdateGamepadMappings("03000000d620000011a7000011010000,Nintendo Switch PowerA Core Plus Controller,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b0,y:b3,platform:Linux,");
 }
 
 void Engine::exit() {
