@@ -304,8 +304,18 @@ function updatePlayerSoldiers() {
 		if(getChunkContainer().getSelectedCharacter() == %unit) {
 			%src = "/images/headshotSelected.png";
 		}
+
+		%pips = "";
+		for(%j = 0; %j < 2; %j++) {
+			if(%j < %unit.ap) {
+				%pips = %pips @ "<img class=\"pip\" src=\"/images/apPip.png\" />";
+			}
+			else {
+				%pips = %pips @ "<img class=\"pip\" src=\"/images/apPipInactive.png\" />";
+			}
+		}
 		
-		getHTMLElementById("player-soldiers").createChild("<img es-class=\"SoldierElement\" soldier-index=\"" @ %i @ "\" class=\"soldier-icon\" src=\"" @ %src @ "\" />");
+		getHTMLElementById("player-soldiers").createChild("<div es-class=\"SoldierElement\" soldier-index=\"" @ %i @ "\" class=\"soldier-icon\"><img class=\"avatar\" src=\"" @ %src @ "\" /><div class=\"info\">Danny Has A Gun<div class=\"pips\">" @ %pips @ "</div></div></div>");
 	}
 }
 
