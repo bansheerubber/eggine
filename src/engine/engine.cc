@@ -250,11 +250,20 @@ void Engine::initialize() {
 	this->gamepadToEnum["left-trigger"] = binds::LEFT_TRIGGER;
 	this->gamepadToEnum["right-trigger"] = binds::RIGHT_TRIGGER;
 
+	this->gamepadToEnum["left-joystick-d-pad-right"] = binds::LEFT_JOYSTICK_DPAD_RIGHT;
+	this->gamepadToEnum["left-joystick-d-pad-left"] = binds::LEFT_JOYSTICK_DPAD_LEFT;
+	this->gamepadToEnum["left-joystick-d-pad-down"] = binds::LEFT_JOYSTICK_DPAD_DOWN;
+	this->gamepadToEnum["left-joystick-d-pad-up"] = binds::LEFT_JOYSTICK_DPAD_UP;
+	this->gamepadToEnum["right-joystick-d-pad-right"] = binds::RIGHT_JOYSTICK_DPAD_RIGHT;
+	this->gamepadToEnum["right-joystick-d-pad-left"] = binds::RIGHT_JOYSTICK_DPAD_LEFT;
+	this->gamepadToEnum["right-joystick-d-pad-down"] = binds::RIGHT_JOYSTICK_DPAD_DOWN;
+	this->gamepadToEnum["right-joystick-d-pad-up"] = binds::RIGHT_JOYSTICK_DPAD_UP;
+
 	this->axesToEnum["left-axis-x"] = binds::LEFT_AXIS_X;
 	this->axesToEnum["left-axis-y"] = binds::LEFT_AXIS_Y;
-	this->axesToEnum["right-axis-y"] = binds::RIGHT_AXIS_X;
+	this->axesToEnum["right-axis-x"] = binds::RIGHT_AXIS_X;
 	this->axesToEnum["right-axis-y"] = binds::RIGHT_AXIS_Y;
-	this->axesToEnum["mouse-axis-y"] = binds::MOUSE_AXIS_X;
+	this->axesToEnum["mouse-axis-x"] = binds::MOUSE_AXIS_X;
 	this->axesToEnum["mouse-axis-y"] = binds::MOUSE_AXIS_Y;
 
 	this->addGamepadBind(binds::B_BUTTON, binds::Keybind {
@@ -385,6 +394,47 @@ void Engine::tick() {
 			}
 
 			onAxisMove(axis, value);
+		}
+
+		// simulate a d-pad using the joysticks
+		binds::Axes correspondingAxis[4] = {
+			binds::LEFT_AXIS_Y,
+			binds::LEFT_AXIS_X,
+			binds::RIGHT_AXIS_Y,
+			binds::RIGHT_AXIS_X,
+		};
+
+		binds::GamepadButtons axisToBinding[8] = {
+			binds::LEFT_JOYSTICK_DPAD_RIGHT,
+			binds::LEFT_JOYSTICK_DPAD_LEFT,
+			binds::LEFT_JOYSTICK_DPAD_DOWN,
+			binds::LEFT_JOYSTICK_DPAD_UP,
+			binds::RIGHT_JOYSTICK_DPAD_RIGHT,
+			binds::RIGHT_JOYSTICK_DPAD_LEFT,
+			binds::RIGHT_JOYSTICK_DPAD_DOWN,
+			binds::RIGHT_JOYSTICK_DPAD_UP,
+		};
+
+		for(int i = 0; i < 4; i++) {
+			double value = this->renderWindow.gamepad.axes[i];
+			double correspondingValue = this->renderWindow.gamepad.axes[correspondingAxis[i]];
+
+			if(abs(value) > 0.9 && abs(correspondingValue) < 0.3) {
+				unsigned int index = i * 2 + (value < 0 ? 1 : 0);
+				if(this->renderWindow.axisDPadCounters[i] == binds::INVALID_BUTTON) {
+					onGamepadButton(axisToBinding[index], true);
+				}
+				else if(this->renderWindow.axisDPadCounters[i] != axisToBinding[index]) {
+					// should be a rare circumstance, releases button if we suddenly flip sign from value > 0.9 to value < -0.9
+					onGamepadButton(this->renderWindow.axisDPadCounters[i], false);
+				}
+
+				this->renderWindow.axisDPadCounters[i] = axisToBinding[index];
+			}
+			else if(this->renderWindow.axisDPadCounters[i] != binds::INVALID_BUTTON) {
+				onGamepadButton(this->renderWindow.axisDPadCounters[i], false);
+				this->renderWindow.axisDPadCounters[i] = binds::INVALID_BUTTON;
+			}
 		}
 
 		binds::GamepadButtons buttons[12] = {binds::A_BUTTON, binds::B_BUTTON, binds::X_BUTTON, binds::Y_BUTTON, binds::D_PAD_UP, binds::D_PAD_DOWN, binds::D_PAD_LEFT, binds::D_PAD_RIGHT, binds::SPECIAL_LEFT, binds::SPECIAL_RIGHT, binds::LEFT_BUTTON, binds::RIGHT_BUTTON};

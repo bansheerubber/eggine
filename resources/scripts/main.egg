@@ -60,10 +60,10 @@ function init() {
 	$Cover::Full = 3;					// the unit is not visible and is completely behind a wall
 	
 	addKeybind("chunk.rotateClockwise", "q", "onRotateClockwise");
-	addKeybind("chunk.rotateClockwise", "d-pad-left", "onRotateClockwise");
+	addKeybind("chunk.rotateClockwise", "right-joystick-d-pad-left", "onRotateClockwise");
 
 	addKeybind("chunk.rotateCounterClockwise", "e", "onRotateCounterClockwise");
-	addKeybind("chunk.rotateCounterClockwise", "d-pad-right", "onRotateCounterClockwise");
+	addKeybind("chunk.rotateCounterClockwise", "right-joystick-d-pad-right", "onRotateCounterClockwise");
 
 	addKeybind("unit.gamepadPressTile", "b-button", "onGamepadPressTile");
 

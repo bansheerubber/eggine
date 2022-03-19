@@ -161,7 +161,12 @@ void Camera::onAxis(string &bind, double value) {
 		this->keyMapping.yAxis = value;
 	}
 	else if(bind == "camera.zoomAxis") {
-		this->keyMapping.zoomAxis = value;
+		if(abs(value) > 0.2) {
+			this->keyMapping.zoomAxis = value < 0 ? (value + 0.2) / 0.8 : (value - 0.2) / 0.8;
+		}
+		else {
+			this->keyMapping.zoomAxis = 0;
+		}
 	}
 }
 

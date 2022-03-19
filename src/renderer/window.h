@@ -307,6 +307,8 @@ namespace render {
 			bool hasGamepad;
 			#endif
 
+			binds::GamepadButtons axisDPadCounters[4] = {binds::INVALID_BUTTON, binds::INVALID_BUTTON, binds::INVALID_BUTTON, binds::INVALID_BUTTON};
+
 		protected:
 			unsigned int errorCount = 0;
 
