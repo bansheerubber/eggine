@@ -31,13 +31,10 @@ void Team::remove(Unit* unit) {
 }
 
 int teamUnitSort(Unit** unit1, Unit** unit2) {
-	glm::vec2 screen1 = tilemath::tileToScreen((*unit1)->getPosition(), engine->chunkContainer->getSize() * Chunk::Size, engine->chunkContainer->getRotation());
-	glm::vec2 screen2 = tilemath::tileToScreen((*unit2)->getPosition(), engine->chunkContainer->getSize() * Chunk::Size, engine->chunkContainer->getRotation());
-	
-	if(screen1.x > screen2.x) {
+	if(*unit1 > *unit2) {
 		return 1;
 	}
-	else if(screen1.x < screen2.x) {
+	else if(*unit1 < *unit2) {
 		return -1;
 	}
 	else {
