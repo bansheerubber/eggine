@@ -29,7 +29,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	}
 
 	#ifndef __switch__
-	int key = engine->keyToScancode[string(arguments[0].stringData)];
+	int key = engine->keyToScancode[string(arguments[0].stringData->string, arguments[0].stringData->size)];
 	int action = (int)arguments[1].numberData;
 
 	#ifdef EGGINE_DEVELOPER_MODE
@@ -212,7 +212,10 @@ void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods)
 	
 	esEntry arguments[2];
 	arguments[0].type = ES_ENTRY_STRING;
-	arguments[0].stringData = cloneString(engine->scancodeToKey[key].c_str());
+	arguments[0].stringData = new esString {
+		cloneString(engine->scancodeToKey[key].c_str()),
+		(uint16_t)engine->scancodeToKey[key].size(),
+	};
 	arguments[1].type = ES_ENTRY_NUMBER;
 	arguments[1].numberData = action;
 	esDeleteEntry(esCallFunction(engine->eggscript, "onKeyPress", 2, arguments));

@@ -109,7 +109,7 @@ void es::defineSoundEngine() {
 
 esEntryPtr es::playSound(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
-		engine->soundEngine.playSoundByCollectionName(std::string(args[0].stringData));
+		engine->soundEngine.playSoundByCollectionName(std::string(args[0].stringData->string, args[0].stringData->size));
 	}
 	return nullptr;
 }

@@ -30,7 +30,7 @@ esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 		if(path != "") {
 			path += "/";
 		}
-		path += args[0].stringData;
+		path += std::string(args[0].stringData->string, args[0].stringData->size);
 
 		resources::ScriptFile* file = (resources::ScriptFile*)engine->manager->metadataToResources(
 			engine->manager->carton->database.get()->equals("fileName", path)->exec()
@@ -49,21 +49,31 @@ esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 
 esEntryPtr es::addKeybind(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 3) {
-		engine->registerTSKeybindCallback(args[0].stringData, args[1].stringData, args[2].stringData);
+		engine->registerTSKeybindCallback(
+			std::string(args[0].stringData->string, args[0].stringData->size),
+			std::string(args[1].stringData->string, args[1].stringData->size),
+			string(args[2].stringData->string, args[2].stringData->size)
+		);
 	}
 	return nullptr;
 }
 
 esEntryPtr es::SimObject__addKeybind(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 4) {
-		engine->registerTSKeybindObjectCallback(args[0].objectData, args[1].stringData, args[2].stringData, args[3].stringData);
+		engine->registerTSKeybindObjectCallback(
+			args[0].objectData,
+			std::string(args[1].stringData->string, args[1].stringData->size),
+			std::string(args[2].stringData->string, args[2].stringData->size),
+			std::string(args[3].stringData->string, args[3].stringData->size)
+		);
 	}
 	return nullptr;
 }
 
 esEntryPtr es::probeGarbage(esEnginePtr engine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
-		return esCreateNumber(esProbeGarbage(engine, args[0].stringData));
+		std::string className(args[0].stringData->string, args[0].stringData->size);
+		return esCreateNumber(esProbeGarbage(engine, className.c_str()));
 	}
 	return nullptr;
 }

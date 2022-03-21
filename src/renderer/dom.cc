@@ -32,7 +32,7 @@ void es::defineDOM() {
 
 esEntryPtr es::getHTMLElementById(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
-		esObjectReferencePtr object = engine->renderWindow.htmlContainer->getESObject(string(args[0].stringData));
+		esObjectReferencePtr object = engine->renderWindow.htmlContainer->getESObject(string(args[0].stringData->string, args[0].stringData->size));
 		if(object != nullptr) {
 			return esCreateObject(object);
 		}
@@ -111,7 +111,7 @@ esEntryPtr es::HTMLElement__createChild(esEnginePtr esEngine, unsigned int argc,
 		litehtml::element::ptr parent = found.value();
 		esEntryPtr entry = new esEntry;
 		entry->type = ES_ENTRY_OBJECT;
-		entry->objectData = engine->renderWindow.htmlContainer->createChild(parent, string(args[1].stringData));
+		entry->objectData = engine->renderWindow.htmlContainer->createChild(parent, string(args[1].stringData->string, args[1].stringData->size));
 		return entry;
 	}
 	return nullptr;
@@ -135,15 +135,29 @@ esEntryPtr es::HTMLElement__setAttribute(esEnginePtr esEngine, unsigned int argc
 		if(found == engine->renderWindow.htmlContainer->esObjectToElement.end()) {
 			return nullptr;
 		}
-		found.value()->set_attr(args[1].stringData, args[2].stringData);
+
+		std::string name(args[1].stringData->string, args[1].stringData->size);
+		std::string value(args[2].stringData->string, args[2].stringData->size);
+
+		found.value()->set_attr(name.c_str(), value.c_str());
 		found.value()->parse_attributes();
 		found.value()->parse_styles(true);
 		engine->renderWindow.registerHTMLUpdate();
 
 		esEntry arguments[3];
 		esCreateObjectAt(&arguments[0], args[0].objectData);
-		esCreateStringAt(&arguments[1], args[1].stringData);
-		esCreateStringAt(&arguments[2], args[2].stringData);
+
+		esStringPtr nameString = new esString {
+			cloneString(name.c_str()),
+			(uint16_t)name.size(),
+		};
+		esCreateStringAt(&arguments[1], nameString);
+
+		esStringPtr valueString = new esString {
+			cloneString(value.c_str()),
+			(uint16_t)value.size(),
+		};
+		esCreateStringAt(&arguments[2], valueString);
 		esDeleteEntry(esCallMethod(esEngine, args[0].objectData, "onSetAttribute", 3, arguments));
 	}
 	return nullptr;
@@ -155,9 +169,15 @@ esEntryPtr es::HTMLElement__getAttribute(esEnginePtr esEngine, unsigned int argc
 		if(found == engine->renderWindow.htmlContainer->esObjectToElement.end()) {
 			return nullptr;
 		}
-		const char* value = found.value()->get_attr(args[1].stringData);
+
+		std::string name(args[1].stringData->string, args[1].stringData->size);
+		const char* value = found.value()->get_attr(name.c_str());
 		if(value != nullptr) {
-			return esCreateString(cloneString((char*)value));
+			esStringPtr valueString = new esString {
+				cloneString(value),
+				(uint16_t)strlen(value),
+			};
+			return esCreateString(valueString);
 		}
 	}
 	return nullptr;
@@ -170,7 +190,11 @@ esEntryPtr es::HTMLElement__setStyleAttribute(esEnginePtr esEngine, unsigned int
 			return nullptr;
 		}
 		litehtml::style styles;
-		styles.add_property(args[1].stringData, args[2].stringData, nullptr, true);
+
+		std::string name(args[1].stringData->string, args[1].stringData->size);
+		std::string value(args[2].stringData->string, args[2].stringData->size);
+
+		styles.add_property(name.c_str(), value.c_str(), nullptr, true);
 		found.value()->add_style(styles);
 		found.value()->parse_styles(true);
 		engine->renderWindow.registerHTMLUpdate();
@@ -184,9 +208,15 @@ esEntryPtr es::HTMLElement__getStyleAttribute(esEnginePtr esEngine, unsigned int
 		if(found == engine->renderWindow.htmlContainer->esObjectToElement.end()) {
 			return nullptr;
 		}
-		const char* value = found.value()->get_style_property(args[1].stringData, false, nullptr);
+
+		std::string name(args[1].stringData->string, args[1].stringData->size);
+		const char* value = found.value()->get_style_property(name.c_str(), false, nullptr);
 		if(value != nullptr) {
-			return esCreateString(cloneString((char*)value));
+			esStringPtr valueString = new esString {
+				cloneString(value),
+				(uint16_t)strlen(value),
+			};
+			return esCreateString(valueString);
 		}
 	}
 	return nullptr;

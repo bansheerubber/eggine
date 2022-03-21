@@ -103,7 +103,7 @@ esEntryPtr es::Team__has(esEnginePtr esEngine, unsigned int argc, esEntry* args)
 esEntryPtr es::Team__setName(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
 		Team* team = (Team*)args[0].objectData->objectWrapper->data;
-		team->name = std::string(args[1].stringData);
+		team->name = std::string(args[1].stringData->string, args[1].stringData->size);
 	}
 	return nullptr;
 }
@@ -111,7 +111,11 @@ esEntryPtr es::Team__setName(esEnginePtr esEngine, unsigned int argc, esEntryPtr
 esEntryPtr es::Team__getName(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
 		Team* team = (Team*)args[0].objectData->objectWrapper->data;
-		return esCreateString(cloneString(team->name.c_str()));
+		esStringPtr nameString = new esString {
+			cloneString(team->name.c_str()),
+			(uint16_t)team->name.size(),
+		};
+		return esCreateString(nameString);
 	}
 	return nullptr;
 }
