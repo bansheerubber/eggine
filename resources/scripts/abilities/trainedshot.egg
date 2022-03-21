@@ -39,14 +39,19 @@ class TrainedShotAbility inherits Ability {
 
 	function description(%this, %target) {
 		%pips = %this.getAPPips(2);
-		%table = "<table class=\"ability-stats-table\"><tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr><tr><td>Damage: 5</td></tr><tr><td>" @ %pips @ "</td></tr></table>";
-		%html = "<div>An accurate, high-damage shot against an enemy</div>";
+
+		%accuracy = "";
 		if(%this.usable(%target)) {
-			return %html @ %table;
+			%accuracy = "<tr><td>Accuracy:" SPC mFloor(%this.accuracy(%target) * 100) @ "%</td></tr>";
 		}
-		else {
-			return %html;
+		else if(isObject(%target)) {
+			%accuracy = "<tr><td>Accuracy: 0%</td></tr>";
 		}
+
+		%table = "<table class=\"ability-stats-table\">" @ %accuracy @ "<tr><td>Damage: 5</td></tr><tr><td>" @ %pips @ "</td></tr></table>";
+		%html = "<div>An accurate, high-damage shot against an enemy</div>";
+		return %html @ %table;
+		return "";
 	}
 
 	function actionName(%this, %target) {
