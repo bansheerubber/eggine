@@ -16,6 +16,9 @@ class OverwatchAbility inherits Ability {
 		if(%this.roll(%target)) {
 			%target.addHealth(-2);
 		}
+		else {
+			%target.showMiss();
+		}
 
 		playSound("SnapshotFire");
 	}

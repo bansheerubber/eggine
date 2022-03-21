@@ -8,6 +8,9 @@ class SnapshotAbility inherits Ability {
 		if(%this.roll(%target)) {
 			%target.addHealth(-5);
 		}
+		else {
+			%target.showMiss();
+		}
 
 		playSound("SnapshotFire");
 	}

@@ -408,6 +408,15 @@ function Unit::triggerOverwatch(%this, %target) {
 	}
 }
 
+function Unit::showMiss(%this) {
+	$miss = new InterweavedTile();
+	$miss.setZIndex(100);
+	$miss.setXRay(2);
+	$miss.setTexture(37);
+	$miss.setPosition(%this.getPosition());
+	$miss.schedule(1500, "delete");
+}
+
 function fireOverwatch(%target) {
 	for(%i = 0; %i < getTeamCount(); %i++) {
 		%team = getTeam(%i);
