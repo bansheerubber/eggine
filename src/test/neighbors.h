@@ -8,6 +8,8 @@ enum NeighborDirection {
 	DIRECTION_EAST,
 	DIRECTION_SOUTH,
 	DIRECTION_WEST,
+	DIRECTION_UP,
+	DIRECTION_DOWN,
 };
 
 inline NeighborDirection flipDirection(NeighborDirection direction) {
@@ -26,6 +28,14 @@ inline NeighborDirection flipDirection(NeighborDirection direction) {
 
 		case DIRECTION_WEST: {
 			return DIRECTION_EAST;
+		}
+
+		case DIRECTION_UP: {
+			return DIRECTION_DOWN;
+		}
+
+		case DIRECTION_DOWN: {
+			return DIRECTION_UP;
 		}
 		
 		default: {

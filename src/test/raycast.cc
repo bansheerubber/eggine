@@ -91,8 +91,6 @@ RaycastMarcher& RaycastMarcher::operator++() {
 		{DIRECTION_SOUTH, DIRECTION_EAST}, // north-west corner wall
 	};
 
-	const glm::ivec3 offset(0, 0, -1);
-
 	if(!engine->chunkContainer->isValidTilePosition(this->position)) {
 		this->_finished = true;
 		this->currentNormal = glm::vec3();
@@ -179,6 +177,7 @@ RaycastMarcher& RaycastMarcher::operator++() {
 
 	// check position below current position (special double-height tile case)
 	{
+		const glm::ivec3 offset(0, 0, -1);
 		resources::SpriteSheetInfo info;
 		if(
 			this->currentHits.find(this->position + offset) != this->currentHits.end()
