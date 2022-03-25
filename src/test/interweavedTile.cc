@@ -150,7 +150,7 @@ OverlappingTile* InterweavedTile::setZIndex(unsigned int zIndex) {
 }
 
 void InterweavedTile::render(double deltaTime, RenderContext &context) {
-	this->xrayBuffer = false;
+	this->xrayBuffer = 0;
 	this->vertexBuffers[3]->setData(&this->xrayBuffer, sizeof(this->xrayBuffer), sizeof(this->xrayBuffer));
 	
 	this->vertexAttributes->bind();
@@ -158,7 +158,7 @@ void InterweavedTile::render(double deltaTime, RenderContext &context) {
 }
 
 void InterweavedTile::renderXRay(double deltaTime, RenderContext &context) {
-	this->xrayBuffer = true;
+	this->xrayBuffer = this->canXRay();
 	this->vertexBuffers[3]->setData(&this->xrayBuffer, sizeof(this->xrayBuffer), sizeof(this->xrayBuffer));
 
 	engine->renderWindow.enableDepthTest(false);
