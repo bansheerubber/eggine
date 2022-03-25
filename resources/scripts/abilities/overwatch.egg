@@ -67,7 +67,8 @@ class OverwatchAbility inherits Ability {
 	}
 
 	function description(%this, %target) {
-		return "<div>Take a shot at an enemy after they have finished moving. Activating overwatch uses all of your unit's AP.</div><table class=\"ability-stats-table\"><tr><td>Damage: 2</td></tr></table>";
+		%pips = %this.getAPPips(%this.cost(%target));
+		return "<div>Take a shot at an enemy after they have finished moving. Activating overwatch uses all of your unit's AP.</div><table class=\"ability-stats-table\"><tr><td>Damage: 2</td></tr><tr><td>" @ %pips @ "</td></tr></table>";
 	}
 
 	function actionName(%this, %target) {

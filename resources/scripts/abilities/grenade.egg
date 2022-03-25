@@ -1,0 +1,170 @@
+$QuadraticTiles = null;
+
+class GrenadeAbility inherits Ability {
+	name = "Grenade";
+	icon = "overwatch.png";
+	useBrowse = true;
+	useSelect = true;
+	lastHover = {-1; -1; -1};
+
+	selectedPosition = {-1; -1; -1};
+	hasSelectedPosition = false;
+
+	radiusIcons = new Array();
+	ghostRadiusIcons = new Array();
+
+	function select(%this, %oldAbility) {
+		if(%oldAbility && %oldAbility.name == "Grenade" && %oldAbility.hasSelectedPosition && %this.owner.ap >= %this.cost(%target)) {
+			%this.selectedPosition = %oldAbility.selectedPosition;
+			%this.hasSelectedPosition = true;
+			%this.showRadius(%this.selectedPosition, true);
+		}
+		else {
+			%this.selectedPosition = {-1; -1; -1};
+			%this.hasSelectedPosition = false;
+			%this.lastHover = {-1; -1; -1};
+		}
+	}
+
+	function deselect(%this) {
+		if(isObject(%this.targetIcon)) {
+			%this.targetIcon.delete();
+		}
+		%this.deleteRadius(false);
+		%this.deleteRadius(true);
+	}
+
+	function selectTile(%this, %position) {
+		if(%this.usable(null)) {
+			%this.showRadius(%position, true);
+			%this.selectedPosition = %position;
+			%this.hasSelectedPosition = true;	
+		}
+	}
+
+	function deleteRadius(%this, %permanent) {
+		%list = %permanent ? %this.radiusIcons : %this.ghostRadiusIcons;
+		for(%i = 0; %i < %list.size(); %i++) {
+			if(isObject(%list[%i])) {
+				%list[%i].delete();
+			}
+		}
+	}
+
+	function showRadius(%this, %position, %permanent) {
+		if(%this.lastHover == %position && !%permanent) {
+			return;
+		}
+
+		%this.deleteRadius(%permanent);
+
+		if(%permanent) {
+			%this.radiusIcons = new Array();
+		}
+		else {
+			%this.ghostRadiusIcons = new Array();
+		}
+
+		%list = %permanent ? %this.radiusIcons : %this.ghostRadiusIcons;
+		for(%x = -1; %x < 2; %x++) {
+			for(%y = -1; %y < 2; %y++) {
+				%icon = new InterweavedTile();
+				%icon.setZIndex(50);
+				%icon.setXRay(2);
+				%icon.setTexture(18);
+				if(%permanent) {
+					%icon.setColor({1; 0; 0; 1.0});
+				}
+				else {
+					%icon.setColor({1; 0.5; 0; 1.0});
+				}
+				%icon.setPosition(%position + {%x; %y; 0});
+				%list.push(%icon);
+			}
+		}
+	}
+
+	function browse(%this, %position) {
+		if(%this.owner.ap < %this.cost(%target)) {
+			if(%this.targetIcon) {
+				%this.targetIcon.delete();
+			}
+			%this.deleteRadius(false);
+			return;
+		}
+		
+		%angle = projectileAngle(%this.owner.getPosition(), %position, 15);
+		if(%angle == null) {
+			// INTERPRETER BUG: cannot do %angle == null && isObject(%this.targetIcon) with an else statement after this if statement
+			if(%this.targetIcon) {
+				%this.targetIcon.delete();
+			}
+			%this.deleteRadius(false);
+			return;
+		}
+
+		if(%this.lastHover != %position) {
+			%this.results = quadraticRaycast(%this.owner.getPosition(), %position + {0; 0; 1}, 15);
+		}
+
+		if(%this.results != null) {
+			if(%this.targetIcon) {
+				%this.targetIcon.delete();
+			}
+			%this.deleteRadius(false);
+			%this.lastHover = %position;
+			return;
+		}
+
+		// finally create target icon if we can hit the tile
+		if(!%this.targetIcon) {
+			%this.targetIcon = new InterweavedTile();
+			%this.targetIcon.setZIndex(50);
+			%this.targetIcon.setXRay(2);
+			%this.targetIcon.setTexture(38);
+		}
+		%this.targetIcon.setPosition(%position);
+		%this.showRadius(%position, false);
+		%this.lastHover = %position;
+	}
+
+	function use(%this, %target) {
+		if(%this.hasSelectedPosition) {
+			for(%x = -1; %x < 2; %x++) {
+				for(%y = -1; %y < 2; %y++) {
+					%character = isTileSelectable(%this.selectedPosition + {%x; %y; 0}); // TODO change this call to something else
+					if(%character) {
+						%character.addHealth(-3);
+					}
+				}
+			}
+			%this.owner.addAP(-%this.cost(%target));
+
+			if(%this.targetIcon) {
+				%this.targetIcon.delete();
+			}
+			%this.deleteRadius(false);
+			%this.deleteRadius(true);
+			%this.hasSelectedPosition = false;
+			%this.selectedPosition = {-1; -1; -1};
+			playSound("GrenadeExplode");
+		}
+	}
+
+	function cost(%this, %target) {
+		return 2;
+	}
+
+	function description(%this, %target) {
+		%pips = %this.getAPPips(%this.cost(%target));
+		return "<div>Throw a grenade. Did you know that fragment grenades that explode in your face are actually less dangerous than bullets?</div><table class=\"ability-stats-table\"><tr><td>Damage: 3</td></tr><tr><td>" @ %pips @ "</td></tr></table>";
+	}
+
+	function usable(%this, %target) {
+		return Parent::usable(%this, %target);
+	}
+
+	function actionName(%this, %target) {
+		return "Throw";
+	}
+};

@@ -16,6 +16,11 @@ function Unit::onAdd(%this) {
 	};
 	%this.abilities.push(%ability3);
 
+	%ability4 = new GrenadeAbility() {
+		owner = %this;
+	};
+	%this.abilities.push(%ability4);
+
 	%this.maxMoves = 5;
 	%this.maxSprintMoves = 15;
 	%this.moves = 5;
@@ -347,7 +352,13 @@ function Unit::selectAbility(%this, %index) {
 			%button.setStyleAttribute("display", "none");
 		}
 
+		if($Unit::SelectedAbility) {
+			$Unit::SelectedAbility.deselect();
+		}
+
 		%this.selectedAbility = %ability;
+		%ability.select($Unit::SelectedAbility);
+
 		$Unit::SelectedAbility = %ability;
 	}
 	else {

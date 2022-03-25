@@ -38,7 +38,7 @@ class SnapshotAbility inherits Ability {
 	}
 
 	function description(%this, %target) {
-		%pips = %this.getAPPips(1);
+		%pips = %this.getAPPips(%this.cost(%target));
 
 		%accuracy = "";
 		if(%this.usable(%target)) {

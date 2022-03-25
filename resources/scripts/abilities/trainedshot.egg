@@ -38,7 +38,7 @@ class TrainedShotAbility inherits Ability {
 	}
 
 	function description(%this, %target) {
-		%pips = %this.getAPPips(2);
+		%pips = %this.getAPPips(%this.cost(%target));
 
 		%accuracy = "";
 		if(%this.usable(%target)) {

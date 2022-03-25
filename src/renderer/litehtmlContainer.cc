@@ -159,7 +159,13 @@ void render::LiteHTMLContainer::on_element_click(const litehtml::element::ptr& e
     if(object) {
       esEntry arguments[1];
       esCreateObjectAt(&arguments[0], object);
-      esDeleteEntry(esCallMethod(engine->eggscript, object, "onClick", 1, arguments));
+      esEntryPtr returnValue = esCallMethod(engine->eggscript, object, "onClick", 1, arguments);
+
+      if(returnValue->type == ES_ENTRY_EMPTY) {
+        this->surpressMouseCallback = true;
+      }
+
+      esDeleteEntry(returnValue);
     }
     element = element->parent();
   }

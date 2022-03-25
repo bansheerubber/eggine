@@ -358,10 +358,10 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 screen) {
 }
 
 void ChunkContainer::onBind(string &bind, binds::Action action) {
-	if(bind == "chunk.mouseSelectTile" && action == binds::PRESS) {
+	if(bind == "chunk.mouseSelectTile" && action == binds::RELEASE) {
 		this->selectTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)), false, false);
 	}
-	else if(bind == "chunk.mouseRightClickTile" && action == binds::PRESS) {
+	else if(bind == "chunk.mouseRightClickTile" && action == binds::RELEASE) {
 		this->rightClickTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)));
 	}
 	else if(bind == "chunk.selectTile" && action == binds::PRESS) {

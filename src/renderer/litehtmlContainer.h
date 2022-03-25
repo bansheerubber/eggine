@@ -25,6 +25,10 @@ namespace std {
 	};
 };
 
+namespace es {
+	esEntryPtr onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
+}
+
 namespace render {
 	struct LiteHTMLTextWrapper {
 		Text* text;
@@ -41,6 +45,8 @@ namespace render {
 		friend esEntryPtr es::HTMLElement__getAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 		friend esEntryPtr es::HTMLElement__setStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 		friend esEntryPtr es::HTMLElement__getStyleAttribute(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
+
+		friend esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr arguments);
 		
 		public:
 			LiteHTMLContainer();
@@ -110,5 +116,7 @@ namespace render {
 			tsl::robin_map<string, litehtml::element::ptr> idToElement;
 			tsl::robin_map<litehtml::element*, esObjectReferencePtr> elementToESObject;
 			tsl::robin_map<esObjectWrapperPtr, litehtml::element::ptr> esObjectToElement;
+
+			bool surpressMouseCallback = false;
 	};
 };

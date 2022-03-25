@@ -39,6 +39,10 @@ function onHoverTile(%position) {
 		}
 		%character.lastPath = %character.path;
 	}
+
+	if($Unit::SelectedAbility.useBrowse) {
+		$Unit::SelectedAbility.browse(%position);
+	}
 	
 	$Editor::CurrentHoverPosition = %position;
 	$Unit::HoveredTile = %position;

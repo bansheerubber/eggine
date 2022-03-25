@@ -18,6 +18,20 @@ class AbilityUseButtonElement inherits HTMLElement {
 class Ability inherits SimObject {
 	name = "Ability";
 	icon = "";
+	useBrowse = false;
+	useSelect = false;
+
+	function select(%this, %oldAbility) {
+
+	}
+
+	function deselect(%this, %oldAbility) {
+		
+	}
+
+	function selectTile(%this, %position) {
+		
+	}
 
 	function roll(%this, %target) {
 		if(getRandom() < %this.accuracy(%target)) {

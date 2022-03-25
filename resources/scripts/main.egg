@@ -3,6 +3,7 @@ exec("tile.egg");
 exec("abilities/snapshot.egg");
 exec("abilities/trainedshot.egg");
 exec("abilities/overwatch.egg");
+exec("abilities/grenade.egg");
 exec("team.egg");
 exec("unit.egg");
 exec("editor.egg");
@@ -79,7 +80,7 @@ function init() {
 }
 
 function HTMLElement::onClick(%this) {
-	
+	return true;
 }
 
 function length(%a) {
@@ -104,7 +105,7 @@ function isTileSelectable(%position) {
 	if(isObject(%character)) {
 		return %character;
 	}
-	return 0;
+	return null;
 }
 
 function onRotateClockwise(%state) {
@@ -191,9 +192,14 @@ function onSelectTile(%position, %browsing, %controller) {
 		if(isObject(%character)) {
 			%path = %character.getPath(%position);
 			%character.path = %path;
-			if(isObject(%path)) {
+			if(isObject(%path) && %character.lastPath != %character.path) {
 				%path.showDots();
 			}
+			%character.lastPath = %character.path;
+		}
+
+		if($Unit::SelectedAbility.useBrowse) {
+			$Unit::SelectedAbility.browse(%position);
 		}
 
 		$Tile::TileSelectionIcon.setPosition(%position);
@@ -201,10 +207,12 @@ function onSelectTile(%position, %browsing, %controller) {
 	}
 	else {
 		%character = isTileSelectable(%position);
+		%noAbilitySelect = false;
 		if(isObject(%character)) {
 			if(getChunkContainer().getPlayerTeam().has(%character)) {
 				getChunkContainer().selectCharacter(%character);
 				playSound("SelectUnit");
+				%noAbilitySelect = true;
 			}
 			else if(getChunkContainer().getEnemyTeam().has(%character)) {
 				selectTarget(%character);
@@ -213,6 +221,13 @@ function onSelectTile(%position, %browsing, %controller) {
 
 			$Tile::TileSelectionIcon.setPosition(%position);
 			$Tile::TileSelectionIcon.setColor({1; 1; 1; 1});
+		}
+
+		if(!%noAbilitySelect) {
+			%ours = getChunkContainer().getSelectedCharacter();
+			if(%ours && $Unit::SelectedAbility.useSelect) {
+				$Unit::SelectedAbility.selectTile(%position);
+			}
 		}
 	}
 }

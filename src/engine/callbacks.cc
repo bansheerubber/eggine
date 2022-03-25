@@ -90,6 +90,12 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 		engine->renderWindow.htmlDocument->on_lbutton_up(engine->mouse.x, engine->mouse.y, engine->mouse.x, engine->mouse.y, redraw);
 	}
 
+	// i'm sure i won't come to regret this later
+	if(engine->renderWindow.htmlContainer->surpressMouseCallback) {
+		engine->renderWindow.htmlContainer->surpressMouseCallback = false;
+		return nullptr;
+	}
+
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow) || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
 		return nullptr;
