@@ -36,13 +36,15 @@ class QuadraticRaycastMarcher {
 		double lastZ = 0;
 
 		glm::vec3 currentNormal;
-		NeighborDirection neighborDirection;
+		NeighborDirection neighborDirection = INVALID_DIRECTION;
+		NeighborDirection oldNeighborDirection = INVALID_DIRECTION;
 
 		tsl::robin_set<glm::ivec3> currentHits;
 		unsigned int options = 0;
 
 		void updateNormal();
 		void marchPosition();
+		bool canFinish();
 };
 
 double calculateProjectileAngle(glm::vec3 start, glm::vec3 end, double speed);

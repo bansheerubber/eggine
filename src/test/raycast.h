@@ -42,6 +42,7 @@ class RaycastMarcher {
 		unsigned int options = 0;
 		unsigned int length;
 		bool useEnd = false;
+		NeighborDirection oldDirection = INVALID_DIRECTION;
 		NeighborDirection direction = INVALID_DIRECTION;
 		glm::ivec3 position;
 		glm::ivec3 steps;
@@ -51,6 +52,8 @@ class RaycastMarcher {
 		std::vector<RaycastResult> results;
 		tsl::robin_set<glm::ivec3> currentHits;
 		glm::vec3 currentNormal;
+
+		bool canFinish();
 };
 
 std::vector<RaycastResult> raycast(glm::ivec3 start, glm::vec3 direction, unsigned int length, unsigned int options);

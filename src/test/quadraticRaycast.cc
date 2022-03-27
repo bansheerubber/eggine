@@ -33,6 +33,7 @@ QuadraticRaycastMarcher::QuadraticRaycastMarcher(glm::ivec3 start, glm::ivec3 en
 
 	this->position2d = glm::ivec2(start);
 	this->position = start;
+	this->lastPosition = start;
 
 	if(isnan(this->angle)) {
 		this->_finished = true;
@@ -119,9 +120,13 @@ QuadraticRaycastMarcher &QuadraticRaycastMarcher::operator++() {
 			for(unsigned int i = 0; i < 2; i++) {
 				char index = info.wall - 1;
 				if(
-					this->neighborDirection < DIRECTION_UP && (
-						invalidDirectionsForWall[(unsigned char)index][i] == this->neighborDirection
-						|| invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->neighborDirection)
+					invalidDirectionsForWall[(unsigned char)index][i] != INVALID_DIRECTION
+					&& this->neighborDirection < DIRECTION_UP
+					&& (
+						invalidDirectionsForWall[(unsigned char)index][i] == this->oldNeighborDirection || (
+							invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->neighborDirection)
+							&& !this->canFinish()
+						)
 					)
 				) {
 					if(!(this->options & RAYCAST_PENETRATE)) {
@@ -164,9 +169,13 @@ QuadraticRaycastMarcher &QuadraticRaycastMarcher::operator++() {
 		for(unsigned int i = 0; i < 2; i++) {
 			char index = info.wall - 1;
 			if(
-				this->neighborDirection < DIRECTION_UP && (
-					invalidDirectionsForWall[(unsigned char)index][i] == this->neighborDirection
-					|| invalidDirectionsForWall[(unsigned char)index][i] == (this->neighborDirection + 2) % 4
+				invalidDirectionsForWall[(unsigned char)index][i] != INVALID_DIRECTION
+				&& this->neighborDirection < DIRECTION_UP
+				&& (
+					invalidDirectionsForWall[(unsigned char)index][i] == this->oldNeighborDirection || (
+						invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->neighborDirection)
+						&& !this->canFinish()
+					)
 				)
 			) {
 				if(!(this->options & RAYCAST_PENETRATE)) {
@@ -188,7 +197,7 @@ QuadraticRaycastMarcher &QuadraticRaycastMarcher::operator++() {
 	}
 	wall_skip:
 
-	if(this->position == this->end) {
+	if(this->canFinish()) {
 		this->_finished = true;
 		this->currentNormal = glm::vec3();
 		return *this;
@@ -201,6 +210,8 @@ QuadraticRaycastMarcher &QuadraticRaycastMarcher::operator++() {
 }
 
 void QuadraticRaycastMarcher::updateNormal() {
+	this->oldNeighborDirection = this->neighborDirection;
+	
 	double distance = glm::distance(glm::vec2(this->start), glm::vec2(position2d));
 	double verticalDisplacement = quadratic(this->angle, this->speed, distance);
 
@@ -305,6 +316,10 @@ void QuadraticRaycastMarcher::marchPosition() {
 			return;
 		}
 	}
+}
+
+bool QuadraticRaycastMarcher::canFinish() {
+	return this->position == this->end;
 }
 
 bool QuadraticRaycastMarcher::finished() {

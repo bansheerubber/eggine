@@ -97,6 +97,7 @@ RaycastMarcher& RaycastMarcher::operator++() {
 		return *this;
 	}
 
+	this->oldDirection = this->direction;
 	// determine heading before we do any tile checks
 	if(this->bounds.x < this->bounds.y && this->bounds.x < this->bounds.z) {
 		this->currentNormal = glm::vec3(-this->steps.x, 0, 0);
@@ -116,6 +117,16 @@ RaycastMarcher& RaycastMarcher::operator++() {
 		}
 		else if(this->steps.y > 0) {
 			this->direction = DIRECTION_SOUTH;
+		}
+	}
+	else {
+		this->currentNormal = glm::vec3(0, 0, -this->steps.z);
+
+		if(this->steps.z < 0) {
+			this->direction = DIRECTION_DOWN;
+		}
+		else if(this->steps.z > 0) {
+			this->direction = DIRECTION_UP;
 		}
 	}
 
@@ -152,8 +163,10 @@ RaycastMarcher& RaycastMarcher::operator++() {
 			for(unsigned int i = 0; i < 2; i++) {
 				char index = info.wall - 1;
 				if(
-					invalidDirectionsForWall[(unsigned char)index][i] == this->direction
-					|| invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
+					invalidDirectionsForWall[(unsigned char)index][i] == this->oldDirection || (
+						invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
+						&& !this->canFinish()
+					)
 				) {
 					if(!(this->options & RAYCAST_PENETRATE)) {
 						this->_finished = true;
@@ -195,8 +208,10 @@ RaycastMarcher& RaycastMarcher::operator++() {
 		for(unsigned int i = 0; i < 2; i++) {
 			char index = info.wall - 1;
 			if(
-				invalidDirectionsForWall[(unsigned char)index][i] == this->direction
-				|| invalidDirectionsForWall[(unsigned char)index][i] == (this->direction + 2) % 4
+				invalidDirectionsForWall[(unsigned char)index][i] == this->oldDirection || (
+					invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
+					&& !this->canFinish()
+				)
 			) {
 				if(!(this->options & RAYCAST_PENETRATE)) {
 					this->_finished = true;
@@ -217,12 +232,7 @@ RaycastMarcher& RaycastMarcher::operator++() {
 	}
 	wall_skip:
 	
-	if(this->useEnd && this->position == this->end) {
-		this->_finished = true;
-		this->currentNormal = glm::vec3();
-		return *this;
-	}
-	else if(!this->useEnd && this->length < glm::distance(glm::vec3(this->start), glm::vec3(this->position))) {
+	if(this->canFinish()) {
 		this->_finished = true;
 		this->currentNormal = glm::vec3();
 		return *this;
@@ -245,6 +255,10 @@ RaycastMarcher& RaycastMarcher::operator++() {
 	}
 
 	return *this;
+}
+
+bool RaycastMarcher::canFinish() {
+	return (this->useEnd && this->position == this->end) || (!this->useEnd && this->length < glm::distance(glm::vec3(this->start), glm::vec3(this->position)));
 }
 
 std::vector<RaycastResult> raycast(glm::ivec3 start, glm::vec3 direction, unsigned int length, unsigned int options) {
