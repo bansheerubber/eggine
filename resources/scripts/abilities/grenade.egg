@@ -35,7 +35,11 @@ class GrenadeAbility inherits Ability {
 	}
 
 	function selectTile(%this, %position) {
-		if(%this.usable(null)) {
+		if(
+			%this.usable(null)
+			&& quadraticRaycast(%this.owner.getPosition(), %position + {0; 0; 1}, 15) == null
+			&& projectileAngle(%this.owner.getPosition(), %position, 15) != null
+		) {
 			%this.showRadius(%position, true);
 			%this.selectedPosition = %position;
 			%this.hasSelectedPosition = true;	
