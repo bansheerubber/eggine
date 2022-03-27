@@ -42,6 +42,15 @@ function init() {
 		{-1; 0; 0} // west
 	);
 
+	$Facing::North = 1;
+	$Facing::East = 2;
+	$Facing::South = 3;
+	$Facing::West = 4;
+	$Facing::NorthEast = 5;
+	$Facing::SouthEast = 6;
+	$Facing::SouthWest = 7;
+	$Facing::NorthWest = 8;
+
 	// editor stuff
 	$Editor::Enabled = false;
 

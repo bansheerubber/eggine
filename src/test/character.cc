@@ -31,12 +31,22 @@ OverlappingTile* Character::setPosition(glm::uvec3 position) {
 	return InterweavedTile::setPosition(position);
 }
 
+// texture should be north texture for the unit
 void Character::setAppearance(unsigned int texture) {
 	// TODO bounds check for network
 	
 	this->appearance = texture;
 	this->setTexture(texture);
 	this->writeUpdateMask("appearance");
+}
+
+void Character::setDirection(resources::SpriteFacing direction) {
+	this->direction = direction;
+
+	resources::SpriteFacingInfo* facingsMap;
+	if((facingsMap = ChunkContainer::Image->getSpriteInfo(this->appearance).facingsMap) != nullptr) {
+		this->setTexture(facingsMap->getFacing(direction, engine->chunkContainer->rotation));
+	}
 }
 
 void es::defineCharacter() {
@@ -48,6 +58,9 @@ void es::defineCharacter() {
 
 	esEntryType getPositionArguments[1] = {ES_ENTRY_OBJECT};
 	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::Character__getPosition, "Character", "getPosition", 1, getPositionArguments);
+
+	esEntryType setDirectionArguments[2] = {ES_ENTRY_OBJECT, ES_ENTRY_NUMBER};
+	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::Character__setDirection, "Character", "setDirection", 2, setDirectionArguments);
 }
 
 esEntryPtr es::Character__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -66,3 +79,16 @@ esEntryPtr es::Character__getPosition(esEnginePtr esEngine, unsigned int argc, e
 	}
 	return nullptr;
 }
+
+esEntryPtr es::Character__setDirection(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 2 && esCompareNamespaceToObjectParents(args[0].objectData, "Character")) {
+		unsigned int direction = args[1].numberData;
+		if(direction < resources::FACING_NORTH || direction > resources::FACING_NORTH_WEST) {
+			return nullptr;
+		}
+		
+		((Character*)args[0].objectData->objectWrapper->data)->setDirection((resources::SpriteFacing)direction);
+	}
+	return nullptr;
+}
+

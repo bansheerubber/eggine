@@ -9,6 +9,7 @@
 #include "../network/types.h"
 #include "../network/stream.h"
 #include "../basic/remoteObject.h"
+#include "../resources/spriteSheet.h"
 #include "tileSet.h"
 
 class Character: public InterweavedTile, public network::RemoteObject {
@@ -24,6 +25,7 @@ class Character: public InterweavedTile, public network::RemoteObject {
 		bool moveTest(glm::uvec3 position);
 
 		void setAppearance(unsigned int texture);
+		void setDirection(resources::SpriteFacing direction);
 	
 	protected:
 		NP_PROPERTY(NP_VECTOR, Character::setPosition);
@@ -31,10 +33,13 @@ class Character: public InterweavedTile, public network::RemoteObject {
 
 		NP_PROPERTY(NP_NUMBER, Character::setAppearance);
 		unsigned int appearance = 4;
+
+		resources::SpriteFacing direction = resources::FACING_NORTH;
 };
 
 namespace es { // order = 3
 	void defineCharacter();
 	esEntryPtr Character__setPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr Character__getPosition(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr Character__setDirection(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };

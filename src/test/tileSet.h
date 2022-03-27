@@ -5,6 +5,7 @@
 
 #include <glm/gtx/hash.hpp>
 #include <tsl/robin_set.h>
+#include <tsl/robin_map.h>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
@@ -36,10 +37,16 @@ class TileSet: public GameObject {
 		void showBorder(glm::vec4 color = glm::vec4(1, 1, 1, 1));
 		void hideBorder();
 		TileSet* pathfind(glm::ivec3 start, glm::ivec3 end);
+
+		glm::uvec3 getCameFrom(glm::uvec3 position);
+		glm::uvec3 getWentTo(glm::uvec3 position);
 	
 	protected:
 		tsl::robin_set<glm::uvec3> set;
 		tsl::robin_set<class OverlappingTile*> border;
+
+		tsl::robin_map<glm::uvec3, glm::uvec3> cameFrom;
+		tsl::robin_map<glm::uvec3, glm::uvec3> wentTo;
 };
 
 namespace es {
@@ -52,4 +59,6 @@ namespace es {
 	esEntryPtr TileSet__showBorder(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr TileSet__showDots(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	esEntryPtr TileSet__hideBorder(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr TileSet__getCameFrom(esEnginePtr esEngine, unsigned int argc, esEntry* args);
+	esEntryPtr TileSet__getWentTo(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 };

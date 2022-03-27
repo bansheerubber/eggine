@@ -27,6 +27,10 @@ namespace resources {
 		FACING_EAST,
 		FACING_SOUTH,
 		FACING_WEST,
+		FACING_NORTH_EAST,
+		FACING_SOUTH_EAST,
+		FACING_SOUTH_WEST,
+		FACING_NORTH_WEST,
 	};
 
 	struct SpriteSheetInfo {
@@ -41,15 +45,51 @@ namespace resources {
 		unsigned int root;
 
 		unsigned int rotateFacing(SpriteFacing facing, tilemath::Rotation oldRotation, tilemath::Rotation newRotation) {
-			int delta = (int)newRotation - (int)oldRotation;
-			int newFacing = ((int)facing - 1) - delta;
-			if(newFacing < 0) {
-				newFacing += 4;
+			if(facing < FACING_NORTH_EAST) {
+				int delta = (int)newRotation - (int)oldRotation;
+				int newFacing = ((int)facing - 1) - delta;
+				if(newFacing < 0) {
+					newFacing += 4;
+				}
+				else {
+					newFacing = newFacing % 4;
+				}
+				return this->facings[(SpriteFacing)(newFacing + 1)];
 			}
 			else {
-				newFacing = newFacing % 4;
+				int delta = (int)newRotation - (int)oldRotation;
+				int newFacing = ((int)facing - 5) - delta;
+				if(newFacing < 0) {
+					newFacing += 4;
+				}
+				else {
+					newFacing = newFacing % 4;
+				}
+				return this->facings[(SpriteFacing)(newFacing + 5)];
 			}
-			return this->facings[(SpriteFacing)(newFacing + 1)];
+		}
+
+		unsigned int getFacing(SpriteFacing facing, tilemath::Rotation rotation) {
+			if(facing < FACING_NORTH_EAST) {
+				int newFacing = (facing - 1) - rotation;
+				if(newFacing < 0) {
+					newFacing += 4;
+				}
+				else {
+					newFacing = newFacing % 4;
+				}
+				return this->facings[(SpriteFacing)(newFacing + 1)];
+			}
+			else {
+				int newFacing = (facing - 5) - rotation;
+				if(newFacing < 0) {
+					newFacing += 4;
+				}
+				else {
+					newFacing = newFacing % 4;
+				}
+				return this->facings[(SpriteFacing)(newFacing + 5)];
+			}
 		}
 	};
 

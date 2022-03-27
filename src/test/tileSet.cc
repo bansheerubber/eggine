@@ -42,6 +42,8 @@ unsigned int TileSet::size() {
 
 void TileSet::clear() {
 	this->set.clear();
+	this->cameFrom.clear();
+	this->wentTo.clear();
 }
 
 void TileSet::showDots() {
@@ -122,6 +124,8 @@ TileSet* TileSet::pathfind(glm::ivec3 start, glm::ivec3 end) {
 			output->add(end);
 			glm::ivec3 current = end;
 			while(cameFrom.find(current) != cameFrom.end()) {
+				output->cameFrom[current] = cameFrom[current];
+				output->wentTo[cameFrom[current]] = current;
 				current = cameFrom[current];
 				output->add(current);
 			}
@@ -169,6 +173,24 @@ AdjacencyBitmask TileSet::adjacency(glm::ivec3 position) {
 	return result;
 }
 
+glm::uvec3 TileSet::getCameFrom(glm::uvec3 position) {
+	if(this->cameFrom.find(position) != this->cameFrom.end()) {
+		return this->cameFrom[position];
+	}
+	else {
+		return glm::uvec3(-1, -1, -1);
+	}
+}
+
+glm::uvec3 TileSet::getWentTo(glm::uvec3 position) {
+	if(this->wentTo.find(position) != this->wentTo.end()) {
+		return this->wentTo[position];
+	}
+	else {
+		return glm::uvec3(-1, -1, -1);
+	}
+}
+
 void es::defineTileSet() {
 	esRegisterNamespace(engine->eggscript, "TileSet");
 	esNamespaceInherit(engine->eggscript, "SimObject", "TileSet");
@@ -185,6 +207,9 @@ void es::defineTileSet() {
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::TileSet__showDots, "TileSet", "showDots", 1, clearArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::TileSet__showBorder, "TileSet", "showBorder", 1, clearArguments);
 	esRegisterMethod(engine->eggscript, ES_ENTRY_EMPTY, es::TileSet__hideBorder, "TileSet", "hideBorder", 1, clearArguments);
+
+	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::TileSet__getCameFrom, "TileSet", "getCameFrom", 2, addArguments);
+	esRegisterMethod(engine->eggscript, ES_ENTRY_MATRIX, es::TileSet__getWentTo, "TileSet", "getWentTo", 2, addArguments);
 }
 
 esEntryPtr es::TileSet__add(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
@@ -270,6 +295,46 @@ esEntryPtr es::TileSet__showBorder(esEnginePtr esEngine, unsigned int argc, esEn
 esEntryPtr es::TileSet__hideBorder(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "TileSet")) {
 		((TileSet*)args[0].objectData->objectWrapper->data)->hideBorder();
+	}
+
+	return nullptr;
+}
+
+esEntryPtr es::TileSet__getCameFrom(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "TileSet") && args[1].matrixData->rows == 3 && args[1].matrixData->columns == 1) {	
+		glm::uvec3 position = ((TileSet*)args[0].objectData->objectWrapper->data)->getCameFrom(
+			glm::uvec3(
+				args[1].matrixData->data[0][0].numberData,
+				args[1].matrixData->data[1][0].numberData,
+				args[1].matrixData->data[2][0].numberData
+			)
+		);
+
+		if(position == glm::uvec3(-1, -1, -1)) {
+			return nullptr;
+		}
+
+		return esCreateVector(3, (double)position.x, (double)position.y, (double)position.z);
+	}
+
+	return nullptr;
+}
+
+esEntryPtr es::TileSet__getWentTo(esEnginePtr esEngine, unsigned int argc, esEntry* args) {
+	if(argc == 1 && args[0].matrixData->rows == 3 && args[0].matrixData->columns == 1) {
+		glm::uvec3 position = ((TileSet*)args[0].objectData->objectWrapper->data)->getWentTo(
+			glm::uvec3(
+				args[1].matrixData->data[0][0].numberData,
+				args[1].matrixData->data[1][0].numberData,
+				args[1].matrixData->data[2][0].numberData
+			)
+		);
+
+		if(position == glm::uvec3(-1, -1, -1)) {
+			return nullptr;
+		}
+
+		return esCreateVector(3, (double)position.x, (double)position.y, (double)position.z);
 	}
 
 	return nullptr;

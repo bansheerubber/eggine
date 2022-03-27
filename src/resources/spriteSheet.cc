@@ -80,6 +80,18 @@ resources::SpriteSheet::SpriteSheet(
 				else if(word == "west") {
 					this->spriteInfo[i].facing = FACING_WEST;
 				}
+				else if(word == "northeast") {
+					this->spriteInfo[i].facing = FACING_NORTH_EAST;
+				}
+				else if(word == "southeast") {
+					this->spriteInfo[i].facing = FACING_SOUTH_EAST;
+				}
+				else if(word == "southwest") {
+					this->spriteInfo[i].facing = FACING_SOUTH_WEST;
+				}
+				else if(word == "northwest") {
+					this->spriteInfo[i].facing = FACING_NORTH_WEST;
+				}
 
 				// handle spritesheet roots/facing
 				uint64_t rootPos = 0;
