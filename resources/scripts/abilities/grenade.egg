@@ -2,7 +2,7 @@ $QuadraticTiles = null;
 
 class GrenadeAbility inherits Ability {
 	name = "Grenade";
-	icon = "overwatch.png";
+	icon = "grenade.png";
 	useBrowse = true;
 	useSelect = true;
 	lastHover = {-1; -1; -1};
@@ -152,6 +152,16 @@ class GrenadeAbility inherits Ability {
 			%this.hasSelectedPosition = false;
 			%this.selectedPosition = {-1; -1; -1};
 			playSound("GrenadeExplode");
+
+			for(%i = 0; %i < %this.owner.abilities.size(); %i++) {
+				if(%this.owner.abilities[%i] == %this) {
+					%this.owner.abilities.remove(%i);
+					break;
+				}
+			}
+
+			%this.delete();
+			getChunkContainer().getSelectedCharacter().updateAbilityList();
 		}
 	}
 
