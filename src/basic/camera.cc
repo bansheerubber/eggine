@@ -67,7 +67,7 @@ void Camera::see(double deltaTime) {
 		}
 	}
 	else {
-		float speed = deltaTime * 5.0f  + 0.05f / zoom;
+		float speed = deltaTime * (8.0f + 0.05f / zoom);
 		this->position.x += (float)this->keyMapping.right * speed - (float)this->keyMapping.left * speed;
 		this->position.y += (float)this->keyMapping.up * speed - (float)this->keyMapping.down * speed;
 
