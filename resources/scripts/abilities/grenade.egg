@@ -6,6 +6,7 @@ class GrenadeAbility inherits Ability {
 	useBrowse = true;
 	useSelect = true;
 	lastHover = {-1; -1; -1};
+	velocity = 10;
 
 	selectedPosition = {-1; -1; -1};
 	hasSelectedPosition = false;
@@ -37,8 +38,8 @@ class GrenadeAbility inherits Ability {
 	function selectTile(%this, %position) {
 		if(
 			%this.usable(null)
-			&& quadraticRaycast(%this.owner.getPosition(), %position + {0; 0; 1}, 15) == null
-			&& projectileAngle(%this.owner.getPosition(), %position, 15) != null
+			&& quadraticRaycast(%this.owner.getPosition(), %position + {0; 0; 1}, %this.velocity) == null
+			&& projectileAngle(%this.owner.getPosition(), %position, %this.velocity) != null
 		) {
 			%this.showRadius(%position, true);
 			%this.selectedPosition = %position;
@@ -56,10 +57,6 @@ class GrenadeAbility inherits Ability {
 	}
 
 	function showRadius(%this, %position, %permanent) {
-		if(%this.lastHover == %position && !%permanent) {
-			return;
-		}
-
 		%this.deleteRadius(%permanent);
 
 		if(%permanent) {
@@ -89,27 +86,31 @@ class GrenadeAbility inherits Ability {
 	}
 
 	function browse(%this, %position) {
+		if(%this.lastHover == %position) {
+			return;
+		}
+		
 		if(%this.owner.ap < %this.cost(%target)) {
 			if(%this.targetIcon) {
 				%this.targetIcon.delete();
 			}
 			%this.deleteRadius(false);
+			%this.lastHover = %position;
 			return;
 		}
 		
-		%angle = projectileAngle(%this.owner.getPosition(), %position, 15);
+		%angle = projectileAngle(%this.owner.getPosition(), %position, %this.velocity);
 		if(%angle == null) {
 			// INTERPRETER BUG: cannot do %angle == null && isObject(%this.targetIcon) with an else statement after this if statement
 			if(%this.targetIcon) {
 				%this.targetIcon.delete();
 			}
 			%this.deleteRadius(false);
+			%this.lastHover = %position;
 			return;
 		}
 
-		if(%this.lastHover != %position) {
-			%this.results = quadraticRaycast(%this.owner.getPosition(), %position + {0; 0; 1}, 15);
-		}
+		%this.results = quadraticRaycast(%this.owner.getPosition(), %position + {0; 0; 1}, %this.velocity);
 
 		if(%this.results != null) {
 			if(%this.targetIcon) {
