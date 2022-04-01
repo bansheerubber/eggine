@@ -163,9 +163,12 @@ RaycastMarcher& RaycastMarcher::operator++() {
 			for(unsigned int i = 0; i < 2; i++) {
 				char index = info.wall - 1;
 				if(
-					invalidDirectionsForWall[(unsigned char)index][i] == this->oldDirection || (
-						invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
-						&& !this->canFinish()
+					invalidDirectionsForWall[(unsigned char)index][i] != INVALID_DIRECTION
+					&& (
+						invalidDirectionsForWall[(unsigned char)index][i] == this->oldDirection || (
+							invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
+							&& !this->canFinish()
+						)
 					)
 				) {
 					if(!(this->options & RAYCAST_PENETRATE)) {
@@ -208,9 +211,12 @@ RaycastMarcher& RaycastMarcher::operator++() {
 		for(unsigned int i = 0; i < 2; i++) {
 			char index = info.wall - 1;
 			if(
-				invalidDirectionsForWall[(unsigned char)index][i] == this->oldDirection || (
-					invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
-					&& !this->canFinish()
+				invalidDirectionsForWall[(unsigned char)index][i] != INVALID_DIRECTION
+				&& (
+					invalidDirectionsForWall[(unsigned char)index][i] == this->oldDirection || (
+						invalidDirectionsForWall[(unsigned char)index][i] == flipDirection(this->direction)
+						&& !this->canFinish()
+					)
 				)
 			) {
 				if(!(this->options & RAYCAST_PENETRATE)) {

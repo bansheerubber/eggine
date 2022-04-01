@@ -2,6 +2,13 @@ class OverwatchAbility inherits Ability {
 	name = "Overwatch";
 	icon = "overwatch.png";
 
+	function onStartTurn(%this) {
+		if(%this.owner.overwatch) {
+			%this.owner.overwatchIcon.delete();
+			%this.owner.overwatch = false;
+		}
+	}
+
 	function overwatch(%this, %target) {
 		if(%target.inCover(%this.owner) == $Cover::Full) {
 			return;

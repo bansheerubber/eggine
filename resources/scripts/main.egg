@@ -101,10 +101,6 @@ function normalize(%a) {
 	return { %a[0] / %length; %a[1] / %length; %a[2] / %length };
 }
 
-function dot(%a, %b) {
-	return %a[0] * %b[0] + %a[1] * %b[1] + %a[2] * %b[2];
-}
-
 function distance(%a, %b) {
 	return mSqrt(mPow(%a[0] - %b[0], 2) + mPow(%a[1] - %b[1], 2) + mPow(%a[2] - %b[2], 2));
 }
@@ -142,7 +138,12 @@ function onGamepadPressTile(%state) {
 	if(!isTileSelectable(%position)) {
 		%selectedCharacter = getChunkContainer().getSelectedCharacter();
 		if(isObject(%selectedCharacter)) {
-			%selectedCharacter.move(%position);
+			if($Unit::SelectedAbility.useSelect) {
+				$Unit::SelectedAbility.selectTile(%position);
+			}
+			else {
+				%selectedCharacter.move(%position);
+			}
 		}
 	}
 }

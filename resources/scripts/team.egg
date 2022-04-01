@@ -12,6 +12,16 @@ class SwitchTeamElement inherits HTMLElement {
 			getChunkContainer().setEnemyTeam($Team::Enemy);
 		}
 
+		// go through current team and reset every ability
+		for(%i = 0; %i < getChunkContainer().getPlayerTeam().size(); %i++) {
+			%abilities = getChunkContainer().getPlayerTeam().get(%i).abilities;
+			for(%j = 0; %j < %abilities.size(); %j++) {
+				if(%abilities[%j].isMethod("onStartTurn")) {
+					%abilities[%j].onStartTurn();
+				}
+			}
+		}
+
 		getHTMLElementById("team-name").clear();
 		getHTMLElementById("team-name").createChild("Team:" SPC getChunkContainer().getPlayerTeam().getName());
 	}
