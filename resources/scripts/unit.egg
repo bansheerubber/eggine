@@ -368,12 +368,15 @@ function Unit::selectAbility(%this, %index) {
 			%button.setStyleAttribute("display", "none");
 		}
 
-		if($Unit::SelectedAbility) {
-			$Unit::SelectedAbility.deselect();
+		if($Unit::SelectedAbility && $Unit::SelectedAbility.isMethod("onDeSelect")) {
+			$Unit::SelectedAbility.onDeSelect();
 		}
 
 		%this.selectedAbility = %ability;
-		%ability.select($Unit::SelectedAbility);
+
+		if(%ability.isMethod("onSelect")) {
+			%ability.onSelect($Unit::SelectedAbility);
+		}
 
 		$Unit::SelectedAbility = %ability;
 	}

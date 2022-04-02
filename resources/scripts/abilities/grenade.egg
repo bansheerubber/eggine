@@ -3,8 +3,6 @@ $QuadraticTiles = null;
 class GrenadeAbility inherits Ability {
 	name = "Grenade";
 	icon = "grenade.png";
-	useBrowse = true;
-	useSelect = true;
 	lastHover = {-1; -1; -1};
 	velocity = 10;
 
@@ -14,7 +12,7 @@ class GrenadeAbility inherits Ability {
 	radiusIcons = new Array();
 	ghostRadiusIcons = new Array();
 
-	function select(%this, %oldAbility) {
+	function onSelect(%this, %oldAbility) {
 		if(%oldAbility && %oldAbility.name == "Grenade" && %oldAbility.hasSelectedPosition && %this.owner.ap >= %this.cost(%target)) {
 			%this.selectedPosition = %oldAbility.selectedPosition;
 			%this.hasSelectedPosition = true;
@@ -27,7 +25,7 @@ class GrenadeAbility inherits Ability {
 		}
 	}
 
-	function deselect(%this) {
+	function onDeSelect(%this) {
 		if(isObject(%this.targetIcon)) {
 			%this.targetIcon.delete();
 		}
@@ -35,7 +33,7 @@ class GrenadeAbility inherits Ability {
 		%this.deleteRadius(true);
 	}
 
-	function selectTile(%this, %position) {
+	function onSelectTile(%this, %position) {
 		if(
 			%this.usable(null)
 			&& quadraticRaycast(%this.owner.getPosition(), %position + {0; 0; 1}, %this.velocity) == null
@@ -85,7 +83,7 @@ class GrenadeAbility inherits Ability {
 		}
 	}
 
-	function browse(%this, %position) {
+	function onBrowse(%this, %position) {
 		if(%this.lastHover == %position) {
 			return;
 		}

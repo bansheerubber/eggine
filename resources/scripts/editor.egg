@@ -40,8 +40,8 @@ function onHoverTile(%position) {
 		%character.lastPath = %character.path;
 	}
 
-	if($Unit::SelectedAbility.useBrowse) {
-		$Unit::SelectedAbility.browse(%position);
+	if($Unit::SelectedAbility && $Unit::SelectedAbility.isMethod("onBrowse")) {
+		$Unit::SelectedAbility.onBrowse(%position);
 	}
 	
 	$Editor::CurrentHoverPosition = %position;

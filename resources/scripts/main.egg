@@ -138,8 +138,8 @@ function onGamepadPressTile(%state) {
 	if(!isTileSelectable(%position)) {
 		%selectedCharacter = getChunkContainer().getSelectedCharacter();
 		if(isObject(%selectedCharacter)) {
-			if($Unit::SelectedAbility.useSelect) {
-				$Unit::SelectedAbility.selectTile(%position);
+			if($Unit::SelectedAbility.isMethod("onSelectTile")) {
+				$Unit::SelectedAbility.onSelectTile(%position);
 			}
 			else {
 				%selectedCharacter.move(%position);
@@ -208,8 +208,8 @@ function onSelectTile(%position, %browsing, %controller) {
 			%character.lastPath = %character.path;
 		}
 
-		if($Unit::SelectedAbility.useBrowse) {
-			$Unit::SelectedAbility.browse(%position);
+		if($Unit::SelectedAbility && $Unit::SelectedAbility.isMethod("onBrowse")) {
+			$Unit::SelectedAbility.onBrowse(%position);
 		}
 
 		$Tile::TileSelectionIcon.setPosition(%position);
@@ -235,8 +235,8 @@ function onSelectTile(%position, %browsing, %controller) {
 
 		if(!%noAbilitySelect) {
 			%ours = getChunkContainer().getSelectedCharacter();
-			if(%ours && $Unit::SelectedAbility.useSelect) {
-				$Unit::SelectedAbility.selectTile(%position);
+			if(%ours && $Unit::SelectedAbility && $Unit::SelectedAbility.isMethod("onSelectTile")) {
+				$Unit::SelectedAbility.onSelectTile(%position);
 			}
 		}
 	}
