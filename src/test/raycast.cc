@@ -247,17 +247,14 @@ RaycastMarcher& RaycastMarcher::operator++() {
 	if(this->bounds.x < this->bounds.y && this->bounds.x < this->bounds.z) {
 		this->position.x += this->steps.x;
 		this->bounds.x += this->delta.x;
-		this->currentNormal = glm::vec3(-this->steps.x, 0, 0);
 	}
 	else if(this->bounds.y <= this->bounds.x && this->bounds.y < this->bounds.z) {
 		this->position.y += this->steps.y;
 		this->bounds.y += this->delta.y;
-		this->currentNormal = glm::vec3(0, -this->steps.y, 0);
 	}
 	else {
 		this->position.z += this->steps.z;
 		this->bounds.z += this->delta.z;
-		this->currentNormal = glm::vec3(0, 0, -this->steps.z);
 	}
 
 	return *this;
