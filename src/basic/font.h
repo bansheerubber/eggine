@@ -9,34 +9,38 @@
 #include "gameObject.h"
 #include "../renderer/texture.h"
 
-struct FontGlyph {
-	unsigned int width;
-	unsigned int height;
-	int left;
-	int top;
-	int64_t advance;
-	glm::vec2 minUV;
-	glm::vec2 maxUV;
-};
+class Text;
 
-class Font : public GameObject {
-	friend class Text;
-	
-	public:
-		Font(std::string fileName, int size);
-		std::string fileName;
+namespace render {
+	struct FontGlyph {
+		unsigned int width;
+		unsigned int height;
+		int left;
+		int top;
+		int64_t advance;
+		glm::vec2 minUV;
+		glm::vec2 maxUV;
+	};
 
-		static tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Fonts;
-		static Font* GetFont(std::string family, int size);
+	class Font : public GameObject {
+		friend Text;
+		
+		public:
+			Font(std::string fileName, int size);
+			std::string fileName;
 
-		int size = 0;
-		char atlas[256 * 256];
-		int ascent = 0;
-		int descent = 0;
-		int x_height = 0;
-		FontGlyph characterToGlyph[128];
-	
-	protected:
-		FT_Face face;
-		render::Texture* texture = nullptr;
+			static tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Fonts;
+			static Font* GetFont(std::string family, int size);
+
+			int size = 0;
+			char atlas[256 * 256];
+			int ascent = 0;
+			int descent = 0;
+			int x_height = 0;
+			FontGlyph characterToGlyph[128];
+		
+		protected:
+			FT_Face face;
+			render::Texture* texture = nullptr;
+	};
 };

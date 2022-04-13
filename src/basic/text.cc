@@ -41,7 +41,7 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 }
 
 Text::Text(std::string family, int size, bool addToUiList) : Text(addToUiList) {
-	this->font = Font::GetFont(family, size);
+	this->font = render::Font::GetFont(family, size);
 }
 
 Text::~Text() {
@@ -61,7 +61,7 @@ void Text::updateBuffers() {
 			y += this->font->size;
 		}
 		else {
-			FontGlyph ch = this->font->characterToGlyph[(unsigned char)this->text[i]];
+			render::FontGlyph ch = this->font->characterToGlyph[(unsigned char)this->text[i]];
 
 			float xpos = x + ch.left * scale;
 			float ypos = y - ch.top;

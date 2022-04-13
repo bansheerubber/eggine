@@ -21,7 +21,7 @@ class Text : public RenderObject {
 
 		glm::vec3 color = glm::vec3(1, 1, 1);
 		glm::vec2 position = glm::vec2(0, 0);
-		Font* font = nullptr;
+		render::Font* font = nullptr;
 
 		void render(double deltaTime, RenderContext &context);
 		void setText(std::string text);

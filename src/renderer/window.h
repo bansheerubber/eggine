@@ -258,6 +258,28 @@ namespace render {
 	}
 	#endif
 
+	#ifndef __switch__
+	struct Device {
+		VkDevice device;
+		VkPhysicalDevice physicalDevice;
+		VkPhysicalDeviceProperties properties;
+		VkPhysicalDeviceFeatures features;
+		uint32_t graphicsQueueIndex;
+		uint32_t presentationQueueIndex;
+		std::vector<VkSurfaceFormatKHR> surfaceFormats;
+		std::vector<VkPresentModeKHR> presentModes;
+		VkSurfaceCapabilitiesKHR capabilities;
+	};
+
+	const std::vector<const char*> RequiredDeviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+	};
+
+	const std::vector<const char*> RequiredValidationLayers = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+	#endif
+
 	// the Window class handles our deko3d front/back buffers as well other global-ish datastructres
 	// for opengl, we just handle a GLFW window
 	class Window {
@@ -357,6 +379,20 @@ namespace render {
 			dk::BlendState blendState = dk::BlendState {};
 
 			PadState pad;
+			#else
+			VkInstance instance;
+			VkSurfaceKHR surface;
+			VkQueue queue;
+			VkQueue presentationQueue;
+			Device device;
+			VkDebugUtilsMessengerEXT debugCallback;
+			VkSwapchainKHR swapchain;
+
+			std::vector<VkImage> renderImages;
+			std::vector<VkImageView> renderImageViews;
+			
+			void pickDevice();
+			void setupDevice();
 			#endif
 	};
 };

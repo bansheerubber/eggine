@@ -9,6 +9,7 @@
 #include "../util/align.h"
 #include "../engine/console.h"
 #include "../engine/debug.h"
+#include "debug.h"
 #include "../engine/engine.h"
 #include "../resources/html.h"
 #include "texture.h"
@@ -112,41 +113,115 @@ void render::Window::initialize() {
 	}
 
 	// support 4.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	// glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	// glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	// glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	this->window = glfwCreateWindow(this->width, this->height, "eggine", NULL, NULL);
-	glfwMakeContextCurrent(window);
-	gladLoadGL(glfwGetProcAddress);
+	// glfwMakeContextCurrent(window);
+	glfwSetErrorCallback(glfwErrorCallback);
+	// gladLoadGL(glfwGetProcAddress);
 
-	glfwSetWindowSizeCallback(this->window, onWindowResize);
+	// glfwSetWindowSizeCallback(this->window, onWindowResize);
 
-	glEnable(GL_BLEND);
-	this->enableDepthTest(true);
-	this->enableStencilTest(true);
-	// glEnable(GL_CULL_FACE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glEnable(GL_BLEND);
+	// this->enableDepthTest(true);
+	// this->enableStencilTest(true);
+	// // glEnable(GL_CULL_FACE);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glfwSwapInterval(1);
+	// glfwSwapInterval(1);
 
-	#ifdef EGGINE_DEBUG
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
-	glDebugMessageCallback(glDebugOutput, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-	#endif
+	// #ifdef EGGINE_DEBUG
+	// glEnable(GL_DEBUG_OUTPUT);
+	// glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+	// glDebugMessageCallback(glDebugOutput, nullptr);
+	// glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+	// #endif
 
-	#ifdef EGGINE_DEVELOPER_MODE
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(this->window, false);
-	ImGui_ImplOpenGL3_Init("#version 150");
-	#endif
+	// #ifdef EGGINE_DEVELOPER_MODE
+	// IMGUI_CHECKVERSION();
+	// ImGui::CreateContext();
+	// ImGuiIO& io = ImGui::GetIO(); (void)io;
+	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	// ImGui::StyleColorsDark();
+	// ImGui_ImplGlfw_InitForOpenGL(this->window, false);
+	// ImGui_ImplOpenGL3_Init("#version 150");
+	// #endif
 
+	VkApplicationInfo app {
+		sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
+		pApplicationName: "VulkanClear",
+		applicationVersion: VK_MAKE_VERSION(1, 0, 0),
+		pEngineName: "ClearScreenEngine",
+		engineVersion: VK_MAKE_VERSION(1, 0, 0),
+		apiVersion: VK_API_VERSION_1_3,
+	};
+
+	uint32_t glfwExtensionCount = 0;
+	const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount); // TODO turn this into std::string so we can add our own extensions?
+
+	std::vector<const char*> extensions;
+	for(uint32_t i = 0; i < glfwExtensionCount; i++) {
+		extensions.push_back(glfwExtensions[i]);
+	}
+
+	extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	extensions.push_back("VK_KHR_xlib_surface");
+	extensions.push_back("VK_KHR_display");
+
+	VkInstanceCreateInfo createInfo {
+		sType: VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+		pApplicationInfo: &app,
+		enabledLayerCount: (uint32_t)RequiredValidationLayers.size(),
+		ppEnabledLayerNames: RequiredValidationLayers.data(),
+		enabledExtensionCount: (uint32_t)extensions.size(),
+		ppEnabledExtensionNames: extensions.data(),
+	};
+
+	VkResult result = vkCreateInstance(&createInfo, nullptr, &this->instance);
+	if(result != VK_SUCCESS) {
+		console::error("vulkan: could not create instance: %s\n", vkResultToString(result).c_str());
+		exit(1);
+	}
+
+	// handle debug
+	VkDebugUtilsMessengerCreateInfoEXT debugInfo = {
+		sType: VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+		messageSeverity: VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT,
+		messageType: VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+		pfnUserCallback: vulkanDebugCallback,
+	};
+
+	PFN_vkCreateDebugUtilsMessengerEXT CreateDebugReportCallback
+		= (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(this->instance, "vkCreateDebugUtilsMessengerEXT");
+
+	if(CreateDebugReportCallback == nullptr) {
+		console::error("vulkan: could not find vkCreateDebugUtilsMessengerEXT\n");
+		exit(1);
+	}
+
+	result = CreateDebugReportCallback(this->instance, &debugInfo, nullptr, &this->debugCallback);
+	if(result != VK_SUCCESS) {
+		console::error("vulkan: could not create debug callback: %s\n", vkResultToString(result).c_str());
+		exit(1);
+	}
+
+	// handle surface
+	result = glfwCreateWindowSurface(this->instance, this->window, nullptr, &this->surface);
+	if(result != VK_SUCCESS || this->surface == VK_NULL_HANDLE) {
+		console::error("vulkan: could not create window surface: %s\n", vkResultToString(result).c_str());
+		exit(1);
+	}
+
+	// handle physical devices
+	this->pickDevice();
+	this->setupDevice();
+
+	console::print("yippee\n");
+
+	exit(0);
 	#endif // end for ifdef __switch__
 }
 
@@ -232,6 +307,15 @@ void render::Window::deinitialize() {
 	this->framebufferMemory.destroy();
 	this->device.destroy();
 	#else
+	vkDestroySurfaceKHR(this->instance, this->surface, nullptr);
+	vkDestroyInstance(this->instance, nullptr);
+
+	for(auto renderImageView: this->renderImageViews) {
+		vkDestroyImageView(this->device.device, renderImageView, nullptr);
+	}
+
+	vkDestroySwapchainKHR(this->device.device, this->swapchain, nullptr);
+	vkDestroyDevice(this->device.device, nullptr);
 	glfwTerminate();
 	#endif
 }
@@ -339,5 +423,224 @@ void render::Window::bindTexture(unsigned int location, Texture* texture) {
 
 	this->commandBuffer.bindImageDescriptorSet(this->imageDescriptorMemory->gpuAddr(), IMAGE_SAMPLER_DESCRIPTOR_COUNT);
 	this->commandBuffer.bindSamplerDescriptorSet(this->samplerDescriptorMemory->gpuAddr(), IMAGE_SAMPLER_DESCRIPTOR_COUNT);
+}
+#else
+void render::Window::pickDevice() {
+	uint32_t deviceCount = 0;
+	vkEnumeratePhysicalDevices(this->instance, &deviceCount, nullptr);
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(this->instance, &deviceCount, devices.data());
+
+	Device integratedGPU = { VK_NULL_HANDLE, VK_NULL_HANDLE };
+	Device discreteGPU = { VK_NULL_HANDLE, VK_NULL_HANDLE };
+	for(VkPhysicalDevice device: devices) {
+		Device potentialDevice = {
+			VK_NULL_HANDLE, device, {}, {}, (uint32_t)-1, (uint32_t)-1,
+		};
+		
+		vkGetPhysicalDeviceProperties(device, &potentialDevice.properties); // devices properties (name, etc)
+		vkGetPhysicalDeviceFeatures(device, &potentialDevice.features); // device features (texture sizes, supported shaders, etc)
+
+		// handle searching for queues
+		{
+			uint32_t queueFamilyCount = 0;
+			vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+			std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+			vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+			for(size_t i = 0; i < queueFamilies.size(); i++) {
+				if((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && potentialDevice.graphicsQueueIndex == (uint32_t)-1) {
+					potentialDevice.graphicsQueueIndex = i;
+				}
+
+				bool presentSupport = glfwGetPhysicalDevicePresentationSupport(this->instance, device, i);
+				if(presentSupport && potentialDevice.presentationQueueIndex == (uint32_t)-1) {
+					potentialDevice.presentationQueueIndex = i;
+				}
+			}
+
+			if(potentialDevice.graphicsQueueIndex == (uint32_t)-1 || potentialDevice.presentationQueueIndex == (uint32_t)-1) {
+				continue;
+			}
+		}
+
+		// handle required extensions
+		{
+			uint32_t extensionCount;
+			vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+			std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+			vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+			uint32_t foundExtensions = 0;
+			for(auto &extension: availableExtensions) {
+				if(std::find_if(
+					RequiredDeviceExtensions.begin(),
+					RequiredDeviceExtensions.end(),
+					[extension] (const char* s) { return std::string(s) == std::string(extension.extensionName); }
+				) != RequiredDeviceExtensions.end()) {
+					foundExtensions++;
+				}
+			}
+
+			if(foundExtensions != RequiredDeviceExtensions.size()) {
+				continue;
+			}
+		}
+
+		// handle swapchain support
+		{
+			uint32_t formatCount;
+			vkGetPhysicalDeviceSurfaceFormatsKHR(potentialDevice.physicalDevice, this->surface, &formatCount, nullptr);
+
+			if(formatCount != 0) {
+				potentialDevice.surfaceFormats.resize(formatCount);
+				vkGetPhysicalDeviceSurfaceFormatsKHR(potentialDevice.physicalDevice, this->surface, &formatCount, potentialDevice.surfaceFormats.data());
+			}
+			else {
+				continue;
+			}
+
+			uint32_t presentModeCount;
+			vkGetPhysicalDeviceSurfacePresentModesKHR(potentialDevice.physicalDevice, this->surface, &presentModeCount, nullptr);
+
+			if(presentModeCount != 0) {
+				potentialDevice.presentModes.resize(presentModeCount);
+				vkGetPhysicalDeviceSurfacePresentModesKHR(potentialDevice.physicalDevice, this->surface, &presentModeCount, potentialDevice.presentModes.data());
+			}
+			else {
+				continue;
+			}
+
+			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(potentialDevice.physicalDevice, this->surface, &potentialDevice.capabilities);
+		}
+
+		// finally, we are done
+		if(potentialDevice.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU || potentialDevice.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
+			integratedGPU = potentialDevice;
+		}
+		else if(potentialDevice.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU || potentialDevice.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU) {
+			discreteGPU = potentialDevice;
+		}
+	}
+
+	Device selectedDevice = discreteGPU.physicalDevice != VK_NULL_HANDLE ? discreteGPU : integratedGPU;
+	if(selectedDevice.physicalDevice == VK_NULL_HANDLE) {
+		console::print("vulkan: could not find suitable display device\n");
+		exit(1);
+	}
+
+	console::print("vulkan: selected device '%s'\n", selectedDevice.properties.deviceName);
+	this->device = selectedDevice;
+}
+
+void render::Window::setupDevice() {
+	float queuePriority = 1.0f;
+	std::set<uint32_t> queues = { this->device.graphicsQueueIndex, this->device.presentationQueueIndex };
+	std::vector<VkDeviceQueueCreateInfo> creationInfos;
+	for(auto queue: queues) {
+		creationInfos.push_back(VkDeviceQueueCreateInfo {
+			sType: VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			queueFamilyIndex: queue,
+			queueCount: 1,
+			pQueuePriorities: &queuePriority,
+		});
+	}
+
+	VkPhysicalDeviceFeatures deviceFeatures {};
+	VkDeviceCreateInfo deviceCreateInfo {
+		sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+		queueCreateInfoCount: (uint32_t)creationInfos.size(),
+		pQueueCreateInfos: creationInfos.data(),
+		enabledLayerCount: 0,
+		enabledExtensionCount: (uint32_t)RequiredDeviceExtensions.size(),
+		ppEnabledExtensionNames: RequiredDeviceExtensions.data(),
+		pEnabledFeatures: &deviceFeatures,
+	};
+	
+	VkResult result = vkCreateDevice(this->device.physicalDevice, &deviceCreateInfo, nullptr, &this->device.device);
+	if(result != VK_SUCCESS) {
+		console::print("vulkan: could not create device with reason '%s'\n", vkResultToString(result).c_str());
+		exit(1);
+	}
+
+	vkGetDeviceQueue(this->device.device, this->device.graphicsQueueIndex, 0, &this->queue);
+	vkGetDeviceQueue(this->device.device, this->device.presentationQueueIndex, 0, &this->presentationQueue);
+
+	// now create the swapchain
+	VkSurfaceFormatKHR format = { VK_FORMAT_UNDEFINED, };
+	for(VkSurfaceFormatKHR f: this->device.surfaceFormats) {
+		if(f.format == VK_FORMAT_B8G8R8A8_SRGB && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+			format = f;
+		}
+	}
+
+	if(format.format == VK_FORMAT_UNDEFINED) {
+		console::print("vulkan: could not find suitable surface format\n");
+		exit(1);
+	}
+
+	uint32_t width, height;
+	glfwGetFramebufferSize(this->window, (int*)&width, (int*)&height);
+
+	width = std::clamp(width, this->device.capabilities.minImageExtent.width, this->device.capabilities.maxImageExtent.width);
+	height = std::clamp(width, this->device.capabilities.minImageExtent.height, this->device.capabilities.maxImageExtent.height);
+
+	uint32_t imageCount = 2; // TODO this needs to be double checked against the drivers
+	VkSwapchainCreateInfoKHR swapChainInfo {
+		sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+		surface: this->surface,
+		minImageCount: imageCount,
+		imageFormat: format.format,
+		imageColorSpace: format.colorSpace,
+		imageExtent: VkExtent2D { width, height },
+		imageArrayLayers: 1,
+		imageUsage: VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		preTransform: this->device.capabilities.currentTransform,
+		compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+		presentMode: VK_PRESENT_MODE_FIFO_KHR,
+		clipped: VK_TRUE,
+		oldSwapchain: VK_NULL_HANDLE,
+	};
+
+	// handle multiple queues
+	if(this->device.graphicsQueueIndex != this->device.presentationQueueIndex) {
+		swapChainInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		swapChainInfo.queueFamilyIndexCount = 2;
+		swapChainInfo.pQueueFamilyIndices = &this->device.graphicsQueueIndex; // i dare you to crash vulkan
+	}
+	else {
+		swapChainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	}
+
+	result = vkCreateSwapchainKHR(this->device.device, &swapChainInfo, nullptr, &this->swapchain);
+	if(result != VK_SUCCESS) {
+		console::print("vulkan: could not create swapchain with reason '%s'\n", vkResultToString(result).c_str());
+		exit(1);
+	}
+
+	vkGetSwapchainImagesKHR(this->device.device, this->swapchain, &imageCount, nullptr);
+	this->renderImages.resize(imageCount);
+	vkGetSwapchainImagesKHR(this->device.device, this->swapchain, &imageCount, this->renderImages.data());
+
+	// create image views
+	this->renderImageViews.resize(imageCount);
+	for(uint32_t i = 0; i < imageCount; i++) {
+		VkImageViewCreateInfo imageViewInfo {
+			sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+			image: this->renderImages[i],
+			viewType: VK_IMAGE_VIEW_TYPE_2D,
+			format: format.format,
+			components: { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, },
+			subresourceRange: { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 },
+		};
+
+		result = vkCreateImageView(this->device.device, &imageViewInfo, nullptr, &this->renderImageViews[i]);
+		if(result != VK_SUCCESS) {
+			console::print("vulkan: could not create swapchain image view with reason '%s'\n", vkResultToString(result).c_str());
+			exit(1);
+		}
+	}
 }
 #endif

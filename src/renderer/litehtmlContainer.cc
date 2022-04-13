@@ -12,7 +12,7 @@ render::LiteHTMLContainer::LiteHTMLContainer() {}
 
 render::LiteHTMLContainer::~LiteHTMLContainer() {}
 
-Text* render::LiteHTMLContainer::getText(Font* font, string input) {
+Text* render::LiteHTMLContainer::getText(render::Font* font, string input) {
   auto found = this->stringToText.find(std::pair(font, input));
   if(found == this->stringToText.end()) {
     Text* text = new Text(false);
@@ -35,7 +35,7 @@ litehtml::uint_ptr render::LiteHTMLContainer::create_font(
   unsigned int decoration,
   litehtml::font_metrics* fm
 ) {
-  Font* font = Font::GetFont(string(faceName), size);
+  render::Font* font = render::Font::GetFont(string(faceName), size);
   
   if(fm) {
     fm->ascent = font->ascent;
@@ -52,7 +52,7 @@ void render::LiteHTMLContainer::delete_font(litehtml::uint_ptr hFont) {
 }
 
 int render::LiteHTMLContainer::text_width(const litehtml::tchar_t* text, litehtml::uint_ptr hFont) {
-  Font* font = (Font*)hFont;
+  render::Font* font = (render::Font*)hFont;
   int x = 0;
   uint64_t length = strlen(text);
   for(uint64_t i = 0; i < length; i++) {
@@ -69,7 +69,7 @@ void render::LiteHTMLContainer::draw_text(
   litehtml::web_color color,
   const litehtml::position& pos
 ) {
-  Text* foundText = this->getText((Font*)hFont, string(text));
+  Text* foundText = this->getText((render::Font*)hFont, string(text));
   RenderContext context = {
 		camera: engine->camera,
 		ui: &engine->ui,
@@ -79,7 +79,7 @@ void render::LiteHTMLContainer::draw_text(
     foundText->position.x = pos.left() + engine->renderWindow.width;
   }
   
-  foundText->position.y = pos.top() - ((Font*)hFont)->descent;
+  foundText->position.y = pos.top() - ((render::Font*)hFont)->descent;
   foundText->color.r = (float)color.red / 255.0f;
   foundText->color.g = (float)color.green / 255.0f;
   foundText->color.b = (float)color.blue / 255.0f;
