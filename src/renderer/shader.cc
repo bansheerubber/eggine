@@ -115,29 +115,42 @@ void render::Shader::load(const char* buffer, uint64_t length, ShaderType type) 
 		exit(1);
 	}
 	#else
-	GLenum glType = type == SHADER_FRAGMENT ? GL_FRAGMENT_SHADER : GL_VERTEX_SHADER;
+	if(this->window->backend == OPENGL_BACKEND) {
+		GLenum glType = type == SHADER_FRAGMENT ? GL_FRAGMENT_SHADER : GL_VERTEX_SHADER;
 
-	GLuint shader = glCreateShader(glType);
-	int glLength = length;
-	glShaderSource(shader, 1, &buffer, &glLength);
-	glCompileShader(shader);
+		GLuint shader = glCreateShader(glType);
+		int glLength = length;
+		glShaderSource(shader, 1, &buffer, &glLength);
+		glCompileShader(shader);
 
-	GLint compiled = 0;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-	if(compiled == GL_FALSE) {
-		// print the error log
-		GLint logLength = 0;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+		GLint compiled = 0;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+		if(compiled == GL_FALSE) {
+			// print the error log
+			GLint logLength = 0;
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
-		GLchar* log = new GLchar[logLength];
-		glGetShaderInfoLog(shader, logLength, &logLength, log);
+			GLchar* log = new GLchar[logLength];
+			glGetShaderInfoLog(shader, logLength, &logLength, log);
 
-		glDeleteShader(shader);
+			glDeleteShader(shader);
 
-		console::error("failed to compile shader:\n%.*s\n", logLength, log);
+			console::error("failed to compile shader:\n%.*s\n", logLength, log);
+		}
+		else {
+			this->shader = shader;
+		}
 	}
 	else {
-		this->shader = shader;
+		std::vector<char> data;
+		for(uint64_t i = 0; i < length; i++) {
+			data.push_back(buffer[i]);
+		}
+		vk::ShaderModuleCreateInfo createInfo(
+			{}, data.size(), reinterpret_cast<const uint32_t*>(data.data())
+		);
+
+		this->module = this->window->device.device.createShaderModule(createInfo, nullptr);
 	}
 	#endif
 }

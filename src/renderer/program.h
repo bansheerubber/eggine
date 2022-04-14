@@ -2,6 +2,7 @@
 
 #ifndef __switch__
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 #endif
 
 #include <array>
@@ -48,6 +49,9 @@ namespace render {
 			#else
 			GLuint program = GL_INVALID_INDEX;
 			tsl::robin_map<std::pair<std::string, uint64_t>, GLuint> uniformToBuffer;
+
+			std::vector<vk::PipelineShaderStageCreateInfo> stages = std::vector<vk::PipelineShaderStageCreateInfo>(2);
+
 			static unsigned int UniformCount;
 			void createUniformBuffer(std::string uniformName, unsigned int size, uint64_t cacheIndex);
 			#endif

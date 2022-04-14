@@ -5,6 +5,7 @@
 #include <switch.h>
 #else
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 #endif
 
 #include "../engine/developer.h"
@@ -260,15 +261,15 @@ namespace render {
 
 	#ifndef __switch__
 	struct Device {
-		VkDevice device;
-		VkPhysicalDevice physicalDevice;
-		VkPhysicalDeviceProperties properties;
-		VkPhysicalDeviceFeatures features;
+		vk::Device device;
+		vk::PhysicalDevice physicalDevice;
+		vk::PhysicalDeviceProperties properties;
+		vk::PhysicalDeviceFeatures features;
 		uint32_t graphicsQueueIndex;
 		uint32_t presentationQueueIndex;
-		std::vector<VkSurfaceFormatKHR> surfaceFormats;
-		std::vector<VkPresentModeKHR> presentModes;
-		VkSurfaceCapabilitiesKHR capabilities;
+		std::vector<vk::SurfaceFormatKHR> surfaceFormats;
+		std::vector<vk::PresentModeKHR> presentModes;
+		vk::SurfaceCapabilitiesKHR capabilities;
 	};
 
 	const std::vector<const char*> RequiredDeviceExtensions = {
@@ -279,11 +280,18 @@ namespace render {
 		"VK_LAYER_KHRONOS_validation"
 	};
 	#endif
+	
+	enum RenderBackend {
+		OPENGL_BACKEND,
+		VULKAN_BACKEND,
+		DEKO_BACKEND,
+	};
 
 	// the Window class handles our deko3d front/back buffers as well other global-ish datastructres
 	// for opengl, we just handle a GLFW window
 	class Window {
 		friend LiteHTMLContainer;
+		friend class Shader;
 		
 		public:
 			double deltaTime = 0.0;
@@ -330,6 +338,12 @@ namespace render {
 			#endif
 
 			binds::GamepadButtons axisDPadCounters[4] = {binds::INVALID_BUTTON, binds::INVALID_BUTTON, binds::INVALID_BUTTON, binds::INVALID_BUTTON};
+
+			#ifdef __switch__
+			RenderBackend backend = DEKO_BACKEND;
+			#else
+			RenderBackend backend = VULKAN_BACKEND;
+			#endif
 
 		protected:
 			unsigned int errorCount = 0;
@@ -380,16 +394,16 @@ namespace render {
 
 			PadState pad;
 			#else
-			VkInstance instance;
-			VkSurfaceKHR surface;
-			VkQueue queue;
-			VkQueue presentationQueue;
+			vk::Instance instance;
+			vk::SurfaceKHR surface;
+			vk::Queue queue;
+			vk::Queue presentationQueue;
 			Device device;
-			VkDebugUtilsMessengerEXT debugCallback;
-			VkSwapchainKHR swapchain;
+			vk::DebugUtilsMessengerEXT debugCallback;
+			vk::SwapchainKHR swapchain;
 
-			std::vector<VkImage> renderImages;
-			std::vector<VkImageView> renderImageViews;
+			std::vector<vk::Image> renderImages;
+			std::vector<vk::ImageView> renderImageViews;
 			
 			void pickDevice();
 			void setupDevice();

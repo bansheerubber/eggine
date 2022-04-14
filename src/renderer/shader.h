@@ -4,6 +4,7 @@
 #include <deko3d.hpp>
 #else
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 #endif
 
 #include <tsl/robin_map.h>
@@ -41,6 +42,8 @@ namespace render {
 			dk::Shader shader;
 			#else
 			GLuint shader = GL_INVALID_INDEX;
+			vk::ShaderModule module;
+			vk::PipelineShaderStageCreateInfo stage;
 			#endif
 
 			void processUniforms(const char* buffer, uint64_t bufferSize);

@@ -18,6 +18,10 @@ render::Program::Program(Window* window) {
 
 void render::Program::addShader(Shader* shader) {
 	this->shaders.push_back(shader);
+
+	if(this->window->backend == VULKAN_BACKEND) {
+		this->stages[0] = vk::PipelineShaderStageCreateInfo({}, shader->type == SHADER_VERTEX ? vk::ShaderStageFlagBits::eVertex : vk::ShaderStageFlagBits::eFragment, shader->module, "main");
+	}
 }
 
 void render::Program::bind() {
