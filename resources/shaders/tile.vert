@@ -19,11 +19,11 @@ layout(std140, binding = 0) uniform vertexBlock
 	int timer;
 } vb;
 
-out vec2 uv;
-out vec4 tileColor;
-flat out int xray;
-out float height;
-flat out int timer;
+layout(location = 0) out vec2 uv;
+layout(location = 1) out vec4 tileColor;
+layout(location = 2) flat out int xray;
+layout(location = 3) out float height;
+layout(location = 4) flat out int timer;
 
 void main() {
 	gl_Position = vb.projection * vec4(vPosition + vOffset.xy + vb.chunkScreenSpace.xy, (vOffset.z + vb.chunkScreenSpace.z) / 100.0f, 1.0f);

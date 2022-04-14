@@ -2,11 +2,11 @@
 
 layout(location = 0) out vec4 color;
 
-in vec2 uv;
-in vec4 tileColor;
-flat in int xray;
-in float height;
-flat in int timer;
+layout(location = 0) in vec2 uv;
+layout(location = 1) in vec4 tileColor;
+layout(location = 2) flat in int xray;
+layout(location = 3) in float height;
+layout(location = 4) flat in int timer;
 
 layout(binding = 0) uniform sampler2D spriteTexture;
 
