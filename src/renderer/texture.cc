@@ -121,26 +121,28 @@ void render::Texture::load(
 
 	memory->deallocate();
 	#else
-	// load the GL texture
-	glGenTextures(1, &this->texture);
-	glBindTexture(GL_TEXTURE_2D, this->texture);
+	if(this->window->backend == OPENGL_BACKEND) {
+		// load the GL texture
+		glGenTextures(1, &this->texture);
+		glBindTexture(GL_TEXTURE_2D, this->texture);
 
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		channelsToGLFormat(this->channels),
-		this->width,
-		this->height,
-		0,
-		channelsToGLFormat(this->channels),
-		bitDepthToGLFormat(this->bitDepth),
-		buffer
-	);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			channelsToGLFormat(this->channels),
+			this->width,
+			this->height,
+			0,
+			channelsToGLFormat(this->channels),
+			bitDepthToGLFormat(this->bitDepth),
+			buffer
+		);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureWrapToGLWrap(this->uWrap));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureWrapToGLWrap(this->vWrap));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFilterToGLFilter(this->minFilter));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFilterToGLFilter(this->magFilter));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureWrapToGLWrap(this->uWrap));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureWrapToGLWrap(this->vWrap));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFilterToGLFilter(this->minFilter));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFilterToGLFilter(this->magFilter));
+	}
 	#endif
 }
 
@@ -162,7 +164,9 @@ void render::Texture::bind(unsigned int location) {
 	this->window->commandBuffer.bindImageDescriptorSet(this->imageDescriptorMemory->gpuAddr(), 1);
 	this->window->commandBuffer.bindSamplerDescriptorSet(this->samplerDescriptorMemory->gpuAddr(), 1);
 	#else
-	glActiveTexture(GL_TEXTURE0 + location);
-	glBindTexture(GL_TEXTURE_2D, this->texture);
+	if(this->window->backend == OPENGL_BACKEND) {
+		glActiveTexture(GL_TEXTURE0 + location);
+		glBindTexture(GL_TEXTURE_2D, this->texture);
+	}
 	#endif
 }

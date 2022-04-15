@@ -270,18 +270,28 @@ namespace render {
 			#else
 			vk::Instance instance;
 			vk::SurfaceKHR surface;
-			vk::Queue queue;
+			vk::Queue graphicsQueue;
 			vk::Queue presentationQueue;
 			Device device;
 			vk::DebugUtilsMessengerEXT debugCallback;
 			vk::SwapchainKHR swapchain;
 			vk::Extent2D swapchainExtent;
-			vk::SurfaceFormatKHR swapchainFormat;			
+			vk::SurfaceFormatKHR swapchainFormat;
 
 			std::vector<vk::Image> renderImages;
 			std::vector<vk::ImageView> renderImageViews;
 
-			tsl::robin_map<VulkanPipeline, vk::Pipeline*> pipelineCache;
+			tsl::robin_map<VulkanPipeline, VulkanPipelineResult> pipelineCache;
+			tsl::robin_map<VulkanPipeline, uint32_t> currentFramebuffer;
+
+			vk::CommandPool commandPool;
+			vk::CommandBuffer mainBuffer;
+
+			vk::Fence frameFence;
+			vk::Semaphore isImageAvailable;
+			vk::Semaphore isRenderFinished;
+
+			Program* simpleProgram = nullptr;
 			
 			void pickDevice();
 			void setupDevice();

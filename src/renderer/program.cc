@@ -44,56 +44,58 @@ void render::Program::bind() {
 		}
 	}
 	#else
-	if(this->program == GL_INVALID_INDEX) {
-		GLuint program = glCreateProgram();
-		
-		for(Shader* shader: this->shaders) {
-			if(shader->shader == GL_INVALID_INDEX) {
-				console::error("shaders not compiled\n");
-				return;
-			}
-
-			glAttachShader(program, shader->shader);
-		}
-
-		glLinkProgram(program);
-
-		GLint linked = 0;
-		glGetProgramiv(program, GL_LINK_STATUS, &linked);
-		if(linked == GL_FALSE) {
-			// print the error log
-			GLint logLength = 0;
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-
-			GLchar* log = new GLchar[logLength];
-			glGetProgramInfoLog(program, logLength, &logLength, log);
-
-			glDeleteProgram(program);
-			console::error("failed to link program:\n%.*s\n", logLength, log);
-
-			this->program = GL_INVALID_INDEX - 1;
-		}
-		else {
-			this->program = program;
-		}
-
-		for(Shader* shader: this->shaders) {
-			glDetachShader(program, shader->shader);
-
-			// handle uniform block bindings (reconcile differences between deko3d and opengl)
-			for(auto &[uniform, binding]: shader->uniformToBinding) {
-				// update shader binding for opengl
-				GLuint blockIndex = glGetUniformBlockIndex(this->program, uniform.c_str());
-				if(blockIndex != GL_INVALID_INDEX) {
-					glUniformBlockBinding(this->program, blockIndex, binding + UniformCount);
-					this->uniformToBinding[uniform] = binding + UniformCount;
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(this->program == GL_INVALID_INDEX) {
+			GLuint program = glCreateProgram();
+			
+			for(Shader* shader: this->shaders) {
+				if(shader->shader == GL_INVALID_INDEX) {
+					console::error("shaders not compiled\n");
+					return;
 				}
-			}
-			UniformCount += shader->uniformToBinding.size();
-		}
-	}
 
-	glUseProgram(this->program);
+				glAttachShader(program, shader->shader);
+			}
+
+			glLinkProgram(program);
+
+			GLint linked = 0;
+			glGetProgramiv(program, GL_LINK_STATUS, &linked);
+			if(linked == GL_FALSE) {
+				// print the error log
+				GLint logLength = 0;
+				glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+
+				GLchar* log = new GLchar[logLength];
+				glGetProgramInfoLog(program, logLength, &logLength, log);
+
+				glDeleteProgram(program);
+				console::error("failed to link program:\n%.*s\n", logLength, log);
+
+				this->program = GL_INVALID_INDEX - 1;
+			}
+			else {
+				this->program = program;
+			}
+
+			for(Shader* shader: this->shaders) {
+				glDetachShader(program, shader->shader);
+
+				// handle uniform block bindings (reconcile differences between deko3d and opengl)
+				for(auto &[uniform, binding]: shader->uniformToBinding) {
+					// update shader binding for opengl
+					GLuint blockIndex = glGetUniformBlockIndex(this->program, uniform.c_str());
+					if(blockIndex != GL_INVALID_INDEX) {
+						glUniformBlockBinding(this->program, blockIndex, binding + UniformCount);
+						this->uniformToBinding[uniform] = binding + UniformCount;
+					}
+				}
+				UniformCount += shader->uniformToBinding.size();
+			}
+		}
+
+		glUseProgram(this->program);
+	}
 	#endif
 }
 
@@ -124,19 +126,21 @@ void render::Program::bindUniform(string uniformName, void* data, unsigned int s
 		}
 	}
 	#else
-	auto found = this->uniformToBuffer.find(pair<string, uint64_t>(uniformName, cacheIndex));
-	bool created = false;
-	if(found == this->uniformToBuffer.end()) {
-		this->createUniformBuffer(uniformName, size, cacheIndex);
-		found = this->uniformToBuffer.find(pair<string, uint64_t>(uniformName, cacheIndex));
-		created = true;
-	}
+	if(this->window->backend == OPENGL_BACKEND) {
+		auto found = this->uniformToBuffer.find(pair<string, uint64_t>(uniformName, cacheIndex));
+		bool created = false;
+		if(found == this->uniformToBuffer.end()) {
+			this->createUniformBuffer(uniformName, size, cacheIndex);
+			found = this->uniformToBuffer.find(pair<string, uint64_t>(uniformName, cacheIndex));
+			created = true;
+		}
 
-	glBindBuffer(GL_UNIFORM_BUFFER, found.value());
+		glBindBuffer(GL_UNIFORM_BUFFER, found.value());
 
-	if(created || !setOnce) { // only update the buffer if we really need to
-		// glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW); // orphan the buffer
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+		if(created || !setOnce) { // only update the buffer if we really need to
+			// glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW); // orphan the buffer
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+		}
 	}
 	#endif
 }
@@ -145,9 +149,11 @@ void render::Program::bindTexture(string uniformName, unsigned int texture) {
 	#ifdef __switch__
 	this->window->commandBuffer.bindTextures(DkStage_Fragment, 0, dkMakeTextureHandle(0, 0));
 	#else
-	// get the location of the uniform we're going to bind to
-	GLuint location = glGetUniformLocation(this->program, uniformName.c_str());
-	glUniform1i(location, texture);
+	if(this->window->backend == OPENGL_BACKEND) {
+		// get the location of the uniform we're going to bind to
+		GLuint location = glGetUniformLocation(this->program, uniformName.c_str());
+		glUniform1i(location, texture);
+	}
 	#endif
 }
 
@@ -159,12 +165,14 @@ void render::Program::createUniformMemory(string uniformName, unsigned int size)
 }
 #else
 void render::Program::createUniformBuffer(string uniformName, unsigned int size, uint64_t cacheIndex) {
-	GLuint bufferId;
-	glGenBuffers(1, &bufferId);
-	this->uniformToBuffer[pair<string, uint64_t>(uniformName, cacheIndex)] = bufferId;
+	if(this->window->backend == OPENGL_BACKEND) {
+		GLuint bufferId;
+		glGenBuffers(1, &bufferId);
+		this->uniformToBuffer[pair<string, uint64_t>(uniformName, cacheIndex)] = bufferId;
 
-	glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[pair<string, uint64_t>(uniformName, cacheIndex)]);
-	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-	glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), bufferId);
+		glBindBuffer(GL_UNIFORM_BUFFER, this->uniformToBuffer[pair<string, uint64_t>(uniformName, cacheIndex)]);
+		glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), bufferId);
+	}
 }
 #endif

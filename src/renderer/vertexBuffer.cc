@@ -50,31 +50,33 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 	}
 	this->memoryAllocated = true;
 	#else
-	if(this->bufferId == GL_INVALID_INDEX) {
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(this->bufferId == GL_INVALID_INDEX) {
+			if(this->usage == GL_DYNAMIC_DRAW) {
+				this->createDynamicBuffer();
+			}
+			else {
+				this->createBuffer();
+			}
+		}
+
 		if(this->usage == GL_DYNAMIC_DRAW) {
-			this->createDynamicBuffer();
+			glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
+			glBufferData(GL_ARRAY_BUFFER, this->size, NULL, this->usage); // orphan the buffer
+			glBufferSubData(GL_ARRAY_BUFFER, 0, this->size, data);
+
+			#ifdef RENDER_UNBIND_VERTEX_BUFFERS
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			#endif
 		}
 		else {
-			this->createBuffer();
+			glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
+			glBufferData(GL_ARRAY_BUFFER, this->size, data, this->usage);
+
+			#ifdef RENDER_UNBIND_VERTEX_BUFFERS
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			#endif
 		}
-	}
-
-	if(this->usage == GL_DYNAMIC_DRAW) {
-		glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
-		glBufferData(GL_ARRAY_BUFFER, this->size, NULL, this->usage); // orphan the buffer
-		glBufferSubData(GL_ARRAY_BUFFER, 0, this->size, data);
-
-		#ifdef RENDER_UNBIND_VERTEX_BUFFERS
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		#endif
-	}
-	else {
-		glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
-		glBufferData(GL_ARRAY_BUFFER, this->size, data, this->usage);
-
-		#ifdef RENDER_UNBIND_VERTEX_BUFFERS
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		#endif
 	}
 	#endif
 }
@@ -93,17 +95,19 @@ void render::VertexBuffer::setSubData(void* data, unsigned int size, unsigned in
 	
 	memcpy((void*)((uintptr_t)this->memory->cpuAddr() + offset), data, size);
 	#else
-	if(this->bufferId == GL_INVALID_INDEX) {
-		console::error("vertex data must be initialized in setSubData\n");
-		return;
-	}
-	
-	glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
-	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(this->bufferId == GL_INVALID_INDEX) {
+			console::error("vertex data must be initialized in setSubData\n");
+			return;
+		}
+		
+		glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
+		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 
-	#ifdef RENDER_UNBIND_VERTEX_BUFFERS
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	#endif
+		#ifdef RENDER_UNBIND_VERTEX_BUFFERS
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		#endif
+	}
 	#endif
 }
 
@@ -128,16 +132,18 @@ void render::VertexBuffer::createBuffer() {
 
 void render::VertexBuffer::createDynamicBuffer() {
 	#ifndef __switch__
-	this->destroyBuffer();
-	
-	this->usage = GL_DYNAMIC_DRAW;
-	glGenBuffers(1, &this->bufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
-	glBufferData(GL_ARRAY_BUFFER, this->size, NULL, this->usage);
+	if(this->window->backend == OPENGL_BACKEND) {
+		this->destroyBuffer();
+		
+		this->usage = GL_DYNAMIC_DRAW;
+		glGenBuffers(1, &this->bufferId);
+		glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
+		glBufferData(GL_ARRAY_BUFFER, this->size, NULL, this->usage);
 
-	#ifdef RENDER_UNBIND_VERTEX_BUFFERS
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	#endif
+		#ifdef RENDER_UNBIND_VERTEX_BUFFERS
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		#endif
+	}
 	#endif
 }
 
@@ -148,8 +154,10 @@ void render::VertexBuffer::destroyBuffer() {
 	}
 	this->memoryAllocated = false;
 	#else
-	if(this->bufferId != GL_INVALID_INDEX) {
-		glDeleteBuffers(1, &this->bufferId);
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(this->bufferId != GL_INVALID_INDEX) {
+			glDeleteBuffers(1, &this->bufferId);
+		}
 	}
 	#endif
 }

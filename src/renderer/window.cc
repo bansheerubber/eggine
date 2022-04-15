@@ -220,16 +220,28 @@ void render::Window::initialize() {
 		render::Shader* fragmentShader = new render::Shader(&engine->renderWindow);
 		fragmentShader->load(getShaderSource("shaders/hello.frag"), render::SHADER_FRAGMENT);
 
-		render::Program* program = new render::Program(&engine->renderWindow);
-		program->addShader(vertexShader);
-		program->addShader(fragmentShader);
+		this->simpleProgram = new render::Program(&engine->renderWindow);
+		this->simpleProgram->addShader(vertexShader);
+		this->simpleProgram->addShader(fragmentShader);
 
-		VulkanPipeline pipeline = { this, PRIMITIVE_TRIANGLE_STRIP, 1280.f, 720.f, program };
-		pipeline.newPipeline();
+		VulkanPipeline pipeline = { this, PRIMITIVE_TRIANGLE_STRIP, 1280.f, 720.f, this->simpleProgram };
+		this->pipelineCache[pipeline] = pipeline.newPipeline();
+
+		vk::CommandPoolCreateInfo commandPoolInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer, this->device.graphicsQueueIndex);
+		this->commandPool = this->device.device.createCommandPool(commandPoolInfo); 
+
+		vk::CommandBufferAllocateInfo commandBufferInfo(this->commandPool, vk::CommandBufferLevel::ePrimary, 1);
+		this->mainBuffer = this->device.device.allocateCommandBuffers(commandBufferInfo)[0];
+
+		// create fences/semaphores
+		vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
+		this->frameFence = this->device.device.createFence(fenceInfo);
+
+		vk::SemaphoreCreateInfo semaphoreInfo = vk::SemaphoreCreateInfo();
+		this->isImageAvailable = this->device.device.createSemaphore(semaphoreInfo);
+		this->isRenderFinished = this->device.device.createSemaphore(semaphoreInfo);
 
 		console::print("yippee\n");
-
-		exit(0);
 	}
 	#endif // end for ifdef __switch__
 }
@@ -261,32 +273,40 @@ void render::Window::registerHTMLUpdate() {
 void render::Window::setStencilFunction(render::StencilFunction func, unsigned int reference, unsigned int mask) {
 	#ifdef __switch__
 	#else
-	glStencilFunc(stencilToGLStencil(func), reference, mask);
+	if(this->backend == OPENGL_BACKEND) {
+		glStencilFunc(stencilToGLStencil(func), reference, mask);
+	}
 	#endif
 }
 
 void render::Window::setStencilMask(unsigned int mask) {
 	#ifdef __switch__
 	#else
-	glStencilMask(mask);
+	if(this->backend == OPENGL_BACKEND) {
+		glStencilMask(mask);
+	}
 	#endif
 }
 
 void render::Window::setStencilOperation(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) {
 	#ifdef __switch__
 	#else
-	glStencilOp(stencilOPToGLStencilOP(stencilFail), stencilOPToGLStencilOP(depthFail), stencilOPToGLStencilOP(pass));
+	if(this->backend == OPENGL_BACKEND) {
+		glStencilOp(stencilOPToGLStencilOP(stencilFail), stencilOPToGLStencilOP(depthFail), stencilOPToGLStencilOP(pass));
+	}
 	#endif
 }
 
 void render::Window::enableStencilTest(bool enable) {
 	#ifdef __switch__
 	#else
-	if(enable) {
-		glEnable(GL_STENCIL_TEST);
-	}
-	else {
-		glDisable(GL_STENCIL_TEST);
+	if(this->backend == OPENGL_BACKEND) {
+		if(enable) {
+			glEnable(GL_STENCIL_TEST);
+		}
+		else {
+			glDisable(GL_STENCIL_TEST);
+		}
 	}
 	#endif
 }
@@ -294,11 +314,13 @@ void render::Window::enableStencilTest(bool enable) {
 void render::Window::enableDepthTest(bool enable) {
 	#ifdef __switch__
 	#else
-	if(enable) {
-		glEnable(GL_DEPTH_TEST);
-	}
-	else {
-		glDisable(GL_DEPTH_TEST);
+	if(this->backend == OPENGL_BACKEND) {
+		if(enable) {
+			glEnable(GL_DEPTH_TEST);
+		}
+		else {
+			glDisable(GL_DEPTH_TEST);
+		}
 	}
 	#endif
 }
@@ -316,15 +338,17 @@ void render::Window::deinitialize() {
 	this->framebufferMemory.destroy();
 	this->device.destroy();
 	#else
-	this->instance.destroySurfaceKHR(this->surface, nullptr);
-	this->instance.destroy(nullptr);
+	if(this->backend == VULKAN_BACKEND) {
+		this->instance.destroySurfaceKHR(this->surface, nullptr);
+		this->instance.destroy(nullptr);
 
-	for(auto renderImageView: this->renderImageViews) {
-		this->device.device.destroyImageView(renderImageView, nullptr);
+		for(auto renderImageView: this->renderImageViews) {
+			this->device.device.destroyImageView(renderImageView, nullptr);
+		}
+
+		this->device.device.destroySwapchainKHR(this->swapchain, nullptr);
+		this->device.device.destroy(nullptr);
 	}
-
-	this->device.device.destroySwapchainKHR(this->swapchain, nullptr);
-	this->device.device.destroy(nullptr);
 	glfwTerminate();
 	#endif
 }
@@ -350,9 +374,36 @@ void render::Window::prerender() {
 	this->rightStick = padGetStickPos(&this->pad, 1);
 	this->buttons = padGetButtons(&this->pad);
 	#else
-	glClearColor(this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a);
-	glStencilMask(0xFF);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	if(this->backend == OPENGL_BACKEND) {
+		glClearColor(this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a);
+		glStencilMask(0xFF);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	}
+	else {
+		// wait for the last fence to finish
+		vk::Result result = this->device.device.waitForFences(1, &this->frameFence, true, UINT64_MAX);
+		result = this->device.device.resetFences(1, &this->frameFence);
+		if(result != vk::Result::eSuccess) {
+			console::print("vulkan: failed to reset frame fence %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+
+		VulkanPipeline pipeline = { this, PRIMITIVE_TRIANGLE_STRIP, 1280.f, 720.f, this->simpleProgram };
+
+		// acquire the next image, signalling using the isImageAvailable semaphore
+		this->currentFramebuffer[pipeline] = this->device.device.acquireNextImageKHR(this->swapchain, UINT64_MAX, this->isImageAvailable).value;
+		
+		// prepare the primary command buffer
+		vk::CommandBufferBeginInfo bufferBeginInfo({}, nullptr);
+		this->mainBuffer.reset();
+		this->mainBuffer.begin(bufferBeginInfo);
+
+		// only do one render pass for now
+		vk::ClearValue clearColor(std::array<float, 4>({{ 0.0f, 0.0f, 0.0f, 1.0f }})); // ????
+		vk::RenderPassBeginInfo renderPassInfo(*this->pipelineCache[pipeline].renderPass, *this->pipelineCache[pipeline].framebuffers[this->currentFramebuffer[pipeline]], { { 0, 0 }, this->swapchainExtent }, 1, &clearColor);
+
+		this->mainBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+	}
 	glfwPollEvents();
 	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
 	#endif
@@ -367,7 +418,9 @@ void render::Window::render() {
 		this->lastHTMLChecksum = this->htmlChecksum;
 	}
 	
-	this->htmlDocument->draw(0, 0, 0, nullptr);
+	if(this->backend == OPENGL_BACKEND) {
+		this->htmlDocument->draw(0, 0, 0, nullptr);
+	}
 	
 	#ifdef __switch__
 	int index = this->queue.acquireImage(this->swapchain);
@@ -387,7 +440,40 @@ void render::Window::render() {
 		engine->exit();
 	}
 	
-	glfwSwapBuffers(this->window);
+	if(this->backend == OPENGL_BACKEND) {
+		glfwSwapBuffers(this->window);
+	}
+	else {
+		// go pipeline
+		VulkanPipeline pipeline = { this, PRIMITIVE_TRIANGLE_STRIP, 1280.f, 720.f, this->simpleProgram };
+		this->mainBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *this->pipelineCache[pipeline].pipeline);
+
+		this->mainBuffer.draw(3, 1, 0, 0);
+
+		// finalize render pass
+		this->mainBuffer.endRenderPass();
+		this->mainBuffer.end();
+
+		// submit the image for presentation
+		vk::Semaphore waitSemaphores[] = { this->isImageAvailable };
+		vk::Semaphore signalSemaphores[] = { this->isRenderFinished };
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+		vk::SubmitInfo submitInfo(1, waitSemaphores, waitStages, 1, &this->mainBuffer, 1, signalSemaphores);
+
+		vk::Result result = this->graphicsQueue.submit(1, &submitInfo, this->frameFence);
+		if(result != vk::Result::eSuccess) {
+			console::print("vulkan: failed to submit graphics queue %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+
+		// present the image. wait for the queue's submit signal
+		vk::PresentInfoKHR presentInfo(1, signalSemaphores, 1, &this->swapchain, &this->currentFramebuffer[pipeline], nullptr);
+		result = this->presentationQueue.presentKHR(presentInfo);
+		if(result != vk::Result::eSuccess) {
+			console::print("vulkan: failed to present via presentation queue %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+	}
 	#endif
 }
 
@@ -395,11 +481,13 @@ void render::Window::draw(PrimitiveType type, unsigned int firstVertex, unsigned
 	#ifdef __switch__
 	this->commandBuffer.draw(primitiveToDkPrimitive(type), vertexCount, instanceCount, firstVertex, firstInstance);
 	#else
-	if(firstInstance == 0 && instanceCount == 1) {
-		glDrawArrays(primitiveToGLPrimitive(type), firstVertex, vertexCount);
-	}
-	else {
-		glDrawArraysInstancedBaseInstance(primitiveToGLPrimitive(type), firstVertex, vertexCount, instanceCount, firstInstance);
+	if(this->backend == OPENGL_BACKEND) {
+		if(firstInstance == 0 && instanceCount == 1) {
+			glDrawArrays(primitiveToGLPrimitive(type), firstVertex, vertexCount);
+		}
+		else {
+			glDrawArraysInstancedBaseInstance(primitiveToGLPrimitive(type), firstVertex, vertexCount, instanceCount, firstInstance);
+		}
 	}
 	#endif
 }
@@ -410,7 +498,9 @@ void render::Window::resize(unsigned int width, unsigned int height) {
 	this->height = height;
 	
 	#ifndef __switch__
-	glViewport(0, 0, width, height);
+	if(this->backend == OPENGL_BACKEND) {
+		glViewport(0, 0, width, height);
+	}
 	#endif
 }
 
@@ -553,7 +643,7 @@ void render::Window::setupDevice() {
 	
 	this->device.device = this->device.physicalDevice.createDevice(deviceCreateInfo);
 
-	this->queue = this->device.device.getQueue(this->device.graphicsQueueIndex, 0);
+	this->graphicsQueue = this->device.device.getQueue(this->device.graphicsQueueIndex, 0);
 	this->presentationQueue = this->device.device.getQueue(this->device.presentationQueueIndex, 0);
 
 	// now create the swapchain

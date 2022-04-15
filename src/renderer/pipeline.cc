@@ -4,7 +4,13 @@
 #include "window.h"
 #include "debug.h"
 
-vk::Pipeline* render::VulkanPipeline::newPipeline() {
+render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
+	VulkanPipelineResult output = {
+		new vk::PipelineLayout,
+		new vk::RenderPass,
+		new vk::Pipeline,
+	};
+	
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo({}, 0, nullptr, 0, nullptr);
 	vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo({}, primitiveToVulkanPrimitive(this->topology), false);
 	vk::Viewport viewport(0.0f, 0.0f, this->viewportWidth, this->viewportHeight, 0.0f, 1.0f);
@@ -50,7 +56,11 @@ vk::Pipeline* render::VulkanPipeline::newPipeline() {
 	vk::PipelineDynamicStateCreateInfo dynamicStateInfo({}, 0, nullptr);
 
 	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, 0, nullptr, 0, nullptr);
-	vk::PipelineLayout pipelineLayout = this->window->device.device.createPipelineLayout(pipelineLayoutInfo); // TODO remember to clean up
+	vk::Result result = this->window->device.device.createPipelineLayout(&pipelineLayoutInfo, nullptr, output.layout); // TODO remember to clean up
+	if(result != vk::Result::eSuccess) {
+		console::error("vulkan: could not create pipeline layout: %s\n", vkResultToString((VkResult)result).c_str());
+		exit(1);
+	}
 
 	// handle renderpass/subpasses
 	vk::AttachmentDescription colorAttachment({}, this->window->swapchainFormat.format, vk::SampleCountFlagBits::e1, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR);
@@ -58,8 +68,22 @@ vk::Pipeline* render::VulkanPipeline::newPipeline() {
 	vk::AttachmentReference attachmentReference(0, vk::ImageLayout::eColorAttachmentOptimal); // attach to the output color location in the shader
 	vk::SubpassDescription subpass({}, vk::PipelineBindPoint::eGraphics, 0, nullptr, 1, &attachmentReference);
 
-	vk::RenderPassCreateInfo renderPassInfo({}, 1, &colorAttachment, 1, &subpass);
-	vk::RenderPass renderPass = this->window->device.device.createRenderPass(renderPassInfo); // TODO remember to clean up
+	// create a subpass dependency that waits for color
+	vk::SubpassDependency dependency(
+		VK_SUBPASS_EXTERNAL, // src
+		0, // dest
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, // src stage
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, // dest stage
+		{}, // src access
+		vk::AccessFlagBits::eColorAttachmentWrite // dest access
+	);
+
+	vk::RenderPassCreateInfo renderPassInfo({}, 1, &colorAttachment, 1, &subpass, 1, &dependency);
+	result = this->window->device.device.createRenderPass(&renderPassInfo, nullptr, output.renderPass); // TODO remember to clean up
+	if(result != vk::Result::eSuccess) {
+		console::error("vulkan: could not create render pass: %s\n", vkResultToString((VkResult)result).c_str());
+		exit(1);
+	}
 
 	// create the pipeline
 	vk::GraphicsPipelineCreateInfo pipelineInfo(
@@ -75,18 +99,30 @@ vk::Pipeline* render::VulkanPipeline::newPipeline() {
 		nullptr,
 		&colorBlendInfo,
 		&dynamicStateInfo,
-		pipelineLayout,
-		renderPass,
+		*output.layout,
+		*output.renderPass,
 		0
 	);
 
-	vk::Pipeline* pipeline = new vk::Pipeline;
 	vk::PipelineCache pipelineCache = vk::PipelineCache();
-	vk::Result result = this->window->device.device.createGraphicsPipelines(pipelineCache, 1, &pipelineInfo, nullptr, pipeline);
-
+	result = this->window->device.device.createGraphicsPipelines(pipelineCache, 1, &pipelineInfo, nullptr, output.pipeline);
 	if(result != vk::Result::eSuccess) {
 		console::error("vulkan: could not create pipeline: %s\n", vkResultToString((VkResult)result).c_str());
 		exit(1);
 	}
-	return pipeline;
+
+	output.framebuffers.resize(this->window->renderImageViews.size());
+	for(size_t i = 0; i < this->window->renderImageViews.size(); i++) {
+		output.framebuffers[i] = new vk::Framebuffer;
+		vk::ImageView attachments[] = { this->window->renderImageViews[i] };
+		vk::FramebufferCreateInfo framebufferInfo({}, *output.renderPass, 1, attachments, this->window->swapchainExtent.width, this->window->swapchainExtent.height, 1);
+
+		result = this->window->device.device.createFramebuffer(&framebufferInfo, nullptr, output.framebuffers[i]);
+		if(result != vk::Result::eSuccess) {
+			console::error("vulkan: could not create framebuffers: %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+	}
+
+	return output;
 }
