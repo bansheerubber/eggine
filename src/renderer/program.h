@@ -9,6 +9,7 @@
 #include <tsl/robin_map.h>
 #include <vector>
 
+#include "pipeline.h"
 #include "memory.h"
 
 namespace std {
@@ -30,6 +31,8 @@ namespace std {
 
 namespace render {
 	class Program {
+		friend VulkanPipeline;
+
 		public:
 			Program(class Window* window);
 			void bind();

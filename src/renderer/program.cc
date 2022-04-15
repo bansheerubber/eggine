@@ -20,7 +20,12 @@ void render::Program::addShader(Shader* shader) {
 	this->shaders.push_back(shader);
 
 	if(this->window->backend == VULKAN_BACKEND) {
-		this->stages[this->stageCount++] = vk::PipelineShaderStageCreateInfo({}, shader->type == SHADER_VERTEX ? vk::ShaderStageFlagBits::eVertex : vk::ShaderStageFlagBits::eFragment, shader->module, "main");
+		this->stages[shader->type == SHADER_VERTEX ? 0 : 1] = vk::PipelineShaderStageCreateInfo(
+			{},
+			shader->type == SHADER_VERTEX ? vk::ShaderStageFlagBits::eVertex : vk::ShaderStageFlagBits::eFragment,
+			shader->module,
+			"main"
+		);
 	}
 }
 

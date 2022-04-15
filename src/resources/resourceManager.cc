@@ -90,6 +90,20 @@ void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint
 	((resources::ShaderSource*)(((resources::ResourceManager*)owner)->metadataToResource[file->metadata]))->original = original;
 }
 
+void handleSPVShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize, true);
+	
+	// find the .vert/.frag and associate it with the shader source so we can get uniform buffer bindings
+	resources::ShaderSource* original = (resources::ShaderSource*)((resources::ResourceManager*)owner)->metadataToResources(
+		((resources::ResourceManager*)owner)->carton->database.get()->equals(
+			"fileName",
+			file->getFileName().replace(file->getFileName().size() - 4, file->getFileName().size(), "")
+		)->exec()
+	)[0];
+	((resources::ShaderSource*)(((resources::ResourceManager*)owner)->metadataToResource[file->metadata]))->original = original;
+}
+
 void handleMaps(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new resources::MapSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
@@ -104,6 +118,10 @@ resources::ShaderSource* getShaderSource(string fileName) {
 	#ifdef __switch__
 	fileName += ".dksh";
 	#endif
+	
+	if(engine->renderWindow.backend == render::VULKAN_BACKEND) {
+		fileName += ".spv";
+	}
 	
 	return (resources::ShaderSource*)engine->manager->metadataToResources(
 		engine->manager->carton->database.get()->equals("fileName", fileName)->exec()
@@ -220,6 +238,7 @@ void resources::ResourceManager::reload() {
 	this->carton->addExtensionHandler(".vert", handleShaders, this);
 	this->carton->addExtensionHandler(".frag", handleShaders, this);
 	this->carton->addExtensionHandler(".dksh", handleDKSHShaders, this);
+	this->carton->addExtensionHandler(".spv", handleSPVShaders, this);
 	this->carton->addExtensionHandler(".map", handleMaps, this);
 	this->carton->addExtensionHandler(".sound", handleSounds, this);
 }

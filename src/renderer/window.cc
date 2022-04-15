@@ -15,6 +15,9 @@
 #include "texture.h"
 #include "window.h"
 
+#include "shader.h"
+#include "program.h"
+
 #ifndef __switch__
 void onWindowResize(GLFWwindow* window, int width, int height) {
 	engine->renderWindow.resize(width, height);
@@ -209,7 +212,19 @@ void render::Window::initialize() {
 		this->pickDevice();
 		this->setupDevice();
 
-		VulkanPipeline pipeline = { this, PRIMITIVE_TRIANGLE_STRIP, 1280.f, 720.f };
+		engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".spv")->exec());
+
+		render::Shader* vertexShader = new render::Shader(&engine->renderWindow);
+		vertexShader->load(getShaderSource("shaders/hello.vert"), render::SHADER_VERTEX);
+
+		render::Shader* fragmentShader = new render::Shader(&engine->renderWindow);
+		fragmentShader->load(getShaderSource("shaders/hello.frag"), render::SHADER_FRAGMENT);
+
+		render::Program* program = new render::Program(&engine->renderWindow);
+		program->addShader(vertexShader);
+		program->addShader(fragmentShader);
+
+		VulkanPipeline pipeline = { this, PRIMITIVE_TRIANGLE_STRIP, 1280.f, 720.f, program };
 		pipeline.newPipeline();
 
 		console::print("yippee\n");

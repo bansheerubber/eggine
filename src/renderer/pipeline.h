@@ -17,11 +17,12 @@ namespace render {
 		PrimitiveType topology;
 		float viewportWidth;
 		float viewportHeight;
+		class Program* program;
 
 		vk::Pipeline* newPipeline();
 
 		bool operator==(VulkanPipeline const &other) {
-			return this->topology == other.topology && this->viewportWidth == other.viewportWidth && this->viewportHeight == other.viewportHeight;
+			return this->topology == other.topology && this->viewportWidth == other.viewportWidth && this->viewportHeight == other.viewportHeight && this->program == other.program;
 		}
 	};
 };
@@ -33,6 +34,7 @@ namespace std {
 			uint64_t result = hash<render::PrimitiveType>{}(source.topology);
 			result = combineHash(result, source.viewportWidth);
 			result = combineHash(result, source.viewportHeight);
+			result = combineHash(result, source.program);
 			return result;
     }
 	};

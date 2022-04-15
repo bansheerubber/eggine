@@ -29,56 +29,25 @@ void render::Shader::bind() {
 	
 }
 
-void render::Shader::loadFromFile(string filename, ShaderType type) {
-	this->processUniforms(filename);
-	
-	#ifdef __switch__
-	filename += ".dksh";
-	#endif
-	
-	ifstream file(filename, ios::binary);
-
-	if(file.bad() || file.fail()) {
-		console::error("failed to open file for shader %s\n", filename.c_str());
-		file.close();
-		this->window->addError();
-		return;
-  }
-
-	file.seekg(0, file.end);
-	uint64_t length = (uint64_t)file.tellg();
-	file.seekg(0, file.beg);
-	char* buffer = new char[length];
-	file.read((char*)buffer, length);
-	file.close();
-
-	this->load(buffer, length, type);
-
-	delete[] buffer;
-}
-
-void render::Shader::load(string buffer, ShaderType type) {
-	this->processUniforms(buffer.c_str(), buffer.length());
-	this->load(buffer.c_str(), buffer.length(), type);
-}
-
 void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 	if(source == nullptr) {
 		console::error("shader source is nullptr\n");
 		return;
 	}
+
+	this->type = type;
+
+	if(source->original != nullptr) {
+		this->processUniforms(source->original->source.c_str(), source->original->source.length());	
+	}
+	else {
+		this->processUniforms(source->source.c_str(), source->source.length());	
+	}
 	
 	#ifdef __switch__
-	this->processUniforms(source->original->source.c_str(), source->original->source.length());
-	this->load((const char*)source->buffer, source->bufferSize, type);
-	#else
-	this->load(source->source, type);
-	#endif
-}
+	const char* buffer = (const char*)source->buffer;
+	uint64_t length = source->bufferSize;
 
-void render::Shader::load(const char* buffer, uint64_t length, ShaderType type) {
-	this->type = type;
-	#ifdef __switch__
 	DkshHeader header {
 		magic: 0,
 		headerSize: 0,
@@ -115,6 +84,17 @@ void render::Shader::load(const char* buffer, uint64_t length, ShaderType type) 
 		exit(1);
 	}
 	#else
+	const char* buffer = nullptr;
+	uint64_t length = 0;
+	if(source->original != nullptr) {
+		buffer = (const char*)source->buffer;
+		length = source->bufferSize;
+	}
+	else {
+		buffer = source->source.c_str();
+		length = source->source.length();
+	}
+
 	if(this->window->backend == OPENGL_BACKEND) {
 		GLenum glType = type == SHADER_FRAGMENT ? GL_FRAGMENT_SHADER : GL_VERTEX_SHADER;
 

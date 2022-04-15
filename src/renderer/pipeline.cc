@@ -1,5 +1,6 @@
 #include "pipeline.h"
 
+#include "program.h"
 #include "window.h"
 #include "debug.h"
 
@@ -61,7 +62,23 @@ vk::Pipeline* render::VulkanPipeline::newPipeline() {
 	vk::RenderPass renderPass = this->window->device.device.createRenderPass(renderPassInfo); // TODO remember to clean up
 
 	// create the pipeline
-	vk::GraphicsPipelineCreateInfo pipelineInfo({}, 0, nullptr, &vertexInputInfo, &inputAssemblyInfo, nullptr, &viewportStateInfo, &rasterizationInfo, &multisampleInfo, nullptr, &colorBlendInfo, &dynamicStateInfo, pipelineLayout, renderPass, 0);
+	vk::GraphicsPipelineCreateInfo pipelineInfo(
+		{},
+		this->program->stages.size(),
+		this->program->stages.data(),
+		&vertexInputInfo,
+		&inputAssemblyInfo,
+		nullptr,
+		&viewportStateInfo,
+		&rasterizationInfo,
+		&multisampleInfo,
+		nullptr,
+		&colorBlendInfo,
+		&dynamicStateInfo,
+		pipelineLayout,
+		renderPass,
+		0
+	);
 
 	vk::Pipeline* pipeline = new vk::Pipeline;
 	vk::PipelineCache pipelineCache = vk::PipelineCache();

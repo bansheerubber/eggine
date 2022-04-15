@@ -25,9 +25,6 @@ namespace render {
 		public:
 			Shader(class Window* window);
 
-			void loadFromFile(string filename, ShaderType type);
-			void load(string buffer, ShaderType type);
-			void load(const char* buffer, uint64_t length, ShaderType type);
 			void load(resources::ShaderSource* source, ShaderType type);
 			void bind();
 
