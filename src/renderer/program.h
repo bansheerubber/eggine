@@ -51,6 +51,7 @@ namespace render {
 			tsl::robin_map<std::pair<std::string, uint64_t>, GLuint> uniformToBuffer;
 
 			std::vector<vk::PipelineShaderStageCreateInfo> stages = std::vector<vk::PipelineShaderStageCreateInfo>(2);
+			uint8_t stageCount = 0;
 
 			static unsigned int UniformCount;
 			void createUniformBuffer(std::string uniformName, unsigned int size, uint64_t cacheIndex);

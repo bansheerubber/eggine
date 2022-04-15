@@ -209,6 +209,9 @@ void render::Window::initialize() {
 		this->pickDevice();
 		this->setupDevice();
 
+		VulkanPipeline pipeline = { this, PRIMITIVE_TRIANGLE_STRIP, 1280.f, 720.f };
+		pipeline.newPipeline();
+
 		console::print("yippee\n");
 
 		exit(0);
@@ -557,6 +560,9 @@ void render::Window::setupDevice() {
 	width = std::clamp(width, this->device.capabilities.minImageExtent.width, this->device.capabilities.maxImageExtent.width);
 	height = std::clamp(width, this->device.capabilities.minImageExtent.height, this->device.capabilities.maxImageExtent.height);
 
+	this->swapchainExtent = vk::Extent2D(width, height);
+	this->swapchainFormat = format;
+
 	uint32_t imageCount = 2; // TODO this needs to be double checked against the drivers
 	vk::SwapchainCreateInfoKHR swapChainInfo(
 		{},
@@ -564,7 +570,7 @@ void render::Window::setupDevice() {
 		imageCount,
 		format.format,
 		format.colorSpace,
-		VkExtent2D { width, height },
+		this->swapchainExtent,
 		1,
 		vk::ImageUsageFlagBits::eColorAttachment,
 		vk::SharingMode::eExclusive,
