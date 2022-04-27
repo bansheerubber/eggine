@@ -28,7 +28,6 @@ class Text : public RenderObject {
 		std::string getText();
 	
 	protected:
-
 		render::VertexBuffer* vertexBuffers[2];
 		render::VertexAttributes* vertexAttributes;
 		std::string text;

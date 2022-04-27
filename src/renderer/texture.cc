@@ -26,8 +26,8 @@ void render::Texture::setWrap(TextureWrap uWrap, TextureWrap vWrap) {
 	this->vWrap = vWrap;
 }
 
-void render::Texture::loadPNGFromFile(string filename) {
-	ifstream file(filename, ios::binary);
+void render::Texture::loadPNGFromFile(std::string filename) {
+	std::ifstream file(filename, std::ios::binary);
 
 	if(file.bad() || file.fail()) {
 		console::error("failed to open file for png %s\n", filename.c_str());
@@ -93,7 +93,7 @@ void render::Texture::load(
 	this->samplerDescriptorMemory = this->window->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, sizeof(DkSamplerDescriptor), DK_SAMPLER_DESCRIPTOR_ALIGNMENT);
 	
 	// allocate memory for the image, we will be deallocating this later though
-	switch_memory::Piece* memory = this->window->memory.allocate(
+	Piece* memory = this->window->memory.allocate(
 		DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached,
 		bufferSize,
 		DK_IMAGE_LINEAR_STRIDE_ALIGNMENT
@@ -142,6 +142,137 @@ void render::Texture::load(
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureWrapToGLWrap(this->vWrap));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFilterToGLFilter(this->minFilter));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFilterToGLFilter(this->magFilter));
+	}
+	else {
+		this->stagingBuffer = this->window->memory.allocateBuffer(
+			vk::BufferCreateInfo(
+				{},
+				bufferSize,
+				vk::BufferUsageFlagBits::eTransferSrc,
+				vk::SharingMode::eExclusive
+			),
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+		);
+
+		this->image = this->window->memory.allocateImage(
+			vk::ImageCreateInfo(
+				{},
+				vk::ImageType::e2D,
+				channelsAndBitDepthToVulkanFormat(this->channels, this->bitDepth),
+				{ this->width, this->height, 1, },
+				1,
+				1,
+				vk::SampleCountFlagBits::e1,
+				vk::ImageTiling::eOptimal,
+				vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+				vk::SharingMode::eExclusive,
+				0,
+				nullptr,
+				vk::ImageLayout::eUndefined
+			),
+			vk::MemoryPropertyFlagBits::eDeviceLocal
+		);
+
+		memcpy(this->stagingBuffer->map(), buffer, bufferSize);
+
+		// handle layout transitions
+		{
+			vk::CommandBuffer buffer = this->window->beginTransientCommands();
+
+			vk::ImageMemoryBarrier barrier(
+				{},
+				vk::AccessFlagBits::eTransferWrite,
+				vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eTransferDstOptimal,
+				VK_QUEUE_FAMILY_IGNORED,
+				VK_QUEUE_FAMILY_IGNORED,
+				this->image->getImage(),
+				vk::ImageSubresourceRange(
+					vk::ImageAspectFlagBits::eColor, // aspect mask
+					0, // base mip level
+					1, // level count
+					0, // base array layer
+					1 // layer count
+				)
+			);
+
+			buffer.pipelineBarrier(
+				vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, 0, nullptr, 0, nullptr, 1, &barrier
+			);
+
+			this->window->endTransientCommands(buffer, {});
+		}
+
+		// copy buffer into valid image memory
+		this->window->copyVulkanBufferToImage(this->stagingBuffer, this->image, this->width, this->height);
+
+		// transfer the layout to shader mode
+		{
+			vk::CommandBuffer buffer = this->window->beginTransientCommands();
+
+			vk::ImageMemoryBarrier barrier(
+				vk::AccessFlagBits::eTransferWrite,
+				vk::AccessFlagBits::eShaderRead,
+				vk::ImageLayout::eTransferDstOptimal,
+				vk::ImageLayout::eShaderReadOnlyOptimal,
+				VK_QUEUE_FAMILY_IGNORED,
+				VK_QUEUE_FAMILY_IGNORED,
+				this->image->getImage(),
+				vk::ImageSubresourceRange(
+					vk::ImageAspectFlagBits::eColor, // aspect mask
+					0, // base mip level
+					1, // level count
+					0, // base array layer
+					1 // layer count
+				)
+			);
+
+			buffer.pipelineBarrier(
+				vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, {}, 0, nullptr, 0, nullptr, 1, &barrier
+			);
+
+			this->window->endTransientCommands(buffer, {});
+		}
+
+		// create image view
+		vk::ImageViewCreateInfo viewInfo(
+			{},
+			this->image->getImage(),
+			vk::ImageViewType::e2D,
+			channelsAndBitDepthToVulkanFormat(this->channels, this->bitDepth),
+			{ vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, },
+			vk::ImageSubresourceRange(
+				vk::ImageAspectFlagBits::eColor, // aspect mask
+				0, // base mip level
+				1, // level count
+				0, // base array layer
+				1 // layer count
+			)
+		);
+
+		this->imageView = this->window->device.device.createImageView(viewInfo);
+
+		// create sampler
+		vk::SamplerCreateInfo samplerInfo(
+			{},
+			textureFilterToVulkanFilter(this->magFilter),
+			textureFilterToVulkanFilter(this->minFilter),
+			vk::SamplerMipmapMode::eNearest,
+			vk::SamplerAddressMode::eRepeat,
+			vk::SamplerAddressMode::eRepeat,
+			vk::SamplerAddressMode::eRepeat,
+			0,
+			false,
+			0,
+			false,
+			vk::CompareOp::eNever,
+			0,
+			0,
+			vk::BorderColor::eFloatTransparentBlack,
+			false
+		);
+
+		this->sampler = this->window->device.device.createSampler(samplerInfo);
 	}
 	#endif
 }

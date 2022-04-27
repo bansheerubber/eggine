@@ -65,11 +65,10 @@ void resources::Image::render() {
 	vb.position = this->position;
 	vb.size = this->size;
 
-	resources::Image::Program->bind();
-	this->texture->bind(0);
-	resources::Image::Program->bindTexture("inTexture", 0);
-	resources::Image::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
+	engine->renderWindow.getState(0).bindProgram(resources::Image::Program);
+	engine->renderWindow.getState(0).bindTexture("inTexture", this->texture);
+	engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb, sizeof(vb));
 
-	resources::Image::Attributes->bind();
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
+	engine->renderWindow.getState(0).bindVertexAttributes(resources::Image::Attributes);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }

@@ -90,6 +90,15 @@ void Camera::see(double deltaTime) {
 		-100.0,
 		1000.0
 	);
+
+	if(engine->renderWindow.backend == render::VULKAN_BACKEND) {
+		this->projectionMatrix = glm::mat4(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 0.5, 0,
+			0, 0, 0.5, 1
+		) * this->projectionMatrix;
+	}
 }
 
 void Camera::setPosition(glm::vec2 position) {

@@ -6,24 +6,15 @@ resources::ShaderSource::ShaderSource(
 	ResourceManager* manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
-	uint64_t bufferSize,
-	bool useCharBuffer
+	uint64_t bufferSize
 ) : ResourceObject(manager, metadata) {
-	if(useCharBuffer) {
-		this->buffer = new unsigned char[bufferSize];
-		this->bufferSize = bufferSize;
-		memcpy(this->buffer, buffer, bufferSize);
-	}
-	else {
-		this->source = string((char*)buffer, bufferSize);
-	}
+	this->buffer = new unsigned char[bufferSize];
+	this->bufferSize = bufferSize;
+	memcpy(this->buffer, buffer, bufferSize);
+
+	this->fileName = metadata->getMetadata("fileName");
 }
 
 unsigned int resources::ShaderSource::getBytesUsed() {
-	if(this->bufferSize == 0) {
-		return this->source.length();
-	}
-	else {
-		return this->bufferSize;
-	}
+	return this->bufferSize;
 }

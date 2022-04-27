@@ -78,7 +78,7 @@ void handleShaders(void* owner, carton::File* file, const char* buffer, uint64_t
 
 void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize, true);
+		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 	
 	// find the .vert/.frag and associate it with the shader source so we can get uniform buffer bindings
 	resources::ShaderSource* original = (resources::ShaderSource*)((resources::ResourceManager*)owner)->metadataToResources(
@@ -92,7 +92,7 @@ void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint
 
 void handleSPVShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize, true);
+		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 	
 	// find the .vert/.frag and associate it with the shader source so we can get uniform buffer bindings
 	resources::ShaderSource* original = (resources::ShaderSource*)((resources::ResourceManager*)owner)->metadataToResources(

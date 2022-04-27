@@ -1,12 +1,8 @@
 #pragma once
 
-#ifdef __switch__
-#include <deko3d.hpp>
-#include <switch.h>
-#else
+#ifndef __switch__
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
-#endif
 
 #include "../util/hash.h"
 #include "primitive.h"
@@ -14,9 +10,7 @@
 namespace render {
 	struct VulkanPipelineResult {
 		vk::PipelineLayout* layout;
-		vk::RenderPass* renderPass;
 		vk::Pipeline* pipeline;
-		std::vector<vk::Framebuffer*> framebuffers;
 	};
 	
 	struct VulkanPipeline { // used for caching a vk pipeline based on commonly used parameters
@@ -25,12 +19,17 @@ namespace render {
 		float viewportWidth;
 		float viewportHeight;
 		class Program* program;
+		class VertexAttributes* attributes;
 
 		VulkanPipelineResult newPipeline();
 	};
 
 	inline bool operator==(const VulkanPipeline &lhs, const VulkanPipeline &rhs) {
 		return lhs.topology == rhs.topology && lhs.viewportWidth == rhs.viewportWidth && lhs.viewportHeight == rhs.viewportHeight && lhs.program == rhs.program;
+	}
+
+	inline bool operator!=(const VulkanPipeline &lhs, const VulkanPipeline &rhs) {
+		return !(lhs == rhs);
 	}
 };
 
@@ -46,3 +45,4 @@ namespace std {
     }
 	};
 };
+#endif

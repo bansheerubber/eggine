@@ -53,9 +53,9 @@ void render::Box::render(glm::mat4 projection) {
 	} fb;
 	fb.color = this->color;
 
-	render::Box::Program->bind();
-	render::Box::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
-	render::Box::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
-	render::Box::VertexAttributes->bind();
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
+	engine->renderWindow.getState(0).bindProgram(render::Box::Program);
+	engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb, sizeof(vb));
+	engine->renderWindow.getState(0).bindUniform("fragmentBlock", &fb, sizeof(fb));
+	engine->renderWindow.getState(0).bindVertexAttributes(render::Box::VertexAttributes);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }

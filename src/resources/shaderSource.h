@@ -6,8 +6,8 @@
 namespace resources {
 	class ShaderSource : public ResourceObject {
 		public:
-			ShaderSource(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize, bool useCharBuffer =  false);
-			string source;
+			ShaderSource(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
+			std::string fileName;
 			unsigned char* buffer;
 			uint64_t bufferSize = 0;
 			ShaderSource* original = nullptr;

@@ -21,6 +21,8 @@ namespace render {
 
 	class Shader {
 		friend class Program;
+		friend class State;
+		friend class Window;
 		
 		public:
 			Shader(class Window* window);
@@ -31,11 +33,14 @@ namespace render {
 		protected:
 			class Window* window;
 
+			std::string fileName;
+
 			tsl::robin_map<std::string, unsigned int> uniformToBinding;
+			tsl::robin_map<std::string, bool> isUniformSampler;
 			ShaderType type;
 
 			#ifdef __switch__
-			switch_memory::Piece* memory = nullptr;
+			Piece* memory = nullptr;
 			dk::Shader shader;
 			#else
 			GLuint shader = GL_INVALID_INDEX;
@@ -44,6 +49,5 @@ namespace render {
 			#endif
 
 			void processUniforms(const char* buffer, uint64_t bufferSize);
-			void processUniforms(std::string filename);
 	};
 };

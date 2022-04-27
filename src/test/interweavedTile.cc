@@ -153,18 +153,18 @@ void InterweavedTile::render(double deltaTime, RenderContext &context) {
 	this->xrayBuffer = 0;
 	this->vertexBuffers[3]->setData(&this->xrayBuffer, sizeof(this->xrayBuffer), sizeof(this->xrayBuffer));
 	
-	this->vertexAttributes->bind();
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
+	engine->renderWindow.getState(0).bindVertexAttributes(this->vertexAttributes);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }
 
 void InterweavedTile::renderXRay(double deltaTime, RenderContext &context) {
 	this->xrayBuffer = this->canXRay();
 	this->vertexBuffers[3]->setData(&this->xrayBuffer, sizeof(this->xrayBuffer), sizeof(this->xrayBuffer));
 
-	engine->renderWindow.enableDepthTest(false);
-	this->vertexAttributes->bind();
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
-	engine->renderWindow.enableDepthTest(true);
+	// engine->renderWindow.enableDepthTest(false);
+	engine->renderWindow.getState(0).bindVertexAttributes(this->vertexAttributes);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
+	// engine->renderWindow.enableDepthTest(true);
 }
 
 void es::defineInterweavedTile() {

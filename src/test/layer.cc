@@ -209,13 +209,14 @@ void Layer::render(double deltaTime, RenderContext &context) {
 		this->needsUpdate = false;
 	}
 	
-	this->attributes->bind();
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, this->tiles.array.head);
+	engine->renderWindow.getState(0).bindVertexAttributes(this->attributes);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, this->tiles.array.head);
 }
 
 void Layer::renderXRay(double deltaTime, RenderContext &context) {	
-	this->xrayAttributes->bind();
-	engine->renderWindow.enableDepthTest(false);
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, this->xrayCount);
-	engine->renderWindow.enableDepthTest(true);
+	engine->renderWindow.getState(0).bindVertexAttributes(this->xrayAttributes);
+
+	// engine->renderWindow.enableDepthTest(false);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, this->xrayCount);
+	// engine->renderWindow.enableDepthTest(true);
 }

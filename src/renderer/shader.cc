@@ -30,6 +30,8 @@ void render::Shader::bind() {
 }
 
 void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
+	this->fileName = source->fileName;
+	
 	if(source == nullptr) {
 		console::error("shader source is nullptr\n");
 		return;
@@ -38,15 +40,14 @@ void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 	this->type = type;
 
 	if(source->original != nullptr) {
-		this->processUniforms(source->original->source.c_str(), source->original->source.length());	
+		this->processUniforms((const char*)source->original->buffer, source->original->bufferSize);	
 	}
 	else {
-		this->processUniforms(source->source.c_str(), source->source.length());	
+		this->processUniforms((const char*)source->buffer, source->bufferSize);
 	}
 	
 	#ifdef __switch__
 	const char* buffer = (const char*)source->buffer;
-	uint64_t length = source->bufferSize;
 
 	DkshHeader header {
 		magic: 0,
@@ -63,7 +64,7 @@ void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 		return;
 	}
 
-	vector<char> controlBuffer(header.controlSize);
+	std::vector<char> controlBuffer(header.controlSize);
 	memcpy(controlBuffer.data(), buffer, header.controlSize);
 
 	this->memory = this->window->memory.allocate(
@@ -81,19 +82,11 @@ void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 	
 	if(!this->shader.isValid()) {
 		console::error("shader not valid\n");
-		exit(1);
+		return;
 	}
 	#else
-	const char* buffer = nullptr;
-	uint64_t length = 0;
-	if(source->original != nullptr) {
-		buffer = (const char*)source->buffer;
-		length = source->bufferSize;
-	}
-	else {
-		buffer = source->source.c_str();
-		length = source->source.length();
-	}
+	const char* buffer = (const char*)source->buffer;
+	uint64_t length = source->bufferSize;
 
 	if(this->window->backend == OPENGL_BACKEND) {
 		GLenum glType = type == SHADER_FRAGMENT ? GL_FRAGMENT_SHADER : GL_VERTEX_SHADER;
@@ -136,7 +129,7 @@ void render::Shader::load(resources::ShaderSource* source, ShaderType type) {
 }
 
 void render::Shader::processUniforms(const char* buffer, uint64_t bufferSize) {
-	string line;
+	std::string line;
 	uint64_t index = 0;
 	while(index < bufferSize) {
 		// read a line
@@ -147,14 +140,14 @@ void render::Shader::processUniforms(const char* buffer, uint64_t bufferSize) {
 		index++; // skip the newline
 
 		uint64_t uniformLocation = line.find("uniform");
-		if(uniformLocation != string::npos) {
+		if(uniformLocation != std::string::npos) {
 			uint64_t bindingLocation = line.find("binding");
-			if(bindingLocation == string::npos) {
+			if(bindingLocation == std::string::npos) {
 				console::error("could not find binding for uniform\n");
 				return;
 			}
 
-			string buffer;
+			std::string buffer;
 			for(unsigned int i = bindingLocation; i < line.length(); i++) {
 				switch(line[i]) {
 					case '0':
@@ -179,10 +172,14 @@ void render::Shader::processUniforms(const char* buffer, uint64_t bufferSize) {
 			}
 			
 			end:
-			unsigned int binding = stod(buffer);
+			unsigned int binding = std::stod(buffer);
 			buffer = "";
-			for(unsigned int i = uniformLocation + string("uniform ").length(); i < line.length(); i++) {
+			bool sampler = false;
+			for(unsigned int i = uniformLocation + std::string("uniform ").length(); i < line.length(); i++) {
 				if(line[i] == ' ') {
+					if(buffer == "sampler2D") {
+						sampler = true;
+					}
 					buffer = "";
 				}
 				else if(
@@ -195,71 +192,7 @@ void render::Shader::processUniforms(const char* buffer, uint64_t bufferSize) {
 				}
 			}
 			this->uniformToBinding[buffer] = binding;
+			this->isUniformSampler[buffer] = sampler;
 		}
 	}
-}
-
-// find the uniforms and identify them so we can do some stuff magically
-void render::Shader::processUniforms(string filename) {
-	ifstream file(filename);
-	if(file.bad() || file.fail()) {
-		file.close();
-		return;
-	}
-
-	string line;
-	while(getline(file, line)) {
-		uint64_t uniformLocation = line.find("uniform");
-		if(uniformLocation != string::npos) {
-			uint64_t bindingLocation = line.find("binding");
-			if(bindingLocation == string::npos) {
-				console::error("could not find binding for uniform\n");
-				file.close();
-				return;
-			}
-
-			string buffer;
-			for(unsigned int i = bindingLocation; i < line.length(); i++) {
-				switch(line[i]) {
-					case '0':
-					case '1':
-					case '2':
-					case '3':
-					case '4':
-					case '5':
-					case '6':
-					case '7':
-					case '8':
-					case '9': {
-						buffer += line[i];
-						break;
-					}
-
-					case ',':
-					case ')': {
-						goto end;
-					}
-				}
-			}
-			
-			end:
-			unsigned int binding = stod(buffer);
-			buffer = "";
-			for(unsigned int i = uniformLocation + string("uniform ").length(); i < line.length(); i++) {
-				if(line[i] == ' ') {
-					buffer = "";
-				}
-				else if(
-					(line[i] >= 'a' && line[i] <= 'z')
-					|| (line[i] >= 'A' && line[i] <= 'Z')
-					|| (line[i] >= '0' && line[i] <= '9')
-					|| line[i] == '_'
-				) {
-					buffer += line[i];
-				}
-			}
-			this->uniformToBinding[buffer] = binding;
-		}
-	}
-	file.close();
 }

@@ -131,9 +131,8 @@ std::string Text::getText() {
 }
 
 void Text::render(double deltaTime, RenderContext &context) {
-	Text::Program->bind();
-	this->font->texture->bind(0);
-	Text::Program->bindTexture("textTexture", 0);
+	engine->renderWindow.getState(0).bindProgram(Text::Program);
+	engine->renderWindow.getState(0).bindTexture("textTexture", this->font->texture);
 
 	struct VertexBlock {
 		glm::mat4 projection;
@@ -148,10 +147,10 @@ void Text::render(double deltaTime, RenderContext &context) {
 	} fb;
 	fb.color = this->color;
 
-	Text::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
-	Text::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
+	engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb, sizeof(vb));
+	engine->renderWindow.getState(0).bindUniform("fragmentBlock", &fb, sizeof(fb));
 
-	this->vertexAttributes->bind();
+	engine->renderWindow.getState(0).bindVertexAttributes(this->vertexAttributes);
 
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLES, 0, 6 * this->text.size(), 0, 1);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLES, 0, 6 * this->text.size(), 0, 1);
 }

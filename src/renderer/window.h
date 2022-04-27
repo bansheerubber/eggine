@@ -11,127 +11,23 @@
 #include "../engine/developer.h"
 
 #include <litehtml.h>
+#include <tsl/robin_map.h>
 #include <glm/vec4.hpp>
 #include <vector>
 
 #include "../util/crop.h"
 #include "../renderer/litehtmlContainer.h"
 #include "memory.h"
-#include "pipeline.h"
 #include "../util/png.h"
 #include "primitive.h"
-#include "../renderer/texture.h"
+#include "state.h"
+#include "texture.h"
 #include "../util/time.h"
+#include "vulkanPipeline.h"
+
+#include "stencil.h"
 
 namespace render {
-	enum StencilFunction {
-		STENCIL_NEVER,
-		STENCIL_LESS,
-		STENCIL_LESS_EQUAL,
-		STENCIL_GREATER,
-		STENCIL_GREATER_EQUAL,
-		STENCIL_EQUAL,
-		STENCIL_NOT_EQUAL,
-		STENCIL_ALWAYS,
-	};
-
-	#ifdef __switch
-	#else
-	inline GLenum stencilToGLStencil(StencilFunction type) {
-		switch(type) {
-			case STENCIL_NEVER: {
-				return GL_NEVER;
-			}
-
-			case STENCIL_LESS: {
-				return GL_LESS;
-			}
-
-			case STENCIL_LESS_EQUAL: {
-				return GL_LEQUAL;
-			}
-
-			case STENCIL_GREATER: {
-				return GL_GREATER;
-			}
-
-			case STENCIL_GREATER_EQUAL: {
-				return GL_GEQUAL;
-			}
-
-			case STENCIL_EQUAL: {
-				return GL_EQUAL;
-			}
-
-			case STENCIL_NOT_EQUAL: {
-				return GL_NOTEQUAL;
-			}
-
-			case STENCIL_ALWAYS: {
-				return GL_ALWAYS;
-			}
-
-			default: {
-				return GL_NEVER;
-			}
-		}
-	}
-	#endif
-
-	enum StencilOperation {
-		STENCIL_KEEP,
-		STENCIL_ZERO,
-		STENCIL_REPLACE,
-		STENCIL_INCREMENT,
-		STENCIL_INCREMENT_WRAP,
-		STENCIL_DECREMENT,
-		STENCIL_DECREMENT_WRAP,
-		STENCIL_INVERT,
-	};
-
-	#ifdef __switch__
-	#else
-	inline GLenum stencilOPToGLStencilOP(StencilOperation type) {
-		switch(type) {
-			case STENCIL_KEEP: {
-				return GL_KEEP;
-			}
-
-			case STENCIL_ZERO: {
-				return GL_ZERO;
-			}
-
-			case STENCIL_REPLACE: {
-				return GL_REPLACE;
-			}
-
-			case STENCIL_INCREMENT: {
-				return GL_INCR;
-			}
-
-			case STENCIL_INCREMENT_WRAP: {
-				return GL_INCR_WRAP;
-			}
-
-			case STENCIL_DECREMENT: {
-				return GL_DECR;
-			}
-
-			case STENCIL_DECREMENT_WRAP: {
-				return GL_DECR_WRAP;
-			}
-
-			case STENCIL_INVERT: {
-				return GL_INVERT;
-			}
-
-			default: {
-				return GL_KEEP;
-			}
-		}
-	}
-	#endif
-
 	#ifndef __switch__
 	struct Device {
 		vk::Device device;
@@ -164,8 +60,12 @@ namespace render {
 	// for opengl, we just handle a GLFW window
 	class Window {
 		friend LiteHTMLContainer;
+		friend class Program;
 		friend class Shader;
+		friend class State;
+		#ifndef __switch__
 		friend VulkanPipeline;
+		#endif
 		
 		public:
 			double deltaTime = 0.0;
@@ -175,27 +75,9 @@ namespace render {
 			shared_ptr<litehtml::document> htmlDocument = nullptr;
 			render::LiteHTMLContainer* htmlContainer = nullptr;
 			
-			void initialize(); // start the graphics
-			void deinitialize(); // end the graphics
-			void initializeHTML(); // load index.html
-			void resize(unsigned int width, unsigned int height); // resize the window
-			void prerender();
-			void render();
-			void draw(PrimitiveType type, unsigned int firstVertex, unsigned int vertexCount, unsigned int firstInstance, unsigned int instanceCount);
-			void addError();
-			unsigned int getErrorCount();
-			void clearErrors();
-			void registerHTMLUpdate();
-
-			void setStencilFunction(StencilFunction func, unsigned int reference, unsigned int mask);
-			void setStencilMask(unsigned int mask);
-			void setStencilOperation(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass);
-			void enableStencilTest(bool enable);
-
-			void enableDepthTest(bool enable);
+			Manager memory = Manager(this);
 
 			#ifdef __switch__
-			switch_memory::Manager memory = switch_memory::Manager(this);
 			dk::UniqueDevice device;
 			dk::CmdBuf commandBuffer;
 
@@ -203,10 +85,11 @@ namespace render {
 			HidAnalogStickState rightStick;
 			uint64_t buttons;
 
-			void addTexture(switch_memory::Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height);
+			void addTexture(Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height);
 			void bindTexture(unsigned int location, class Texture* texture);
 			#else
 			GLFWwindow* window = nullptr;
+			Device device;
 			GLFWgamepadstate gamepad;
 			bool hasGamepad;
 			#endif
@@ -219,6 +102,25 @@ namespace render {
 			RenderBackend backend = VULKAN_BACKEND;
 			#endif
 
+			void initialize(); // start the graphics
+			void deinitialize(); // end the graphics
+			void initializeHTML(); // load index.html
+			void resize(unsigned int width, unsigned int height); // resize the window
+			void prerender();
+			void render();
+			void addError();
+			unsigned int getErrorCount();
+			void clearErrors();
+			void registerHTMLUpdate();
+
+			State &getState(uint32_t id); // get a render state, potentially allocate a new one
+
+			vk::CommandBuffer beginTransientCommands();
+			void endTransientCommands(vk::CommandBuffer buffer, vk::Fence fence);
+
+			void copyVulkanBuffer(Piece* source, Piece* destination);
+			void copyVulkanBufferToImage(Piece* source, Piece* destination, uint32_t width, uint32_t height);
+
 		protected:
 			unsigned int errorCount = 0;
 
@@ -229,10 +131,14 @@ namespace render {
 			litehtml::context htmlContext;
 			uint64_t htmlChecksum = 0;
 			uint64_t lastHTMLChecksum = 0;
-			
+			uint32_t framePingPong = 0;
+
+			std::vector<class Program*> programs;
+			tsl::robin_map<uint32_t, State> renderStates;
+
 			#ifdef __switch__
-			switch_memory::Piece* imageDescriptorMemory;
-			switch_memory::Piece* samplerDescriptorMemory;
+			Piece* imageDescriptorMemory;
+			Piece* samplerDescriptorMemory;
 			
 			dk::MemBlock commandBufferMemory;
 			unsigned int commandBufferSize = 1024 * 1024; // 1 MB
@@ -267,34 +173,45 @@ namespace render {
 			dk::BlendState blendState = dk::BlendState {};
 
 			PadState pad;
+
+			void initializeDeko3d();
 			#else
 			vk::Instance instance;
 			vk::SurfaceKHR surface;
 			vk::Queue graphicsQueue;
 			vk::Queue presentationQueue;
-			Device device;
 			vk::DebugUtilsMessengerEXT debugCallback;
 			vk::SwapchainKHR swapchain;
 			vk::Extent2D swapchainExtent;
 			vk::SurfaceFormatKHR swapchainFormat;
+			vk::RenderPass renderPass;
+			std::vector<vk::Framebuffer> framebuffers;
+			uint32_t currentFramebuffer;
 
 			std::vector<vk::Image> renderImages;
 			std::vector<vk::ImageView> renderImageViews;
 
 			tsl::robin_map<VulkanPipeline, VulkanPipelineResult> pipelineCache;
-			tsl::robin_map<VulkanPipeline, uint32_t> currentFramebuffer;
 
 			vk::CommandPool commandPool;
-			vk::CommandBuffer mainBuffer;
+			vk::CommandPool transientCommandPool;
+			vk::DescriptorPool descriptorPool;
 
-			vk::Fence frameFence;
-			vk::Semaphore isImageAvailable;
-			vk::Semaphore isRenderFinished;
+			vk::Fence frameFence[2];
+			vk::Semaphore isImageAvailable[2];
+			vk::Semaphore isRenderFinished[2];
 
-			Program* simpleProgram = nullptr;
-			
+			std::vector<vk::Fence> memoryCopyFences;
+			std::vector<vk::CommandBuffer> transientCommandBuffers;
+
+			bool swapchainOutOfDate = false;
+
 			void pickDevice();
 			void setupDevice();
+			void createSwapchain();
+
+			void initializeOpenGL();
+			void initializeVulkan();
 			#endif
 	};
 };

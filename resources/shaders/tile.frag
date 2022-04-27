@@ -8,7 +8,7 @@ layout(location = 2) flat in int xray;
 layout(location = 3) in float height;
 layout(location = 4) flat in int timer;
 
-layout(binding = 0) uniform sampler2D spriteTexture;
+layout(binding = 1) uniform sampler2D spriteTexture;
 
 void main() {
 	color = texture(spriteTexture, uv);

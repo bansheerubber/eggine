@@ -305,13 +305,13 @@ void Engine::initialize() {
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());
 
 	// execute eggscript file
-	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
-		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
-	)[0];
-	esExecVirtualFile(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
-	esCallFunction(this->eggscript, "init", 0, nullptr);
+	// resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
+	// 	engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
+	// )[0];
+	// esExecVirtualFile(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
+	// esCallFunction(this->eggscript, "init", 0, nullptr);
 
-	this->renderWindow.initializeHTML();
+	// this->renderWindow.initializeHTML();
 
 	#ifdef EGGINE_DEVELOPER_MODE
 	this->developerGui = new DeveloperGui();
@@ -514,7 +514,7 @@ void Engine::tick() {
 	this->debugText->setText(this->debug.getInfoText());
 	#endif
 
-	this->renderWindow.enableDepthTest(false);
+	// this->renderWindow.enableDepthTest(false);
 
 	for(uint64_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
@@ -528,7 +528,7 @@ void Engine::tick() {
 
 	this->renderWindow.render();
 
-	this->renderWindow.enableDepthTest(true);
+	// this->renderWindow.enableDepthTest(true);
 
 	if(this->network.isServer()) {
 		this->network.tick();
