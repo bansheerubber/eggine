@@ -119,61 +119,30 @@ void render::Program::compile() {
 }
 
 #ifndef __switch__
-void render::Program::createDescriptorSet() {
-	if(!this->descritporSetOutOfDate || this->uniformToShaderBinding.size() == 0) {
-		return;
+void render::Program::createDescriptorSet(uint32_t index) {
+	if(index >= this->descriptorSets.size()) {
+		this->descriptorSets.resize(index + 1);
 	}
+	
+	if(!this->descriptorSets[index].initialized) {
+		console::print("created %u\n", index);
+		
+		std::array<vk::DescriptorSetLayout, 2> layouts = { this->descriptorLayout, this->descriptorLayout };
+		vk::DescriptorSetAllocateInfo allocateInfo(this->window->descriptorPool, layouts);
+		auto sets = this->window->device.device.allocateDescriptorSets(allocateInfo);
 
-	if(!this->descriptorSetInitialized) {
-		vk::DescriptorSetAllocateInfo allocateInfo(this->window->descriptorPool, 1, &this->descriptorLayout);
-		this->descriptorSet = this->window->device.device.allocateDescriptorSets(allocateInfo)[0];
+		this->descriptorSets[index].sets[0] = sets[0];
+		this->descriptorSets[index].sets[1] = sets[1];
+		this->descriptorSets[index].initialized = true;
 	}
+}
 
-	std::vector<vk::WriteDescriptorSet> writes(this->uniformToShaderBinding.size());
-	std::vector<vk::DescriptorBufferInfo> bufferInfos(this->uniformToShaderBinding.size());
-	std::vector<vk::DescriptorImageInfo> imageInfos(this->uniformToShaderBinding.size());
-	for(auto &[uniform, binding]: this->uniformToShaderBinding) {
-		if(this->isUniformSampler[uniform]) {
-			if(this->uniformToTexture[uniform] == nullptr) {
-				console::error("program: could not find texture '%s'\n", uniform.c_str());
-				exit(1);
-			}
-
-			imageInfos[binding] = vk::DescriptorImageInfo(
-				this->uniformToTexture[uniform]->sampler,
-				this->uniformToTexture[uniform]->imageView,
-				vk::ImageLayout::eShaderReadOnlyOptimal
-			);
-		}
-		else {
-			if(this->uniformToVulkanBuffer[uniform] == nullptr) {
-				console::error("program: could not find uniform '%s'\n", uniform.c_str());
-				exit(1);
-			}
-			
-			bufferInfos[binding] = vk::DescriptorBufferInfo(this->uniformToVulkanBuffer[uniform]->getBuffer(), 0, VK_WHOLE_SIZE);
-		}
-
-		writes[binding] = vk::WriteDescriptorSet(
-			this->descriptorSet,
-			binding,
-			0,
-			1,
-			this->isUniformSampler[uniform] ? vk::DescriptorType::eCombinedImageSampler : vk::DescriptorType::eUniformBuffer,
-			this->isUniformSampler[uniform] ? &imageInfos[binding] : nullptr,
-			this->isUniformSampler[uniform] ? nullptr : &bufferInfos[binding],
-			nullptr
-		);
-	}
-
-	this->window->device.device.updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
-
-	this->descriptorSetInitialized = true;
-	this->descritporSetOutOfDate = false;
+vk::DescriptorSet &render::Program::getDescriptorSet(uint32_t index, uint32_t framePingPong) {
+	return this->descriptorSets[index].sets[framePingPong];
 }
 #endif
 
-void render::Program::createUniformBuffer(std::string uniformName, unsigned int size) {
+void render::Program::createUniformBuffer(std::string uniformName, unsigned int size, unsigned int index) {
 	#ifdef __switch__
 	this->uniformToPiece[uniformName] = this->window->memory.allocate(
 		DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, size, DK_UNIFORM_BUF_ALIGNMENT
@@ -189,15 +158,31 @@ void render::Program::createUniformBuffer(std::string uniformName, unsigned int 
 		glBindBufferBase(GL_UNIFORM_BUFFER, this->uniformToBinding.find(uniformName).value(), bufferId);
 	}
 	else if(this->window->backend == VULKAN_BACKEND) {
-		this->uniformToVulkanBuffer[uniformName] = this->window->memory.allocateBuffer(
-			vk::BufferCreateInfo(
-				{},
-				size,
-				vk::BufferUsageFlagBits::eUniformBuffer,
-				vk::SharingMode::eExclusive
-			),
-			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-		);
+		if(this->uniformToVulkanBuffer.find(std::pair(uniformName, index)) == this->uniformToVulkanBuffer.end()) {
+			UniformBufferPair &buffer = this->uniformToVulkanBuffer[std::pair(uniformName, index)];
+			
+			buffer.pieces[0] = this->window->memory.allocateBuffer(
+				vk::BufferCreateInfo(
+					{},
+					size,
+					vk::BufferUsageFlagBits::eUniformBuffer,
+					vk::SharingMode::eExclusive
+				),
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+			);
+
+			buffer.pieces[1] = this->window->memory.allocateBuffer(
+				vk::BufferCreateInfo(
+					{},
+					size,
+					vk::BufferUsageFlagBits::eUniformBuffer,
+					vk::SharingMode::eExclusive
+				),
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+			);
+
+			buffer.initialized = true;
+		}
 	}
 	#endif
 }

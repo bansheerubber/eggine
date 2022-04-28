@@ -325,19 +325,19 @@ void render::Window::prerender() {
 
 		this->renderStates[0].buffer[this->framePingPong].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 	}
-	// glfwPollEvents();
+	glfwPollEvents();
 	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
 	#endif
 }
 
 void render::Window::render() {
-	// litehtml::position clip;
-	// this->htmlContainer->get_client_rect(clip);
+	litehtml::position clip;
+	this->htmlContainer->get_client_rect(clip);
 	
-	// if(this->htmlChecksum != this->lastHTMLChecksum) {
-	// 	this->htmlDocument->render(clip.width);
-	// 	this->lastHTMLChecksum = this->htmlChecksum;
-	// }
+	if(this->htmlChecksum != this->lastHTMLChecksum) {
+		this->htmlDocument->render(clip.width);
+		this->lastHTMLChecksum = this->htmlChecksum;
+	}
 	
 	// if(this->backend == OPENGL_BACKEND) {
 	// 	this->htmlDocument->draw(0, 0, 0, nullptr);

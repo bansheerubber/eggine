@@ -305,13 +305,13 @@ void Engine::initialize() {
 	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());
 
 	// execute eggscript file
-	// resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
-	// 	engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
-	// )[0];
-	// esExecVirtualFile(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
-	// esCallFunction(this->eggscript, "init", 0, nullptr);
+	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
+		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
+	)[0];
+	esExecVirtualFile(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
+	esCallFunction(this->eggscript, "init", 0, nullptr);
 
-	// this->renderWindow.initializeHTML();
+	this->renderWindow.initializeHTML();
 
 	#ifdef EGGINE_DEVELOPER_MODE
 	this->developerGui = new DeveloperGui();

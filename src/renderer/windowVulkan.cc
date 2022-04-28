@@ -106,7 +106,7 @@ void render::Window::initializeVulkan() {
 	std::vector<vk::DescriptorPoolSize> poolSizes;
 	poolSizes.push_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, 50)); // TODO change to 2, also maybe revisit for textures?
 	poolSizes.push_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, 50));
-	vk::DescriptorPoolCreateInfo descriptorInfo({}, 5, (uint32_t)poolSizes.size(), poolSizes.data()); // also change 1 to 2
+	vk::DescriptorPoolCreateInfo descriptorInfo({}, 5000, (uint32_t)poolSizes.size(), poolSizes.data()); // also change 1 to 2
 	this->descriptorPool = this->device.device.createDescriptorPool(descriptorInfo);
 }
 

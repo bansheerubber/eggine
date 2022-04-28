@@ -282,6 +282,7 @@ namespace render {
 	class Texture {
 		friend DeveloperGui;
 		friend class Program;
+		friend class State;
 		friend class Window;
 		
 		public:

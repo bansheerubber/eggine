@@ -31,6 +31,18 @@ namespace std {
 };
 
 namespace render {
+	#ifndef __switch__
+	struct DescriptorSetPair {
+		std::array<vk::DescriptorSet, 2> sets;
+		bool initialized = false;
+	};
+
+	struct UniformBufferPair {
+		std::array<Piece*, 2> pieces;
+		bool initialized = false;
+	};
+	#endif
+	
 	class Program {
 		#ifndef __switch__
 		friend VulkanPipeline;
@@ -54,7 +66,7 @@ namespace render {
 			#else
 			GLuint program = GL_INVALID_INDEX;
 			tsl::robin_map<std::string, GLuint> uniformToBuffer;
-			tsl::robin_map<std::string, Piece*> uniformToVulkanBuffer;
+			tsl::robin_map<std::pair<std::string, uint64_t>, UniformBufferPair> uniformToVulkanBuffer;
 			tsl::robin_map<std::string, uint32_t> uniformToShaderBinding;
 			tsl::robin_map<std::string, bool> isUniformSampler;
 			tsl::robin_map<std::string, class Texture*> uniformToTexture;
@@ -62,17 +74,16 @@ namespace render {
 			std::vector<vk::PipelineShaderStageCreateInfo> stages = std::vector<vk::PipelineShaderStageCreateInfo>(2);
 			uint8_t stageCount = 0;
 			vk::DescriptorSetLayout descriptorLayout;
-			vk::DescriptorSet descriptorSet;
-			bool descriptorSetInitialized = false;
-			bool descritporSetOutOfDate = true;
+			std::vector<DescriptorSetPair> descriptorSets;
 
 			bool compiled = false;
 
 			static unsigned int UniformCount;
 
-			void createDescriptorSet();
+			void createDescriptorSet(uint32_t index);
+			vk::DescriptorSet &getDescriptorSet(uint32_t index, uint32_t framePingPong);
 			#endif
 
-			void createUniformBuffer(std::string uniformName, unsigned int size);
+			void createUniformBuffer(std::string uniformName, unsigned int size, unsigned int index = 0);
 	};
 };

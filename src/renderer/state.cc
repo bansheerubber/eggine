@@ -11,6 +11,9 @@
 #include "vertexBuffer.h"
 #include "window.h"
 
+tsl::robin_map<render::Program*, uint32_t> render::State::DescriptorSetIndex = tsl::robin_map<render::Program*, uint32_t>();
+tsl::robin_map<std::pair<render::Program*, std::string>, uint32_t> render::State::UniformIndex = tsl::robin_map<std::pair<render::Program*, std::string>, uint32_t>();
+
 render::State::State() {
 
 }
@@ -38,6 +41,8 @@ void render::State::draw(PrimitiveType type, unsigned int firstVertex, unsigned 
 
 void render::State::bindProgram(render::Program* program) {
 	this->current.program = program;
+	this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
+	this->topDescriptor = 0;
 	
 	#ifdef __switch__
 	std::vector<DkShader const*> shaders;
@@ -98,13 +103,15 @@ void render::State::bindUniform(std::string uniformName, void* data, uint32_t si
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
 	}
 	else if(this->window->backend == VULKAN_BACKEND) {
-		auto found = this->current.program->uniformToVulkanBuffer.find(uniformName);
-		if(found == this->current.program->uniformToVulkanBuffer.end()) {
-			this->current.program->createUniformBuffer(uniformName, size);
-			found = this->current.program->uniformToVulkanBuffer.find(uniformName);
-		}
+		unsigned int index = State::UniformIndex[std::pair(this->current.program, uniformName)];
+		this->current.program->createUniformBuffer(uniformName, size, index);
 
-		memcpy(found.value()->map(), data, size);
+		Piece* uniform = this->current.program->uniformToVulkanBuffer[std::pair(uniformName, index)].pieces[this->window->framePingPong];
+		memcpy(uniform->map(), data, size);	
+		this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].uniform = uniform;
+		this->updateDescriptorWrites(uniformName);
+	
+		State::UniformIndex[std::pair(this->current.program, uniformName)]++;
 	}
 	#endif
 }
@@ -120,11 +127,10 @@ void render::State::bindTexture(std::string uniformName, render::Texture* textur
 		GLuint location = glGetUniformLocation(this->current.program->program, uniformName.c_str());
 		glUniform1i(location, 0);
 	}
-	else if(this->current.program->descritporSetOutOfDate) {
-		this->current.program->descritporSetOutOfDate = true;
+	else if(this->window->backend == VULKAN_BACKEND) {
+		this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].texture = texture;
+		this->updateDescriptorWrites(uniformName);
 	}
-
-	this->current.program->uniformToTexture[uniformName] = texture;
 	#endif
 }
 
@@ -163,6 +169,10 @@ void render::State::reset() {
 
 	this->buffer[this->window->framePingPong].reset();
 	this->oldPipeline = {};
+	this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC; // reset in-use flag to true so we re-allocate descriptor set
+
+	State::DescriptorSetIndex.clear();
+	State::UniformIndex.clear();
 	#endif
 }
 
@@ -171,8 +181,6 @@ void render::State::bindPipeline() {
 	if(this->window->backend != VULKAN_BACKEND || this->window->swapchainOutOfDate) {
 		return;
 	}
-
-	this->current.program->createDescriptorSet();
 
 	if(this->current != this->old || !this->applied) {
 		if(this->current.program == nullptr) {
@@ -199,9 +207,25 @@ void render::State::bindPipeline() {
 		}
 		this->oldPipeline = pipeline;
 
-		if(this->current.program->descriptorSetInitialized) { // TODO independent descriptor sets for different uniform/texture combos
+		if(this->descriptorSetState == DESCRIPTOR_SET_NEEDS_UPDATE) {
+			std::vector<vk::WriteDescriptorSet> writes;
+			for(uint32_t i = 0; i < this->topDescriptor + 1; i++) {
+				this->descriptorWrites[i].write.setDstSet(
+					this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong)
+				);
+				writes.push_back(this->descriptorWrites[i].write);
+			}
+
+			this->window->device.device.updateDescriptorSets(this->topDescriptor + 1, writes.data(), 0, nullptr);
+
 			this->buffer[this->window->framePingPong].bindDescriptorSets(
-				vk::PipelineBindPoint::eGraphics, *this->window->pipelineCache[pipeline].layout, 0, 1, &this->current.program->descriptorSet, 0, nullptr
+				vk::PipelineBindPoint::eGraphics,
+				*this->window->pipelineCache[pipeline].layout,
+				0,
+				1,
+				&this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong),
+				0,
+				nullptr
 			);
 		}
 
@@ -220,10 +244,65 @@ void render::State::bindPipeline() {
 		}
 
 		this->buffer[this->window->framePingPong].bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
-
 		this->old = this->current;
-
 		this->applied = true;
+		this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
 	}
 	#endif
 }
+
+#ifndef __switch__
+void render::State::updateDescriptorWrites(std::string uniformName) {
+	// figure out descriptor sets
+	uint32_t binding = this->current.program->uniformToShaderBinding[uniformName];
+	UniformInfo &info = this->descriptorWrites[binding];
+	if(this->current.program->isUniformSampler[uniformName]) {
+		if(this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].texture == nullptr) {
+			console::error("state: could not find texture '%s'\n", uniformName.c_str());
+			exit(1);
+		}
+
+		info.imageInfo = vk::DescriptorImageInfo(
+			this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].texture->sampler,
+			this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].texture->imageView,
+			vk::ImageLayout::eShaderReadOnlyOptimal
+		);
+	}
+	else {
+		if(this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].uniform == nullptr) {
+			console::error("state: could not find uniform '%s'\n", uniformName.c_str());
+			exit(1);
+		}
+		
+		info.bufferInfo = vk::DescriptorBufferInfo(
+			this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].uniform->getBuffer(),
+			0,
+			VK_WHOLE_SIZE
+		);
+	}
+
+	// create a descriptor set if needed
+	if(this->descriptorSetState == DESCRIPTOR_SET_NEEDS_REALLOC) {
+		this->descriptorSetIndex = State::DescriptorSetIndex[this->current.program];
+		this->current.program->createDescriptorSet(this->descriptorSetIndex);
+		this->descriptorSetState = DESCRIPTOR_SET_NEEDS_UPDATE;
+
+		State::DescriptorSetIndex[this->current.program]++;
+	}
+
+	if(binding > this->topDescriptor) {
+		this->topDescriptor = binding;
+	}
+
+	info.write = vk::WriteDescriptorSet(
+		this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong),
+		binding,
+		0,
+		1,
+		this->current.program->isUniformSampler[uniformName] ? vk::DescriptorType::eCombinedImageSampler : vk::DescriptorType::eUniformBuffer,
+		this->current.program->isUniformSampler[uniformName] ? &info.imageInfo : nullptr,
+		this->current.program->isUniformSampler[uniformName] ? nullptr : &info.bufferInfo,
+		nullptr
+	);
+}
+#endif

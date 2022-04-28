@@ -45,9 +45,11 @@ namespace render {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
 
-	const std::vector<const char*> RequiredValidationLayers = {
-		"VK_LAYER_KHRONOS_validation"
-	};
+	// const std::vector<const char*> RequiredValidationLayers = {
+	// 	"VK_LAYER_KHRONOS_validation"
+	// };
+
+	const std::vector<const char*> RequiredValidationLayers = {};
 	#endif
 	
 	enum RenderBackend {
@@ -99,7 +101,7 @@ namespace render {
 			#ifdef __switch__
 			RenderBackend backend = DEKO_BACKEND;
 			#else
-			RenderBackend backend = VULKAN_BACKEND;
+			RenderBackend backend = OPENGL_BACKEND;
 			#endif
 
 			void initialize(); // start the graphics
