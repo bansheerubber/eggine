@@ -9,8 +9,8 @@
 
 namespace render {
 	struct VulkanPipelineResult {
-		vk::PipelineLayout* layout;
-		vk::Pipeline* pipeline;
+		vk::PipelineLayout layout;
+		vk::Pipeline pipeline;
 	};
 	
 	struct VulkanPipeline { // used for caching a vk pipeline based on commonly used parameters
@@ -25,7 +25,7 @@ namespace render {
 	};
 
 	inline bool operator==(const VulkanPipeline &lhs, const VulkanPipeline &rhs) {
-		return lhs.topology == rhs.topology && lhs.viewportWidth == rhs.viewportWidth && lhs.viewportHeight == rhs.viewportHeight && lhs.program == rhs.program;
+		return lhs.topology == rhs.topology && lhs.viewportWidth == rhs.viewportWidth && lhs.viewportHeight == rhs.viewportHeight && lhs.program == rhs.program && lhs.attributes == rhs.attributes;
 	}
 
 	inline bool operator!=(const VulkanPipeline &lhs, const VulkanPipeline &rhs) {
@@ -41,6 +41,7 @@ namespace std {
 			result = combineHash(result, source.viewportWidth);
 			result = combineHash(result, source.viewportHeight);
 			result = combineHash(result, source.program);
+			result = combineHash(result, source.attributes);
 			return result;
     }
 	};

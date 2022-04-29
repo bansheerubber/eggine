@@ -8,10 +8,7 @@
 #include "debug.h"
 
 render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
-	VulkanPipelineResult output = {
-		new vk::PipelineLayout,
-		new vk::Pipeline,
-	};
+	VulkanPipelineResult output;
 
 	// handle pipeline layout
 	{
@@ -22,7 +19,7 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 			{}, descriptorLayouts.size(), descriptorLayouts.data(), 0, nullptr
 		);
 
-		vk::Result result = this->window->device.device.createPipelineLayout(&pipelineLayoutInfo, nullptr, output.layout); // TODO remember to clean up
+		vk::Result result = this->window->device.device.createPipelineLayout(&pipelineLayoutInfo, nullptr, &output.layout); // TODO remember to clean up
 		if(result != vk::Result::eSuccess) {
 			console::error("vulkan: could not create pipeline layout: %s\n", vkResultToString((VkResult)result).c_str());
 			exit(1);
@@ -32,6 +29,7 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 	// handle pipeline
 	{
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+		vk::PipelineVertexInputDivisorStateCreateInfoEXT divisorInfo;
 		if(this->attributes != nullptr) {
 			vertexInputInfo = vk::PipelineVertexInputStateCreateInfo(
 				{},
@@ -40,6 +38,18 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 				(uint32_t)this->attributes->inputAttributes.size(),
 				this->attributes->inputAttributes.data()
 			);
+
+			for(auto &binding: this->attributes->inputBindings) {
+				if(binding.inputRate == vk::VertexInputRate::eInstance) {
+					console::print("big saucceess %u\n", binding.binding);
+				}
+			}
+
+			divisorInfo = vk::PipelineVertexInputDivisorStateCreateInfoEXT(
+				(uint32_t)this->attributes->inputDivisors.size(),
+				this->attributes->inputDivisors.data()
+			);
+			vertexInputInfo.setPNext(&divisorInfo);
 		}
 
 		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo({}, primitiveToVulkanPrimitive(this->topology), false);
@@ -99,13 +109,12 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 			nullptr,
 			&colorBlendInfo,
 			&dynamicStateInfo,
-			*output.layout,
+			output.layout,
 			this->window->renderPass,
 			0
 		);
 
-		vk::PipelineCache pipelineCache = vk::PipelineCache();
-		vk::Result result = this->window->device.device.createGraphicsPipelines(pipelineCache, 1, &pipelineInfo, nullptr, output.pipeline);
+		vk::Result result = this->window->device.device.createGraphicsPipelines(this->window->pipelineCache, 1, &pipelineInfo, nullptr, &output.pipeline);
 		if(result != vk::Result::eSuccess) {
 			console::error("vulkan: could not create pipeline: %s\n", vkResultToString((VkResult)result).c_str());
 			exit(1);

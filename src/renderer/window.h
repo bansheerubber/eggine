@@ -43,6 +43,7 @@ namespace render {
 
 	const std::vector<const char*> RequiredDeviceExtensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		VK_EXT_VERTEX_ATTRIBUTE_DIVISOR_EXTENSION_NAME,
 	};
 
 	// const std::vector<const char*> RequiredValidationLayers = {
@@ -101,7 +102,7 @@ namespace render {
 			#ifdef __switch__
 			RenderBackend backend = DEKO_BACKEND;
 			#else
-			RenderBackend backend = OPENGL_BACKEND;
+			RenderBackend backend = VULKAN_BACKEND;
 			#endif
 
 			void initialize(); // start the graphics
@@ -193,7 +194,8 @@ namespace render {
 			std::vector<vk::Image> renderImages;
 			std::vector<vk::ImageView> renderImageViews;
 
-			tsl::robin_map<VulkanPipeline, VulkanPipelineResult> pipelineCache;
+			tsl::robin_map<VulkanPipeline, VulkanPipelineResult> pipelines;
+			vk::PipelineCache pipelineCache;
 
 			vk::CommandPool commandPool;
 			vk::CommandPool transientCommandPool;

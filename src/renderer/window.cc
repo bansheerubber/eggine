@@ -223,12 +223,13 @@ void render::Window::deinitialize() {
 			}
 		}
 
-		for(auto &[_, pipeline]: this->pipelineCache) {
-			this->device.device.destroyPipelineLayout(*pipeline.layout);
-			this->device.device.destroyPipeline(*pipeline.pipeline);
+		for(auto &[_, pipeline]: this->pipelines) {
+			this->device.device.destroyPipelineLayout(pipeline.layout);
+			this->device.device.destroyPipeline(pipeline.pipeline);
 		}
 
 		this->device.device.destroyRenderPass(this->renderPass);
+		this->device.device.destroyPipelineCache(this->pipelineCache);
 
 		for(auto framebuffer: this->framebuffers) {
 			this->device.device.destroyFramebuffer(framebuffer);

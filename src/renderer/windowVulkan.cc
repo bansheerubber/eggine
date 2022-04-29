@@ -31,6 +31,7 @@ void render::Window::initializeVulkan() {
 	}
 
 	extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 	extensions.push_back("VK_KHR_xlib_surface");
 	extensions.push_back("VK_KHR_display");
 
@@ -111,15 +112,17 @@ void render::Window::initializeVulkan() {
 }
 
 void render::Window::createSwapchain() {
-	if(this->pipelineCache.size() > 0) {
+	if(this->pipelines.size() > 0) {
 		this->device.device.waitIdle();
 		
-		for(auto &[_, pipeline]: this->pipelineCache) { // have to destroy all pipelines
-			this->device.device.destroyPipelineLayout(*pipeline.layout);
-			this->device.device.destroyPipeline(*pipeline.pipeline);
+		for(auto &[_, pipeline]: this->pipelines) { // have to destroy all pipelines
+			this->device.device.destroyPipelineLayout(pipeline.layout);
+			this->device.device.destroyPipeline(pipeline.pipeline);
 		}
 
-		this->pipelineCache.clear();
+		this->device.device.destroyPipelineCache(this->pipelineCache);
+
+		this->pipelines.clear();
 
 		this->device.device.destroyRenderPass(this->renderPass);
 
@@ -266,6 +269,9 @@ void render::Window::createSwapchain() {
 			exit(1);
 		}
 	}
+
+	vk::PipelineCacheCreateInfo pipelineCacheInfo({}, 0);
+	this->pipelineCache = this->device.device.createPipelineCache(pipelineCacheInfo);
 }
 
 void render::Window::pickDevice() {

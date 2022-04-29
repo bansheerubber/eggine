@@ -96,6 +96,15 @@ void render::VertexAttributes::buildCommandLists() {
 						attribute.divisor == 0 ? vk::VertexInputRate::eVertex : vk::VertexInputRate::eInstance
 					));
 					incrementBufferId = true;
+
+					if(attribute.divisor != 0) {
+						this->inputDivisors.push_back(vk::VertexInputBindingDivisorDescriptionEXT(
+							bufferId,
+							attribute.divisor
+						));
+					}
+
+					currentBuffer = attribute.buffer;
 				}
 
 				this->inputAttributes.push_back(vk::VertexInputAttributeDescription(

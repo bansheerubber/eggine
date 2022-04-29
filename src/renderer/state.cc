@@ -22,18 +22,19 @@ render::State::State(render::Window* window) {
 	this->window = window;
 }
 
-void render::State::draw(PrimitiveType type, unsigned int firstVertex, unsigned int vertexCount, unsigned int firstInstance, unsigned int instanceCount) {
+void render::State::draw(
+	PrimitiveType type, unsigned int firstVertex, unsigned int vertexCount, unsigned int firstInstance, unsigned int instanceCount
+) {
 	this->current.primitive = type;
 
 	#ifdef __switch__
 	this->window->commandBuffer.draw(primitiveToDkPrimitive(type), vertexCount, instanceCount, firstVertex, firstInstance);
 	#else
-	this->bindPipeline();
-	
 	if(this->window->backend == OPENGL_BACKEND) {
 		glDrawArraysInstancedBaseInstance(primitiveToGLPrimitive(type), firstVertex, vertexCount, instanceCount, firstInstance);
 	}
 	else if(!this->window->swapchainOutOfDate) {
+		this->bindPipeline();
 		this->buffer[this->window->framePingPong].draw(vertexCount, instanceCount, firstVertex, firstInstance);
 	}
 	#endif
@@ -196,13 +197,13 @@ void render::State::bindPipeline() {
 			this->current.program,
 			this->current.attributes,
 		};
-		if(this->window->pipelineCache.find(pipeline) == this->window->pipelineCache.end()) {
-			this->window->pipelineCache[pipeline] = pipeline.newPipeline(); // TODO move this creation step to the window class??
+		if(this->window->pipelines.find(pipeline) == this->window->pipelines.end()) {
+			this->window->pipelines[pipeline] = pipeline.newPipeline(); // TODO move this creation step to the window class??
 		}
 
 		if(this->oldPipeline != pipeline) {
 			this->buffer[this->window->framePingPong].bindPipeline(
-				vk::PipelineBindPoint::eGraphics, *this->window->pipelineCache[pipeline].pipeline
+				vk::PipelineBindPoint::eGraphics, this->window->pipelines[pipeline].pipeline
 			);
 		}
 		this->oldPipeline = pipeline;
@@ -220,7 +221,7 @@ void render::State::bindPipeline() {
 
 			this->buffer[this->window->framePingPong].bindDescriptorSets(
 				vk::PipelineBindPoint::eGraphics,
-				*this->window->pipelineCache[pipeline].layout,
+				this->window->pipelines[pipeline].layout,
 				0,
 				1,
 				&this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong),

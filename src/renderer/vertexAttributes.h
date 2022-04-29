@@ -362,6 +362,7 @@ namespace render {
 
 			std::vector<vk::VertexInputBindingDescription> inputBindings;
 			std::vector<vk::VertexInputAttributeDescription> inputAttributes;
+			std::vector<vk::VertexInputBindingDivisorDescriptionEXT> inputDivisors;
 			#endif
 
 			void buildCommandLists();
