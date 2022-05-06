@@ -125,8 +125,6 @@ void render::Program::createDescriptorSet(uint32_t index) {
 	}
 	
 	if(!this->descriptorSets[index].initialized) {
-		console::print("created %u\n", index);
-		
 		std::array<vk::DescriptorSetLayout, 2> layouts = { this->descriptorLayout, this->descriptorLayout };
 		vk::DescriptorSetAllocateInfo allocateInfo(this->window->descriptorPool, layouts);
 		auto sets = this->window->device.device.allocateDescriptorSets(allocateInfo);

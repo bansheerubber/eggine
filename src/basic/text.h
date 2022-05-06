@@ -30,7 +30,8 @@ class Text : public RenderObject {
 	protected:
 		render::VertexBuffer* vertexBuffers[2];
 		render::VertexAttributes* vertexAttributes;
-		std::string text;
+		std::string text = "";
+		std::string oldText = "";
 
 		void updateBuffers();
 		

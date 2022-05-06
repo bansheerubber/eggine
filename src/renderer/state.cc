@@ -240,7 +240,17 @@ void render::State::bindPipeline() {
 				attribute.buffer->needsCopy = false;
 			}
 
-			vertexBuffers.push_back(attribute.buffer->gpuBuffer->buffer);
+			if(attribute.buffer->isDynamicDraw) {
+				if(attribute.buffer->isOutOfDateBuffer()) {
+					attribute.buffer->handleOutOfDateBuffer();
+					VertexBuffer::OutOfDateBuffers[this->window->framePingPong].erase(attribute.buffer);
+				}
+				
+				vertexBuffers.push_back(attribute.buffer->dynamicBuffers[this->window->framePingPong].buffer->getBuffer());
+			}
+			else {
+				vertexBuffers.push_back(attribute.buffer->gpuBuffer->getBuffer());
+			}
 			offsets.push_back(0);
 		}
 

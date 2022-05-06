@@ -37,6 +37,10 @@ DkGpuAddr render::Piece::gpuAddr() {
 	return this->parent->gpuAddr() + this->start;
 }
 #else
+uint64_t render::Piece::getBufferSize() {
+	return this->bufferSize;
+}
+
 void* render::Piece::map() {
 	return (char*)this->parent->data + this->start;
 }

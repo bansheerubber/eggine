@@ -8,8 +8,14 @@
 #include "vertexBuffer.h"
 #include "window.h"
 
-render::VertexBuffer::VertexBuffer(Window* window) {
+std::array<std::unordered_set<render::VertexBuffer*>, 2> render::VertexBuffer::OutOfDateBuffers = {
+	std::unordered_set<render::VertexBuffer*>(),
+	std::unordered_set<render::VertexBuffer*>(),
+};
+
+render::VertexBuffer::VertexBuffer(Window* window, std::string debugName) {
 	this->window = window;
+	this->debugName = debugName;
 }
 
 render::VertexBuffer::~VertexBuffer() {
@@ -30,6 +36,7 @@ void render::VertexBuffer::setDynamicDraw(bool isDynamicDraw) {
 	#endif
 }
 
+// TODO port this over to double buffer system
 void render::VertexBuffer::setSubData(void* data, unsigned int size, unsigned int offset) {
 	if(this->size < size) {
 		console::error("vertex data must be subset of data in setSubData\n");
@@ -80,11 +87,8 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 	this->align = align;
 	
 	if(!this->memoryAllocated || alignTo(size, align) != this->memory->size() || this->forceReallocate) {
-		if(this->memory != nullptr) {
-			this->memory->deallocate(); // deallocate memory
-		}
-		
-		this->memory = this->window->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, this->size, align);
+		this->destroyBuffer();
+		this->allocateBuffer();
 	}
 
 	if(data != nullptr) {
@@ -95,20 +99,7 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 	if(this->window->backend == OPENGL_BACKEND) {
 		if(this->bufferId == GL_INVALID_INDEX) {
 			this->destroyBuffer();
-			if(this->usage == GL_DYNAMIC_DRAW) {
-				this->usage = GL_DYNAMIC_DRAW;
-				glGenBuffers(1, &this->bufferId);
-				glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
-				glBufferData(GL_ARRAY_BUFFER, this->size, NULL, this->usage);
-
-				#ifdef RENDER_UNBIND_VERTEX_BUFFERS
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-				#endif
-			}
-			else {
-				this->usage = GL_STATIC_DRAW;
-				glGenBuffers(1, &this->bufferId);
-			}
+			this->allocateBuffer();
 		}
 
 		if(this->usage == GL_DYNAMIC_DRAW) {
@@ -130,57 +121,49 @@ void render::VertexBuffer::setData(void* data, unsigned int size, unsigned int a
 		}
 	}
 	else {
-		if(this->size != this->oldSize) {
-			this->destroyBuffer();
+		if(this->isDynamicDraw) {
+			VertexSubBuffer &writeSubBuffer = this->dynamicBuffers[this->window->framePingPong];
+			VertexSubBuffer &readSubBuffer = this->dynamicBuffers[!this->window->framePingPong];
+
+			if(writeSubBuffer.buffer == nullptr || writeSubBuffer.buffer->getBufferSize() != this->size) {
+				this->destroyBuffer();
+				this->allocateBuffer();
+			}
 			
-			if(this->isDynamicDraw) { // do not use staging buffer if we're dynamic draw
-				this->gpuBuffer = this->window->memory.allocateBuffer(
-					vk::BufferCreateInfo(
-						{},
-						size,
-						vk::BufferUsageFlagBits::eVertexBuffer,
-						vk::SharingMode::eExclusive
-					),
-					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-				);
+			if(data == nullptr) {
+				memset(writeSubBuffer.buffer->map(), 0, this->size);
 			}
 			else {
-				this->stagingBuffer = this->window->memory.allocateBuffer(
-					vk::BufferCreateInfo(
-						{},
-						size,
-						vk::BufferUsageFlagBits::eTransferSrc,
-						vk::SharingMode::eExclusive
-					),
-					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-				);
-				
-				this->gpuBuffer = this->window->memory.allocateBuffer(
-					vk::BufferCreateInfo(
-						{},
-						size,
-						vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
-						vk::SharingMode::eExclusive
-					),
-					vk::MemoryPropertyFlagBits::eDeviceLocal
-				);
+				memcpy(writeSubBuffer.buffer->map(), data, this->size);
 			}
-		}
+			
+			writeSubBuffer.state = VERTEX_SUB_BUFFER_IN_USE;
 
-		void* map;
-		if(this->isDynamicDraw) {
-			map = this->gpuBuffer->map();			
+			// determine how the in-use buffer turns out of date
+			if(readSubBuffer.state == VERTEX_SUB_BUFFER_IN_USE) {
+				if(this->size != this->oldSize) {
+					readSubBuffer.state = VERTEX_SUB_BUFFER_SIZE_OUT_OF_DATE;
+				}
+				else {
+					readSubBuffer.state = VERTEX_SUB_BUFFER_DATA_OUT_OF_DATE;
+				}
+			}
+			VertexBuffer::OutOfDateBuffers[!this->window->framePingPong].insert(this);
+			VertexBuffer::OutOfDateBuffers[this->window->framePingPong].erase(this);
 		}
 		else {
-			map = this->stagingBuffer->map();
+			if(this->size != this->oldSize) {
+				this->destroyBuffer();
+				this->allocateBuffer();
+			}
+			
+			if(data == nullptr) {
+				memset(this->stagingBuffer->map(), 0, this->size);
+			}
+			else {
+				memcpy(this->stagingBuffer->map(), data, this->size);
+			}
 			this->needsCopy = true;
-		}
-
-		if(data != nullptr) {
-			memcpy(map, data, this->size);
-		}
-		else {
-			memset(map, 0, this->size);
 		}
 	}
 	#endif
@@ -197,6 +180,75 @@ void render::VertexBuffer::bind() {
 	glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
 }
 #endif
+
+void render::VertexBuffer::allocateBuffer() {
+	#ifdef __switch__
+	this->memory = this->window->memory.allocate(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, this->size, this->align);
+	#else
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(this->usage == GL_DYNAMIC_DRAW) {
+			this->usage = GL_DYNAMIC_DRAW;
+			glGenBuffers(1, &this->bufferId);
+			glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
+			glBufferData(GL_ARRAY_BUFFER, this->size, NULL, this->usage);
+
+			#ifdef RENDER_UNBIND_VERTEX_BUFFERS
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			#endif
+		}
+		else {
+			this->usage = GL_STATIC_DRAW;
+			glGenBuffers(1, &this->bufferId);
+		}
+	}
+	else {
+		if(this->isDynamicDraw) { // do not use staging buffer if we're dynamic draw
+			this->dynamicBuffers[this->window->framePingPong].buffer = this->window->memory.allocateBuffer(
+				vk::BufferCreateInfo(
+					{},
+					size,
+					vk::BufferUsageFlagBits::eVertexBuffer,
+					vk::SharingMode::eExclusive
+				),
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+			);
+
+			if(!this->dynamicBufferInitialized) {
+				this->dynamicBuffers[!this->window->framePingPong].buffer = this->window->memory.allocateBuffer(
+					vk::BufferCreateInfo(
+						{},
+						size,
+						vk::BufferUsageFlagBits::eVertexBuffer,
+						vk::SharingMode::eExclusive
+					),
+					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+				);
+			}
+		}
+		else {
+			this->stagingBuffer = this->window->memory.allocateBuffer(
+				vk::BufferCreateInfo(
+					{},
+					size,
+					vk::BufferUsageFlagBits::eTransferSrc,
+					vk::SharingMode::eExclusive
+				),
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+			);
+			
+			this->gpuBuffer = this->window->memory.allocateBuffer(
+				vk::BufferCreateInfo(
+					{},
+					size,
+					vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
+					vk::SharingMode::eExclusive
+				),
+				vk::MemoryPropertyFlagBits::eDeviceLocal
+			);
+		}
+	}
+	#endif
+}
 
 void render::VertexBuffer::destroyBuffer() {
 	#ifdef __switch__
@@ -219,7 +271,44 @@ void render::VertexBuffer::destroyBuffer() {
 			if(this->gpuBuffer != nullptr) {
 				this->gpuBuffer->deallocate();
 			}
+
+			if(this->dynamicBuffers[this->window->framePingPong].buffer != nullptr) {
+				this->dynamicBuffers[this->window->framePingPong].buffer->deallocate();
+				this->dynamicBuffers[this->window->framePingPong].buffer = nullptr;
+			}
 		}
 	}
 	#endif
+}
+
+void render::VertexBuffer::handleOutOfDateBuffer() {
+	#ifdef __switch__
+	#else
+	VertexSubBuffer &writeSubBuffer = this->dynamicBuffers[this->window->framePingPong];
+	VertexSubBuffer &readSubBuffer = this->dynamicBuffers[!this->window->framePingPong];
+
+	if(writeSubBuffer.state == VERTEX_SUB_BUFFER_SIZE_OUT_OF_DATE) {
+		writeSubBuffer.buffer->deallocate();
+		writeSubBuffer.buffer = this->window->memory.allocateBuffer(
+			vk::BufferCreateInfo(
+				{},
+				this->size,
+				vk::BufferUsageFlagBits::eVertexBuffer,
+				vk::SharingMode::eExclusive
+			),
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+		);
+		memcpy(writeSubBuffer.buffer->map(), readSubBuffer.buffer->map(), this->size);
+	}
+	else if(writeSubBuffer.state == VERTEX_SUB_BUFFER_DATA_OUT_OF_DATE) {
+		memcpy(writeSubBuffer.buffer->map(), readSubBuffer.buffer->map(), this->size);
+	}
+
+	writeSubBuffer.state = VERTEX_SUB_BUFFER_IN_USE;
+	#endif
+}
+
+bool render::VertexBuffer::isOutOfDateBuffer() {
+	VertexSubBuffer &writeSubBuffer = this->dynamicBuffers[this->window->framePingPong];
+	return writeSubBuffer.state == VERTEX_SUB_BUFFER_SIZE_OUT_OF_DATE || writeSubBuffer.state == VERTEX_SUB_BUFFER_DATA_OUT_OF_DATE;
 }

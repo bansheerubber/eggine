@@ -16,7 +16,7 @@ namespace render {
 	#ifdef __switch__
 	#define DEFAULT_PAGE_SIZE 4 * 1024
 	#else
-	#define DEFAULT_PAGE_SIZE 50 * 1024
+	#define DEFAULT_PAGE_SIZE 1000 * 1024
 
 	enum PieceType {
 		INVALID_PIECE = 0,
@@ -50,6 +50,7 @@ namespace render {
 			void* map();
 			vk::Buffer getBuffer();
 			vk::Image getImage();
+			uint64_t getBufferSize();
 			#endif
 
 			void requestDeallocate();

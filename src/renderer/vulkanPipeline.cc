@@ -39,12 +39,6 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 				this->attributes->inputAttributes.data()
 			);
 
-			for(auto &binding: this->attributes->inputBindings) {
-				if(binding.inputRate == vk::VertexInputRate::eInstance) {
-					console::print("big saucceess %u\n", binding.binding);
-				}
-			}
-
 			divisorInfo = vk::PipelineVertexInputDivisorStateCreateInfoEXT(
 				(uint32_t)this->attributes->inputDivisors.size(),
 				this->attributes->inputDivisors.data()

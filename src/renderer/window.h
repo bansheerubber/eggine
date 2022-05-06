@@ -66,6 +66,7 @@ namespace render {
 		friend class Program;
 		friend class Shader;
 		friend class State;
+		friend class VertexBuffer;
 		#ifndef __switch__
 		friend VulkanPipeline;
 		#endif
