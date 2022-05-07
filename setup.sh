@@ -44,7 +44,7 @@ git clone --recurse-submodules https://github.com/bansheerubber/eggscript-interp
 cd eggscript-interpreter
 [[ "$PWD" != *eggscript-interpreter* ]] && echo "\033[0;31mNot in eggscript-interpreter" && exit 1
 
-git checkout class-definition
+git checkout development
 echo -e "\033[0;33mCompiling eggscript"
 tput sgr0
 make -j 8 library
@@ -117,7 +117,7 @@ cd litehtml
 
 mkdir build
 cd build
-CFLAGS="-O2" cmake .. -D LITEHTML_UTF8=ON
+CFLAGS="-O2" cmake -DLITEHTML_UTF8=ON ..
 cmake --build . --target litehtml
 popd
 cp -v tmp-setup/litehtml/build/liblitehtml.a lib

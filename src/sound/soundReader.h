@@ -1,9 +1,13 @@
 #pragma once
 
-#include <AL/al.h>
+#ifndef _VORBIS_HEADERS
 #include <vorbis/codec.h>
-#include <fstream>
 #include <vorbis/vorbisfile.h>
+#define _VORBIS_HEADERS
+#endif
+
+#include <AL/al.h>
+#include <fstream>
 
 namespace sound {
 	enum SoundFileType {

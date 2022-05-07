@@ -263,7 +263,7 @@ def preprocess(filename, contents, depth):
 				continue
 
 			if ".py" in command:
-				command = f"cd {directory} && python3 {command}"
+				command = f"cd {directory} && python3.10 {command}"
 			else:
 				command = f"cd {directory} && {command}"
 

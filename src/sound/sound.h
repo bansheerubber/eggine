@@ -4,10 +4,14 @@
 #include <switch.h>
 #endif
 
+#ifndef _VORBIS_HEADERS
 #include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
+#define _VORBIS_HEADERS
+#endif
+
 #include <fstream>
 #include <glm/vec3.hpp>
-#include <vorbis/vorbisfile.h>
 
 #include "buffer.h"
 #include "../engine/console.h"
