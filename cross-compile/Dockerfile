@@ -36,9 +36,8 @@ RUN apt-get update && \
 
 # move all the stuff over
 RUN mkdir /eggine
-RUN mkdir /eggine/dist
-RUN mkdir /eggine/lib
 ADD include /eggine/include
+RUN mkdir /eggine/lib
 
 ADD cross-compile/setup.sh /eggine/setup.sh
 # setup eggine dependencies
@@ -46,6 +45,9 @@ WORKDIR /eggine
 RUN chmod +x ./setup.sh
 RUN ./setup.sh
 
+RUN mkdir /eggine/dist
+
+ADD .git /eggine/.git
 ADD resources /eggine/resources
 ADD glad /eggine/glad
 ADD imgui /eggine/imgui
@@ -53,6 +55,7 @@ ADD tools /eggine/tools
 ADD Makefile /eggine
 ADD src /eggine/src
 ADD cross-compile/auto.py /eggine/auto.py
+ADD version.sh /eggine/version.sh
 
 RUN rm imgui/*.o
 RUN rm glad/*.o
