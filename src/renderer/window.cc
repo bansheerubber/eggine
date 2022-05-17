@@ -398,7 +398,7 @@ void render::Window::render() {
 		// present the image. wait for the queue's submit signal
 		vk::PresentInfoKHR presentInfo(1, signalSemaphores, 1, &this->swapchain, &this->currentFramebuffer, nullptr);
 		result = this->presentationQueue.presentKHR(&presentInfo);
-		if(result == vk::Result::eErrorOutOfDateKHR) {
+		if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR) {
 			this->swapchainOutOfDate = true;
 			return;
 		}

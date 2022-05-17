@@ -42,8 +42,11 @@ void render::State::draw(
 
 void render::State::bindProgram(render::Program* program) {
 	this->current.program = program;
-	this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
-	this->topDescriptor = 0;
+
+	if(this->old.program != this->current.program) {
+		this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
+		this->topDescriptor = 0;
+	}
 	
 	#ifdef __switch__
 	std::vector<DkShader const*> shaders;
@@ -183,20 +186,21 @@ void render::State::bindPipeline() {
 		return;
 	}
 
+	render::VulkanPipeline pipeline = {
+		this->window,
+		this->current.primitive,
+		(float)this->window->width,
+		(float)this->window->height,
+		this->current.program,
+		this->current.attributes,
+	};
+
 	if(this->current != this->old || !this->applied) {
 		if(this->current.program == nullptr) {
 			console::print("render state: no program bound\n");
 			exit(1);
 		}
-		
-		render::VulkanPipeline pipeline = {
-			this->window,
-			this->current.primitive,
-			(float)this->window->width,
-			(float)this->window->height,
-			this->current.program,
-			this->current.attributes,
-		};
+
 		if(this->window->pipelines.find(pipeline) == this->window->pipelines.end()) {
 			this->window->pipelines[pipeline] = pipeline.newPipeline(); // TODO move this creation step to the window class??
 		}
@@ -207,28 +211,6 @@ void render::State::bindPipeline() {
 			);
 		}
 		this->oldPipeline = pipeline;
-
-		if(this->descriptorSetState == DESCRIPTOR_SET_NEEDS_UPDATE) {
-			std::vector<vk::WriteDescriptorSet> writes;
-			for(uint32_t i = 0; i < this->topDescriptor + 1; i++) {
-				this->descriptorWrites[i].write.setDstSet(
-					this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong)
-				);
-				writes.push_back(this->descriptorWrites[i].write);
-			}
-
-			this->window->device.device.updateDescriptorSets(this->topDescriptor + 1, writes.data(), 0, nullptr);
-
-			this->buffer[this->window->framePingPong].bindDescriptorSets(
-				vk::PipelineBindPoint::eGraphics,
-				this->window->pipelines[pipeline].layout,
-				0,
-				1,
-				&this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong),
-				0,
-				nullptr
-			);
-		}
 
 		// probably should move vertex buffer binding away from here
 		std::vector<vk::Buffer> vertexBuffers;
@@ -257,8 +239,31 @@ void render::State::bindPipeline() {
 		this->buffer[this->window->framePingPong].bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		this->old = this->current;
 		this->applied = true;
-		this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
 	}
+
+	if(this->descriptorSetState == DESCRIPTOR_SET_NEEDS_UPDATE) {
+		std::vector<vk::WriteDescriptorSet> writes;
+		for(uint32_t i = 0; i < this->topDescriptor + 1; i++) {
+			this->descriptorWrites[i].write.setDstSet(
+				this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong)
+			);
+			writes.push_back(this->descriptorWrites[i].write);
+		}
+
+		this->window->device.device.updateDescriptorSets(this->topDescriptor + 1, writes.data(), 0, nullptr);
+
+		this->buffer[this->window->framePingPong].bindDescriptorSets(
+			vk::PipelineBindPoint::eGraphics,
+			this->window->pipelines[pipeline].layout,
+			0,
+			1,
+			&this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong),
+			0,
+			nullptr
+		);
+	}
+	this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
+
 	#endif
 }
 
