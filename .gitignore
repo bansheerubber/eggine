@@ -22,6 +22,7 @@ include/common/master.css
 tmp-setup
 src/carton
 resources/spritesheets
+resources/shaders/*.spv
 imgui
 resources/sounds
 playtest1
