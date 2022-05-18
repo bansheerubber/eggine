@@ -340,9 +340,7 @@ void render::Window::render() {
 		this->lastHTMLChecksum = this->htmlChecksum;
 	}
 	
-	// if(this->backend == OPENGL_BACKEND) {
-	// 	this->htmlDocument->draw(0, 0, 0, nullptr);
-	// }
+	this->htmlDocument->draw(0, 0, 0, nullptr);
 	
 	#ifdef __switch__
 	int index = this->queue.acquireImage(this->swapchain);
