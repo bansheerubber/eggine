@@ -479,14 +479,6 @@ void Engine::tick() {
 		deltaTime = 0;
 	}
 
-	// this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
-
-	// int escape = glfwGetKey(engine->window, GLFW_KEY_ESCAPE);
-	// if(escape || this->gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]) {
-	// 	this->exit();
-	// 	return;
-	// }
-
 	// handle eggscript
 	int64_t esStartTime = getMicrosecondsNow();
 	esTick(this->eggscript);
@@ -494,10 +486,6 @@ void Engine::tick() {
 
 	this->camera->see(deltaTime);
 	this->ui.update();
-
-	// if(glfwWindowShouldClose(this->window)) {
-	// 	return;
-	// }
 
 	RenderContext context = {
 		camera: this->camera,
