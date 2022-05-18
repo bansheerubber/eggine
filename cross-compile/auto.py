@@ -21,12 +21,9 @@ def make():
 	global target
 	if time() - last_compile > 1:
 		if target:
-			if target == "docker":
-				os.system("docker cp src/. eggine:/eggine/src")
-			else:
-				os.system(f"make {target} -j8")
+			os.system(f"make CC=g++-9 {target} -j8")
 		else:
-			os.system(f"make -j8")
+			os.system(f"make CC=g++-9 -j8")
 
 		print("---------------------------------------------------------------------------------")
 
@@ -35,12 +32,9 @@ def make():
 os.system("make clean")
 
 if target:
-	if target == "docker":
-		os.system("docker cp src/. eggine:/eggine/src")
-	else:
-		os.system(f"make {target} -j8")
+	os.system(f"make CC=g++-9 {target} -j8")
 else:
-	os.system(f"make -j8")
+	os.system(f"make CC=g++-9 -j8")
 
 print("---------------------------------------------------------------------------------")
 

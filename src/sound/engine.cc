@@ -1,8 +1,5 @@
 #include "engine.h"
 
-#include <AL/al.h>
-#include <AL/alc.h>
-
 #include "../engine/engine.h"
 #include "sound.h"
 #include "soundCollection.h"

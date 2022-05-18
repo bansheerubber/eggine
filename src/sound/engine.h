@@ -4,6 +4,8 @@
 #include <switch.h>
 #endif
 
+#include <AL/al.h>
+#include <AL/alc.h>
 #include <deque>
 #include <eggscript/egg.h>
 #include <mutex>
@@ -16,8 +18,6 @@ namespace es {
 	esEntryPtr playSound(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 };
 
-class ALCdevice;
-class ALCcontext;
 namespace sound {
 	class Engine {
 		friend class SoundCollection;
