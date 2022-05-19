@@ -195,6 +195,9 @@ namespace render {
 			std::vector<vk::Image> renderImages;
 			std::vector<vk::ImageView> renderImageViews;
 
+			Piece* depthImage;
+			vk::ImageView depthImageView;
+
 			tsl::robin_map<VulkanPipeline, VulkanPipelineResult> pipelines;
 			vk::PipelineCache pipelineCache;
 

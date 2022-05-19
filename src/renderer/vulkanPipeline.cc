@@ -91,6 +91,19 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 
 		vk::PipelineDynamicStateCreateInfo dynamicStateInfo({}, 0, nullptr);
 
+		vk::PipelineDepthStencilStateCreateInfo depthInfo(
+			{},
+			this->depthEnabled, // depth test enabled
+			true, // depth write enabled
+			vk::CompareOp::eLess,
+			false,
+			this->stencilEnabled,
+			{},
+			{},
+			0.0f,
+			1.0f
+		);
+
 		// create the pipeline
 		vk::GraphicsPipelineCreateInfo pipelineInfo(
 			{},
@@ -102,7 +115,7 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 			&viewportStateInfo,
 			&rasterizationInfo,
 			&multisampleInfo,
-			nullptr,
+			&depthInfo,
 			&colorBlendInfo,
 			&dynamicStateInfo,
 			output.layout,

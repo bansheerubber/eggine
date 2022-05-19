@@ -18,6 +18,8 @@ namespace render {
 		PrimitiveType topology;
 		float viewportWidth;
 		float viewportHeight;
+		bool depthEnabled;
+		bool stencilEnabled;
 		class Program* program;
 		class VertexAttributes* attributes;
 
@@ -25,7 +27,13 @@ namespace render {
 	};
 
 	inline bool operator==(const VulkanPipeline &lhs, const VulkanPipeline &rhs) {
-		return lhs.topology == rhs.topology && lhs.viewportWidth == rhs.viewportWidth && lhs.viewportHeight == rhs.viewportHeight && lhs.program == rhs.program && lhs.attributes == rhs.attributes;
+		return lhs.topology == rhs.topology
+			&& lhs.viewportWidth == rhs.viewportWidth
+			&& lhs.viewportHeight == rhs.viewportHeight
+			&& lhs.depthEnabled == rhs.depthEnabled
+			&& lhs.stencilEnabled == rhs.stencilEnabled
+			&& lhs.program == rhs.program
+			&& lhs.attributes == rhs.attributes;
 	}
 
 	inline bool operator!=(const VulkanPipeline &lhs, const VulkanPipeline &rhs) {

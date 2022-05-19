@@ -109,6 +109,9 @@ void render::Window::initializeVulkan() {
 	poolSizes.push_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, 50));
 	vk::DescriptorPoolCreateInfo descriptorInfo({}, 5000, (uint32_t)poolSizes.size(), poolSizes.data()); // also change 1 to 2
 	this->descriptorPool = this->device.device.createDescriptorPool(descriptorInfo);
+
+	this->getState(0).enableDepthTest(true);
+	this->getState(0).enableStencilTest(true);
 }
 
 void render::Window::createSwapchain() {
@@ -210,6 +213,40 @@ void render::Window::createSwapchain() {
 		this->renderImageViews[i] = this->device.device.createImageView(imageViewInfo);
 	}
 
+	// create depth image/imageview
+	{
+		this->depthImage = this->memory.allocateImage(
+			vk::ImageCreateInfo(
+				{},
+				vk::ImageType::e2D,
+				vk::Format::eD32SfloatS8Uint,
+				{ width, height, 1, },
+				1,
+				1,
+				vk::SampleCountFlagBits::e1,
+				vk::ImageTiling::eOptimal,
+				vk::ImageUsageFlagBits::eDepthStencilAttachment,
+				vk::SharingMode::eExclusive,
+				0,
+				nullptr,
+				vk::ImageLayout::eUndefined
+			),
+			vk::MemoryPropertyFlagBits::eDeviceLocal
+		);
+
+		vk::ImageViewCreateInfo depthViewInfo(
+			{},
+			this->depthImage->getImage(),
+			vk::ImageViewType::e2D,
+			vk::Format::eD32SfloatS8Uint,
+			{ vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, },
+			{ vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1 }
+		);
+
+		this->depthImageView = this->device.device.createImageView(depthViewInfo);
+	}
+
+
 	// handle renderpass creation
 	vk::AttachmentDescription colorAttachment(
 		{},
@@ -223,27 +260,53 @@ void render::Window::createSwapchain() {
 		vk::ImageLayout::ePresentSrcKHR
 	);
 
-	vk::AttachmentReference attachmentReference(0, vk::ImageLayout::eColorAttachmentOptimal); // attach to the output color location in the shader
+	vk::AttachmentReference colorAttachmentReference(0, vk::ImageLayout::eColorAttachmentOptimal); // attach to the output color location in the shader
+
+	vk::AttachmentDescription depthAttachment(
+		{},
+		vk::Format::eD32SfloatS8Uint,
+		vk::SampleCountFlagBits::e1,
+		vk::AttachmentLoadOp::eClear, // color
+		vk::AttachmentStoreOp::eDontCare, // color
+		vk::AttachmentLoadOp::eDontCare, // stencil
+		vk::AttachmentStoreOp::eDontCare, // stencil
+		vk::ImageLayout::eUndefined,
+		vk::ImageLayout::eDepthStencilAttachmentOptimal
+	);
+
+	vk::AttachmentReference depthAttachmentReference(1, vk::ImageLayout::eDepthStencilAttachmentOptimal); // attach to the output depth location in the shader
+
 	vk::SubpassDescription subpass(
 		{},
 		vk::PipelineBindPoint::eGraphics,
 		0,
 		nullptr,
 		1,
-		&attachmentReference
+		&colorAttachmentReference,
+		nullptr,
+		&depthAttachmentReference
 	);
 
 	// create a subpass dependency that waits for color
 	vk::SubpassDependency dependency(
 		VK_SUBPASS_EXTERNAL, // src
 		0, // dest
-		vk::PipelineStageFlagBits::eColorAttachmentOutput, // src stage
-		vk::PipelineStageFlagBits::eColorAttachmentOutput, // dest stage
+		vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests, // src stage
+		vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests, // dest stage
 		{}, // src access
-		vk::AccessFlagBits::eColorAttachmentWrite // dest access
+		vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite // dest access
 	);
 
-	vk::RenderPassCreateInfo renderPassInfo({}, 1, &colorAttachment, 1, &subpass, 1, &dependency);
+	std::array<vk::AttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
+	vk::RenderPassCreateInfo renderPassInfo(
+		{},
+		(uint32_t)attachments.size(),
+		attachments.data(),
+		1,
+		&subpass,
+		1,
+		&dependency
+	);
 	vk::Result result = this->device.device.createRenderPass(&renderPassInfo, nullptr, &this->renderPass); // TODO remember to clean up
 	if(result != vk::Result::eSuccess) {
 		console::error("vulkan: could not create render pass: %s\n", vkResultToString((VkResult)result).c_str());
@@ -252,11 +315,11 @@ void render::Window::createSwapchain() {
 
 	this->framebuffers.resize(this->renderImageViews.size());
 	for(size_t i = 0; i < this->renderImageViews.size(); i++) {
-		vk::ImageView attachments[] = { this->renderImageViews[i] };
+		vk::ImageView attachments[] = { this->renderImageViews[i], this->depthImageView };
 		vk::FramebufferCreateInfo framebufferInfo(
 			{},
 			this->renderPass,
-			1,
+			2,
 			attachments,
 			this->swapchainExtent.width,
 			this->swapchainExtent.height,

@@ -216,7 +216,7 @@ void Layer::render(double deltaTime, RenderContext &context) {
 void Layer::renderXRay(double deltaTime, RenderContext &context) {	
 	engine->renderWindow.getState(0).bindVertexAttributes(this->xrayAttributes);
 
-	// engine->renderWindow.enableDepthTest(false);
+	engine->renderWindow.getState(0).enableDepthTest(false);
 	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, this->xrayCount);
-	// engine->renderWindow.enableDepthTest(true);
+	engine->renderWindow.getState(0).enableDepthTest(true);
 }

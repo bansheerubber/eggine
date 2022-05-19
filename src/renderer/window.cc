@@ -175,7 +175,7 @@ void render::Window::initializeOpenGL() {
 	glfwSetWindowSizeCallback(this->window, onWindowResize);
 
 	glEnable(GL_BLEND);
-	// this->enableDepthTest(true);
+	this->getState(0).enableDepthTest(true);
 	// this->enableStencilTest(true);
 	glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -322,7 +322,13 @@ void render::Window::prerender() {
 		vk::ClearValue clearColor(
 			std::array<float, 4>({{ this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a }})
 		); // ????
-		vk::RenderPassBeginInfo renderPassInfo(this->renderPass, this->framebuffers[this->currentFramebuffer], { { 0, 0 }, this->swapchainExtent }, 1, &clearColor);
+
+		vk::ClearValue clearDepth(
+			{ 1.0f, 0 }
+		);
+
+		std::array<vk::ClearValue, 2> clears = { clearColor, clearDepth };
+		vk::RenderPassBeginInfo renderPassInfo(this->renderPass, this->framebuffers[this->currentFramebuffer], { { 0, 0 }, this->swapchainExtent }, clears);
 
 		this->renderStates[0].buffer[this->framePingPong].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 	}

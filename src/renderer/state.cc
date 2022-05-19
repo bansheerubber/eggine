@@ -162,6 +162,40 @@ void render::State::bindVertexAttributes(render::VertexAttributes* attributes) {
 	#endif
 }
 
+void render::State::enableStencilTest(bool enable) {
+	#ifdef __switch__
+	#else
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(enable) {
+			glEnable(GL_STENCIL_TEST);
+		}
+		else {
+			glDisable(GL_STENCIL_TEST);
+		}
+	}
+	else {
+		this->current.stencilEnabled = enable;
+	}
+	#endif
+}
+
+void render::State::enableDepthTest(bool enable) {
+	#ifdef __switch__
+	#else
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(enable) {
+			glEnable(GL_DEPTH_TEST);
+		}
+		else {
+			glDisable(GL_DEPTH_TEST);
+		}
+	}
+	else {
+		this->current.depthEnabled = enable;
+	}
+	#endif
+}
+
 void render::State::reset() {
 	this->applied = false;
 
@@ -191,6 +225,8 @@ void render::State::bindPipeline() {
 		this->current.primitive,
 		(float)this->window->width,
 		(float)this->window->height,
+		this->current.depthEnabled,
+		this->current.stencilEnabled,
 		this->current.program,
 		this->current.attributes,
 	};

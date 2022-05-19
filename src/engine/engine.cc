@@ -502,7 +502,7 @@ void Engine::tick() {
 	this->debugText->setText(this->debug.getInfoText());
 	#endif
 
-	// this->renderWindow.enableDepthTest(false);
+	this->renderWindow.getState(0).enableDepthTest(false);
 
 	for(uint64_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
@@ -516,7 +516,7 @@ void Engine::tick() {
 
 	this->renderWindow.render();
 
-	// this->renderWindow.enableDepthTest(true);
+	this->renderWindow.getState(0).enableDepthTest(true);
 
 	if(this->network.isServer()) {
 		this->network.tick();
