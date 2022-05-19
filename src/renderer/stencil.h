@@ -22,6 +22,46 @@ namespace render {
 
 	#ifdef __switch__
 	#else
+	inline vk::CompareOp stencilToVulkanStencil(StencilFunction type) {
+		switch(type) {
+			case STENCIL_NEVER: {
+				return vk::CompareOp::eNever;
+			}
+
+			case STENCIL_LESS: {
+				return vk::CompareOp::eLess;
+			}
+
+			case STENCIL_LESS_EQUAL: {
+				return vk::CompareOp::eLessOrEqual;
+			}
+
+			case STENCIL_GREATER: {
+				return vk::CompareOp::eGreater;
+			}
+
+			case STENCIL_GREATER_EQUAL: {
+				return vk::CompareOp::eGreaterOrEqual;
+			}
+
+			case STENCIL_EQUAL: {
+				return vk::CompareOp::eEqual;
+			}
+
+			case STENCIL_NOT_EQUAL: {
+				return vk::CompareOp::eNotEqual;
+			}
+
+			case STENCIL_ALWAYS: {
+				return vk::CompareOp::eAlways;
+			}
+
+			default: {
+				return vk::CompareOp::eNever;
+			}
+		}
+	}
+	
 	inline GLenum stencilToGLStencil(StencilFunction type) {
 		switch(type) {
 			case STENCIL_NEVER: {
@@ -76,6 +116,46 @@ namespace render {
 
 	#ifdef __switch__
 	#else
+	inline vk::StencilOp stencilOPToVulkanStencilOP(StencilOperation type) {
+		switch(type) {
+			case STENCIL_KEEP: {
+				return vk::StencilOp::eKeep;
+			}
+
+			case STENCIL_ZERO: {
+				return vk::StencilOp::eZero;
+			}
+
+			case STENCIL_REPLACE: {
+				return vk::StencilOp::eReplace;
+			}
+
+			case STENCIL_INCREMENT: {
+				return vk::StencilOp::eIncrementAndClamp;
+			}
+
+			case STENCIL_INCREMENT_WRAP: {
+				return vk::StencilOp::eIncrementAndWrap;
+			}
+
+			case STENCIL_DECREMENT: {
+				return vk::StencilOp::eDecrementAndClamp;
+			}
+
+			case STENCIL_DECREMENT_WRAP: {
+				return vk::StencilOp::eDecrementAndWrap;
+			}
+
+			case STENCIL_INVERT: {
+				return vk::StencilOp::eInvert;
+			}
+
+			default: {
+				return vk::StencilOp::eKeep;
+			}
+		}
+	}
+	
 	inline GLenum stencilOPToGLStencilOP(StencilOperation type) {
 		switch(type) {
 			case STENCIL_KEEP: {

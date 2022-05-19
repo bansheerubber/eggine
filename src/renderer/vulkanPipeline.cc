@@ -91,15 +91,25 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 
 		vk::PipelineDynamicStateCreateInfo dynamicStateInfo({}, 0, nullptr);
 
+		vk::StencilOpState stencilOpState = vk::StencilOpState(
+			stencilOPToVulkanStencilOP(this->stencilFail),
+			stencilOPToVulkanStencilOP(this->stencilPass),
+			stencilOPToVulkanStencilOP(this->depthFail),
+			stencilToVulkanStencil(this->stencilFunction),
+			this->stencilCompare,
+			this->stencilWriteMask,
+			this->stencilReference
+		);
+
 		vk::PipelineDepthStencilStateCreateInfo depthInfo(
 			{},
 			this->depthEnabled, // depth test enabled
 			true, // depth write enabled
-			vk::CompareOp::eLess,
+			vk::CompareOp::eLessOrEqual,
 			false,
 			this->stencilEnabled,
-			{},
-			{},
+			stencilOpState,
+			stencilOpState,
 			0.0f,
 			1.0f
 		);

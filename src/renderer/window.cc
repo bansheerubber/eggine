@@ -176,8 +176,8 @@ void render::Window::initializeOpenGL() {
 
 	glEnable(GL_BLEND);
 	this->getState(0).enableDepthTest(true);
-	// this->enableStencilTest(true);
-	glEnable(GL_CULL_FACE);
+	this->getState(0).enableStencilTest(true);
+	glDisable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glfwSwapInterval(1);

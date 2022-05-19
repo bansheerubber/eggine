@@ -162,6 +162,40 @@ void render::State::bindVertexAttributes(render::VertexAttributes* attributes) {
 	#endif
 }
 
+void render::State::setStencilFunction(StencilFunction func, unsigned int reference, unsigned int compare) {
+	#ifdef __switch__
+	#else
+	if(this->window->backend == OPENGL_BACKEND) {
+		glStencilFunc(stencilToGLStencil(func), reference, compare);
+	}
+	else {
+		this->current.stencilFunction = func;
+		this->current.stencilReference = reference;
+		this->current.stencilCompare = compare;
+	}
+	#endif
+}
+
+void render::State::setStencilMask(unsigned int mask) {
+	if(this->window->backend == OPENGL_BACKEND) {
+		glStencilMask(mask);
+	}
+	else {
+		this->current.stencilWriteMask = mask;
+	}
+}
+
+void render::State::setStencilOperation(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) {
+	if(this->window->backend == OPENGL_BACKEND) {
+		glStencilOp(stencilOPToGLStencilOP(stencilFail), stencilOPToGLStencilOP(depthFail), stencilOPToGLStencilOP(pass));
+	}
+	else {
+		this->current.stencilFail = stencilFail;
+		this->current.depthFail = depthFail;
+		this->current.stencilPass = pass;
+	}
+}
+
 void render::State::enableStencilTest(bool enable) {
 	#ifdef __switch__
 	#else
@@ -227,6 +261,13 @@ void render::State::bindPipeline() {
 		(float)this->window->height,
 		this->current.depthEnabled,
 		this->current.stencilEnabled,
+		this->current.stencilReference,
+		this->current.stencilCompare,
+		this->current.stencilWriteMask,
+		this->current.stencilFunction,
+		this->current.stencilFail,
+		this->current.depthFail,
+		this->current.stencilPass,
 		this->current.program,
 		this->current.attributes,
 	};

@@ -263,15 +263,15 @@ uint64_t Chunk::renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint6
 	uint64_t limit = startIndex + amount;
 	InterweavedTileWrapper* tile = nullptr;
 
-	// engine->renderWindow.setStencilFunction(render::STENCIL_ALWAYS, 1, 0b1);
-	// engine->renderWindow.setStencilMask(0b1);
+	engine->renderWindow.getState(0).setStencilFunction(render::STENCIL_ALWAYS, 1, 0b1);
+	engine->renderWindow.getState(0).setStencilMask(0b1);
 
 	for(
 		uint64_t i = startInterweavedIndex;
 		i < this->interweavedTiles.array.head && (tile = &this->interweavedTiles.array[i])->index < limit;
 		i++
 	) { // go through interweaved tiles
-		// engine->renderWindow.setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
+		engine->renderWindow.getState(0).setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
 		
 		int overlapBias = ChunkContainer::Image->drawOntopOfOverlap(this->textureIndices[tile->index]) ? 0 : 1;
 		if(lastIndex - 1 != tile->index) {
@@ -285,7 +285,7 @@ uint64_t Chunk::renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint6
 		}
 
 		// write to the stencil buffer so we can do some cool unit x-ray FX
-		// engine->renderWindow.setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_REPLACE);
+		engine->renderWindow.getState(0).setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_REPLACE);
 		tile->tile->render(deltaTime, context);
 
 		lastIndex = tile->index + overlapBias;
@@ -293,14 +293,14 @@ uint64_t Chunk::renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint6
 		leftOff = i + 1;
 	}
 
-	// engine->renderWindow.setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
+	engine->renderWindow.getState(0).setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
 	engine->renderWindow.getState(0).bindVertexAttributes(this->vertexAttributes);
 	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, lastIndex, limit - lastIndex);
 	#ifdef EGGINE_DEBUG
 	this->drawCalls++;
 	#endif
 
-	// engine->renderWindow.setStencilMask(0b0); // disable writing to the stencil buffer
+	engine->renderWindow.getState(0).setStencilMask(0b0); // disable writing to the stencil buffer
 
 	return leftOff;
 }
@@ -350,14 +350,13 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 			if(this->getLayer(i) != nullptr) { // check if we need to stop and render the layer
 				engine->renderWindow.getState(0).bindVertexAttributes(this->vertexAttributes);
-				// engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
 				interweavedIndex = this->renderWithInterweavedTiles(interweavedIndex, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size, deltaTime, context);
 
-				// engine->renderWindow.setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_REPLACE);
-				// engine->renderWindow.setStencilMask(0b1);
+				engine->renderWindow.getState(0).setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_REPLACE);
+				engine->renderWindow.getState(0).setStencilMask(0b1);
 				this->getLayer(i)->render(deltaTime, context);
-				// engine->renderWindow.setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
-				// engine->renderWindow.setStencilMask(0b0);
+				engine->renderWindow.getState(0).setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
+				engine->renderWindow.getState(0).setStencilMask(0b0);
 
 				start = i + 1;
 				end = i;
@@ -367,25 +366,24 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 
 		if(!rendered) { // render remaining tiles at top of the chunk
 			engine->renderWindow.getState(0).bindVertexAttributes(this->vertexAttributes);
-			// engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size);
 			interweavedIndex = this->renderWithInterweavedTiles(interweavedIndex, start * Chunk::Size * Chunk::Size, (end - start + 1) * Chunk::Size * Chunk::Size, deltaTime, context);
 		}
 
 		// render remaining overlapping tiles
-		// engine->renderWindow.setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_REPLACE);
-		// engine->renderWindow.setStencilMask(0b1);
-		// for(unsigned int i = end; i <= this->maxLayer; i++) {
-		// 	if(this->getLayer(i) != nullptr) {
-		// 		this->getLayer(i)->render(deltaTime, context);
-		// 	}
-		// }
+		engine->renderWindow.getState(0).setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_REPLACE);
+		engine->renderWindow.getState(0).setStencilMask(0b1);
+		for(unsigned int i = end; i <= this->maxLayer; i++) {
+			if(this->getLayer(i) != nullptr) {
+				this->getLayer(i)->render(deltaTime, context);
+			}
+		}
 
 		// draw overlapping tiles above the height of the chunk
-		// for(uint64_t i = interweavedIndex; i < this->interweavedTiles.array.head; i++) {
-		// 	this->interweavedTiles.array[i].tile->render(deltaTime, context);
-		// }
-		// engine->renderWindow.setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
-		// engine->renderWindow.setStencilMask(0b0);
+		for(uint64_t i = interweavedIndex; i < this->interweavedTiles.array.head; i++) {
+			this->interweavedTiles.array[i].tile->render(deltaTime, context);
+		}
+		engine->renderWindow.getState(0).setStencilOperation(render::STENCIL_KEEP, render::STENCIL_KEEP, render::STENCIL_ZERO);
+		engine->renderWindow.getState(0).setStencilMask(0b0);
 
 		#ifdef EGGINE_DEBUG
 		this->isCulled = false;
@@ -399,7 +397,6 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 }
 
 void Chunk::renderXRay(double deltaTime, RenderContext &context) {
-	return;
 	Camera* camera = context.camera;
 	if(!(
 		camera->left > this->right
@@ -428,8 +425,8 @@ void Chunk::renderXRay(double deltaTime, RenderContext &context) {
 		vb.timer = this->container->timer;
 		engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb, sizeof(vb));
 		
-		// engine->renderWindow.setStencilFunction(render::STENCIL_NOT_EQUAL, 1, 0b1);
-		// engine->renderWindow.setStencilMask(0b0); // do not write to the mask
+		engine->renderWindow.getState(0).setStencilFunction(render::STENCIL_NOT_EQUAL, 1, 0b1);
+		engine->renderWindow.getState(0).setStencilMask(0b0); // do not write to the mask
 		
 		unsigned int interweavedTile = 0;
 		for(unsigned int i = 0, j = 0; i < this->height; i++) {
@@ -460,8 +457,7 @@ void Chunk::renderXRay(double deltaTime, RenderContext &context) {
 				tile->renderXRay(deltaTime, context);
 			}
 		}
-
-		// engine->renderWindow.setStencilFunction(render::STENCIL_ALWAYS, 0, 0b0);
+		engine->renderWindow.getState(0).setStencilFunction(render::STENCIL_ALWAYS, 0, 0b0);
 	}
 }
 

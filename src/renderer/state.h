@@ -41,7 +41,7 @@ namespace render {
 	struct SubState {
 		StencilFunction stencilFunction;
 		uint32_t stencilReference;
-		uint32_t stencilMask;
+		uint32_t stencilCompare;
 
 		uint32_t stencilWriteMask;
 
@@ -62,14 +62,15 @@ namespace render {
 	inline bool operator==(const SubState &a, const SubState &b) {
 		return a.stencilFunction == b.stencilFunction
 			&& a.stencilReference == b.stencilReference
-			&& a.stencilMask == b.stencilMask
+			&& a.stencilCompare == b.stencilCompare
 			&& a.stencilWriteMask == b.stencilWriteMask
 			&& a.stencilFail == b.stencilFail
 			&& a.depthFail == b.depthFail
 			&& a.stencilPass == b.stencilPass
 			&& a.stencilEnabled == b.stencilEnabled
 			&& a.depthEnabled == b.depthEnabled
-			&& a.primitive == b.primitive			&& a.program == b.program
+			&& a.primitive == b.primitive
+			&& a.program == b.program
 			&& a.attributes == b.attributes;
 	}
 
@@ -110,9 +111,10 @@ namespace render {
 			void bindTexture(std::string uniformName, class Texture* texture);
 			void bindVertexAttributes(class VertexAttributes* attributes);
 
-			void setStencilFunction(StencilFunction func, unsigned int reference, unsigned int mask);
+			void setStencilFunction(StencilFunction func, unsigned int reference, unsigned int compare);
 			void setStencilMask(unsigned int mask);
 			void setStencilOperation(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass);
+
 			void enableStencilTest(bool enable);
 			void enableDepthTest(bool enable);
 
