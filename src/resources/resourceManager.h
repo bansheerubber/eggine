@@ -23,6 +23,7 @@ void handleCSS(void* owner, carton::File* file, const char* buffer, uint64_t buf
 void handleScripts(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 void handleShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
+void handleSPVShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 void handleMaps(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 void handleSounds(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 
@@ -36,6 +37,7 @@ namespace resources {
 		friend void ::handleScripts(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		friend void ::handleShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		friend void ::handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
+		friend void ::handleSPVShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		friend void ::handleMaps(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		friend void ::handleSounds(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		

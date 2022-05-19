@@ -483,14 +483,6 @@ void Engine::tick() {
 		deltaTime = 0;
 	}
 
-	// this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
-
-	// int escape = glfwGetKey(engine->window, GLFW_KEY_ESCAPE);
-	// if(escape || this->gamepad.buttons[GLFW_GAMEPAD_BUTTON_START]) {
-	// 	this->exit();
-	// 	return;
-	// }
-
 	// handle eggscript
 	int64_t esStartTime = getMicrosecondsNow();
 	esTick(this->eggscript);
@@ -498,10 +490,6 @@ void Engine::tick() {
 
 	this->camera->see(deltaTime);
 	this->ui.update();
-
-	// if(glfwWindowShouldClose(this->window)) {
-	// 	return;
-	// }
 
 	RenderContext context = {
 		camera: this->camera,
@@ -518,7 +506,7 @@ void Engine::tick() {
 	this->debugText->setText(this->debug.getInfoText());
 	#endif
 
-	this->renderWindow.enableDepthTest(false);
+	this->renderWindow.getState(0).enableDepthTest(false);
 
 	for(uint64_t i = 0; i < this->renderableUIs.head; i++) {
 		this->renderableUIs[i]->render(deltaTime, context);
@@ -532,7 +520,7 @@ void Engine::tick() {
 
 	this->renderWindow.render();
 
-	this->renderWindow.enableDepthTest(true);
+	this->renderWindow.getState(0).enableDepthTest(true);
 
 	if(this->network.isServer()) {
 		this->network.tick();

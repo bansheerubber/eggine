@@ -2,13 +2,16 @@
 
 #ifndef __switch__
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 #endif
 
 #include <array>
 #include <tsl/robin_map.h>
+#include <string>
 #include <vector>
 
 #include "memory.h"
+#include "vulkanPipeline.h"
 
 namespace std {
 	template<>
@@ -28,13 +31,29 @@ namespace std {
 };
 
 namespace render {
+	#ifndef __switch__
+	struct DescriptorSetPair {
+		std::array<vk::DescriptorSet, 2> sets;
+		bool initialized = false;
+	};
+
+	struct UniformBufferPair {
+		std::array<Piece*, 2> pieces;
+		bool initialized = false;
+	};
+	#endif
+	
 	class Program {
+		#ifndef __switch__
+		friend VulkanPipeline;
+		#endif
+		friend class State;
+		friend class Window;
+
 		public:
 			Program(class Window* window);
-			void bind();
+			void compile();
 			void addShader(class Shader* shader);
-			void bindUniform(std::string uniformNamde, void* data, unsigned int size, uint64_t cacheIndex = 0, bool setOnce = false);
-			void bindTexture(std::string uniformName, unsigned int texture);
 		
 		protected:
 			std::vector<class Shader*> shaders;
@@ -43,13 +62,28 @@ namespace render {
 			tsl::robin_map<std::string, unsigned int> uniformToBinding;
 
 			#ifdef __switch__
-			tsl::robin_map<std::string, switch_memory::Piece*> uniformToPiece;
-			void createUniformMemory(std::string uniformName, unsigned int size);
+			tsl::robin_map<std::string, Piece*> uniformToPiece;
 			#else
 			GLuint program = GL_INVALID_INDEX;
-			tsl::robin_map<std::pair<std::string, uint64_t>, GLuint> uniformToBuffer;
+			tsl::robin_map<std::string, GLuint> uniformToBuffer;
+			tsl::robin_map<std::pair<std::string, uint64_t>, UniformBufferPair> uniformToVulkanBuffer;
+			tsl::robin_map<std::string, uint32_t> uniformToShaderBinding;
+			tsl::robin_map<std::string, bool> isUniformSampler;
+			tsl::robin_map<std::string, class Texture*> uniformToTexture;
+
+			std::vector<vk::PipelineShaderStageCreateInfo> stages = std::vector<vk::PipelineShaderStageCreateInfo>(2);
+			uint8_t stageCount = 0;
+			vk::DescriptorSetLayout descriptorLayout;
+			std::vector<DescriptorSetPair> descriptorSets;
+
+			bool compiled = false;
+
 			static unsigned int UniformCount;
-			void createUniformBuffer(std::string uniformName, unsigned int size, uint64_t cacheIndex);
+
+			void createDescriptorSet(uint32_t index);
+			vk::DescriptorSet &getDescriptorSet(uint32_t index, uint32_t framePingPong);
 			#endif
+
+			void createUniformBuffer(std::string uniformName, unsigned int size, unsigned int index = 0);
 	};
 };

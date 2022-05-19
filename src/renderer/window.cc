@@ -2,6 +2,7 @@
 #include <glad/gl.h>
 #endif
 
+#include <set>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,8 +10,11 @@
 #include "../util/align.h"
 #include "../engine/console.h"
 #include "../engine/debug.h"
+#include "debug.h"
 #include "../engine/engine.h"
 #include "../resources/html.h"
+#include "program.h"
+#include "shader.h"
 #include "texture.h"
 #include "window.h"
 
@@ -24,6 +28,57 @@ void onWindowResize(GLFWwindow* window, int width, int height) {
 // deko3d: create framebuffers/swapchains, command buffers
 void render::Window::initialize() {
 	#ifdef __switch__ // start of switch code (based on switch-examples/graphics/deko3d/deko_basic)
+	this->initializeDeko3d();
+	#else // else for ifdef __switch__
+	if(!glfwInit()) {
+		console::error("failed to initialize glfw\n");
+		exit(1);
+	}
+
+	// support 4.3
+	if(this->backend == OPENGL_BACKEND) {
+		this->initializeOpenGL();
+	}
+	else {
+		this->initializeVulkan();
+	}
+	#endif // end for ifdef __switch__
+}
+
+void render::Window::initializeHTML() {
+	this->htmlContainer = new LiteHTMLContainer();
+
+	resources::HTML* html = (resources::HTML*)engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", "html/index.html")->exec())[0];
+	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".css")->exec());
+	this->htmlDocument = litehtml::document::createFromString(html->document.c_str(), this->htmlContainer, &this->htmlContext);
+}
+
+void render::Window::addError() {
+	this->errorCount++;
+}
+
+unsigned int render::Window::getErrorCount() {
+	return this->errorCount;
+}
+
+void render::Window::clearErrors() {
+	this->errorCount = 0;
+}
+
+void render::Window::registerHTMLUpdate() {
+	this->htmlChecksum++;
+}
+
+render::State &render::Window::getState(uint32_t id) {
+	// id 0 is special, this represents the main command buffer
+	if(this->renderStates.find(id) == this->renderStates.end()) {
+		this->renderStates[id] = State(this); // TODO create command buffer for vulkan
+	}
+	return this->renderStates[id];
+}
+
+#ifdef __switch__
+void render::Window::initializeDeko3d() {
 	this->device = dk::DeviceMaker{}.create();
 	this->queue = dk::QueueMaker{this->device}.setFlags(DkQueueFlags_Graphics).create();
 
@@ -90,7 +145,7 @@ void render::Window::initialize() {
 
 	// create a buffer object for the command buffer
 	this->commandBuffer = dk::CmdBufMaker{this->device}.create();
-	this->commandBuffer.addMemory(this->commandBufferMemory, this->commandBufferSliceSize * this->currentCommandBuffer, this->commandBufferSliceSize);
+	this->commandBuffer.addMemory(this->commandBufferMemory, this->commandBufferSliceSize * this->framePingPong, this->commandBufferSliceSize);
 
 	// create a buffer object for the texture command buffer
 	this->textureCommandBufferMemory = dk::MemBlockMaker{this->device, 4 * 1024}.setFlags(DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached).create();
@@ -105,27 +160,24 @@ void render::Window::initialize() {
 	// initialize gamepad
 	padConfigureInput(1, HidNpadStyleSet_NpadStandard);
 	padInitializeDefault(&this->pad);
-	#else // else for ifdef __switch__
-	if(!glfwInit()) {
-		console::error("failed to initialize glfw\n");
-		exit(1);
-	}
-
-	// support 4.3
+}
+#else
+void render::Window::initializeOpenGL() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	this->window = glfwCreateWindow(this->width, this->height, "eggine", NULL, NULL);
 	glfwMakeContextCurrent(window);
+	glfwSetErrorCallback(glfwErrorCallback);
 	gladLoadGL(glfwGetProcAddress);
 
 	glfwSetWindowSizeCallback(this->window, onWindowResize);
 
 	glEnable(GL_BLEND);
-	this->enableDepthTest(true);
-	this->enableStencilTest(true);
-	// glEnable(GL_CULL_FACE);
+	this->getState(0).enableDepthTest(true);
+	this->getState(0).enableStencilTest(true);
+	glDisable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glfwSwapInterval(1);
@@ -146,78 +198,8 @@ void render::Window::initialize() {
 	ImGui_ImplGlfw_InitForOpenGL(this->window, false);
 	ImGui_ImplOpenGL3_Init("#version 150");
 	#endif
-
-	#endif // end for ifdef __switch__
 }
-
-void render::Window::initializeHTML() {
-	this->htmlContainer = new LiteHTMLContainer();
-
-	resources::HTML* html = (resources::HTML*)engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", "html/index.html")->exec())[0];
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".css")->exec());
-	this->htmlDocument = litehtml::document::createFromString(html->document.c_str(), this->htmlContainer, &this->htmlContext);
-}
-
-void render::Window::addError() {
-	this->errorCount++;
-}
-
-unsigned int render::Window::getErrorCount() {
-	return this->errorCount;
-}
-
-void render::Window::clearErrors() {
-	this->errorCount = 0;
-}
-
-void render::Window::registerHTMLUpdate() {
-	this->htmlChecksum++;
-}
-
-void render::Window::setStencilFunction(render::StencilFunction func, unsigned int reference, unsigned int mask) {
-	#ifdef __switch__
-	#else
-	glStencilFunc(stencilToGLStencil(func), reference, mask);
-	#endif
-}
-
-void render::Window::setStencilMask(unsigned int mask) {
-	#ifdef __switch__
-	#else
-	glStencilMask(mask);
-	#endif
-}
-
-void render::Window::setStencilOperation(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) {
-	#ifdef __switch__
-	#else
-	glStencilOp(stencilOPToGLStencilOP(stencilFail), stencilOPToGLStencilOP(depthFail), stencilOPToGLStencilOP(pass));
-	#endif
-}
-
-void render::Window::enableStencilTest(bool enable) {
-	#ifdef __switch__
-	#else
-	if(enable) {
-		glEnable(GL_STENCIL_TEST);
-	}
-	else {
-		glDisable(GL_STENCIL_TEST);
-	}
-	#endif
-}
-
-void render::Window::enableDepthTest(bool enable) {
-	#ifdef __switch__
-	#else
-	if(enable) {
-		glEnable(GL_DEPTH_TEST);
-	}
-	else {
-		glDisable(GL_DEPTH_TEST);
-	}
-	#endif
-}
+#endif
 
 void render::Window::deinitialize() {
 	#ifdef __switch__
@@ -232,6 +214,49 @@ void render::Window::deinitialize() {
 	this->framebufferMemory.destroy();
 	this->device.destroy();
 	#else
+	if(this->backend == VULKAN_BACKEND) {
+		this->device.device.waitIdle();
+
+		for(Program* program: this->programs) {
+			for(Shader* shader: program->shaders) {
+				this->device.device.destroyShaderModule(shader->module);
+			}
+		}
+
+		for(auto &[_, pipeline]: this->pipelines) {
+			this->device.device.destroyPipelineLayout(pipeline.layout);
+			this->device.device.destroyPipeline(pipeline.pipeline);
+		}
+
+		this->device.device.destroyRenderPass(this->renderPass);
+		this->device.device.destroyPipelineCache(this->pipelineCache);
+
+		for(auto framebuffer: this->framebuffers) {
+			this->device.device.destroyFramebuffer(framebuffer);
+		}
+
+		this->device.device.destroySwapchainKHR(this->swapchain);
+		this->instance.destroySurfaceKHR(this->surface);
+
+		for(auto renderImageView: this->renderImageViews) {
+			this->device.device.destroyImageView(renderImageView);
+		}
+
+		for(uint8_t i = 0; i < 2; i++) {
+			this->device.device.destroySemaphore(this->isRenderFinished[i]);
+			this->device.device.destroySemaphore(this->isImageAvailable[i]);
+			this->device.device.destroyFence(this->frameFence[i]);
+		}
+
+		this->device.device.destroyCommandPool(this->commandPool);
+		this->device.device.destroyCommandPool(this->transientCommandPool);
+		this->device.device.destroyDescriptorPool(this->descriptorPool);
+
+		this->device.device.destroy();
+
+		this->instance.destroyDebugUtilsMessengerEXT(this->debugCallback, nullptr, vk::DispatchLoaderDynamic{ this->instance, vkGetInstanceProcAddr });
+		this->instance.destroy();
+	}
 	glfwTerminate();
 	#endif
 }
@@ -245,7 +270,7 @@ void render::Window::prerender() {
 	// do dynamic command buffer magic
 	this->commandBuffer.clear();
 	this->commandBufferFences[this->signaledFence].wait();
-	this->commandBuffer.addMemory(this->commandBufferMemory, this->commandBufferSliceSize * this->currentCommandBuffer, this->commandBufferSliceSize);
+	this->commandBuffer.addMemory(this->commandBufferMemory, this->commandBufferSliceSize * this->framePingPong, this->commandBufferSliceSize);
 
 	// handle deallocated memory at the beginning of each frame
 	this->memory.processDeallocationLists();
@@ -257,9 +282,56 @@ void render::Window::prerender() {
 	this->rightStick = padGetStickPos(&this->pad, 1);
 	this->buttons = padGetButtons(&this->pad);
 	#else
-	glClearColor(this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a);
-	glStencilMask(0xFF);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	if(this->backend == OPENGL_BACKEND) {
+		glClearColor(this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a);
+		glStencilMask(0xFF);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	}
+	else {
+		if(this->swapchainOutOfDate) {
+			this->createSwapchain();
+			this->swapchainOutOfDate = false;
+		}
+		
+		// wait for the last fence to finish
+		vk::Result result = this->device.device.waitForFences(1, &this->frameFence[this->framePingPong], true, UINT64_MAX);
+		if(result != vk::Result::eSuccess) {
+			console::print("vulkan: failed to wait on frame fence %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+
+		// acquire the next image, signalling using the isImageAvailable semaphore
+		result = this->device.device.acquireNextImageKHR(this->swapchain, UINT64_MAX, this->isImageAvailable[this->framePingPong], {}, &this->currentFramebuffer);
+		if(result == vk::Result::eErrorOutOfDateKHR) {
+			this->swapchainOutOfDate = true;
+			return;
+		}
+
+		result = this->device.device.resetFences(1, &this->frameFence[this->framePingPong]);
+		if(result != vk::Result::eSuccess) {
+			console::print("vulkan: failed to reset frame fence %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+		
+		// prepare the primary command buffer
+		vk::CommandBufferBeginInfo bufferBeginInfo({}, nullptr);
+		this->renderStates[0].reset();
+		this->renderStates[0].buffer[this->framePingPong].begin(bufferBeginInfo);
+
+		// only do one render pass for now
+		vk::ClearValue clearColor(
+			std::array<float, 4>({{ this->clearColor.r, this->clearColor.g, this->clearColor.b, this->clearColor.a }})
+		); // ????
+
+		vk::ClearValue clearDepth(
+			{ 1.0f, 0 }
+		);
+
+		std::array<vk::ClearValue, 2> clears = { clearColor, clearDepth };
+		vk::RenderPassBeginInfo renderPassInfo(this->renderPass, this->framebuffers[this->currentFramebuffer], { { 0, 0 }, this->swapchainExtent }, clears);
+
+		this->renderStates[0].buffer[this->framePingPong].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+	}
 	glfwPollEvents();
 	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
 	#endif
@@ -282,11 +354,11 @@ void render::Window::render() {
 	this->queue.submitCommands(this->staticCommandList);
 
 	// do dynamic command buffer magic
-	this->commandBuffer.signalFence(this->commandBufferFences[this->currentCommandBuffer]);
-	this->signaledFence = this->currentCommandBuffer;
+	this->commandBuffer.signalFence(this->commandBufferFences[this->framePingPong]);
+	this->signaledFence = this->framePingPong;
 	this->queue.submitCommands(this->commandBuffer.finishList());
 
-	this->currentCommandBuffer = (this->currentCommandBuffer + 1) % this->commandBufferCount;
+	this->framePingPong = (this->framePingPong + 1) % this->commandBufferCount;
 
 	this->queue.presentImage(this->swapchain, index);
 	#else
@@ -294,19 +366,72 @@ void render::Window::render() {
 		engine->exit();
 	}
 	
-	glfwSwapBuffers(this->window);
-	#endif
-}
-
-void render::Window::draw(PrimitiveType type, unsigned int firstVertex, unsigned int vertexCount, unsigned int firstInstance, unsigned int instanceCount) {
-	#ifdef __switch__
-	this->commandBuffer.draw(primitiveToDkPrimitive(type), vertexCount, instanceCount, firstVertex, firstInstance);
-	#else
-	if(firstInstance == 0 && instanceCount == 1) {
-		glDrawArrays(primitiveToGLPrimitive(type), firstVertex, vertexCount);
+	if(this->backend == OPENGL_BACKEND) {
+		glfwSwapBuffers(this->window);
 	}
 	else {
-		glDrawArraysInstancedBaseInstance(primitiveToGLPrimitive(type), firstVertex, vertexCount, instanceCount, firstInstance);
+		if(this->swapchainOutOfDate) {
+			return;
+		}
+		
+		// finalize render pass
+		this->renderStates[0].buffer[this->framePingPong].endRenderPass();
+		this->renderStates[0].buffer[this->framePingPong].end();
+
+		// we need to wait for any copy operations to finish before we process main command buffer
+		if(this->memoryCopyFences.size() > 0) {
+			vk::Result result = this->device.device.waitForFences(this->memoryCopyFences.size(), this->memoryCopyFences.data(), true, UINT64_MAX);
+			if(result != vk::Result::eSuccess) {
+				console::print("vulkan: failed to wait for memory transfer fences %s\n", vkResultToString((VkResult)result).c_str());
+				exit(1);
+			}
+		}
+
+		// submit the image for presentation
+		vk::Semaphore waitSemaphores[] = { this->isImageAvailable[this->framePingPong] };
+		vk::Semaphore signalSemaphores[] = { this->isRenderFinished[this->framePingPong] };
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+		vk::SubmitInfo submitInfo(1, waitSemaphores, waitStages, 1, &this->renderStates[0].buffer[this->framePingPong], 1, signalSemaphores);
+
+		vk::Result result = this->graphicsQueue.submit(1, &submitInfo, this->frameFence[this->framePingPong]);
+		if(result != vk::Result::eSuccess) {
+			console::print("vulkan: failed to submit graphics queue %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+
+		// present the image. wait for the queue's submit signal
+		vk::PresentInfoKHR presentInfo(1, signalSemaphores, 1, &this->swapchain, &this->currentFramebuffer, nullptr);
+		result = this->presentationQueue.presentKHR(&presentInfo);
+		if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR) {
+			this->swapchainOutOfDate = true;
+			return;
+		}
+		else if(result != vk::Result::eSuccess) {
+			console::print("vulkan: failed to present via presentation queue %s\n", vkResultToString((VkResult)result).c_str());
+			exit(1);
+		}
+
+		// end copy operations
+		for(vk::Fence fence: this->memoryCopyFences) {
+			this->device.device.destroyFence(fence);
+		}
+		this->memoryCopyFences.clear();
+
+		// clear transient command buffers
+		if(this->transientCommandBuffers.size() > 0) {
+			this->device.device.freeCommandBuffers(
+				this->transientCommandPool, this->transientCommandBuffers.size(), this->transientCommandBuffers.data()
+			);
+			this->transientCommandBuffers.clear();
+		}
+
+		// handle any dynamic buffer copy operations that we may have skipped since the buffer was not in use
+		for(VertexBuffer* buffer: VertexBuffer::OutOfDateBuffers[this->framePingPong]) {
+			buffer->handleOutOfDateBuffer();
+		}
+		VertexBuffer::OutOfDateBuffers[this->framePingPong].clear();
+
+		this->framePingPong = (this->framePingPong + 1) % 2;
 	}
 	#endif
 }
@@ -317,12 +442,14 @@ void render::Window::resize(unsigned int width, unsigned int height) {
 	this->height = height;
 	
 	#ifndef __switch__
-	glViewport(0, 0, width, height);
+	if(this->backend == OPENGL_BACKEND) {
+		glViewport(0, 0, width, height);
+	}
 	#endif
 }
 
 #ifdef __switch__
-void render::Window::addTexture(switch_memory::Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height) {
+void render::Window::addTexture(Piece* tempMemory, dk::ImageView& view, unsigned int width, unsigned int height) {
 	this->queue.waitIdle();
 	this->textureCommandBuffer.clear();
 	this->textureCommandBuffer.addMemory(this->textureCommandBufferMemory, 0, 4 * 1024);

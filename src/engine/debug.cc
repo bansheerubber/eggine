@@ -99,11 +99,10 @@ void Debug::drawTexture(render::Texture* texture) {
 		this->attributes->addVertexAttribute(this->buffers[0], 0, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
 		this->attributes->addVertexAttribute(this->buffers[1], 1, 2, render::VERTEX_ATTRIB_FLOAT, 0, sizeof(glm::vec2), 0);
 	}
+	
+	engine->renderWindow.getState(0).bindProgram(this->program);
+	engine->renderWindow.getState(0).bindTexture("inTexture", texture);
 
-	this->program->bind();
-	texture->bind(0);
-	this->program->bindTexture("inTexture", 0);
-	this->attributes->bind();
-
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
+	engine->renderWindow.getState(0).bindVertexAttributes(this->attributes);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }

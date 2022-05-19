@@ -23,11 +23,11 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 	#ifdef __switch__
 	filePrefix = "romfs:/";
 	#endif
-	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow, "text pos vertex");
 	this->vertexBuffers[0]->setDynamicDraw(true);
 	this->vertexBuffers[0]->setData(nullptr, sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 
-	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow, "text uv vertex");
 	this->vertexBuffers[1]->setDynamicDraw(true);
 	this->vertexBuffers[1]->setData(nullptr, sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 
@@ -41,7 +41,7 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 }
 
 Text::Text(std::string family, int size, bool addToUiList) : Text(addToUiList) {
-	this->font = Font::GetFont(family, size);
+	this->font = render::Font::GetFont(family, size);
 }
 
 Text::~Text() {
@@ -61,7 +61,7 @@ void Text::updateBuffers() {
 			y += this->font->size;
 		}
 		else {
-			FontGlyph ch = this->font->characterToGlyph[(unsigned char)this->text[i]];
+			render::FontGlyph ch = this->font->characterToGlyph[(unsigned char)this->text[i]];
 
 			float xpos = x + ch.left * scale;
 			float ypos = y - ch.top;
@@ -123,7 +123,6 @@ void Text::updateBuffers() {
 
 void Text::setText(std::string text) {
 	this->text = text;
-	this->updateBuffers();
 }
 
 std::string Text::getText() {
@@ -131,9 +130,13 @@ std::string Text::getText() {
 }
 
 void Text::render(double deltaTime, RenderContext &context) {
-	Text::Program->bind();
-	this->font->texture->bind(0);
-	Text::Program->bindTexture("textTexture", 0);
+	if(this->oldText != this->text) {
+		this->updateBuffers();
+		this->oldText = this->text;
+	}
+	
+	engine->renderWindow.getState(0).bindProgram(Text::Program);
+	engine->renderWindow.getState(0).bindTexture("textTexture", this->font->texture);
 
 	struct VertexBlock {
 		glm::mat4 projection;
@@ -148,10 +151,10 @@ void Text::render(double deltaTime, RenderContext &context) {
 	} fb;
 	fb.color = this->color;
 
-	Text::Program->bindUniform("vertexBlock", &vb, sizeof(vb));
-	Text::Program->bindUniform("fragmentBlock", &fb, sizeof(fb));
+	engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb, sizeof(vb));
+	engine->renderWindow.getState(0).bindUniform("fragmentBlock", &fb, sizeof(fb));
 
-	this->vertexAttributes->bind();
+	engine->renderWindow.getState(0).bindVertexAttributes(this->vertexAttributes);
 
-	engine->renderWindow.draw(render::PRIMITIVE_TRIANGLES, 0, 6 * this->text.size(), 0, 1);
+	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLES, 0, 6 * this->text.size(), 0, 1);
 }

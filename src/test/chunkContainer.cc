@@ -166,10 +166,8 @@ uint64_t ChunkContainer::getChunkCount() {
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
 	this->timer++;
 	
-	ChunkContainer::Program->bind();
-
-	ChunkContainer::Program->bindTexture("spriteTexture", 0);
-	ChunkContainer::Image->texture->bind(0);
+	engine->renderWindow.getState(0).bindProgram(ChunkContainer::Program);
+	engine->renderWindow.getState(0).bindTexture("spriteTexture", ChunkContainer::Image->texture);
 
 	#ifdef EGGINE_DEBUG
 	uint64_t chunksRendered = 0;

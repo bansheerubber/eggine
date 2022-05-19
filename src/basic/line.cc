@@ -51,16 +51,16 @@ void Line::commit() {
 
 void Line::render(double deltaTime, RenderContext &context) {
 	if(this->positions.size() > 0) {
-		Line::Program->bind();
+		engine->renderWindow.getState(0).bindProgram(Line::Program);
 
 		struct {
 			glm::mat4 projection;
 		} vb;
 		vb.projection = context.camera->projectionMatrix;
 
-		Line::Program->bindUniform("vertexBlock", &vb.projection[0][0], sizeof(glm::mat4));
-		this->attributes->bind();
+		engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb.projection[0][0], sizeof(glm::mat4));
+		engine->renderWindow.getState(0).bindVertexAttributes(this->attributes);
 
-		engine->renderWindow.draw(render::PRIMITIVE_LINE_STRIP, 0, this->positions.size(), 0, 1);
+		engine->renderWindow.getState(0).draw(render::PRIMITIVE_LINE_STRIP, 0, this->positions.size(), 0, 1);
 	}
 }

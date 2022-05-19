@@ -24,8 +24,8 @@ namespace render {
 			static render::VertexAttributes* VertexAttributes;
 			static constexpr glm::vec2 VerticesSource[4] = {
 				glm::vec2(0.0, 1.0),
-				glm::vec2(1.0, 1.0),
 				glm::vec2(0.0, 0.0),
+				glm::vec2(1.0, 1.0),
 				glm::vec2(1.0, 0.0),
 			};
 	};

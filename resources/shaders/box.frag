@@ -2,7 +2,7 @@
 
 layout(location = 0) out vec4 color;
 
-layout(std140, binding = 0) uniform fragmentBlock
+layout(std140, binding = 1) uniform fragmentBlock
 {
 	vec4 color;
 } fb;

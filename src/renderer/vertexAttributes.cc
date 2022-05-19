@@ -23,23 +23,6 @@ void render::VertexAttributes::addVertexAttribute(class VertexBuffer* buffer, un
 	});
 }
 
-void render::VertexAttributes::bind() {
-	#ifdef __switch__
-	this->buildCommandLists();
-
-	unsigned short id = 0;
-	for(VertexBuffer* buffer: this->bufferBindOrder) {
-		buffer->bind(id++);
-	}
-
-	this->window->commandBuffer.bindVtxAttribState(dk::detail::ArrayProxy(this->attributeStates.size(), (const DkVtxAttribState*)this->attributeStates.data()));
-	this->window->commandBuffer.bindVtxBufferState(dk::detail::ArrayProxy(this->bufferStates.size(), (const DkVtxBufferState*)this->bufferStates.data()));
-	#else
-	this->buildCommandLists();
-	glBindVertexArray(this->vertexArrayObject);
-	#endif
-}
-
 void render::VertexAttributes::buildCommandLists() {
 	#ifdef __switch__
 	this->bufferBindOrder.clear();
@@ -73,29 +56,69 @@ void render::VertexAttributes::buildCommandLists() {
 		});
 	}
 	#else
-	if(this->vertexArrayObject != GL_INVALID_INDEX) {
-		return;
+	if(this->window->backend == OPENGL_BACKEND) {
+		if(this->vertexArrayObject != GL_INVALID_INDEX) {
+			return;
+		}
+
+		glGenVertexArrays(1, &this->vertexArrayObject);
+		glBindVertexArray(this->vertexArrayObject);
+		
+		for(VertexAttribute &attribute: this->attributes) {
+			glBindBuffer(GL_ARRAY_BUFFER, attribute.buffer->bufferId);
+			if(attribute.type == VERTEX_ATTRIB_HALF_FLOAT || attribute.type == VERTEX_ATTRIB_FLOAT || attribute.type == VERTEX_ATTRIB_DOUBLE) {
+				glVertexAttribPointer(attribute.attributeLocation, attribute.vectorLength, attributeTypeToGLType(attribute.type), GL_FALSE, attribute.stride, 0);
+			}
+			else {
+				glVertexAttribIPointer(attribute.attributeLocation, attribute.vectorLength, attributeTypeToGLType(attribute.type), attribute.stride, 0);
+			}
+
+			if(attribute.divisor) {
+				glVertexAttribDivisor(attribute.attributeLocation, attribute.divisor);
+			}
+
+			glEnableVertexAttribArray(attribute.attributeLocation);
+		}
+
+		glBindVertexArray(0);
 	}
+	else {
+		if(this->inputBindings.size() == 0) {
+			unsigned short bufferId = 0;
+			VertexBuffer* currentBuffer = nullptr;
+			bool incrementBufferId = this->attributes[0].buffer;
 
-	glGenVertexArrays(1, &this->vertexArrayObject);
-	glBindVertexArray(this->vertexArrayObject);
-	
-	for(VertexAttribute &attribute: this->attributes) {
-		glBindBuffer(GL_ARRAY_BUFFER, attribute.buffer->bufferId);
-		if(attribute.type == VERTEX_ATTRIB_HALF_FLOAT || attribute.type == VERTEX_ATTRIB_FLOAT || attribute.type == VERTEX_ATTRIB_DOUBLE) {
-			glVertexAttribPointer(attribute.attributeLocation, attribute.vectorLength, attributeTypeToGLType(attribute.type), GL_FALSE, attribute.stride, 0);
-		}
-		else {
-			glVertexAttribIPointer(attribute.attributeLocation, attribute.vectorLength, attributeTypeToGLType(attribute.type), attribute.stride, 0);
-		}
+			for(VertexAttribute &attribute: this->attributes) {
+				if(currentBuffer != attribute.buffer) {
+					this->inputBindings.push_back(vk::VertexInputBindingDescription(
+						bufferId,
+						attribute.stride,
+						attribute.divisor == 0 ? vk::VertexInputRate::eVertex : vk::VertexInputRate::eInstance
+					));
+					incrementBufferId = true;
 
-		if(attribute.divisor) {
-			glVertexAttribDivisor(attribute.attributeLocation, attribute.divisor);
-		}
+					if(attribute.divisor != 0) {
+						this->inputDivisors.push_back(vk::VertexInputBindingDivisorDescriptionEXT(
+							bufferId,
+							attribute.divisor
+						));
+					}
 
-		glEnableVertexAttribArray(attribute.attributeLocation);
+					currentBuffer = attribute.buffer;
+				}
+
+				this->inputAttributes.push_back(vk::VertexInputAttributeDescription(
+					attribute.attributeLocation,
+					bufferId,
+					attributeTypeToVulkanType(attribute.type, attribute.vectorLength),
+					attribute.offset
+				));
+
+				if(incrementBufferId) {
+					bufferId++;
+				}
+			}
+		}
 	}
-
-	glBindVertexArray(0);
 	#endif
 }

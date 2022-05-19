@@ -4,6 +4,7 @@
 #include <deko3d.hpp>
 #else
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 #endif
 
 #include <tsl/robin_map.h>
@@ -20,30 +21,34 @@ namespace render {
 
 	class Shader {
 		friend class Program;
+		friend class State;
+		friend class Window;
 		
 		public:
 			Shader(class Window* window);
 
-			void loadFromFile(string filename, ShaderType type);
-			void load(string buffer, ShaderType type);
-			void load(const char* buffer, uint64_t length, ShaderType type);
 			void load(resources::ShaderSource* source, ShaderType type);
 			void bind();
 
 		protected:
 			class Window* window;
 
+			std::string fileName;
+
 			tsl::robin_map<std::string, unsigned int> uniformToBinding;
+			tsl::robin_map<std::string, bool> isUniformSampler;
 			ShaderType type;
 
 			#ifdef __switch__
-			switch_memory::Piece* memory = nullptr;
+			Piece* memory = nullptr;
 			dk::Shader shader;
 			#else
 			GLuint shader = GL_INVALID_INDEX;
+			uint32_t lowestBinding = 999;
+			vk::ShaderModule module;
+			vk::PipelineShaderStageCreateInfo stage;
 			#endif
 
 			void processUniforms(const char* buffer, uint64_t bufferSize);
-			void processUniforms(std::string filename);
 	};
 };

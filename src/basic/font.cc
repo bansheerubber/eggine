@@ -3,9 +3,9 @@
 #include "../engine/console.h"
 #include "../engine/engine.h"
 
-tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Font::Fonts;
+tsl::robin_map<std::string, tsl::robin_map<int, render::Font*>> render::Font::Fonts;
 
-Font* Font::GetFont(std::string family, int size) {
+render::Font* render::Font::GetFont(std::string family, int size) {
 	if(Font::Fonts[family][size] == nullptr) {
 		// TODO load this from the carton
 		#if defined(__switch__) || defined(_WIN32)
@@ -19,7 +19,7 @@ Font* Font::GetFont(std::string family, int size) {
 	}
 }
 
-Font::Font(std::string fileName, int size) {
+render::Font::Font(std::string fileName, int size) {
 	this->fileName = fileName;
 	this->size = size;
 

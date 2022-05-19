@@ -59,10 +59,14 @@ namespace std {
 	}
 };
 
+namespace render {
+	class Font;
+};
+
 class Engine {
 	friend Camera;
 	friend class Shader;
-	friend class Font;
+	friend render::Font;
 	#ifndef __switch__
 	friend void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods);
 	friend void onMouseMove(GLFWwindow* window, double x, double y);

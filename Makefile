@@ -1,8 +1,8 @@
 target = game
-cclibs = -lpthread -llitehtml -lgumbo -lGL -lglfw3 -ldl -lpng -lfreetype -leggscript -lfmt -lz -lopenal -lvorbis -lvorbisfile -lssl -lcrypto -lvulkan -lX11 -lXxf86vm -lXrandr -lXi
+cclibs = -lpthread -llitehtml -lgumbo -lGL -lglfw -ldl -lpng -lfreetype -leggscript -lfmt -lz -lopenal -lvorbis -lvorbisfile -lssl -lcrypto -lvulkan -lX11 -lXxf86vm -lXrandr -lXi
 ccinclude = -Iinclude/pc/glm/ -Iinclude/common/ -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ -Iinclude/pc/ -Iimgui -Llib
 CC = g++
-CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17 -DEGGINE_DEVELOPER_MODE -DGLM_EXT_INCLUDED
+CPPFLAGS = -g -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17 -DGLM_EXT_INCLUDED -DGLFW_INCLUDE_VULKAN -DGLFW_EXPOSE_NATIVE_X11
 soflags =
 ldflags =
 

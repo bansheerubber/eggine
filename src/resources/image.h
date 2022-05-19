@@ -30,6 +30,7 @@ namespace resources {
 			}
 		
 		private:
+		public:
 			render::Texture* texture = nullptr;
 
 			static render::Program* Program;
