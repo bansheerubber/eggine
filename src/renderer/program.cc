@@ -78,8 +78,8 @@ void render::Program::compile() {
 						// update shader binding for opengl
 						GLuint blockIndex = glGetUniformBlockIndex(this->program, uniform.c_str());
 						if(blockIndex != GL_INVALID_INDEX) {
-							glUniformBlockBinding(this->program, blockIndex, binding + UniformCount);
-							this->uniformToBinding[uniform] = binding + UniformCount;
+							glUniformBlockBinding(this->program, blockIndex, binding + UniformCount - shader->lowestBinding);
+							this->uniformToBinding[uniform] = binding + UniformCount - shader->lowestBinding;
 						}
 					}
 					UniformCount += shader->uniformToBinding.size();

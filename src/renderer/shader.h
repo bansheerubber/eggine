@@ -44,6 +44,7 @@ namespace render {
 			dk::Shader shader;
 			#else
 			GLuint shader = GL_INVALID_INDEX;
+			uint32_t lowestBinding = 999;
 			vk::ShaderModule module;
 			vk::PipelineShaderStageCreateInfo stage;
 			#endif

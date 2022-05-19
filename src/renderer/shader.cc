@@ -193,6 +193,10 @@ void render::Shader::processUniforms(const char* buffer, uint64_t bufferSize) {
 			}
 			this->uniformToBinding[buffer] = binding;
 			this->isUniformSampler[buffer] = sampler;
+
+			if(binding < this->lowestBinding) {
+				this->lowestBinding = binding;
+			}
 		}
 	}
 }
