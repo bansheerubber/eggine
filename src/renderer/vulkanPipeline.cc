@@ -39,11 +39,13 @@ render::VulkanPipelineResult render::VulkanPipeline::newPipeline() {
 				this->attributes->inputAttributes.data()
 			);
 
-			divisorInfo = vk::PipelineVertexInputDivisorStateCreateInfoEXT(
-				(uint32_t)this->attributes->inputDivisors.size(),
-				this->attributes->inputDivisors.data()
-			);
-			vertexInputInfo.setPNext(&divisorInfo);
+			if(this->attributes->inputDivisors.size() > 0) {
+				divisorInfo = vk::PipelineVertexInputDivisorStateCreateInfoEXT(
+					(uint32_t)this->attributes->inputDivisors.size(),
+					this->attributes->inputDivisors.data()
+				);
+				vertexInputInfo.setPNext(&divisorInfo);
+			}
 		}
 
 		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo({}, primitiveToVulkanPrimitive(this->topology), false);

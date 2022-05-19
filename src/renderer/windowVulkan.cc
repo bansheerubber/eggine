@@ -166,7 +166,7 @@ void render::Window::createSwapchain() {
 	this->swapchainExtent = vk::Extent2D(width, height);
 	this->swapchainFormat = format;
 
-	uint32_t imageCount = 2; // TODO this needs to be double checked against the drivers
+	uint32_t imageCount = this->device.capabilities.minImageCount; // TODO this needs to be double checked against the drivers
 	vk::SwapchainCreateInfoKHR swapChainInfo(
 		{},
 		this->surface,
