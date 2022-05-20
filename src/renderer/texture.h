@@ -254,19 +254,19 @@ namespace render {
 			case 8: {
 				switch(channels) {
 					case 1: {
-						return vk::Format::eR8Srgb;
+						return vk::Format::eR8Unorm;
 					}
 
 					case 2: {
-						return vk::Format::eR8G8Srgb;
+						return vk::Format::eR8G8Unorm;
 					}
 
 					case 3: {
-						return vk::Format::eR8G8B8Srgb;
+						return vk::Format::eR8G8B8Unorm;
 					}
 
 					case 4: {
-						return vk::Format::eR8G8B8A8Srgb;
+						return vk::Format::eR8G8B8A8Unorm;
 					}
 				}
 			}
@@ -275,7 +275,7 @@ namespace render {
 		console::error("error: vulkan does not support %u channels and %u bitdepth", channels, bitDepth);
 		exit(1);
 
-		return vk::Format::eR8Srgb;
+		return vk::Format::eR8Unorm;
 	}
 	#endif
 	

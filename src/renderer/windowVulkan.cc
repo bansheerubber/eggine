@@ -147,7 +147,7 @@ void render::Window::createSwapchain() {
 	// now create the swapchain
 	vk::SurfaceFormatKHR format(vk::Format::eUndefined);
 	for(vk::SurfaceFormatKHR f: this->device.surfaceFormats) {
-		if(f.format == vk::Format::eB8G8R8A8Srgb && f.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+		if(f.format == vk::Format::eB8G8R8A8Unorm && f.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
 			format = f;
 		}
 	}
