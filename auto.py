@@ -32,14 +32,16 @@ def make():
 
 		last_compile = time()
 
-os.system("make clean")
-
 if target:
 	if target == "docker":
+		os.system("docker kill eggine")
+		os.system("docker run -d --rm --name eggine -it ghcr.io/bansheerubber/eggine-linux:latest")
 		os.system("docker cp src/. eggine:/eggine/src")
 	else:
+		os.system("make clean")
 		os.system(f"make {target} -j8")
 else:
+	os.system("make clean")
 	os.system(f"make -j8")
 
 print("---------------------------------------------------------------------------------")
