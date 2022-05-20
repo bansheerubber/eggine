@@ -463,6 +463,14 @@ void Engine::tick() {
 	
 	this->debug.clearInfoMessages();
 	this->debug.addInfoMessage(fmt::format("Version: {}", this->version));
+
+	if(this->renderWindow.backend == render::OPENGL_BACKEND) {
+		this->debug.addInfoMessage(fmt::format("Render Backend: OpengGL"));
+	}
+	else {
+		this->debug.addInfoMessage(fmt::format("Render Backend: Vulkan"));
+	}
+
 	this->debug.addInfoMessage(fmt::format("{} fps", (int)(1 / deltaTime)));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for CPU render time", this->cpuRenderTime));
 	this->debug.addInfoMessage(fmt::format("{0:05d} us for TS tick time", this->eggscriptTickTime));
