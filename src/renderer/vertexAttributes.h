@@ -348,6 +348,11 @@ namespace render {
 
 			void addVertexAttribute(class VertexBuffer* buffer, unsigned short attributeLocation, unsigned short vectorLength, VertexAttributeType type, unsigned short offset, unsigned short stride, unsigned short divisor);
 
+			#ifndef __switch__
+			std::vector<vk::Buffer> getVulkanBuffers();
+			vk::PipelineVertexInputStateCreateInfo getVulkanVertexInputInfo();
+			#endif
+
 		protected:
 			Window* window = nullptr;
 
@@ -363,6 +368,9 @@ namespace render {
 			std::vector<vk::VertexInputBindingDescription> inputBindings;
 			std::vector<vk::VertexInputAttributeDescription> inputAttributes;
 			std::vector<vk::VertexInputBindingDivisorDescriptionEXT> inputDivisors;
+
+			vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+			vk::PipelineVertexInputDivisorStateCreateInfoEXT divisorInfo;
 			#endif
 
 			void buildCommandLists();

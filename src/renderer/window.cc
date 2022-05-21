@@ -20,7 +20,7 @@
 
 #ifndef __switch__
 void onWindowResize(GLFWwindow* window, int width, int height) {
-	engine->renderWindow.resize(width, height);
+	engine->renderWindow.handleGLFWResize(width, height);
 }
 #endif
 
@@ -69,10 +69,15 @@ void render::Window::registerHTMLUpdate() {
 	this->htmlChecksum++;
 }
 
+uint32_t render::Window::getFramePingPong() {
+	return this->framePingPong;
+}
+
 render::State &render::Window::getState(uint32_t id) {
 	// id 0 is special, this represents the main command buffer
 	if(this->renderStates.find(id) == this->renderStates.end()) {
 		this->renderStates[id] = State(this); // TODO create command buffer for vulkan
+		this->renderStates[id].resize(this->width, this->height);
 	}
 	return this->renderStates[id];
 }
@@ -223,10 +228,7 @@ void render::Window::deinitialize() {
 			}
 		}
 
-		for(auto &[_, pipeline]: this->pipelines) {
-			this->device.device.destroyPipelineLayout(pipeline.layout);
-			this->device.device.destroyPipeline(pipeline.pipeline);
-		}
+		State::ResetPipelines();
 
 		this->device.device.destroyRenderPass(this->renderPass);
 		this->device.device.destroyPipelineCache(this->pipelineCache);
@@ -290,6 +292,7 @@ void render::Window::prerender() {
 	else {
 		if(this->swapchainOutOfDate) {
 			this->createSwapchain();
+			this->registerHTMLUpdate();
 			this->swapchainOutOfDate = false;
 		}
 		
@@ -315,8 +318,8 @@ void render::Window::prerender() {
 		
 		// prepare the primary command buffer
 		vk::CommandBufferBeginInfo bufferBeginInfo({}, nullptr);
-		this->renderStates[0].reset();
-		this->renderStates[0].buffer[this->framePingPong].begin(bufferBeginInfo);
+		this->getState(0).reset();
+		this->getState(0).buffer[this->framePingPong].begin(bufferBeginInfo);
 
 		// only do one render pass for now
 		vk::ClearValue clearColor(
@@ -330,7 +333,7 @@ void render::Window::prerender() {
 		std::array<vk::ClearValue, 2> clears = { clearColor, clearDepth };
 		vk::RenderPassBeginInfo renderPassInfo(this->renderPass, this->framebuffers[this->currentFramebuffer], { { 0, 0 }, this->swapchainExtent }, clears);
 
-		this->renderStates[0].buffer[this->framePingPong].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+		this->getState(0).buffer[this->framePingPong].beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 	}
 	glfwPollEvents();
 	this->hasGamepad = glfwGetGamepadState(GLFW_JOYSTICK_1, &this->gamepad);
@@ -375,8 +378,8 @@ void render::Window::render() {
 		}
 		
 		// finalize render pass
-		this->renderStates[0].buffer[this->framePingPong].endRenderPass();
-		this->renderStates[0].buffer[this->framePingPong].end();
+		this->getState(0).buffer[this->framePingPong].endRenderPass();
+		this->getState(0).buffer[this->framePingPong].end();
 
 		// we need to wait for any copy operations to finish before we process main command buffer
 		if(this->memoryCopyFences.size() > 0) {
@@ -391,7 +394,7 @@ void render::Window::render() {
 		vk::Semaphore waitSemaphores[] = { this->isImageAvailable[this->framePingPong] };
 		vk::Semaphore signalSemaphores[] = { this->isRenderFinished[this->framePingPong] };
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-		vk::SubmitInfo submitInfo(1, waitSemaphores, waitStages, 1, &this->renderStates[0].buffer[this->framePingPong], 1, signalSemaphores);
+		vk::SubmitInfo submitInfo(1, waitSemaphores, waitStages, 1, &this->getState(0).buffer[this->framePingPong], 1, signalSemaphores);
 
 		vk::Result result = this->graphicsQueue.submit(1, &submitInfo, this->frameFence[this->framePingPong]);
 		if(result != vk::Result::eSuccess) {
@@ -436,7 +439,7 @@ void render::Window::render() {
 	#endif
 }
 
-void render::Window::resize(unsigned int width, unsigned int height) {
+void render::Window::handleGLFWResize(unsigned int width, unsigned int height) {
 	this->registerHTMLUpdate();
 	this->width = width;
 	this->height = height;
@@ -444,7 +447,7 @@ void render::Window::resize(unsigned int width, unsigned int height) {
 	#ifndef __switch__
 	if(this->backend == OPENGL_BACKEND) {
 		glViewport(0, 0, width, height);
-	}
+	}	
 	#endif
 }
 

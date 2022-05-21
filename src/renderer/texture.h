@@ -282,7 +282,6 @@ namespace render {
 	class Texture {
 		friend DeveloperGui;
 		friend class Program;
-		friend class State;
 		friend class Window;
 		
 		public:
@@ -305,6 +304,10 @@ namespace render {
 
 			unsigned int getWidth();
 			unsigned int getHeight();
+
+			#ifndef __switch__
+			vk::DescriptorImageInfo getVulkanImageInfo();
+			#endif
 		
 		protected:
 			Window* window;

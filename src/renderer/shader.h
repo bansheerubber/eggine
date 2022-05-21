@@ -38,13 +38,13 @@ namespace render {
 			tsl::robin_map<std::string, unsigned int> uniformToBinding;
 			tsl::robin_map<std::string, bool> isUniformSampler;
 			ShaderType type;
+			uint32_t lowestBinding = ~0;
 
 			#ifdef __switch__
 			Piece* memory = nullptr;
 			dk::Shader shader;
 			#else
 			GLuint shader = GL_INVALID_INDEX;
-			uint32_t lowestBinding = 999;
 			vk::ShaderModule module;
 			vk::PipelineShaderStageCreateInfo stage;
 			#endif

@@ -5,14 +5,20 @@
 #include "state.h"
 
 #include "../engine/console.h"
+#include "../engine/engine.h"
 #include "program.h"
 #include "shader.h"
 #include "vertexAttributes.h"
 #include "vertexBuffer.h"
 #include "window.h"
 
+#include "debug.h"
+
+#ifndef __switch__
 tsl::robin_map<render::Program*, uint32_t> render::State::DescriptorSetIndex = tsl::robin_map<render::Program*, uint32_t>();
 tsl::robin_map<std::pair<render::Program*, std::string>, uint32_t> render::State::UniformIndex = tsl::robin_map<std::pair<render::Program*, std::string>, uint32_t>();
+tsl::robin_map<render::SubState, render::VulkanPipelineResult> render::State::VulkanPipelines = tsl::robin_map<render::SubState, render::VulkanPipelineResult>();
+#endif
 
 render::State::State() {
 
@@ -42,11 +48,6 @@ void render::State::draw(
 
 void render::State::bindProgram(render::Program* program) {
 	this->current.program = program;
-
-	if(this->old.program != this->current.program) {
-		this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
-		this->topDescriptor = 0;
-	}
 	
 	#ifdef __switch__
 	std::vector<DkShader const*> shaders;
@@ -62,6 +63,11 @@ void render::State::bindProgram(render::Program* program) {
 		}
 	}
 	#else
+	if(this->old.program != this->current.program) {
+		this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC;
+		this->topDescriptor = 0;
+	}
+
 	program->compile();
 	if(this->window->backend == OPENGL_BACKEND) {
 		glUseProgram(this->current.program->program);
@@ -95,6 +101,7 @@ void render::State::bindUniform(std::string uniformName, void* data, uint32_t si
 		}
 	}
 	#else
+	// TODO replace this junk with a bindUniform function on the program
 	if(this->window->backend == OPENGL_BACKEND) {
 		auto found = this->current.program->uniformToBuffer.find(uniformName);
 		if(found == this->current.program->uniformToBuffer.end()) {
@@ -177,15 +184,20 @@ void render::State::setStencilFunction(StencilFunction func, unsigned int refere
 }
 
 void render::State::setStencilMask(unsigned int mask) {
+	#ifdef __switch__
+	#else
 	if(this->window->backend == OPENGL_BACKEND) {
 		glStencilMask(mask);
 	}
 	else {
 		this->current.stencilWriteMask = mask;
 	}
+	#endif
 }
 
 void render::State::setStencilOperation(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) {
+	#ifdef __switch__
+	#else
 	if(this->window->backend == OPENGL_BACKEND) {
 		glStencilOp(stencilOPToGLStencilOP(stencilFail), stencilOPToGLStencilOP(depthFail), stencilOPToGLStencilOP(pass));
 	}
@@ -194,6 +206,7 @@ void render::State::setStencilOperation(StencilOperation stencilFail, StencilOpe
 		this->current.depthFail = depthFail;
 		this->current.stencilPass = pass;
 	}
+	#endif
 }
 
 void render::State::enableStencilTest(bool enable) {
@@ -231,21 +244,23 @@ void render::State::enableDepthTest(bool enable) {
 }
 
 void render::State::reset() {
-	this->applied = false;
-
 	#ifdef __switch__
 	#else
 	if(this->window->backend != VULKAN_BACKEND) {
 		return;
 	}
 
-	this->buffer[this->window->framePingPong].reset();
-	this->oldPipeline = {};
+	this->buffer[this->window->framePingPong].reset(); // reset command buffer
 	this->descriptorSetState = DESCRIPTOR_SET_NEEDS_REALLOC; // reset in-use flag to true so we re-allocate descriptor set
 
 	State::DescriptorSetIndex.clear();
 	State::UniformIndex.clear();
 	#endif
+}
+
+void render::State::resize(unsigned int width, unsigned int height) {
+	this->current.viewportWidth = width;
+	this->current.viewportHeight = height;
 }
 
 void render::State::bindPipeline() {
@@ -254,68 +269,149 @@ void render::State::bindPipeline() {
 		return;
 	}
 
-	render::VulkanPipeline pipeline = {
-		this->window,
-		this->current.primitive,
-		(float)this->window->width,
-		(float)this->window->height,
-		this->current.depthEnabled,
-		this->current.stencilEnabled,
-		this->current.stencilReference,
-		this->current.stencilCompare,
-		this->current.stencilWriteMask,
-		this->current.stencilFunction,
-		this->current.stencilFail,
-		this->current.depthFail,
-		this->current.stencilPass,
-		this->current.program,
-		this->current.attributes,
-	};
-
-	if(this->current != this->old || !this->applied) {
+	if(this->current != this->old) {
 		if(this->current.program == nullptr) {
 			console::print("render state: no program bound\n");
 			exit(1);
 		}
 
-		if(this->window->pipelines.find(pipeline) == this->window->pipelines.end()) {
-			this->window->pipelines[pipeline] = pipeline.newPipeline(); // TODO move this creation step to the window class??
+		if(this->current.attributes == nullptr) {
+			console::print("render state: no vertex attributes bound\n");
+			exit(1);
 		}
 
-		if(this->oldPipeline != pipeline) {
-			this->buffer[this->window->framePingPong].bindPipeline(
-				vk::PipelineBindPoint::eGraphics, this->window->pipelines[pipeline].pipeline
-			);
-		}
-		this->oldPipeline = pipeline;
+		// create the pipeline if we don't have it
+		if(State::VulkanPipelines.find(this->current) == State::VulkanPipelines.end()) {
+			VulkanPipelineResult output;
 
-		// probably should move vertex buffer binding away from here
-		std::vector<vk::Buffer> vertexBuffers;
-		std::vector<vk::DeviceSize> offsets;
-		for(VertexAttribute attribute: this->current.attributes->attributes) {
-			// figure out if we need to copy buffer contents
-			if(attribute.buffer->needsCopy) {
-				this->window->copyVulkanBuffer(attribute.buffer->stagingBuffer, attribute.buffer->gpuBuffer);
-				attribute.buffer->needsCopy = false;
-			}
-
-			if(attribute.buffer->isDynamicDraw) {
-				if(attribute.buffer->isOutOfDateBuffer()) {
-					attribute.buffer->handleOutOfDateBuffer();
-					VertexBuffer::OutOfDateBuffers[this->window->framePingPong].erase(attribute.buffer);
-				}
+			// handle pipeline layout
+			{
+				std::vector<vk::DescriptorSetLayout> descriptorLayouts;
+				descriptorLayouts.push_back(this->current.program->descriptorLayout);
 				
-				vertexBuffers.push_back(attribute.buffer->dynamicBuffers[this->window->framePingPong].buffer->getBuffer());
+				vk::PipelineLayoutCreateInfo pipelineLayoutInfo(
+					{}, descriptorLayouts.size(), descriptorLayouts.data(), 0, nullptr
+				);
+
+				vk::Result result = this->window->device.device.createPipelineLayout(&pipelineLayoutInfo, nullptr, &output.layout); // TODO remember to clean up
+				if(result != vk::Result::eSuccess) {
+					console::error("vulkan: could not create pipeline layout: %s\n", vkResultToString((VkResult)result).c_str());
+					exit(1);
+				}
 			}
-			else {
-				vertexBuffers.push_back(attribute.buffer->gpuBuffer->getBuffer());
+			
+			// handle pipeline
+			{
+				vk::PipelineVertexInputStateCreateInfo vertexInputInfo = this->current.attributes->getVulkanVertexInputInfo();
+				vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo({}, primitiveToVulkanPrimitive(this->current.primitive), false);
+				vk::Viewport viewport(0.0f, this->current.viewportHeight, this->current.viewportWidth, -this->current.viewportHeight, 0.0f, 1.0f);
+				vk::Rect2D scissor({ 0, 0 }, this->window->swapchainExtent);
+
+				vk::PipelineViewportStateCreateInfo viewportStateInfo({}, 1, &viewport, 1, &scissor);
+				vk::PipelineRasterizationStateCreateInfo rasterizationInfo(
+					{},
+					false,
+					false,
+					vk::PolygonMode::eFill, // TODO change fill based on primitive?
+					vk::CullModeFlagBits::eNone,
+					vk::FrontFace::eCounterClockwise,
+					false,
+					0.0f,
+					0.0f,
+					0.0f,
+					1.0f
+				);
+
+				vk::PipelineMultisampleStateCreateInfo multisampleInfo({}, vk::SampleCountFlagBits::e1, false, 1.0f, nullptr, false, false);
+
+				vk::PipelineColorBlendAttachmentState colorBlend(
+					true,
+					vk::BlendFactor::eSrcAlpha, // color blend
+					vk::BlendFactor::eOneMinusSrcAlpha,
+					vk::BlendOp::eAdd,
+					vk::BlendFactor::eOne, // alpha blend
+					vk::BlendFactor::eZero,
+					vk::BlendOp::eAdd,
+					vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA 
+				);
+
+				vk::PipelineColorBlendStateCreateInfo colorBlendInfo(
+					{},
+					false,
+					vk::LogicOp::eCopy,
+					1,
+					&colorBlend,
+					{ 0.0f, 0.0f, 0.0f, 0.0f, }
+				);
+
+				vk::PipelineDynamicStateCreateInfo dynamicStateInfo({}, 0, nullptr);
+
+				vk::StencilOpState stencilOpState = vk::StencilOpState(
+					stencilOPToVulkanStencilOP(this->current.stencilFail),
+					stencilOPToVulkanStencilOP(this->current.stencilPass),
+					stencilOPToVulkanStencilOP(this->current.depthFail),
+					stencilToVulkanStencil(this->current.stencilFunction),
+					this->current.stencilCompare,
+					this->current.stencilWriteMask,
+					this->current.stencilReference
+				);
+
+				vk::PipelineDepthStencilStateCreateInfo depthInfo(
+					{},
+					this->current.depthEnabled, // depth test enabled
+					true, // depth write enabled
+					vk::CompareOp::eLessOrEqual,
+					false,
+					this->current.stencilEnabled,
+					stencilOpState,
+					stencilOpState,
+					0.0f,
+					1.0f
+				);
+
+				// create the pipeline
+				vk::GraphicsPipelineCreateInfo pipelineInfo(
+					{},
+					this->current.program->stages.size(),
+					this->current.program->stages.data(),
+					&vertexInputInfo,
+					&inputAssemblyInfo,
+					nullptr,
+					&viewportStateInfo,
+					&rasterizationInfo,
+					&multisampleInfo,
+					&depthInfo,
+					&colorBlendInfo,
+					&dynamicStateInfo,
+					output.layout,
+					this->window->renderPass,
+					0
+				);
+
+				vk::Result result = this->window->device.device.createGraphicsPipelines(this->window->pipelineCache, 1, &pipelineInfo, nullptr, &output.pipeline);
+				if(result != vk::Result::eSuccess) {
+					console::error("vulkan: could not create pipeline: %s\n", vkResultToString((VkResult)result).c_str());
+					exit(1);
+				}
 			}
+
+			State::VulkanPipelines[this->current] = output;
+		}
+
+		// bind the pipeline
+		this->buffer[this->window->framePingPong].bindPipeline(
+			vk::PipelineBindPoint::eGraphics, State::VulkanPipelines[this->current].pipeline
+		);
+
+		// get the buffer from the vertex attributes
+		std::vector<vk::Buffer> vertexBuffers = this->current.attributes->getVulkanBuffers();
+		std::vector<vk::DeviceSize> offsets;
+		for(uint32_t i = 0; i < vertexBuffers.size(); i++) {
 			offsets.push_back(0);
 		}
 
 		this->buffer[this->window->framePingPong].bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		this->old = this->current;
-		this->applied = true;
 	}
 
 	if(this->descriptorSetState == DESCRIPTOR_SET_NEEDS_UPDATE) {
@@ -331,7 +427,7 @@ void render::State::bindPipeline() {
 
 		this->buffer[this->window->framePingPong].bindDescriptorSets(
 			vk::PipelineBindPoint::eGraphics,
-			this->window->pipelines[pipeline].layout,
+			State::VulkanPipelines[this->current].layout,
 			0,
 			1,
 			&this->current.program->getDescriptorSet(this->descriptorSetIndex, this->window->framePingPong),
@@ -355,11 +451,7 @@ void render::State::updateDescriptorWrites(std::string uniformName) {
 			exit(1);
 		}
 
-		info.imageInfo = vk::DescriptorImageInfo(
-			this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].texture->sampler,
-			this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].texture->imageView,
-			vk::ImageLayout::eShaderReadOnlyOptimal
-		);
+		info.imageInfo = this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].texture->getVulkanImageInfo();
 	}
 	else {
 		if(this->descriptorWrites[this->current.program->uniformToShaderBinding[uniformName]].uniform == nullptr) {
@@ -397,5 +489,14 @@ void render::State::updateDescriptorWrites(std::string uniformName) {
 		this->current.program->isUniformSampler[uniformName] ? nullptr : &info.bufferInfo,
 		nullptr
 	);
+}
+
+void render::State::ResetPipelines() {
+	for(auto &[_, pipeline]: State::VulkanPipelines) {
+		engine->renderWindow.device.device.destroyPipelineLayout(pipeline.layout);
+		engine->renderWindow.device.device.destroyPipeline(pipeline.pipeline);
+	}
+
+	State::VulkanPipelines.clear();
 }
 #endif

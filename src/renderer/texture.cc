@@ -285,6 +285,16 @@ unsigned int render::Texture::getHeight() {
 	return this->height;
 }
 
+#ifndef __switch__
+vk::DescriptorImageInfo render::Texture::getVulkanImageInfo() {
+	return vk::DescriptorImageInfo(
+		this->sampler,
+		this->imageView,
+		vk::ImageLayout::eShaderReadOnlyOptimal
+	);
+}
+#endif
+
 void render::Texture::bind(unsigned int location) {
 	#ifdef __switch__
 	// this->window->bindTexture(location, this);

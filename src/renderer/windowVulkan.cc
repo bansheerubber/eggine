@@ -1,3 +1,4 @@
+#ifndef __switch__
 #include <set>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,6 @@
 #include "texture.h"
 #include "window.h"
 
-#ifndef __switch__
 void render::Window::initializeVulkan() {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	this->window = glfwCreateWindow(this->width, this->height, "eggine", NULL, NULL);
@@ -87,8 +87,8 @@ void render::Window::initializeVulkan() {
 	this->transientCommandPool = this->device.device.createCommandPool(transientCommandPoolInfo);
 
 	vk::CommandBufferAllocateInfo commandBufferInfo(this->commandPool, vk::CommandBufferLevel::ePrimary, 2);
-	this->renderStates[0] = State(this);
-	result = this->device.device.allocateCommandBuffers(&commandBufferInfo, this->renderStates[0].buffer);
+	State &state = this->getState(0);
+	result = this->device.device.allocateCommandBuffers(&commandBufferInfo, state.buffer);
 	if(result != vk::Result::eSuccess) {
 		console::error("vulkan: could not create command buffers: %s\n", vkResultToString((VkResult)result).c_str());
 		exit(1);
@@ -105,8 +105,8 @@ void render::Window::initializeVulkan() {
 
 	// create descriptor pool
 	std::vector<vk::DescriptorPoolSize> poolSizes;
-	poolSizes.push_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, 50)); // TODO change to 2, also maybe revisit for textures?
-	poolSizes.push_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, 50));
+	poolSizes.push_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, 2500)); // TODO change to 2, also maybe revisit for textures?
+	poolSizes.push_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, 2500));
 	vk::DescriptorPoolCreateInfo descriptorInfo({}, 5000, (uint32_t)poolSizes.size(), poolSizes.data()); // also change 1 to 2
 	this->descriptorPool = this->device.device.createDescriptorPool(descriptorInfo);
 
@@ -115,17 +115,12 @@ void render::Window::initializeVulkan() {
 }
 
 void render::Window::createSwapchain() {
-	if(this->pipelines.size() > 0) {
+	if(this->swapchainCreated) {
 		this->device.device.waitIdle();
-		
-		for(auto &[_, pipeline]: this->pipelines) { // have to destroy all pipelines
-			this->device.device.destroyPipelineLayout(pipeline.layout);
-			this->device.device.destroyPipeline(pipeline.pipeline);
-		}
+
+		State::ResetPipelines();
 
 		this->device.device.destroyPipelineCache(this->pipelineCache);
-
-		this->pipelines.clear();
 
 		this->device.device.destroyRenderPass(this->renderPass);
 
@@ -335,6 +330,12 @@ void render::Window::createSwapchain() {
 
 	vk::PipelineCacheCreateInfo pipelineCacheInfo({}, 0);
 	this->pipelineCache = this->device.device.createPipelineCache(pipelineCacheInfo);
+
+	this->swapchainCreated = true;
+
+	for(auto &[index, _]: this->renderStates) {
+		this->renderStates[index].resize(this->width, this->height);
+	}
 }
 
 void render::Window::pickDevice() {

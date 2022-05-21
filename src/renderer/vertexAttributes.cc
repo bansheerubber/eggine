@@ -23,6 +23,52 @@ void render::VertexAttributes::addVertexAttribute(class VertexBuffer* buffer, un
 	});
 }
 
+#ifndef __switch__
+std::vector<vk::Buffer> render::VertexAttributes::getVulkanBuffers() {
+	std::vector<vk::Buffer> vertexBuffers;
+	for(VertexAttribute attribute: this->attributes) {
+		// figure out if we need to copy buffer contents
+		if(attribute.buffer->needsCopy) {
+			this->window->copyVulkanBuffer(attribute.buffer->stagingBuffer, attribute.buffer->gpuBuffer);
+			attribute.buffer->needsCopy = false;
+		}
+
+		if(attribute.buffer->isDynamicDraw) {
+			if(attribute.buffer->isOutOfDateBuffer()) {
+				attribute.buffer->handleOutOfDateBuffer();
+				VertexBuffer::RemoveOutOfDateBuffer(attribute.buffer);
+			}
+			
+			vertexBuffers.push_back(attribute.buffer->getVulkanDynamicBuffer());
+		}
+		else {
+			vertexBuffers.push_back(attribute.buffer->getVulkanBuffer());
+		}
+	}
+	return vertexBuffers;
+}
+
+vk::PipelineVertexInputStateCreateInfo render::VertexAttributes::getVulkanVertexInputInfo() {
+	this->vertexInputInfo = vk::PipelineVertexInputStateCreateInfo(
+		{},
+		(uint32_t)this->inputBindings.size(),
+		this->inputBindings.data(),
+		(uint32_t)this->inputAttributes.size(),
+		this->inputAttributes.data()
+	);
+
+	if(this->inputDivisors.size() > 0) {
+		this->divisorInfo = vk::PipelineVertexInputDivisorStateCreateInfoEXT(
+			(uint32_t)this->inputDivisors.size(),
+			this->inputDivisors.data()
+		);
+		this->vertexInputInfo.setPNext(&this->divisorInfo);
+	}
+
+	return this->vertexInputInfo;
+}
+#endif
+
 void render::VertexAttributes::buildCommandLists() {
 	#ifdef __switch__
 	this->bufferBindOrder.clear();

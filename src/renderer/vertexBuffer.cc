@@ -5,6 +5,7 @@
 #endif
 
 #include "../util/align.h"
+#include "../engine/engine.h"
 #include "vertexBuffer.h"
 #include "window.h"
 
@@ -27,6 +28,16 @@ void render::VertexBuffer::reallocate() {
 	this->forceReallocate = true;
 	#endif
 }
+
+#ifndef __switch__
+vk::Buffer render::VertexBuffer::getVulkanBuffer() {
+	return this->gpuBuffer->getBuffer();
+}
+
+vk::Buffer render::VertexBuffer::getVulkanDynamicBuffer() {
+	return this->dynamicBuffers[this->window->getFramePingPong()].buffer->getBuffer();
+}
+#endif
 
 void render::VertexBuffer::setDynamicDraw(bool isDynamicDraw) {
 	#ifndef __switch__
@@ -309,6 +320,14 @@ void render::VertexBuffer::handleOutOfDateBuffer() {
 }
 
 bool render::VertexBuffer::isOutOfDateBuffer() {
+	#ifdef __switch__
+	return false;
+	#else
 	VertexSubBuffer &writeSubBuffer = this->dynamicBuffers[this->window->framePingPong];
 	return writeSubBuffer.state == VERTEX_SUB_BUFFER_SIZE_OUT_OF_DATE || writeSubBuffer.state == VERTEX_SUB_BUFFER_DATA_OUT_OF_DATE;
+	#endif
+}
+
+void render::VertexBuffer::RemoveOutOfDateBuffer(render::VertexBuffer* buffer) {
+	VertexBuffer::OutOfDateBuffers[engine->renderWindow.getFramePingPong()].erase(buffer);
 }

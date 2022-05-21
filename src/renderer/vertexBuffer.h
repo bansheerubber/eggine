@@ -8,6 +8,7 @@
 #endif
 
 #include <unordered_set>
+#include <string>
 
 #include "memory.h"
 
@@ -28,7 +29,6 @@ namespace render {
 	#endif
 	
 	class VertexBuffer {
-		friend class State;
 		friend class VertexAttributes;
 		friend class Window;
 		
@@ -49,7 +49,14 @@ namespace render {
 			void setData(void* data, unsigned int size, unsigned int align);
 			void reallocate();
 
+			#ifndef __switch__
+			vk::Buffer getVulkanBuffer();
+			vk::Buffer getVulkanDynamicBuffer();
+			#endif
+
 			bool isOutOfDateBuffer();
+
+			static void RemoveOutOfDateBuffer(VertexBuffer* buffer);
 		
 		protected:
 			#ifdef __switch__

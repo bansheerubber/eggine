@@ -15,7 +15,7 @@ LIBS = -ldeko3d -ldrm_nouveau -lnx -lm -lglad -lpng -lfreetype -leggscript -lz -
 INCLUDE = -Iinclude/common -Iinclude/common/robin-map/include -Iinclude/common/fmt/include/ $(INCLUDENX) `$(PREFIX)pkg-config --cflags SDL2_mixer`
 LIBPATHS = $(LIBNX) -Llibnx
 
-CPPFLAGS = -O2 -D__switch__ -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -fPIC --static -fno-semantic-interposition $(ARCH) $(SWITCH)
+CPPFLAGS = -O2 -D__switch__ -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -fPIC --static -fno-semantic-interposition $(ARCH) $(SWITCH) -DGLM_EXT_INCLUDED
 LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -g -fPIE
 
 cpp_source = $(shell find src -type f -name "*.cc" ! -path "src/include*")
@@ -44,7 +44,6 @@ preprocessor:
 # 	@echo -e "   CXX      $@"
 # 	@$(CXX) $(CPPFLAGS) $(INCLUDE) $(LIBPATHS) -c $< -o $@
 
-$(cpp_objects_tmp) : %.o : %.h
 $(cpp_objects_tmp) : %.o : %.cc
 	@mkdir -p $(dir $@)
 	@echo -e "   CXX      $<"

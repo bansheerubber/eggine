@@ -29,7 +29,6 @@ namespace render {
 	class Piece {
 		friend class Manager;
 		friend class Page;
-		friend class State;
 		friend class Window;
 		
 		public:

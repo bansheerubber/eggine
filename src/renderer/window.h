@@ -23,7 +23,6 @@
 #include "state.h"
 #include "texture.h"
 #include "../util/time.h"
-#include "vulkanPipeline.h"
 
 #include "stencil.h"
 
@@ -67,9 +66,6 @@ namespace render {
 		friend class Shader;
 		friend class State;
 		friend class VertexBuffer;
-		#ifndef __switch__
-		friend VulkanPipeline;
-		#endif
 		
 		public:
 			double deltaTime = 0.0;
@@ -109,7 +105,7 @@ namespace render {
 			void initialize(); // start the graphics
 			void deinitialize(); // end the graphics
 			void initializeHTML(); // load index.html
-			void resize(unsigned int width, unsigned int height); // resize the window
+			void handleGLFWResize(unsigned int width, unsigned int height); // resize the window
 			void prerender();
 			void render();
 			void addError();
@@ -119,11 +115,15 @@ namespace render {
 
 			State &getState(uint32_t id); // get a render state, potentially allocate a new one
 
+			#ifndef __switch__
 			vk::CommandBuffer beginTransientCommands();
 			void endTransientCommands(vk::CommandBuffer buffer, vk::Fence fence);
+			#endif
 
 			void copyVulkanBuffer(Piece* source, Piece* destination);
 			void copyVulkanBufferToImage(Piece* source, Piece* destination, uint32_t width, uint32_t height);
+
+			uint32_t getFramePingPong();
 
 		protected:
 			unsigned int errorCount = 0;
@@ -198,7 +198,6 @@ namespace render {
 			Piece* depthImage;
 			vk::ImageView depthImageView;
 
-			tsl::robin_map<VulkanPipeline, VulkanPipelineResult> pipelines;
 			vk::PipelineCache pipelineCache;
 
 			vk::CommandPool commandPool;
@@ -213,6 +212,7 @@ namespace render {
 			std::vector<vk::CommandBuffer> transientCommandBuffers;
 
 			bool swapchainOutOfDate = false;
+			bool swapchainCreated = false;
 
 			void pickDevice();
 			void setupDevice();

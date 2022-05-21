@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "memory.h"
-#include "vulkanPipeline.h"
 
 namespace std {
 	template<>
@@ -44,9 +43,6 @@ namespace render {
 	#endif
 	
 	class Program {
-		#ifndef __switch__
-		friend VulkanPipeline;
-		#endif
 		friend class State;
 		friend class Window;
 

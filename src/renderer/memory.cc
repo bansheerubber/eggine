@@ -264,6 +264,7 @@ void render::Manager::processDeallocationLists() {
 	}
 }
 
+#ifndef __switch__
 render::Piece* render::Manager::allocateBuffer(vk::BufferCreateInfo bufferInfo, vk::MemoryPropertyFlags propertyFlags) {
 	vk::Buffer buffer = this->window->device.device.createBuffer(bufferInfo);
 	vk::MemoryRequirements requirements = this->window->device.device.getBufferMemoryRequirements(buffer);
@@ -287,6 +288,7 @@ render::Piece* render::Manager::allocateImage(vk::ImageCreateInfo imageInfo, vk:
 	this->window->device.device.bindImageMemory(image, piece->parent->memory, piece->start);
 	return piece;
 }
+#endif
 
 #ifdef __switch__
 render::Piece* render::Manager::allocate(uint32_t flags, uint64_t size, uint64_t align) {
