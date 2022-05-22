@@ -88,11 +88,8 @@ bool TileNeighborIterator::testTile(glm::ivec3 position, NeighborDirection direc
 	
 	resources::SpriteSheetInfo info = this->container->getSpriteInfo(position + glm::ivec3(0, 0, 1), true);
 	if(
-		(
-			this->container->getTile(position + glm::ivec3(0, 0, 1)) != 0
-			&& info.wall == resources::NO_WALL
-		)
-		|| this->container->positionToCharacter.find(position + glm::ivec3(0, 0, 1)) != this->container->positionToCharacter.end()
+		(info.index != 0 && info.wall == resources::NO_WALL)
+		|| this->container->getCharacter(position + glm::ivec3(0, 0, 1)) != nullptr
 	) {
 		return false;
 	}

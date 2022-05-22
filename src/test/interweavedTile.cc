@@ -88,7 +88,7 @@ OverlappingTile* InterweavedTile::setPosition(glm::uvec3 position) {
 	relativePosition.y -= chunk->position.y * Chunk::Size;
 	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, Chunk::Size, this->container->getRotation());
 	
-	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(this->container->getTile(this->position));
+	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(this->container->getSpriteInfo(this->position).index);
 	this->screenSpacePosition.z += (drawOntop ? -0.5 : 0.5) + (double)this->getZIndex() / 1000.0f;
 
 	bool initialized = false;
@@ -118,7 +118,7 @@ void InterweavedTile::updateRotation(tilemath::Rotation oldRotation, tilemath::R
 	relativePosition.y -= chunk->position.y * Chunk::Size;
 	this->screenSpacePosition = tilemath::tileToScreen(relativePosition, Chunk::Size, this->container->getRotation());
 
-	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(this->container->getTile(this->position));
+	bool drawOntop = ChunkContainer::Image->drawOntopOfOverlap(this->container->getSpriteInfo(this->position).index);
 	this->screenSpacePosition.z += (drawOntop ? -0.5 : 0.5) + (double)this->getZIndex() / 1000.0f;
 
 	this->vertexBuffers[0]->setData(&this->screenSpacePosition, sizeof(this->screenSpacePosition), sizeof(this->screenSpacePosition));

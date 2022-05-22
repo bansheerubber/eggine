@@ -39,7 +39,6 @@ namespace es {
 
 class ChunkContainer : public RenderObject {
 	friend class Character;
-	friend TileNeighborIterator;
 	friend esEntryPtr es::ChunkContainer__getCharacter(esEnginePtr esEngine, unsigned int argc, esEntry* args);
 	friend esEntryPtr es::ChunkContainer__getPlayerTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
 	friend esEntryPtr es::ChunkContainer__getEnemyTeam(esEnginePtr esEngine, unsigned int argc, esEntryPtr args);
@@ -86,9 +85,9 @@ class ChunkContainer : public RenderObject {
 		bool isValidTilePosition(glm::uvec3 position);
 
 		void setTile(glm::ivec3 position, int texture);
-		int getTile(glm::ivec3 position);
 		resources::SpriteSheetInfo getSpriteInfo(glm::ivec3 position, bool original = false);
 		TileNeighborIterator getNeighbors(glm::ivec3 position);
+		class Character* getCharacter(glm::ivec3 position);
 
 		static render::Program* Program;
 		static resources::SpriteSheet* Image;

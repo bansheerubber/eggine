@@ -258,18 +258,14 @@ void ChunkContainer::setTile(glm::ivec3 position, int texture) {
 	this->renderOrder[index]->setTileTexture(position, texture);
 }
 
-int ChunkContainer::getTile(glm::ivec3 position) {
+resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position, bool original) {
 	if(!this->isValidTilePosition(position)) {
-		return 0;
+		return resources::SpriteSheetInfo();
 	}
 
 	glm::uvec2 chunkPosition = glm::uvec3(position) / (unsigned int)Chunk::Size;
 	int64_t index = tilemath::coordinateToIndex(chunkPosition, this->size, this->getRotation());
-	return this->renderOrder[index]->getTileTexture(position);
-}
-
-resources::SpriteSheetInfo ChunkContainer::getSpriteInfo(glm::ivec3 position, bool original) {
-	int texture = this->getTile(position);
+	int texture = this->renderOrder[index]->getTileTexture(position);
 	if(original) {
 		resources::SpriteSheetInfo info = ChunkContainer::Image->getSpriteInfo(texture);
 		if(info.facing == resources::FACING_INVALID) {
@@ -300,6 +296,14 @@ void ChunkContainer::selectTile(glm::ivec3 position, bool browsing, bool control
 
 TileNeighborIterator ChunkContainer::getNeighbors(glm::ivec3 position) {
 	return TileNeighborIterator(position);
+}
+
+Character* ChunkContainer::getCharacter(glm::ivec3 position) {
+	auto it = this->positionToCharacter.find(position);
+	if(it == this->positionToCharacter.end()) {
+		return nullptr;
+	}
+	return it.value();
 }
 
 void ChunkContainer::rightClickTile(glm::ivec3 position) {
@@ -555,7 +559,7 @@ esEntryPtr es::ChunkContainer__getTile(esEnginePtr esEngine, unsigned int argc, 
 			args[1].matrixData->data[2][0].numberData
 		);
 
-		return esCreateNumber(container->getTile(position));
+		return esCreateNumber(container->getSpriteInfo(position).index);
 	}
 	return nullptr;
 }

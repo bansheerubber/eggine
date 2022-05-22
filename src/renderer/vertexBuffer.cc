@@ -234,6 +234,7 @@ void render::VertexBuffer::allocateBuffer() {
 					),
 					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 				);
+				this->dynamicBufferInitialized = true;
 			}
 		}
 		else {
@@ -295,6 +296,10 @@ void render::VertexBuffer::destroyBuffer() {
 void render::VertexBuffer::handleOutOfDateBuffer() {
 	#ifdef __switch__
 	#else
+	if(!this->dynamicBufferInitialized) {
+		return;
+	}
+	
 	VertexSubBuffer &writeSubBuffer = this->dynamicBuffers[this->window->framePingPong];
 	VertexSubBuffer &readSubBuffer = this->dynamicBuffers[!this->window->framePingPong];
 
