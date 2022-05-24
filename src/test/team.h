@@ -37,5 +37,5 @@ class Team: public GameObject {
 		static std::vector<Team*> Teams;
 	
 	private:
-		SortedArray<class Unit*> units = SortedArray<class Unit*>(teamUnitSort, nullptr, nullptr);
+		SortedArray<class Unit*> units = SortedArray<class Unit*>(teamUnitSort);
 };

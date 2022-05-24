@@ -3,15 +3,6 @@
 #include "../engine/engine.h"
 #include "resourceManager.h"
 
-void resources::initSpriteSheetInfo(SpriteSheet* owner, SpriteSheetInfo* wall) {
-	*wall = {
-		facingsMap: nullptr,
-		facing: FACING_INVALID,
-		index: 0,
-		wall: NO_WALL,
-	};
-}
-
 resources::SpriteSheet::SpriteSheet(
 	ResourceManager* manager,
 	carton::Metadata* metadata,
@@ -118,13 +109,7 @@ resources::SpriteSheetInfo resources::SpriteSheet::getSpriteInfo(uint64_t index)
 	if(index < this->spriteInfo.head) {
 		return this->spriteInfo[index];
 	}
-
-	return {
-		facingsMap: nullptr,
-		facing: FACING_INVALID,
-		index: 0,
-		wall: NO_WALL,
-	};
+	return SpriteSheetInfo();
 }
 
 bool resources::SpriteSheet::drawOntopOfOverlap(uint64_t spriteIndex) {

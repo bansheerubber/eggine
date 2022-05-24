@@ -2,7 +2,7 @@
 
 #include "dynamicArray.h"
 
-template <typename T, typename S = void>
+template <typename T>
 class SortedArray {
 	public:
 		SortedArray() {
@@ -10,22 +10,10 @@ class SortedArray {
 		}
 
 		SortedArray(
-			int (*compare) (T* a, T* b),
-			void (*init) (S* parent, T* location) = nullptr,
-			void (*onRealloc) (S* parent) = nullptr
+			int (*compare) (T* a, T* b)
 		) {
 			this->compare = compare;
-			new((void*)&this->array) DynamicArray<T, S>(4, init, onRealloc);
-		}
-		
-		SortedArray(
-			S* parent,
-			int (*compare) (T* a, T* b),
-			void (*init) (S* parent, T* location) = nullptr,
-			void (*onRealloc) (S* parent) = nullptr
-		) {
-			this->compare = compare;
-			new((void*)&this->array) DynamicArray<T, S>(parent, 4, init, onRealloc);
+			new((void*)&this->array) DynamicArray<T>(4);
 		}
 
 		void insert(T value) {
@@ -68,7 +56,7 @@ class SortedArray {
 			qsort(&this->array[0], this->array.head, sizeof(T), (int (*)(const void*, const void*))this->compare);
 		}
 	
-		DynamicArray<T, S> array;
+		DynamicArray<T> array;
 	
 	private:
 		int (*compare) (T* a, T* b);

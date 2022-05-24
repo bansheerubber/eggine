@@ -26,10 +26,6 @@ render::VertexBuffer* ChunkContainer::UVs = nullptr;
 render::VertexBuffer* ChunkContainer::Colors = nullptr;
 render::VertexBuffer* ChunkContainer::XRay = nullptr;
 
-void initChunk(class ChunkContainer* container, class Chunk** chunk) {
-	*chunk = nullptr;
-}
-
 ChunkContainer::ChunkContainer() {
 	engine->registerBind("chunk.selectTile", this);
 	engine->registerBind("chunk.mouseSelectTile", this);
@@ -78,8 +74,6 @@ ChunkContainer::ChunkContainer() {
 		ChunkContainer::XRay = new render::VertexBuffer(&engine->renderWindow);
 		ChunkContainer::XRay->setData((int*)&ChunkContainer::XRaySource, sizeof(ChunkContainer::XRaySource), alignof(int));
 	}
-
-	this->renderOrder.allocate(8);
 
 	// create torquescript object
 	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);

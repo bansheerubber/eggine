@@ -2,19 +2,11 @@
 
 #include "dynamicArray.h"
 
-template <typename T, typename S>
+template <typename T>
 class MinHeap {
 	public:
 		MinHeap() {
-
-		}
-		
-		MinHeap(
-			S* parent,
-			void (*init) (S* parent, T* location),
-			void (*onRealloc) (S* parent)
-		) {
-			new((void*)&this->array) DynamicArray<T, S>(parent, 4, init, onRealloc);
+			new((void*)&this->array) DynamicArray<T>(4);
 		}
 
 		void insert(T value) {
@@ -45,7 +37,7 @@ class MinHeap {
 			}
 		}
 	
-		DynamicArray<T, S> array;
+		DynamicArray<T> array;
 	
 	private:
 		uint64_t parentIndex(uint64_t index) {

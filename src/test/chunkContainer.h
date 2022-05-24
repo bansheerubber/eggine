@@ -17,8 +17,6 @@
 #include "../resources/spriteSheet.h"
 #include "tileMath.h"
 
-void initChunk(class ChunkContainer* container, class Chunk** chunk);
-
 namespace es {
 	void defineChunkContainer();
 	esEntryPtr getChunkContainer(esEnginePtr esEngine, unsigned int argc, esEntry* args);
@@ -108,7 +106,7 @@ class ChunkContainer : public RenderObject {
 		class Character* selectedCharacter = nullptr;
 		class Team* playerTeam = nullptr;
 		class Team* enemyTeam = nullptr;
-		DynamicArray<Chunk*, ChunkContainer> renderOrder = DynamicArray<Chunk*, ChunkContainer>(this, 0, initChunk, nullptr);
+		DynamicArray<Chunk*> renderOrder = DynamicArray<Chunk*>(0);
 
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
 

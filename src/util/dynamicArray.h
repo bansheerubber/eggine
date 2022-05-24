@@ -3,13 +3,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <new>
 #include <stdio.h>
 #include <stdlib.h>
 #include <utility>
 
 #define DYNAMIC_ARRAY_MAX_SIZE 5000000
 
-template <typename T, typename S = void>
+template <typename T>
 class DynamicArray {
 	public:
 		uint64_t head;
@@ -21,40 +22,6 @@ class DynamicArray {
 		}
 
 		DynamicArray(uint64_t size) {
-			this->parent = nullptr;
-			this->init = nullptr;
-			this->onRealloc = nullptr;
-
-			this->head = 0;
-			this->size = size;
-
-			this->constructArray();
-		}
-
-		DynamicArray(
-			uint64_t size,
-			void (*init) (S* parent, T* location),
-			void (*onRealloc) (S* parent)
-		) {
-			this->init = init;
-			this->onRealloc = onRealloc;
-
-			this->head = 0;
-			this->size = size;
-
-			this->constructArray();
-		}
-
-		DynamicArray(
-			S* parent,
-			uint64_t size,
-			void (*init) (S* parent, T* location),
-			void (*onRealloc) (S* parent)
-		) {
-			this->parent = parent;
-			this->init = init;
-			this->onRealloc = onRealloc;
-
 			this->head = 0;
 			this->size = size;
 
@@ -90,7 +57,7 @@ class DynamicArray {
 				return;
 			}
 			
-			if(amount * 2 > DYNAMIC_ARRAY_MAX_SIZE) {
+			if(amount > DYNAMIC_ARRAY_MAX_SIZE) {
 				printf("stack overflow\n");
 				exit(1);
 			}
@@ -102,16 +69,10 @@ class DynamicArray {
 			}
 			this->array = array;
 
-			if(this->init != nullptr) {
-				for(uint64_t i = this->size; i < amount; i++) {
-					(*this->init)(this->parent, &this->array[i]);
-				}
+			for(uint64_t i = this->size; i < amount; i++) {
+				::new (static_cast<void*>(&this->array[i])) T();
 			}
 			this->size = amount;
-			
-			if(this->onRealloc != nullptr) {
-				(*this->onRealloc)(this->parent);
-			}
 		}
 
 		void remove(T entry) {
@@ -150,17 +111,12 @@ class DynamicArray {
 			}
 
 			for(int i = index; i < index + amount; i++) {
-				// re-initialize entries
-				if(this->init != nullptr) {
-					(*this->init)(this->parent, &this->array[i]);
-				}
+				::new (static_cast<void*>(&this->array[i])) T; // re-initialize entries
 			}
 
 			if(amount < 0) { // pop for shift lefts
 				for(int i = end - 1; i >= end + amount; i--) {
-					if(this->init != nullptr) {
-						(*this->init)(this->parent, &this->array[i]);
-					}
+					::new (static_cast<void*>(&this->array[i])) T;
 					this->popped();
 				}
 			}
@@ -179,16 +135,11 @@ class DynamicArray {
 			}
 			this->array = array;
 
-			if(this->init != nullptr) {
-				for(uint64_t i = 0; i < this->size; i++) {
-					(*this->init)(this->parent, &(this->array[i]));
-				}
+			for(uint64_t i = 0; i < this->size; i++) {
+				::new (static_cast<void*>(&this->array[i])) T();
 			}
 		}
 
 		bool dontDelete = false;
 		T* array;
-		S* parent;
-		void (*init) (S* parent, T* location);
-		void (*onRealloc) (S* parent);
 };

@@ -38,6 +38,13 @@ namespace resources {
 		SpriteFacing facing;
 		unsigned int index;
 		SpriteSheetWall wall;
+
+		SpriteSheetInfo() {
+			this->facingsMap = nullptr;
+			this->facing = FACING_INVALID;
+			this->index = 0;
+			this->wall = NO_WALL;
+		}
 	};
 
 	struct SpriteFacingInfo { // records all sprite facings for a particular root sprite
@@ -93,8 +100,6 @@ namespace resources {
 		}
 	};
 
-	void initSpriteSheetInfo(class SpriteSheet* owner, SpriteSheetInfo* wall);
-	
 	class SpriteSheet: public ResourceObject {
 		public:
 			SpriteSheet(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
@@ -118,7 +123,7 @@ namespace resources {
 			unsigned int spriteSheetWidth = 0; // number of sprites per row
 			unsigned int spriteSheetAmount = 0; // number of sprites in PNG
 			
-			DynamicArray<SpriteSheetInfo, SpriteSheet> spriteInfo = DynamicArray<SpriteSheetInfo, SpriteSheet>(this, 8, initSpriteSheetInfo, nullptr);
+			DynamicArray<SpriteSheetInfo> spriteInfo = DynamicArray<SpriteSheetInfo>(8);
 			tsl::robin_map<unsigned int, SpriteFacingInfo*> spriteFacingInfo; // root sprite to facing object
 	};
 };

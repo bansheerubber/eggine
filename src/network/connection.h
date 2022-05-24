@@ -11,7 +11,6 @@
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 
-#include "../util/dynamicArray.h"
 #include "packetHandler.h"
 #include "stream.h"
 

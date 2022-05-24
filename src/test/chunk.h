@@ -80,9 +80,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	protected:
 		class ChunkContainer* container;
 
-		SortedArray<InterweavedTileWrapper, Chunk> interweavedTiles = SortedArray<InterweavedTileWrapper, Chunk>(
-			this, compareInterweavedTile, initInterweavedTileWrapper, nullptr
-		);
+		SortedArray<InterweavedTileWrapper> interweavedTiles = SortedArray<InterweavedTileWrapper>(compareInterweavedTile);
 
 		tsl::robin_set<class OverlappingTile*> overlappingTiles;
 		tsl::robin_map<unsigned int, class Layer*> layers;

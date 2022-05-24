@@ -147,8 +147,8 @@ class Engine {
 		Text* debugText;
 		#endif
 
-		DynamicArray<RenderObject*, Engine> renderables = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
-		DynamicArray<RenderObject*, Engine> renderableUIs = DynamicArray<RenderObject*, Engine>(this, 1024, engineInitRenderables, nullptr);
+		DynamicArray<RenderObject*> renderables = DynamicArray<RenderObject*>(1024);
+		DynamicArray<RenderObject*> renderableUIs = DynamicArray<RenderObject*>(1024);
 
 		tsl::robin_map<string, tsl::robin_set<string>> bindToTSCallback;
 		tsl::robin_map<string, tsl::robin_set<pair<esObjectReferencePtr, string>>> bindToTSObjectCallback;
