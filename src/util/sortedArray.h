@@ -1,25 +1,19 @@
 #pragma once
 
+#include <algorithm>
+
 #include "dynamicArray.h"
 
 template <typename T>
 class SortedArray {
 	public:
 		SortedArray() {
-
-		}
-
-		SortedArray(
-			int (*compare) (T* a, T* b)
-		) {
-			this->compare = compare;
 			new((void*)&this->array) DynamicArray<T>(4);
 		}
-
 		void insert(T value) {
 			// find a place to insert it at
 			for(uint64_t i = 0; i < this->array.head; i++) {
-				if(this->compare(&value, &this->array[i]) < 0) {
+				if(value < this->array[i]) {
 					this->array.shift(i, 1);
 					this->array[i] = value;
 					return;
@@ -53,14 +47,16 @@ class SortedArray {
 		}
 
 		void sort() {
-			qsort(&this->array[0], this->array.head, sizeof(T), (int (*)(const void*, const void*))this->compare);
+			std::sort(
+				&this->array[0],
+				&this->array[0] + this->array.head,
+				[](const T &a, const T &b){ return a < b; }
+			);
 		}
 	
 		DynamicArray<T> array;
 	
 	private:
-		int (*compare) (T* a, T* b);
-
 		void swap(uint64_t index1, uint64_t index2) {
 			T temp = this->array[index1];
 			this->array[index1] = this->array[index2];

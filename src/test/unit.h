@@ -86,3 +86,19 @@ class Unit: public Character {
 		void calculateDestinations(TileSet &destinations, unsigned int moves);
 		TileSet* getPath(glm::ivec3 end);
 };
+
+namespace std {
+	template<>
+	struct greater<Unit*> {
+		bool operator()(const Unit* &lhs, const Unit* &rhs) const {
+			return *lhs > *rhs;
+		}
+	};
+	
+	template<>
+	struct less<Unit*> {
+		bool operator()(const Unit* &lhs, const Unit* &rhs) const {
+			return *lhs < *rhs;
+		}
+	};
+};

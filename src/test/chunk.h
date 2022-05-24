@@ -36,13 +36,36 @@ struct InterweavedTileWrapper {
 	unsigned int index;
 	class InterweavedTile* tile;
 
-	bool operator<(const InterweavedTileWrapper &other);
-	bool operator>(const InterweavedTileWrapper &other);
-	bool operator==(const InterweavedTileWrapper &other);
+	InterweavedTileWrapper() {
+		this->index = 0;
+		this->tile = nullptr;
+	}
+
+	InterweavedTileWrapper(unsigned int index, class InterweavedTile* tile) {
+		this->index = index;
+		this->tile = tile;
+	}
+
+	bool operator<(const InterweavedTileWrapper &other) const;
+	bool operator>(const InterweavedTileWrapper &other) const;
+	bool operator==(const InterweavedTileWrapper &other) const;
 };
 
-int compareInterweavedTile(InterweavedTileWrapper* a, InterweavedTileWrapper* b);
-void initInterweavedTileWrapper(class Chunk* chunk, InterweavedTileWrapper* tile);
+namespace std {
+	template<>
+	struct greater<InterweavedTileWrapper> {
+		bool operator()(const InterweavedTileWrapper &lhs, const InterweavedTileWrapper &rhs) const {
+			return lhs > rhs;
+		}
+	};
+
+	template<>
+	struct less<InterweavedTileWrapper> {
+		bool operator()(const InterweavedTileWrapper &lhs, const InterweavedTileWrapper &rhs) const {
+			return lhs < rhs;
+		}
+	};
+};
 
 class Chunk : public InstancedRenderObjectContainer<Tile> {
 	friend class ChunkContainer;
@@ -80,7 +103,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 	protected:
 		class ChunkContainer* container;
 
-		SortedArray<InterweavedTileWrapper> interweavedTiles = SortedArray<InterweavedTileWrapper>(compareInterweavedTile);
+		SortedArray<InterweavedTileWrapper> interweavedTiles = SortedArray<InterweavedTileWrapper>();
 
 		tsl::robin_set<class OverlappingTile*> overlappingTiles;
 		tsl::robin_map<unsigned int, class Layer*> layers;

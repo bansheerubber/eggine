@@ -35,20 +35,24 @@ class OverlappingTile : public GameObject {
 		// ## game_object_definitions OverlappingTile
 
 		virtual OverlappingTile* setPosition(glm::uvec3 position);
-		glm::uvec3 getPosition();
+		glm::uvec3 getPosition() const;
 
 		virtual OverlappingTile* setTexture(unsigned int index);
 		int getTexture();
 		virtual OverlappingTile* setColor(glm::vec4 color);
 		glm::vec4 getColor();
 		virtual OverlappingTile* setZIndex(unsigned int zIndex);
-		unsigned int getZIndex();
+		unsigned int getZIndex() const;
 
 		class ChunkContainer* getContainer();
 		class Layer* getLayer();
 
 		OverlappingTile* setXRay(int xray);
 		int canXRay();
+
+		bool operator<(const OverlappingTile &other) const;
+		bool operator>(const OverlappingTile &other) const;
+		bool operator==(const OverlappingTile &other) const;
 
 	protected:
 		class ChunkContainer* container = nullptr;
@@ -65,4 +69,20 @@ class OverlappingTile : public GameObject {
 		int xray = false;
 
 		void updateRotation(tilemath::Rotation oldRotation, tilemath::Rotation newRotation);
+};
+
+namespace std {
+	template<>
+	struct greater<OverlappingTile*> {
+		bool operator()(const OverlappingTile* &lhs, const OverlappingTile* &rhs) const {
+			return *lhs > *rhs;
+		}
+	};
+	
+	template<>
+	struct less<OverlappingTile*> {
+		bool operator()(const OverlappingTile* &lhs, const OverlappingTile* &rhs) const {
+			return *lhs < *rhs;
+		}
+	};
 };

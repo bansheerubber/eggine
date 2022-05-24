@@ -18,25 +18,6 @@ glm::vec3 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
 tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>>();
 
-void initInterweavedTileWrapper(Chunk* chunk, InterweavedTileWrapper* tile) {
-	*tile = {};
-}
-
-int compareInterweavedTile(InterweavedTileWrapper* a, InterweavedTileWrapper* b) {
-	InterweavedTileWrapper* a2 = (InterweavedTileWrapper*)a;
-	InterweavedTileWrapper* b2 = (InterweavedTileWrapper*)b;
-
-	if(*a2 > *b2) {
-		return 1;
-	}
-	else if(*a2 < *b2) {
-		return -1;
-	}
-	else {
-		return 0;
-	}
-}
-
 Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) {
 	this->container = container;
 	
@@ -500,11 +481,7 @@ void Chunk::removeOverlappingTile(OverlappingTile* tile) {
 void Chunk::addInterweavedTile(InterweavedTile* tile) {
 	glm::uvec2 relativePosition = glm::uvec2(tile->getPosition()) - this->position * (unsigned int)Chunk::Size;
 	unsigned int index = tilemath::coordinateToIndex(relativePosition, Chunk::Size, this->container->getRotation()) + Chunk::Size * Chunk::Size * tile->getPosition().z;
-
-	this->interweavedTiles.insert(InterweavedTileWrapper {
-		index: index,
-		tile: tile,
-	});
+	this->interweavedTiles.insert(InterweavedTileWrapper(index, tile));
 }
 
 void Chunk::updateInterweavedTile(InterweavedTile* tile) {
@@ -523,10 +500,7 @@ void Chunk::updateInterweavedTile(InterweavedTile* tile) {
 
 void Chunk::removeInterweavedTile(InterweavedTile* tile) {
 	if(this->interweavedTiles.array.head != 0) { // signifies that the array has been deallocated
-		this->interweavedTiles.remove(InterweavedTileWrapper {
-			index: 0,
-			tile: tile,
-		});
+		this->interweavedTiles.remove(InterweavedTileWrapper(0, tile));
 	}	
 }
 
@@ -574,20 +548,20 @@ int Chunk::getTileTextureByIndex(uint64_t index) {
 	return -1;
 }
 
-bool InterweavedTileWrapper::operator<(const InterweavedTileWrapper &other) {
+bool InterweavedTileWrapper::operator<(const InterweavedTileWrapper &other) const {
 	if(this->index == other.index) {
 		return this->tile->getZIndex() < other.tile->getZIndex();
 	}
 	return this->index < other.index;
 }
 
-bool InterweavedTileWrapper::operator>(const InterweavedTileWrapper &other) {
+bool InterweavedTileWrapper::operator>(const InterweavedTileWrapper &other) const {
 	if(this->index == other.index) {
 		return this->tile->getZIndex() > other.tile->getZIndex();
 	}
 	return this->index > other.index;
 }
 
-bool InterweavedTileWrapper::operator==(const InterweavedTileWrapper &other) {
+bool InterweavedTileWrapper::operator==(const InterweavedTileWrapper &other) const {
 	return this->tile == other.tile;
 }

@@ -71,7 +71,7 @@ void OverlappingTile::updateRotation(tilemath::Rotation oldRotation, tilemath::R
 	}
 }
 
-glm::uvec3 OverlappingTile::getPosition() {
+glm::uvec3 OverlappingTile::getPosition() const {
 	return this->position;
 }
 
@@ -86,6 +86,41 @@ OverlappingTile* OverlappingTile::setXRay(int xray) {
 
 int OverlappingTile::canXRay() {
 	return this->xray;
+}
+
+bool OverlappingTile::operator<(const OverlappingTile &other) const {
+	unsigned int indexA = tilemath::coordinateToIndex(this->getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
+	unsigned int indexB = tilemath::coordinateToIndex(other.getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
+
+	if(indexA < indexB) {
+		return true;
+	}
+	else if(indexA == indexB && this->getZIndex() < other.getZIndex()) {
+		return true;
+	}
+	return false;
+}
+
+bool OverlappingTile::operator>(const OverlappingTile &other) const {
+	unsigned int indexA = tilemath::coordinateToIndex(this->getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
+	unsigned int indexB = tilemath::coordinateToIndex(other.getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
+	
+	if(indexA > indexB) {
+		return true;
+	}
+	else if(indexA == indexB && this->getZIndex() > other.getZIndex()) {
+		return true;
+	}
+	return false;
+}
+
+bool OverlappingTile::operator==(const OverlappingTile &other) const {
+	unsigned int indexA = tilemath::coordinateToIndex(this->getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
+	unsigned int indexB = tilemath::coordinateToIndex(other.getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
+	if(indexA == indexB && this->getZIndex() == other.getZIndex()) {
+		return true;
+	}
+	return false;
 }
 
 OverlappingTile* OverlappingTile::setTexture(unsigned int index) {
@@ -117,7 +152,7 @@ OverlappingTile* OverlappingTile::setZIndex(unsigned int zIndex) {
 	return this;
 }
 
-unsigned int OverlappingTile::getZIndex() {
+unsigned int OverlappingTile::getZIndex() const {
 	return this->zIndex;	
 }
 

@@ -15,26 +15,6 @@ DynamicArray<int> Layer::XRayTextureIndices = DynamicArray<int>(4);
 DynamicArray<glm::vec4> Layer::XRayColors = DynamicArray<glm::vec4>(4);
 DynamicArray<int> Layer::XRayEnabled = DynamicArray<int>(4);
 
-int layerTilesCompare(class OverlappingTile** a, class OverlappingTile** b) {
-	unsigned int indexA = tilemath::coordinateToIndex((*a)->getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
-	unsigned int indexB = tilemath::coordinateToIndex((*b)->getPosition(), Chunk::Size, engine->chunkContainer->getRotation());
-	if(indexA > indexB) {
-		return 1;
-	}
-	else if(indexA < indexB) {
-		return -1;
-	}
-	else if((*a)->getZIndex() > (*b)->getZIndex()) {
-		return 1;
-	}
-	else if((*a)->getZIndex() < (*b)->getZIndex()) {
-		return -1;
-	}
-	else {
-		return 0;
-	}
-}
-
 Layer::Layer(Chunk* chunk) {
 	this->chunk = chunk;
 

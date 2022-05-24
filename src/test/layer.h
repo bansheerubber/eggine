@@ -4,13 +4,12 @@
 #include <glm/vec4.hpp>
 
 #include "../basic/gameObject.h"
+#include "overlappingTile.h"
 #include "../basic/renderContext.h"
 #include "../util/sortedArray.h"
 #include "tileMath.h"
 #include "../renderer/vertexAttributes.h"
 #include "../renderer/vertexBuffer.h"
-
-int layerTilesCompare(class OverlappingTile** a, class OverlappingTile** b);
 
 class Layer : public GameObject {
 	friend class Chunk;
@@ -28,7 +27,7 @@ class Layer : public GameObject {
 
 	private:
 		class Chunk* chunk = nullptr;
-		SortedArray<class OverlappingTile*> tiles = SortedArray<class OverlappingTile*>(layerTilesCompare);
+		SortedArray<class OverlappingTile*> tiles = SortedArray<class OverlappingTile*>();
 
 		render::VertexBuffer* buffers[3];
 		render::VertexBuffer* xrayBuffers[4];
