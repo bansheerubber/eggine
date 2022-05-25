@@ -10,23 +10,23 @@
 #include "../util/trim.h"
 
 sound::SoundCollection::SoundCollection(
-	resources::ResourceManager* manager,
+	resources::ResourceManager &manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
 	uint64_t bufferSize
 ) : ResourceObject(manager, metadata) {
-	string fileBase = filesystem::path(metadata->getMetadata("fileName")).parent_path().string();
+	std::string fileBase = std::filesystem::path(metadata->getMetadata("fileName")).parent_path().string();
 	std::replace(fileBase.begin(), fileBase.end(), '\\', '/');
 	
-	istringstream stream(string((const char*)buffer, bufferSize));
-	for(string line; getline(stream, line);) {
+	std::istringstream stream(std::string((const char*)buffer, bufferSize));
+	for(std::string line; std::getline(stream, line);) {
 		if(trim(line).length() == 0) {
 			continue;
 		}
 
 		uint64_t equalsPosition = line.find("=");
-		string key = trim(line.substr(0, equalsPosition));
-		string value = trim(line.substr(equalsPosition + 1, line.length() - equalsPosition));
+		std::string key = trim(line.substr(0, equalsPosition));
+		std::string value = trim(line.substr(equalsPosition + 1, line.length() - equalsPosition));
 
 		if(key == "soundName") {
 			this->name = value;
@@ -37,9 +37,9 @@ sound::SoundCollection::SoundCollection(
 		else if(key == "pitchMax") {
 			this->pitchMax = stof(value);
 		}
-		else if(regex_match(key, regex("sound[0-9]+"))) {
-			string fileName = fileBase + "/" + value;
-			fileName = filesystem::path(fileName).lexically_normal().string();
+		else if(std::regex_match(key, std::regex("sound[0-9]+"))) {
+			std::string fileName = fileBase + "/" + value;
+			fileName = std::filesystem::path(fileName).lexically_normal().string();
 			std::replace(fileName.begin(), fileName.end(), '\\', '/');
 			if(engine->soundEngine.fileToSound.find(fileName) != engine->soundEngine.fileToSound.end()) {
 				this->sounds.push_back(engine->soundEngine.fileToSound[fileName]);

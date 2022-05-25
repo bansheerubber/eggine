@@ -16,7 +16,7 @@
 
 glm::vec3 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
-tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Chunk::Rotations = tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>>();
+tsl::robin_map<std::pair<tilemath::Rotation, tilemath::Rotation>, std::vector<int64_t>> Chunk::Rotations = tsl::robin_map<std::pair<tilemath::Rotation, tilemath::Rotation>, std::vector<int64_t>>();
 
 Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) {
 	this->container = container;
@@ -29,7 +29,7 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 		for(int a = 0; a < 4; a++) {
 			for(int b = 0; b < 4; b++) {
 				if(a != b) {
-					auto rotationPair = pair((tilemath::Rotation)a, (tilemath::Rotation)b);
+					auto rotationPair = std::pair((tilemath::Rotation)a, (tilemath::Rotation)b);
 					Chunk::Rotations[rotationPair].resize(Chunk::Size * Chunk::Size);
 					for(unsigned int oldIndex = 0; oldIndex < Chunk::Size * Chunk::Size; oldIndex++) {
 						glm::ivec2 intermediatePosition = tilemath::indexToCoordinate(oldIndex, Chunk::Size, (tilemath::Rotation)a);
@@ -120,6 +120,10 @@ glm::uvec2& Chunk::getPosition() {
 	return this->position;
 }
 
+uint16_t Chunk::getHeight() {
+	return this->height;
+}
+
 void Chunk::defineBounds() {
 	tilemath::Rotation rotation = this->container->getRotation();
 	int topHeight = 0, rightHeight = 0, bottomHeight = 0, leftHeight = 0;
@@ -204,7 +208,7 @@ void Chunk::updateRotation(tilemath::Rotation rotation) {
 	int* newTextureIndices = (int*)calloc(Chunk::Size * Chunk::Size * Chunk::MaxHeight, sizeof(int)); // this is slightly faster than new
 	for(unsigned int i = 0;  i < Chunk::Size * Chunk::Size * Chunk::MaxHeight; i++) {
 		unsigned int height = i / (Chunk::Size * Chunk::Size);
-		int64_t newIndex = Chunk::Rotations[pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
+		int64_t newIndex = Chunk::Rotations[std::pair(this->oldRotation, rotation)][i % (Chunk::Size * Chunk::Size)];
 
 		resources::SpriteFacingInfo* facingsMap;
 		if((facingsMap = ChunkContainer::Image->getSpriteInfo(this->textureIndices[i]).facingsMap) != nullptr) {
@@ -291,12 +295,12 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 	this->drawCalls = 0;
 	#endif
 	
-	Camera* camera = context.camera;
+	CameraBounds bounds = context.camera->getBounds();
 	if(!(
-		camera->left > this->right
-		|| camera->right < this->left
-		|| camera->top < this->bottom
-		|| camera->bottom > this->top
+		bounds.left > this->right
+		|| bounds.right < this->left
+		|| bounds.top < this->bottom
+		|| bounds.bottom > this->top
 	)) {
 		struct VertexBlock {
 			glm::mat4 projection;
@@ -308,7 +312,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 			float spritesOnRow;
 			int timer;
 		} vb;
-		vb.projection = context.camera->projectionMatrix;
+		vb.projection = context.camera->getProjectionMatrix();
 		vb.chunkScreenSpace = this->screenSpacePosition;
 		vb.chunkScreenSpace.z = this->screenSpacePosition.z * Chunk::Size * 2.0;
 		vb.spritesheetWidth = 1057;
@@ -316,7 +320,7 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 		vb.spriteWidth = 64.0f;
 		vb.spriteHeight = 128.0f;
 		vb.spritesOnRow = floor(vb.spritesheetWidth / vb.spriteWidth);
-		vb.timer = this->container->timer;
+		vb.timer = this->container->getShaderTimer();
 
 		engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb, sizeof(vb));
 		
@@ -378,12 +382,12 @@ void Chunk::renderChunk(double deltaTime, RenderContext &context) {
 }
 
 void Chunk::renderXRay(double deltaTime, RenderContext &context) {
-	Camera* camera = context.camera;
+	CameraBounds bounds = context.camera->getBounds();
 	if(!(
-		camera->left > this->right
-		|| camera->right < this->left
-		|| camera->top < this->bottom
-		|| camera->bottom > this->top
+		bounds.left > this->right
+		|| bounds.right < this->left
+		|| bounds.top < this->bottom
+		|| bounds.bottom > this->top
 	)) {
 		struct VertexBlock {
 			glm::mat4 projection;
@@ -395,7 +399,7 @@ void Chunk::renderXRay(double deltaTime, RenderContext &context) {
 			float spritesOnRow;
 			int timer;
 		} vb;
-		vb.projection = context.camera->projectionMatrix;
+		vb.projection = context.camera->getProjectionMatrix();
 		vb.chunkScreenSpace = this->screenSpacePosition;
 		vb.chunkScreenSpace.z = this->screenSpacePosition.z * Chunk::Size * 2.0;
 		vb.spritesheetWidth = 1057;
@@ -403,7 +407,7 @@ void Chunk::renderXRay(double deltaTime, RenderContext &context) {
 		vb.spriteWidth = 64.0f;
 		vb.spriteHeight = 128.0f;
 		vb.spritesOnRow = floor(vb.spritesheetWidth / vb.spriteWidth);
-		vb.timer = this->container->timer;
+		vb.timer = this->container->getShaderTimer();
 		engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb, sizeof(vb));
 		
 		engine->renderWindow.getState(0).setStencilFunction(render::STENCIL_NOT_EQUAL, 1, 0b1);
@@ -446,7 +450,7 @@ void Chunk::addOverlappingTile(OverlappingTile* tile) {
 	Layer* found = this->getLayer(tile->getPosition().z);
 	if(found == nullptr) {
 		found = this->layers[tile->getPosition().z] = new Layer(this);
-		this->maxLayer = max(tile->getPosition().z, this->maxLayer);
+		this->maxLayer = std::max(tile->getPosition().z, this->maxLayer);
 	}
 
 	this->overlappingTiles.insert(tile);
@@ -458,7 +462,7 @@ void Chunk::updateOverlappingTile(OverlappingTile* tile) {
 	Layer* found = this->getLayer(tile->getPosition().z);
 	if(found == nullptr) {
 		found = this->layers[tile->getPosition().z] = new Layer(this);
-		this->maxLayer = max(tile->getPosition().z, this->maxLayer);
+		this->maxLayer = std::max(tile->getPosition().z, this->maxLayer);
 	}
 	
 	if(found != tile->getLayer()) {
@@ -519,7 +523,7 @@ void Chunk::setTileTexture(glm::uvec3 position, unsigned int spritesheetIndex) {
 	this->vertexBuffer->setSubData(&spritesheetIndex, 1, index * sizeof(unsigned int));
 	this->textureIndices[index] = spritesheetIndex;
 
-	this->height = max(this->height, position.z + 1);
+	this->height = std::max(this->height, (uint16_t)(position.z + 1));
 }
 
 int Chunk::getTileTexture(glm::uvec3 position) {
@@ -535,7 +539,7 @@ int Chunk::getTileTexture(glm::uvec3 position) {
 void Chunk::setTileTextureByIndex(uint64_t index, unsigned int spritesheetIndex) {
 	if(index < Chunk::Size * Chunk::Size * Chunk::MaxHeight) {
 		unsigned int height = index / (Chunk::Size * Chunk::Size);
-		this->height = max(this->height, height + 1);
+		this->height = std::max(this->height, (uint16_t)(height + 1));
 		this->vertexBuffer->setSubData(&spritesheetIndex, 1, index * sizeof(unsigned int)); // TODO improve efficiency
 		this->textureIndices[index] = spritesheetIndex;
 	}

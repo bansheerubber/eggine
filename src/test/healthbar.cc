@@ -31,9 +31,9 @@ void Healthbar::render(double deltaTime, RenderContext &context) {
 
 	this->box.position.y += offset;
 
-	this->box.render(context.camera->projectionMatrix); // render the background
+	this->box.render(context.camera->getProjectionMatrix()); // render the background
 
 	this->box.size.x = width * this->percent;
 	this->box.color = glm::vec4(1, 0, 0, 1);
-	this->box.render(context.camera->projectionMatrix); // render the foreground
+	this->box.render(context.camera->getProjectionMatrix()); // render the foreground
 }

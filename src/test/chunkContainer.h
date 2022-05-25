@@ -87,6 +87,8 @@ class ChunkContainer : public RenderObject {
 		TileNeighborIterator getNeighbors(glm::ivec3 position);
 		class Character* getCharacter(glm::ivec3 position);
 
+		uint32_t getShaderTimer();
+
 		static render::Program* Program;
 		static resources::SpriteSheet* Image;
 
@@ -94,8 +96,6 @@ class ChunkContainer : public RenderObject {
 		static render::VertexBuffer* UVs;
 		static render::VertexBuffer* Colors;
 		static render::VertexBuffer* XRay;
-
-		unsigned int timer = 0;
 	
 	private:
 		unsigned int size = 0;
@@ -109,6 +109,8 @@ class ChunkContainer : public RenderObject {
 		DynamicArray<Chunk*> renderOrder = DynamicArray<Chunk*>(0);
 
 		tsl::robin_map<glm::uvec3, class Character*> positionToCharacter;
+
+		uint32_t shaderTimer = 0;
 
 		void updateCharacterPosition(class Character* character, glm::uvec3 newPosition);
 		glm::vec3 screenToTile(glm::vec2 screenSpace);

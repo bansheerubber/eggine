@@ -3,13 +3,11 @@
 #include "../engine/console.h"
 #include "resourceManager.h"
 
-resources::ResourceObject::ResourceObject(ResourceManager* manager, carton::Metadata* metadata) {
-	this->manager = manager;
+resources::ResourceObject::ResourceObject(ResourceManager &manager, carton::Metadata* metadata) {
+	this->manager = &manager;
 	this->metadata = metadata;
 	this->fileName = this->metadata->getMetadata("fileName");
-	if(manager != nullptr) {
-		manager->objects.insert(this);
-	}
+	manager.objects.insert(this);
 }
 
 void resources::ResourceObject::lease() {

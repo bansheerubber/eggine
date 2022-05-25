@@ -29,7 +29,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	}
 
 	#ifndef __switch__
-	int key = engine->keyToScancode[string(arguments[0].stringData)];
+	int key = engine->keyToScancode[std::string(arguments[0].stringData)];
 	int action = (int)arguments[1].numberData;
 
 	#ifdef EGGINE_DEVELOPER_MODE
@@ -39,7 +39,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 	#endif
 
 	if(action != GLFW_REPEAT) {
-		vector<binds::Keybind> &binds = engine->keyToKeybind[key];
+		std::vector<binds::Keybind> &binds = engine->keyToKeybind[key];
 		for(auto &bind: binds) {
 			tsl::robin_set<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
@@ -47,7 +47,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 			}
 
 			// handle TS callbacks
-			tsl::robin_set<string> esPresses = engine->bindToTSCallback[bind.bind];
+			tsl::robin_set<std::string> esPresses = engine->bindToTSCallback[bind.bind];
 			for(auto &callback: esPresses) {
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
@@ -56,7 +56,7 @@ esEntryPtr es::onKeyPress(esEnginePtr esEngine, unsigned int argc, esEntryPtr ar
 			}
 
 			// handle TS object callbacks
-			tsl::robin_set<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
+			tsl::robin_set<std::pair<esObjectReferencePtr, std::string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
 			for(auto &[object, callback]: esObjectPresses) {
 				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
 					esEntry arguments[2];
@@ -104,7 +104,7 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 
 	if(action != GLFW_REPEAT) {
 		// handle game objects
-		vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
+		std::vector<binds::Keybind> &binds = engine->buttonToMousebind[button];
 		for(auto &bind: binds) {
 			tsl::robin_set<GameObject*> presses = engine->bindToGameObject[bind.bind];
 			for(GameObject* object: presses) {
@@ -112,7 +112,7 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 			}
 
 			// handle TS callbacks
-			tsl::robin_set<string> esPresses = engine->bindToTSCallback[bind.bind];
+			tsl::robin_set<std::string> esPresses = engine->bindToTSCallback[bind.bind];
 			for(auto &callback: esPresses) {
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
@@ -121,7 +121,7 @@ esEntryPtr es::onMousePress(esEnginePtr esEngine, unsigned int argc, esEntryPtr 
 			}
 
 			// handle TS object callbacks
-			tsl::robin_set<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
+			tsl::robin_set<std::pair<esObjectReferencePtr, std::string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
 			for(auto &[object, callback]: esObjectPresses) {
 				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
 					esEntry arguments[2];
@@ -171,7 +171,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 	int action = (int)arguments[1].numberData;
 
 	if(action == 1 || action == 0) {
-		vector<binds::Keybind> &binds = engine->gamepadToBind[button];
+		std::vector<binds::Keybind> &binds = engine->gamepadToBind[button];
 		for(auto &bind: binds) {
 			// handle game objects
 			tsl::robin_set<GameObject*> presses = engine->bindToGameObject[bind.bind];
@@ -180,7 +180,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 			}
 
 			// handle TS callbacks
-			tsl::robin_set<string> esPresses = engine->bindToTSCallback[bind.bind];
+			tsl::robin_set<std::string> esPresses = engine->bindToTSCallback[bind.bind];
 			for(auto &callback: esPresses) {
 				esEntry arguments[1];
 				arguments[0].type = ES_ENTRY_NUMBER;
@@ -189,7 +189,7 @@ esEntryPtr es::onGamepadButton(esEnginePtr esEngine, unsigned int argc, esEntryP
 			}
 
 			// handle TS object callbacks
-			tsl::robin_set<pair<esObjectReferencePtr, string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
+			tsl::robin_set<std::pair<esObjectReferencePtr, std::string>> esObjectPresses = engine->bindToTSObjectCallback[bind.bind];
 			for(auto &[object, callback]: esObjectPresses) {
 				if(object->objectWrapper != nullptr) { // TODO delete from vector if object was deleted
 					esEntry arguments[2];
@@ -212,7 +212,7 @@ void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods)
 
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(key == GLFW_KEY_GRAVE_ACCENT) {
-		engine->developerGui->focusConsole = true;
+		engine->developerGui->focusConsole();
 	}
 	#endif
 	
@@ -239,8 +239,9 @@ void onMousePress(GLFWwindow* window, int button, int action, int mods) {
 
 void onMouseMove(GLFWwindow* window, double x, double y) {
 	#ifdef EGGINE_DEVELOPER_MODE
-	if(engine->renderWindow.backend == render::)
-	ImGui_ImplGlfw_CursorPosCallback(window, x, y);
+	if(engine->renderWindow.backend == render::OPENGL_BACKEND) {
+		ImGui_ImplGlfw_CursorPosCallback(window, x, y);
+	}
 	#endif
 	
 	esEntry arguments1[2];

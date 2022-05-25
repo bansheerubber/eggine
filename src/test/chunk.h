@@ -69,8 +69,6 @@ namespace std {
 
 class Chunk : public InstancedRenderObjectContainer<Tile> {
 	friend class ChunkContainer;
-	friend class InterweavedTile;
-	friend class OverlappingTile;
 	
 	public:
 		Chunk(class ChunkContainer* container);
@@ -78,15 +76,13 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		// ## game_object_definitions Chunk
 
-		int* textureIndices = nullptr;
-		unsigned int height = 5;
-
 		void render(double deltaTime, RenderContext &context) {};
 		void renderChunk(double deltaTime, RenderContext &context);
 		void renderXRay(double deltaTime, RenderContext &context);
 
 		void setPosition(glm::uvec2 position);
 		glm::uvec2& getPosition();
+		uint16_t getHeight();
 
 		class Layer* getLayer(unsigned int z);
 
@@ -95,6 +91,14 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		void setTileTextureByIndex(uint64_t index, unsigned int spritesheetIndex);
 		int getTileTextureByIndex(uint64_t index);
+
+		void addOverlappingTile(class OverlappingTile* tile);
+		void updateOverlappingTile(class OverlappingTile* tile);
+		void removeOverlappingTile(class OverlappingTile* tile);
+
+		void addInterweavedTile(class InterweavedTile* tile);
+		void updateInterweavedTile(class InterweavedTile* tile);
+		void removeInterweavedTile(class InterweavedTile* tile);
 
 		static constexpr unsigned int Size = 25;
 		static constexpr unsigned int MaxHeight = 15;
@@ -111,6 +115,7 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 
 		glm::uvec2 position = glm::uvec2(0, 0);
 		glm::vec3 screenSpacePosition = glm::vec3(0, 0, 0);
+		uint16_t height = 5;
 		
 		render::VertexBuffer* vertexBuffer;
 		render::VertexAttributes* vertexAttributes;
@@ -118,6 +123,8 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		double top = 0, right = 0, bottom = 0, left = 0;
 
 		tilemath::Rotation oldRotation = tilemath::ROTATION_0_DEG;
+
+		int* textureIndices = nullptr;
 
 		#ifdef EGGINE_DEBUG
 		bool isCulled = false;
@@ -127,19 +134,11 @@ class Chunk : public InstancedRenderObjectContainer<Tile> {
 		uint64_t renderWithInterweavedTiles(uint64_t startInterweavedIndex, uint64_t startIndex, uint64_t amount, double deltaTime, RenderContext &context);
 
 		void updateRotation(tilemath::Rotation rotation);
-
-		void addOverlappingTile(class OverlappingTile* tile);
-		void updateOverlappingTile(class OverlappingTile* tile);
-		void removeOverlappingTile(class OverlappingTile* tile);
-
-		void addInterweavedTile(class InterweavedTile* tile);
-		void updateInterweavedTile(class InterweavedTile* tile);
-		void removeInterweavedTile(class InterweavedTile* tile);
 		
 		void buildDebugLines();
 		void defineBounds();
 
 		static glm::vec3 OffsetsSource[];
 		static render::VertexBuffer* Offsets;
-		static tsl::robin_map< pair<tilemath::Rotation, tilemath::Rotation>, vector<int64_t>> Rotations;
+		static tsl::robin_map<std::pair<tilemath::Rotation, tilemath::Rotation>, std::vector<int64_t>> Rotations;
 };

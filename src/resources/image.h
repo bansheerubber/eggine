@@ -13,7 +13,7 @@
 namespace resources {
 	class Image: public ResourceObject {
 		public:
-			Image(class ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
+			Image(ResourceManager &manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
 
 			glm::vec2 position;
 			glm::vec2 size;

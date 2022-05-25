@@ -9,7 +9,6 @@
 #include "../carton/file.h"
 #include "../carton/metadata.h"
 #include "../carton/metadata/queryList.h"
-#include "resourceObject.h"
 
 namespace es {
 	void defineResourceManager();
@@ -29,7 +28,7 @@ void handleSounds(void* owner, carton::File* file, const char* buffer, uint64_t 
 
 namespace resources {
 	class ResourceManager {
-		friend ResourceObject;
+		friend class ResourceObject;
 		friend void ::handleSpritesheets(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		friend void ::handlePNGs(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		friend void ::handleHTML(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
@@ -42,16 +41,18 @@ namespace resources {
 		friend void ::handleSounds(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize);
 		
 		public:
-			ResourceManager(string fileName);
+			ResourceManager();
 			~ResourceManager();
 			
 			carton::Carton* carton = nullptr;
-			string fileName;
-			DynamicArray<ResourceObject*> loadResources(DynamicArray<carton::Metadata*> resources);
-			DynamicArray<ResourceObject*> metadataToResources(DynamicArray<carton::Metadata*> resources);
+			std::string fileName;
+			DynamicArray<class ResourceObject*> loadResources(DynamicArray<carton::Metadata*> resources);
+			DynamicArray<class ResourceObject*> metadataToResources(DynamicArray<carton::Metadata*> resources);
 			unsigned int getBytesUsed();
 			void reload();
 			void tick();
+
+			void init(std::string fileName);
 		
 		private:
 			#ifdef __linux__
@@ -62,11 +63,11 @@ namespace resources {
 			bool hashed = false;
 			#endif
 
-			tsl::robin_set<ResourceObject*> objects;
-			tsl::robin_map<carton::Metadata*, ResourceObject*> metadataToResource;
+			tsl::robin_set<class ResourceObject*> objects;
+			tsl::robin_map<carton::Metadata*, class ResourceObject*> metadataToResource;
 	};
 
 	class ShaderSource;
 };
 
-resources::ShaderSource* getShaderSource(string fileName);
+resources::ShaderSource* getShaderSource(std::string fileName);

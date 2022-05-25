@@ -25,15 +25,15 @@ void es::eggscriptDefinitions() {
 
 esEntryPtr es::exec(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
-		string path = filesystem::path(esGetLastExecFileName(esEngine)).parent_path().string();
+		std::string path = std::filesystem::path(esGetLastExecFileName(esEngine)).parent_path().string();
 		std::replace(path.begin(), path.end(), '\\', '/');
 		if(path != "") {
 			path += "/";
 		}
 		path += args[0].stringData;
 
-		resources::ScriptFile* file = (resources::ScriptFile*)engine->manager->metadataToResources(
-			engine->manager->carton->database.get()->equals("fileName", path)->exec()
+		resources::ScriptFile* file = (resources::ScriptFile*)engine->manager.metadataToResources(
+			engine->manager.carton->database.get()->equals("fileName", path)->exec()
 		)[0];
 
 		if(file != nullptr) {

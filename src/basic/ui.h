@@ -7,5 +7,8 @@
 class UI : public GameObject {
 	public:
 		void update();
+		glm::mat4 getProjectionMatrix();
+	
+	private:
 		glm::mat4 projectionMatrix;
 };

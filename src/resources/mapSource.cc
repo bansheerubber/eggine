@@ -4,7 +4,7 @@
 #include "resourceManager.h"
 
 resources::MapSource::MapSource(
-	ResourceManager* manager,
+	ResourceManager &manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
 	uint64_t bufferSize

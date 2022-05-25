@@ -127,7 +127,20 @@ glm::vec2 Camera::mouseToWorld(glm::vec2 mouse) {
 	);
 }
 
-void Camera::onBind(string &bind, binds::Action action) {
+CameraBounds Camera::getBounds() {
+	return {
+		this->top,
+		this->right,
+		this->bottom,
+		this->left,
+	};
+}
+
+glm::mat4 Camera::getProjectionMatrix() {
+	return this->projectionMatrix;
+}
+
+void Camera::onBind(std::string &bind, binds::Action action) {
 	if(bind == "camera.zoomIn") {
 		if(action == binds::PRESS) {
 			this->setZoomLevel(this->zoomLevel - 1.0f);
@@ -162,7 +175,7 @@ void Camera::onBind(string &bind, binds::Action action) {
 	}
 }
 
-void Camera::onAxis(string &bind, double value) {
+void Camera::onAxis(std::string &bind, double value) {
 	if(bind == "camera.xAxis") {
 		this->keyMapping.xAxis = value;
 	}
@@ -180,7 +193,7 @@ void Camera::onAxis(string &bind, double value) {
 }
 
 void Camera::setZoomLevel(float zoomLevel) {
-	this->zoomLevel = min(max(zoomLevel, this->minZoomLevel), this->maxZoomLevel);
+	this->zoomLevel = std::min(std::max(zoomLevel, this->minZoomLevel), this->maxZoomLevel);
 }
 
 float Camera::getZoom() {

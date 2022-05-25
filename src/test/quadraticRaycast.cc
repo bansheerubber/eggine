@@ -35,7 +35,7 @@ QuadraticRaycastMarcher::QuadraticRaycastMarcher(glm::ivec3 start, glm::ivec3 en
 	this->position = start;
 	this->lastPosition = start;
 
-	if(isnan(this->angle)) {
+	if(std::isnan(this->angle)) {
 		this->_finished = true;
 	}
 }
@@ -360,7 +360,7 @@ esEntryPtr es::projectileAngle(esEnginePtr esEngine, unsigned int argc, esEntryP
 		double speed = args[2].numberData;
 		double result = calculateProjectileAngle(start, end, speed);
 
-		if(isnan(result)) {
+		if(std::isnan(result)) {
 			return nullptr;
 		}
 		else {

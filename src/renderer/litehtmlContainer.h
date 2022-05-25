@@ -107,17 +107,17 @@ namespace render {
 			virtual void import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) override;
 			virtual void get_client_rect(litehtml::position& client) const override;
 
-			esObjectReferencePtr getESObject(string id);
-			esObjectReferencePtr createChild(litehtml::element::ptr parent, string html);
+			esObjectReferencePtr getESObject(std::string id);
+			esObjectReferencePtr createChild(litehtml::element::ptr parent, std::string html);
 		
 		private:
 			Text text = Text(false);
 			render::Box box;
 
-			Text* getText(render::Font* font, string text);
-			tsl::robin_map<std::pair<render::Font*, string>, LiteHTMLTextWrapper> stringToText;
-			tsl::robin_map<string, resources::Image*> sourceToImage;
-			tsl::robin_map<string, litehtml::element::ptr> idToElement;
+			Text* getText(render::Font* font, std::string text);
+			tsl::robin_map<std::pair<render::Font*, std::string>, LiteHTMLTextWrapper> stringToText;
+			tsl::robin_map<std::string, resources::Image*> sourceToImage;
+			tsl::robin_map<std::string, litehtml::element::ptr> idToElement;
 			tsl::robin_map<litehtml::element*, esObjectReferencePtr> elementToESObject;
 			tsl::robin_map<esObjectWrapperPtr, litehtml::element::ptr> esObjectToElement;
 

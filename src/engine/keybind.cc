@@ -1,7 +1,7 @@
 #include "keybind.h"
 #include "engine.h"
 
-void Engine::registerTSKeybindCallback(string bind, string key, string callback) {
+void Engine::registerTSKeybindCallback(std::string bind, std::string key, std::string callback) {
 	if(this->keyToScancode.find(key) != this->keyToScancode.end()) {
 		this->addKeybind(this->keyToScancode[key], {
 			bind: bind,
@@ -32,13 +32,13 @@ void Engine::registerTSKeybindCallback(string bind, string key, string callback)
 	}
 }
 
-void Engine::registerTSKeybindObjectCallback(esObjectReferencePtr object, string bind, string key, string callback) {
+void Engine::registerTSKeybindObjectCallback(esObjectReferencePtr object, std::string bind, std::string key, std::string callback) {
 	if(this->keyToScancode.find(key) != this->keyToScancode.end()) {
 		this->addKeybind(this->keyToScancode[key], {
 			bind: bind,
 		});
 
-		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+		if(this->bindToTSObjectCallback[bind].find(std::pair<esObjectReferencePtr, std::string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
 			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
 		}
 	}
@@ -47,7 +47,7 @@ void Engine::registerTSKeybindObjectCallback(esObjectReferencePtr object, string
 			bind: bind,
 		});
 
-		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+		if(this->bindToTSObjectCallback[bind].find(std::pair<esObjectReferencePtr, std::string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
 			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
 		}
 	}
@@ -56,7 +56,7 @@ void Engine::registerTSKeybindObjectCallback(esObjectReferencePtr object, string
 			bind: bind,
 		});
 
-		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+		if(this->bindToTSObjectCallback[bind].find(std::pair<esObjectReferencePtr, std::string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
 			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
 		}
 	}
@@ -65,17 +65,17 @@ void Engine::registerTSKeybindObjectCallback(esObjectReferencePtr object, string
 			bind: bind,
 		});
 
-		if(this->bindToTSObjectCallback[bind].find(pair<esObjectReferencePtr, string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
+		if(this->bindToTSObjectCallback[bind].find(std::pair<esObjectReferencePtr, std::string>(object, callback)) == this->bindToTSObjectCallback[bind].end()) {
 			this->bindToTSObjectCallback[bind].emplace(esCloneObjectReference(object), callback);
 		}
 	}
 }
 
-void Engine::registerBind(string command, GameObject* gameObject) {
+void Engine::registerBind(std::string command, GameObject* gameObject) {
 	this->bindToGameObject[command].emplace(gameObject);
 }
 
-void Engine::registerBindAxis(string command, GameObject* gameObject) {
+void Engine::registerBindAxis(std::string command, GameObject* gameObject) {
 	this->bindAxisToGameObject[command].emplace(gameObject);
 }
 

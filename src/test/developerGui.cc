@@ -166,7 +166,7 @@ void DeveloperGui::render() {
 		float width = ImGui::GetContentRegionAvail().x;
 		int count = 0;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(margin, margin));
-		for(render::Texture* texture: this->spritesheetImages) {
+		for(render::Texture* texture: this->spritesheetTextures) {
 			if(usedWidth + size < width && count != 0) {
 				ImGui::SameLine();
 				usedWidth += size + margin;
@@ -201,7 +201,7 @@ void DeveloperGui::render() {
 		ImGui::SetNextWindowSize(ImVec2(-1, -1));
 		ImGui::Begin("eggscript shell", NULL, ImGuiWindowFlags_NoResize);
 
-		if(this->focusConsole) {
+		if(this->_focusConsole) {
 			ImGui::SetWindowFocus();
 			ImGui::SetWindowCollapsed(false);
 		}
@@ -248,9 +248,9 @@ void DeveloperGui::render() {
 		memset(buffer, 0, sizeof(buffer));
 		ImGui::PushItemWidth(800.f);
 
-		if(this->focusConsole) {
+		if(this->_focusConsole) {
 			ImGui::SetKeyboardFocusHere();
-			this->focusConsole = false;
+			this->_focusConsole = false;
 		}
 
 		if(
@@ -293,4 +293,19 @@ void DeveloperGui::addEntry(ConsoleEntry entry) {
 	this->console.push_back(entry);
 }
 
+void DeveloperGui::focusConsole() {
+	this->_focusConsole = true;
+}
+
+void DeveloperGui::setSpritesheet(png spritesheet) {
+	this->spritesheet = spritesheet;
+}
+
+png DeveloperGui::getSpritesheet() {
+	return this->spritesheet;
+}
+
+void DeveloperGui::addSpritesheetTexture(render::Texture* texture) {
+	this->spritesheetTextures.push_back(texture);
+}
 #endif

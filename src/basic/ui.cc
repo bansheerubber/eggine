@@ -17,3 +17,7 @@ void UI::update() {
 		0.0
 	);
 }
+
+glm::mat4 UI::getProjectionMatrix() {
+	return this->projectionMatrix;
+}

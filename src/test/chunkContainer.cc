@@ -49,8 +49,8 @@ ChunkContainer::ChunkContainer() {
 	}
 
 	if(ChunkContainer::Image == nullptr) {
-		ChunkContainer::Image = (resources::SpriteSheet*)engine->manager->metadataToResources(
-			engine->manager->carton->database.get()->equals("extension", ".ss")->exec()
+		ChunkContainer::Image = (resources::SpriteSheet*)engine->manager.metadataToResources(
+			engine->manager.carton->database.get()->equals("extension", ".ss")->exec()
 		)[0];
 	}
 
@@ -79,10 +79,10 @@ ChunkContainer::ChunkContainer() {
 	this->reference = esInstantiateObject(engine->eggscript, "ChunkContainer", this);
 
 	this->playerTeam = new Team();
-	this->playerTeam->name = "Player";
+	this->playerTeam->setName("Player");
 
 	this->enemyTeam = new Team();
-	this->enemyTeam->name = "Alien";
+	this->enemyTeam->setName("Alien");
 }
 
 ChunkContainer::~ChunkContainer() {
@@ -158,7 +158,7 @@ uint64_t ChunkContainer::getChunkCount() {
 }
 
 void ChunkContainer::render(double deltaTime, RenderContext &context) {
-	this->timer++;
+	this->shaderTimer++;
 	
 	engine->renderWindow.getState(0).bindProgram(ChunkContainer::Program);
 	engine->renderWindow.getState(0).bindTexture("spriteTexture", ChunkContainer::Image->texture);
@@ -300,6 +300,10 @@ Character* ChunkContainer::getCharacter(glm::ivec3 position) {
 	return it.value();
 }
 
+uint32_t ChunkContainer::getShaderTimer() {
+	return this->shaderTimer;
+}
+
 void ChunkContainer::rightClickTile(glm::ivec3 position) {
 	esEntry arguments[1];
 	esCreateVectorAt(&arguments[0], 3, (double)position.x, (double)position.y, (double)position.z);
@@ -353,7 +357,7 @@ glm::ivec3 ChunkContainer::findCandidateSelectedTile(glm::vec2 screen) {
 	return glm::ivec3(screenToTile(screen));
 }
 
-void ChunkContainer::onBind(string &bind, binds::Action action) {
+void ChunkContainer::onBind(std::string &bind, binds::Action action) {
 	if(bind == "chunk.mouseSelectTile" && action == binds::RELEASE) {
 		this->selectTile(this->findCandidateSelectedTile(engine->camera->mouseToWorld(engine->mouse)), false, false);
 	}
@@ -368,7 +372,7 @@ void ChunkContainer::onBind(string &bind, binds::Action action) {
 	}
 }
 
-void ChunkContainer::onAxis(string &bind, double value) {
+void ChunkContainer::onAxis(std::string &bind, double value) {
 	if((bind == "chunk.xAxis" || bind == "chunk.yAxis") && value != 0.0) {
 		glm::vec2 position = engine->camera->getPosition();
 		position.x += 0.5;

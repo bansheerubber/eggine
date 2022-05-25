@@ -30,6 +30,14 @@ void Team::remove(Unit* unit) {
 	unit->team = nullptr;
 }
 
+void Team::setName(std::string name) {
+	this->name = name;
+}
+
+std::string Team::getName() {
+	return this->name;
+}
+
 int teamUnitSort(Unit** unit1, Unit** unit2) {
 	if(*unit1 > *unit2) {
 		return 1;
@@ -103,7 +111,7 @@ esEntryPtr es::Team__has(esEnginePtr esEngine, unsigned int argc, esEntry* args)
 esEntryPtr es::Team__setName(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
 		Team* team = (Team*)args[0].objectData->objectWrapper->data;
-		team->name = std::string(args[1].stringData);
+		team->getName() = std::string(args[1].stringData);
 	}
 	return nullptr;
 }
@@ -111,7 +119,7 @@ esEntryPtr es::Team__setName(esEnginePtr esEngine, unsigned int argc, esEntryPtr
 esEntryPtr es::Team__getName(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1 && esCompareNamespaceToObject(args[0].objectData, "Team")) {
 		Team* team = (Team*)args[0].objectData->objectWrapper->data;
-		return esCreateString(cloneString(team->name.c_str()));
+		return esCreateString(cloneString(team->getName().c_str()));
 	}
 	return nullptr;
 }

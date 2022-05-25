@@ -52,7 +52,7 @@ void Unit::calculateDestinations(TileSet &destinations, unsigned int moves) {
 		start.z -= 1;
 	}
 
-	priority_queue<DijkstraEntry> queue;
+	std::priority_queue<DijkstraEntry> queue;
 	tsl::robin_map<glm::vec3, unsigned int> distances;
 
 	destinations.add(start);
@@ -258,7 +258,7 @@ esEntryPtr es::Unit__setMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
 		unit->maxHealth = (int)args[1].numberData;
-		unit->health = max(unit->maxHealth, unit->health);
+		unit->health = std::max(unit->maxHealth, unit->health);
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 
 		unit->writeUpdateMask("maxHealth");
@@ -269,7 +269,7 @@ esEntryPtr es::Unit__setMaxHealth(esEnginePtr esEngine, unsigned int argc, esEnt
 esEntryPtr es::Unit__addHealth(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 2 && esCompareNamespaceToObject(args[0].objectData, "Unit")) {
 		Unit* unit = (Unit*)args[0].objectData->objectWrapper->data;
-		unit->health = max(min(unit->health + (int)args[1].numberData, unit->maxHealth), 0);
+		unit->health = std::max(std::min(unit->health + (int)args[1].numberData, unit->maxHealth), 0);
 		unit->healthbar.setPercent((double)unit->health / (double)unit->maxHealth);
 		if(unit->health <= 0) {
 			unit->kill();

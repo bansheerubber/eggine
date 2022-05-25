@@ -8,8 +8,8 @@ Map::Map(ChunkContainer* container) {
 	this->container = container;
 }
 
-void Map::loadFromFile(string filename) {
-	ifstream file(filename, ios::binary);
+void Map::loadFromFile(std::string filename) {
+	std::ifstream file(filename, std::ios::binary);
 
 	if(file.bad() || file.fail()) {
 		console::error("failed to open file for map %s\n", filename.c_str());
@@ -49,8 +49,8 @@ void Map::load(unsigned char* buffer, uint64_t size) {
 		MapCommand command = (MapCommand)this->readNumber<uint16_t>(&buffer[index], &index);
 		switch(command) {
 			case MAP_INFO: {
-				string key = this->readString(&buffer[index], &index);
-				string value = this->readString(&buffer[index], &index);
+				std::string key = this->readString(&buffer[index], &index);
+				std::string value = this->readString(&buffer[index], &index);
 				this->info[key] = value;
 				break;
 			}
@@ -83,8 +83,8 @@ void Map::load(unsigned char* buffer, uint64_t size) {
 	}
 }
 
-void Map::save(string filename) {
-	ofstream file(filename);
+void Map::save(std::string filename) {
+	std::ofstream file(filename);
 
 	file.write("XMAP", 4);
 
@@ -102,8 +102,8 @@ void Map::save(string filename) {
 		this->writeNumber<short>(file, MAP_CHUNK);
 		this->writeNumber<short>(file, chunk->getPosition().x);
 		this->writeNumber<short>(file, chunk->getPosition().y);
-		this->writeNumber<short>(file, chunk->height);
-		for(unsigned int i = 0; i < Chunk::Size * Chunk::Size * chunk->height; i++) {
+		this->writeNumber<short>(file, chunk->getHeight());
+		for(unsigned int i = 0; i < Chunk::Size * Chunk::Size * chunk->getHeight(); i++) {
 			this->writeNumber<short>(file, chunk->getTileTextureByIndex(i));
 		}
 	}

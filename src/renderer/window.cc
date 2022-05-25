@@ -48,8 +48,10 @@ void render::Window::initialize() {
 void render::Window::initializeHTML() {
 	this->htmlContainer = new LiteHTMLContainer();
 
-	resources::HTML* html = (resources::HTML*)engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", "html/index.html")->exec())[0];
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".css")->exec());
+	resources::HTML* html = (resources::HTML*)engine->manager.loadResources(
+		engine->manager.carton->database.get()->equals("fileName", "html/index.html")->exec()
+	)[0];
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".css")->exec());
 	this->htmlDocument = litehtml::document::createFromString(html->document.c_str(), this->htmlContainer, &this->htmlContext);
 }
 

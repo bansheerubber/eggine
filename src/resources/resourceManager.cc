@@ -29,21 +29,22 @@
 
 void handleSpritesheets(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::SpriteSheet((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::SpriteSheet(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 	
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(file->getFileName() == "spritesheets/spritesheet.ss") {
-		engine->developerGui->spritesheet = loadPng((unsigned char*)buffer, bufferSize);
+		png spritesheet = loadPng((unsigned char*)buffer, bufferSize);
+		engine->developerGui->setSpritesheet(spritesheet);
 		for(unsigned int i = 0; i < stoul(file->metadata->getMetadata("amount")); i++) {
 			glm::ivec2 start = tilemath::textureIndexToXY(i, 1057, 391);
-			cropped result = crop(engine->developerGui->spritesheet, start.x, start.y, 64, 128);
+			cropped result = crop(spritesheet, start.x, start.y, 64, 128);
 
 			render::Texture* texture = new render::Texture(&engine->renderWindow);
 			texture->setFilters(render::TEXTURE_FILTER_NEAREST, render::TEXTURE_FILTER_NEAREST);
 			texture->setWrap(render::TEXTURE_WRAP_CLAMP_TO_BORDER, render::TEXTURE_WRAP_CLAMP_TO_BORDER);
 			texture->load(result.buffer, result.bufferSize, result.width, result.height, result.source.bitDepth, result.source.channels);
 
-			engine->developerGui->spritesheetImages.push_back(texture);
+			engine->developerGui->addSpritesheetTexture(texture);
 
 			delete[] result.buffer;
 		}
@@ -53,32 +54,32 @@ void handleSpritesheets(void* owner, carton::File* file, const char* buffer, uin
 
 void handleHTML(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::HTML((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::HTML(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleCSS(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::CSS((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::CSS(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handlePNGs(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::Image((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::Image(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleScripts(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::ScriptFile((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::ScriptFile(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::ShaderSource(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::ShaderSource(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 	
 	// find the .vert/.frag and associate it with the shader source so we can get uniform buffer bindings
 	resources::ShaderSource* original = (resources::ShaderSource*)((resources::ResourceManager*)owner)->metadataToResources(
@@ -92,7 +93,7 @@ void handleDKSHShaders(void* owner, carton::File* file, const char* buffer, uint
 
 void handleSPVShaders(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::ShaderSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::ShaderSource(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 	
 	// find the .vert/.frag and associate it with the shader source so we can get uniform buffer bindings
 	resources::ShaderSource* original = (resources::ShaderSource*)((resources::ResourceManager*)owner)->metadataToResources(
@@ -106,15 +107,15 @@ void handleSPVShaders(void* owner, carton::File* file, const char* buffer, uint6
 
 void handleMaps(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new resources::MapSource((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new resources::MapSource(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 void handleSounds(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
-		= new sound::SoundCollection((resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+		= new sound::SoundCollection(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
-resources::ShaderSource* getShaderSource(string fileName) {
+resources::ShaderSource* getShaderSource(std::string fileName) {
 	#ifdef __switch__
 	fileName += ".dksh";
 	#endif
@@ -123,12 +124,28 @@ resources::ShaderSource* getShaderSource(string fileName) {
 		fileName += ".spv";
 	}
 	
-	return (resources::ShaderSource*)engine->manager->metadataToResources(
-		engine->manager->carton->database.get()->equals("fileName", fileName)->exec()
+	return (resources::ShaderSource*)engine->manager.metadataToResources(
+		engine->manager.carton->database.get()->equals("fileName", fileName)->exec()
 	)[0];
 }
 
-resources::ResourceManager::ResourceManager(string fileName) {
+resources::ResourceManager::ResourceManager() {
+	
+}
+
+resources::ResourceManager::~ResourceManager() {
+	#ifdef __linux__
+	if(this->watch >= 0) {
+		inotify_rm_watch(this->inotify, this->watch);
+	}
+	
+	if(this->inotify >= 0) {
+		close(this->inotify);
+	}
+	#endif
+}
+
+void resources::ResourceManager::init(std::string fileName) {
 	#ifdef __linux__
 	this->inotify = inotify_init();
 	if(this->inotify < 0) {
@@ -148,18 +165,6 @@ resources::ResourceManager::ResourceManager(string fileName) {
 	
 	this->fileName = fileName;
 	this->reload();
-}
-
-resources::ResourceManager::~ResourceManager() {
-	#ifdef __linux__
-	if(this->watch >= 0) {
-		inotify_rm_watch(this->inotify, this->watch);
-	}
-	
-	if(this->inotify >= 0) {
-		close(this->inotify);
-	}
-	#endif
 }
 
 void resources::ResourceManager::tick() {
@@ -189,7 +194,7 @@ void resources::ResourceManager::tick() {
 	if(!(this->carton->hash == this->hash)) {
 		console::print("----------------------------------------------------------------------\n");
 
-		string hash = "";
+		std::string hash = "";
 		for(unsigned int i = 0; i < MD5_DIGEST_LENGTH; i++) {
 			hash += fmt::format("{:x}", this->hash.hash[i]);
 		}
@@ -279,6 +284,6 @@ void es::defineResourceManager() {
 }
 
 esEntryPtr es::hotReload(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
-	engine->manager->reload();
+	engine->manager.reload();
 	return nullptr;
 }

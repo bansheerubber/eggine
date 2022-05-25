@@ -11,5 +11,6 @@ class RenderObject : public GameObject {
 		
 		virtual void render(double deltaTime, RenderContext &context) = 0;
 
+	private:
 		bool visible = true;
 };

@@ -80,7 +80,7 @@ class Engine {
 	public:
 		FT_Library ft;
 		esEnginePtr eggscript = nullptr;
-		resources::ResourceManager* manager;
+		resources::ResourceManager manager;
 		render::Window renderWindow;
 		sound::Engine soundEngine;
 		network::Network network;
@@ -118,17 +118,17 @@ class Engine {
 		void removeUIObject(RenderObject* renderable);
 
 		// handle keybinds
-		void registerTSKeybindCallback(string bind, string key, string callback);
-		void registerTSKeybindObjectCallback(esObjectReferencePtr object, string bind, string key, string callback);
-		void registerBind(string command, GameObject* gameObject);
-		void registerBindAxis(string command, GameObject* gameObject);
+		void registerTSKeybindCallback(std::string bind, std::string key, std::string callback);
+		void registerTSKeybindObjectCallback(esObjectReferencePtr object, std::string bind, std::string key, std::string callback);
+		void registerBind(std::string command, GameObject* gameObject);
+		void registerBindAxis(std::string command, GameObject* gameObject);
 		void addKeybind(int key, binds::Keybind keybind);
 		void addAxis(binds::Axes axis, binds::Keybind keybind);
 		void addMousebind(int button, binds::Keybind keybind);
 		void addGamepadBind(binds::GamepadButtons bind, binds::Keybind keybind);
 
-		void setFilePrefix(string filePrefix);
-		string getFilePrefix();
+		void setFilePrefix(std::string filePrefix);
+		std::string getFilePrefix();
 
 	private:
 		#ifdef __switch__
@@ -150,22 +150,22 @@ class Engine {
 		DynamicArray<RenderObject*> renderables = DynamicArray<RenderObject*>(1024);
 		DynamicArray<RenderObject*> renderableUIs = DynamicArray<RenderObject*>(1024);
 
-		tsl::robin_map<string, tsl::robin_set<string>> bindToTSCallback;
-		tsl::robin_map<string, tsl::robin_set<pair<esObjectReferencePtr, string>>> bindToTSObjectCallback;
-		tsl::robin_map<string, tsl::robin_set<GameObject*>> bindToGameObject;
-		tsl::robin_map<string, tsl::robin_set<GameObject*>> bindAxisToGameObject;
+		tsl::robin_map<std::string, tsl::robin_set<std::string>> bindToTSCallback;
+		tsl::robin_map<std::string, tsl::robin_set<std::pair<esObjectReferencePtr, std::string>>> bindToTSObjectCallback;
+		tsl::robin_map<std::string, tsl::robin_set<GameObject*>> bindToGameObject;
+		tsl::robin_map<std::string, tsl::robin_set<GameObject*>> bindAxisToGameObject;
 
-		tsl::robin_map<int, vector<binds::Keybind>> keyToKeybind;
-		tsl::robin_map<binds::Axes, vector<binds::Keybind>> axisToKeybind;
-		tsl::robin_map<int, vector<binds::Keybind>> buttonToMousebind;
-		tsl::robin_map<binds::GamepadButtons, vector<binds::Keybind>> gamepadToBind;
+		tsl::robin_map<int, std::vector<binds::Keybind>> keyToKeybind;
+		tsl::robin_map<binds::Axes, std::vector<binds::Keybind>> axisToKeybind;
+		tsl::robin_map<int, std::vector<binds::Keybind>> buttonToMousebind;
+		tsl::robin_map<binds::GamepadButtons, std::vector<binds::Keybind>> gamepadToBind;
 
-		tsl::robin_map<string, int> keyToScancode;
-		tsl::robin_map<int, string> scancodeToKey;
+		tsl::robin_map<std::string, int> keyToScancode;
+		tsl::robin_map<int, std::string> scancodeToKey;
 
-		tsl::robin_map<string, binds::GamepadButtons> gamepadToEnum;
-		tsl::robin_map<string, binds::Axes> axesToEnum;
-		tsl::robin_map<string, int> mouseToEnum;
+		tsl::robin_map<std::string, binds::GamepadButtons> gamepadToEnum;
+		tsl::robin_map<std::string, binds::Axes> axesToEnum;
+		tsl::robin_map<std::string, int> mouseToEnum;
 
 		#ifdef __switch__
 		uint64_t lastGamepadButtons = 0;

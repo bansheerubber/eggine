@@ -107,7 +107,7 @@ TileSet* TileSet::pathfind(glm::ivec3 start, glm::ivec3 end) {
 
 	tsl::robin_map<glm::ivec3, unsigned int> distances;
 	tsl::robin_map<glm::ivec3, glm::ivec3> cameFrom;
-	priority_queue<AStarEntry> queue;
+	std::priority_queue<AStarEntry> queue;
 	auto heuristic = [](glm::ivec3 a, glm::ivec3 b) { return (unsigned int)manhattan(a, b); };
 
 	queue.push(AStarEntry {

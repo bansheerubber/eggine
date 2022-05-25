@@ -22,25 +22,36 @@ namespace render {
 		glm::vec2 maxUV;
 	};
 
+	struct FontInfo {
+		int size = 0;
+		int ascent = 0;
+		int descent = 0;
+		int xHeight = 0;
+	};
+
 	class Font : public GameObject {
 		friend Text;
 		
 		public:
 			Font(std::string fileName, int size);
-			std::string fileName;
+
+			FontInfo getInfo();
+			FontGlyph getGlyph(unsigned char character);
 
 			static tsl::robin_map<std::string, tsl::robin_map<int, Font*>> Fonts;
 			static Font* GetFont(std::string family, int size);
-
-			int size = 0;
-			char atlas[256 * 256];
-			int ascent = 0;
-			int descent = 0;
-			int x_height = 0;
-			FontGlyph characterToGlyph[128];
 		
 		protected:
 			FT_Face face;
 			render::Texture* texture = nullptr;
+
+			std::string fileName;
+
+			int size = 0;
+			int ascent = 0;
+			int descent = 0;
+			int xHeight = 0;
+			char atlas[256 * 256];
+			FontGlyph characterToGlyph[128];
 	};
 };

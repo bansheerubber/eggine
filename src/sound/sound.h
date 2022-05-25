@@ -52,7 +52,7 @@ namespace sound {
 		friend void ::_play(sound::SoundThreadContext* context);
 		
 		public:
-			Sound(resources::ResourceManager* manager, carton::Metadata* metadata);
+			Sound(resources::ResourceManager &manager, carton::Metadata* metadata);
 
 			void play(SoundSourceProperties properties = SoundSourceProperties());
 

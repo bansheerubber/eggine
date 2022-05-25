@@ -74,7 +74,7 @@ void render::Window::initializeVulkan() {
 	this->setupDevice();
 	this->createSwapchain();
 
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".spv")->exec());
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".spv")->exec());
 
 	vk::CommandPoolCreateInfo commandPoolInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer, this->device.graphicsQueueIndex);
 	this->commandPool = this->device.device.createCommandPool(commandPoolInfo); 

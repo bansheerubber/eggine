@@ -56,7 +56,7 @@ void Line::render(double deltaTime, RenderContext &context) {
 		struct {
 			glm::mat4 projection;
 		} vb;
-		vb.projection = context.camera->projectionMatrix;
+		vb.projection = context.camera->getProjectionMatrix();
 
 		engine->renderWindow.getState(0).bindUniform("vertexBlock", &vb.projection[0][0], sizeof(glm::mat4));
 		engine->renderWindow.getState(0).bindVertexAttributes(this->attributes);

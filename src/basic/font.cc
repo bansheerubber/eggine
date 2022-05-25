@@ -76,7 +76,7 @@ render::Font::Font(std::string fileName, int size) {
 		};
 
 		if(c == 'z' || c == 'w' || c == 'v' || c == 'x') {
-			this->x_height += this->face->glyph->bitmap_top;
+			this->xHeight += this->face->glyph->bitmap_top;
 		}
 
 		if(this->characterToGlyph[c].top > this->ascent) {
@@ -88,7 +88,7 @@ render::Font::Font(std::string fileName, int size) {
 		}
 	}
 
-	this->x_height /= 4;
+	this->xHeight /= 4;
 
 	this->texture = new render::Texture(&engine->renderWindow);
 	this->texture->setWrap(render::TEXTURE_WRAP_CLAMP_TO_EDGE, render::TEXTURE_WRAP_CLAMP_TO_EDGE);
@@ -97,4 +97,17 @@ render::Font::Font(std::string fileName, int size) {
 	this->texture->load((unsigned char*)this->atlas, 256 * 256, 256, 256, 8, 1);
 
 	FT_Done_Face(face);
+}
+
+render::FontInfo render::Font::getInfo() {
+	return {
+		this->size,
+		this->ascent,
+		this->descent,
+		this->xHeight,
+	};
+}
+
+render::FontGlyph render::Font::getGlyph(unsigned char character) {
+	return this->characterToGlyph[character];
 }

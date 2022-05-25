@@ -29,7 +29,7 @@ void network::RemoteObject::writeUpdateMask(unsigned int position) {
 	this->update = true;
 }
 
-void network::RemoteObject::writeUpdateMask(string property) {
+void network::RemoteObject::writeUpdateMask(std::string property) {
 	this->writeUpdateMask(this->propertyToMaskPosition(property));
 }
 
@@ -94,6 +94,6 @@ void network::RemoteObject::allocateMask() {
 	
 }
 
-unsigned int network::RemoteObject::propertyToMaskPosition(string property) {
+unsigned int network::RemoteObject::propertyToMaskPosition(std::string property) {
 	return 0;
 }

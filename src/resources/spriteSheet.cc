@@ -4,7 +4,7 @@
 #include "resourceManager.h"
 
 resources::SpriteSheet::SpriteSheet(
-	ResourceManager* manager,
+	ResourceManager &manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
 	uint64_t bufferSize
@@ -21,16 +21,16 @@ resources::SpriteSheet::SpriteSheet(
 	this->spriteInfo.allocate(this->spriteSheetAmount);
 
 	for(uint64_t i = 0; i < this->spriteSheetAmount; i++) {
-		string info = metadata->getMetadata("sprite" + to_string(i));
+		std::string info = metadata->getMetadata("sprite" + std::to_string(i));
 		this->spriteInfo[i].wall = NO_WALL;
 		this->spriteInfo[i].index = (unsigned int)i;
 		if(info.size()) {
 			do {
 				uint64_t position = info.find(' ');
-				position = position != string::npos
+				position = position != std::string::npos
 					? position
 					: info.size();
-				string word = info.substr(0, position);
+				std::string word = info.substr(0, position);
 				info = info.substr(position >= info.size() ? info.size() : position + 1, info.size());
 
 				// figure out what to do with info
@@ -86,7 +86,7 @@ resources::SpriteSheet::SpriteSheet(
 
 				// handle spritesheet roots/facing
 				uint64_t rootPos = 0;
-				if((rootPos = word.find("root")) != string::npos) {
+				if((rootPos = word.find("root")) != std::string::npos) {
 					unsigned int root = stoi(word.substr(0, rootPos));
 					if(this->spriteFacingInfo.find(root) == this->spriteFacingInfo.end()) {
 						this->spriteFacingInfo[root] = new SpriteFacingInfo {

@@ -24,17 +24,14 @@ int vDeveloperError(const char* buffer, va_list args);
 class DeveloperGui {
 	public:
 		DeveloperGui();
-
-		png spritesheet;
-		std::vector<render::Texture*> spritesheetImages;
-
-		std::vector<ConsoleEntry> console;
-
-		bool focusConsole = false;
 		
 		void render();
 		void prerender();
 		void addEntry(ConsoleEntry entry);
+		void focusConsole();
+		void setSpritesheet(png spritesheet);
+		png getSpritesheet();
+		void addSpritesheetTexture(render::Texture* texture);
 	
 	private:
 		std::vector<std::string> history;
@@ -42,6 +39,11 @@ class DeveloperGui {
 		std::string incompleteCommand = "";
 		bool jumpToBottom = false;
 		bool consoleFullSize = false; // whether or not the console takes up the full extent of its scroll
+		bool _focusConsole = false;
+		png spritesheet;
+		std::vector<ConsoleEntry> console;
+		std::vector<render::Texture*> spritesheetTextures;
+
 		int consoleCallback(ImGuiInputTextCallbackData* data);
 };
 #endif

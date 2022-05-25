@@ -129,6 +129,30 @@ std::string Text::getText() {
 	return this->text;
 }
 
+void Text::setColor(glm::vec3 color) {
+	this->color = color;
+}
+
+glm::vec3 Text::getColor() {
+	return this->color;
+}
+
+void Text::setPosition(glm::vec2 position) {
+	this->position = position;
+}
+
+glm::vec2 Text::getPosition() {
+	return this->position;
+}
+
+void Text::setFont(render::Font* font) {
+	this->font = font;
+}
+
+render::Font* Text::getFont() {
+	return this->font;
+}
+
 void Text::render(double deltaTime, RenderContext &context) {
 	if(this->oldText != this->text) {
 		this->updateBuffers();
@@ -142,7 +166,7 @@ void Text::render(double deltaTime, RenderContext &context) {
 		glm::mat4 projection;
 		glm::vec2 position;
 	} vb;
-	vb.projection = context.ui->projectionMatrix;
+	vb.projection = context.ui->getProjectionMatrix();
 	vb.position = this->position;
 
 	struct FragmentBlock {

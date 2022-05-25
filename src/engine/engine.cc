@@ -60,12 +60,12 @@ void Engine::initialize() {
 
 	FT_Init_FreeType(&this->ft);
 
-	this->manager = new resources::ResourceManager(this->filePrefix + "out.carton");
+	this->manager.init(this->filePrefix + "out.carton");
 
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".frag")->exec());
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".vert")->exec());
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".frag")->exec());
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".vert")->exec());
 	#ifdef __switch__
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".dksh")->exec());
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".dksh")->exec());
 	#endif
 
 	this->renderWindow.initialize();
@@ -89,9 +89,7 @@ void Engine::initialize() {
 
 	#ifdef EGGINE_DEBUG
 	this->debugText = new Text("Arial", 12);
-	this->debugText->color[0] = 0.0;
-	this->debugText->color[1] = 1.0;
-	this->debugText->color[2] = 0.0;
+	this->debugText->setColor(glm::vec3(0.0, 1.0, 0.0));
 	#endif
 
 	// initialize keybinds
@@ -302,11 +300,11 @@ void Engine::initialize() {
 	this->camera = new Camera();
 
 	// pre-load all .egg files
-	engine->manager->loadResources(engine->manager->carton->database.get()->equals("extension", ".egg")->exec());
+	engine->manager.loadResources(engine->manager.carton->database.get()->equals("extension", ".egg")->exec());
 
 	// execute eggscript file
-	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager->metadataToResources(
-		engine->manager->carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
+	resources::ScriptFile* mainCS = (resources::ScriptFile*)engine->manager.metadataToResources(
+		engine->manager.carton->database.get()->equals("fileName", "scripts/main.egg")->exec()
 	)[0];
 	esExecVirtualFile(this->eggscript, "scripts/main.egg", mainCS->script.c_str());
 	esCallFunction(this->eggscript, "init", 0, nullptr);
@@ -330,7 +328,6 @@ void Engine::exit() {
 	FT_Done_FreeType(ft);
 
 	this->renderWindow.deinitialize();
-	delete this->manager;
 
 	#ifdef __switch__
 	close(this->nxlink);
@@ -545,7 +542,7 @@ void Engine::tick() {
 		this->network.tick();
 	}
 
-	this->manager->tick();
+	this->manager.tick();
 
 	goto start_tick;
 }
@@ -568,11 +565,11 @@ void Engine::removeUIObject(RenderObject* renderable) {
 	this->renderableUIs.remove(renderable);
 }
 
-void Engine::setFilePrefix(string filePrefix) {
+void Engine::setFilePrefix(std::string filePrefix) {
 	this->filePrefix = filePrefix;
 }
 
-string Engine::getFilePrefix() {
+std::string Engine::getFilePrefix() {
 	return this->filePrefix;
 }
 

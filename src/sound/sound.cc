@@ -8,15 +8,15 @@
 #include "soundReader.h"
 
 sound::Sound::Sound(
-	resources::ResourceManager* manager,
+	resources::ResourceManager &manager,
 	carton::Metadata* metadata
 ) : resources::ResourceObject(manager, metadata) {
 	this->fileName = metadata->getMetadata("fileName");
-	this->position = engine->manager->carton->getFileLocation(this->fileName);
-	this->size = engine->manager->carton->getFileSize(this->fileName);
+	this->position = engine->manager.carton->getFileLocation(this->fileName);
+	this->size = engine->manager.carton->getFileSize(this->fileName);
 
 	SoundFileType type = OGG_FILE;
-	if(this->fileName.find("wav") != string::npos) {
+	if(this->fileName.find("wav") != std::string::npos) {
 		type = WAV_FILE;
 	}
 
@@ -64,7 +64,7 @@ void _play(sound::SoundThreadContext* context) {
 		ALint state = AL_PLAYING;
 		while(state == AL_PLAYING) {
 			alGetSourcei(source, AL_SOURCE_STATE, &state); // update the state
-			this_thread::sleep_for(chrono::milliseconds(SOUND_THREAD_WAIT));
+			std::this_thread::sleep_for(std::chrono::milliseconds(SOUND_THREAD_WAIT));
 		}
 
 		alDeleteSources(1, &source); // cleanup the source
@@ -74,7 +74,7 @@ void _play(sound::SoundThreadContext* context) {
 	}
 
 	sound::SoundFileType type = sound::OGG_FILE;
-	if(sound->fileName.find("wav") != string::npos) {
+	if(sound->fileName.find("wav") != std::string::npos) {
 		type = sound::WAV_FILE;
 	}
 
@@ -109,7 +109,7 @@ void _play(sound::SoundThreadContext* context) {
 		alGetSourcei(source, AL_BUFFERS_PROCESSED, &buffersProcessed); // figure out if we need to update buffers
 
 		if(buffersProcessed == 0) {
-			this_thread::sleep_for(chrono::milliseconds(SOUND_THREAD_WAIT));
+			std::this_thread::sleep_for(std::chrono::milliseconds(SOUND_THREAD_WAIT));
 			continue;
 		}
 
@@ -170,7 +170,7 @@ void sound::Sound::play(SoundSourceProperties properties) {
 	SoundThreadContext* context = new SoundThreadContext;
 	context->properties = properties;
 	context->sound = this;
-	thread t(&::_play, context);
+	std::thread t(&::_play, context);
 	t.detach();
 	#endif
 }

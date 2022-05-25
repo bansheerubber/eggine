@@ -72,7 +72,7 @@ namespace render {
 			unsigned int width = 1280;
 			unsigned int height = 720;
 
-			shared_ptr<litehtml::document> htmlDocument = nullptr;
+			std::shared_ptr<litehtml::document> htmlDocument = nullptr;
 			render::LiteHTMLContainer* htmlContainer = nullptr;
 			
 			Manager memory = Manager(this);

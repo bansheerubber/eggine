@@ -32,7 +32,7 @@ void es::defineDOM() {
 
 esEntryPtr es::getHTMLElementById(esEnginePtr esEngine, unsigned int argc, esEntryPtr args) {
 	if(argc == 1) {
-		esObjectReferencePtr object = engine->renderWindow.htmlContainer->getESObject(string(args[0].stringData));
+		esObjectReferencePtr object = engine->renderWindow.htmlContainer->getESObject(std::string(args[0].stringData));
 		if(object != nullptr) {
 			return esCreateObject(object);
 		}
@@ -111,7 +111,7 @@ esEntryPtr es::HTMLElement__createChild(esEnginePtr esEngine, unsigned int argc,
 		litehtml::element::ptr parent = found.value();
 		esEntryPtr entry = new esEntry;
 		entry->type = ES_ENTRY_OBJECT;
-		entry->objectData = engine->renderWindow.htmlContainer->createChild(parent, string(args[1].stringData));
+		entry->objectData = engine->renderWindow.htmlContainer->createChild(parent, std::string(args[1].stringData));
 		return entry;
 	}
 	return nullptr;

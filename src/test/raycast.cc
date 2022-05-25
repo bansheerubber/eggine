@@ -5,7 +5,7 @@
 #include "../util/sign.h"
 
 RaycastMarcher::RaycastMarcher(glm::ivec3 start, glm::vec3 direction, unsigned int length, unsigned int options) {
-	if(isnan(glm::length(direction)) || glm::length(direction) < 0.99) {
+	if(std::isnan(glm::length(direction)) || glm::length(direction) < 0.99) {
 		this->_finished = true;
 		this->currentNormal = glm::vec3();
 		return;
@@ -46,7 +46,7 @@ RaycastMarcher::RaycastMarcher(glm::ivec3 start, glm::vec3 direction, unsigned i
 RaycastMarcher::RaycastMarcher(glm::ivec3 start, glm::ivec3 end, unsigned int options) {
 	glm::vec3 direction = end - start;
 	direction = glm::normalize(direction);
-	if(isnan(glm::length(direction)) || glm::length(direction) < 0.99) {
+	if(std::isnan(glm::length(direction)) || glm::length(direction) < 0.99) {
 		this->_finished = true;
 		this->currentNormal = glm::vec3();
 		return;

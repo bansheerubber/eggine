@@ -3,7 +3,7 @@
 #include <string.h>
 
 resources::ShaderSource::ShaderSource(
-	ResourceManager* manager,
+	ResourceManager &manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
 	uint64_t bufferSize

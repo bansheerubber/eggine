@@ -40,7 +40,7 @@ void render::Box::render(glm::mat4 projection) {
 	} vb;
 
 	if(projection == glm::mat4(1)) {
-		vb.projection = engine->ui.projectionMatrix;
+		vb.projection = engine->ui.getProjectionMatrix();
 	}
 	else {
 		vb.projection = projection;

@@ -12,11 +12,11 @@ render::LiteHTMLContainer::LiteHTMLContainer() {}
 
 render::LiteHTMLContainer::~LiteHTMLContainer() {}
 
-Text* render::LiteHTMLContainer::getText(render::Font* font, string input) {
+Text* render::LiteHTMLContainer::getText(render::Font* font, std::string input) {
   auto found = this->stringToText.find(std::pair(font, input));
   if(found == this->stringToText.end()) {
     Text* text = new Text(false);
-    text->font = font;
+    text->setFont(font);
     text->setText(input);
     this->stringToText[std::pair(font, input)] = {
       text: text,
@@ -35,13 +35,13 @@ litehtml::uint_ptr render::LiteHTMLContainer::create_font(
   unsigned int decoration,
   litehtml::font_metrics* fm
 ) {
-  render::Font* font = render::Font::GetFont(string(faceName), size);
-  
+  render::Font* font = render::Font::GetFont(std::string(faceName), size);
+  render::FontInfo info = font->getInfo();
   if(fm) {
-    fm->ascent = font->ascent;
-    fm->descent = font->descent;
-    fm->height = font->ascent + font->descent;
-    fm->x_height = font->x_height;
+    fm->ascent = info.ascent;
+    fm->descent = info.descent;
+    fm->height = info.ascent + info.descent;
+    fm->x_height = info.xHeight;
     fm->draw_spaces = false;
   }
   return (litehtml::uint_ptr)font;
@@ -56,7 +56,7 @@ int render::LiteHTMLContainer::text_width(const litehtml::tchar_t* text, litehtm
   int x = 0;
   uint64_t length = strlen(text);
   for(uint64_t i = 0; i < length; i++) {
-    FontGlyph ch = font->characterToGlyph[(unsigned char)text[i]]; // TODO sign check
+    FontGlyph ch = font->getGlyph((unsigned char)text[i]); // TODO sign check
     x += (ch.advance >> 6);
   }
   return x;
@@ -69,20 +69,29 @@ void render::LiteHTMLContainer::draw_text(
   litehtml::web_color color,
   const litehtml::position& pos
 ) {
-  Text* foundText = this->getText((render::Font*)hFont, string(text));
+  Text* foundText = this->getText((render::Font*)hFont, std::string(text));
   RenderContext context = {
 		camera: engine->camera,
 		ui: &engine->ui,
 	};
-  foundText->position.x = pos.left();
-  if(foundText->position.x < 0) {
-    foundText->position.x = pos.left() + engine->renderWindow.width;
+  if(pos.left() < 0) {
+    foundText->setPosition(glm::vec2(
+      pos.left() + engine->renderWindow.width,
+      pos.top() - ((render::Font*)hFont)->getInfo().descent
+    ));
+  }
+  else {
+    foundText->setPosition(glm::vec2(
+      pos.left(),
+      pos.top() - ((render::Font*)hFont)->getInfo().descent
+    ));
   }
   
-  foundText->position.y = pos.top() - ((render::Font*)hFont)->descent;
-  foundText->color.r = (float)color.red / 255.0f;
-  foundText->color.g = (float)color.green / 255.0f;
-  foundText->color.b = (float)color.blue / 255.0f;
+  foundText->setColor(glm::vec3(
+    (float)color.red / 255.0f,
+    (float)color.green / 255.0f,
+    (float)color.blue / 255.0f
+  ));
   foundText->render(0, context);
 }
 
@@ -95,20 +104,22 @@ const litehtml::tchar_t* render::LiteHTMLContainer::get_default_font_name() cons
 void render::LiteHTMLContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker& marker) {}
 
 void render::LiteHTMLContainer::load_image(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, bool redraw_on_ready) {
-  if(this->sourceToImage[string(src)] != nullptr) {
+  if(this->sourceToImage[std::string(src)] != nullptr) {
     return;
   }
 
   std::string filename = "html";
   filename += src;
-  resources::Image* image = (resources::Image*)(engine->manager->loadResources(engine->manager->carton->database.get()->equals("fileName", filename)->exec())[0]);
-  this->sourceToImage[string(src)] = image;
+  resources::Image* image = (resources::Image*)(engine->manager.loadResources(
+    engine->manager.carton->database.get()->equals("fileName", filename)->exec()
+  )[0]);
+  this->sourceToImage[std::string(src)] = image;
 }
 
 void render::LiteHTMLContainer::get_image_size(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, litehtml::size& sz) {
-  if(this->sourceToImage[string(src)] != nullptr) {
-    sz.width = this->sourceToImage[string(src)]->getWidth();
-    sz.height = this->sourceToImage[string(src)]->getHeight();
+  if(this->sourceToImage[std::string(src)] != nullptr) {
+    sz.width = this->sourceToImage[std::string(src)]->getWidth();
+    sz.height = this->sourceToImage[std::string(src)]->getHeight();
   }
 }
 
@@ -128,7 +139,7 @@ void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const li
   }
   
   resources::Image* image;
-  if((image = this->sourceToImage[string(bg.image.c_str())]) != nullptr) {
+  if((image = this->sourceToImage[std::string(bg.image.c_str())]) != nullptr) {
     image->position.x = bg.position_x;
     image->position.y = bg.position_y;
     image->size.x = bg.image_size.width;
@@ -176,8 +187,8 @@ void render::LiteHTMLContainer::set_cursor(const litehtml::tchar_t* cursor) {}
 void render::LiteHTMLContainer::transform_text(litehtml::tstring& text, litehtml::text_transform tt) {}
 
 void render::LiteHTMLContainer::import_css(litehtml::tstring& text, const litehtml::tstring& url, litehtml::tstring& baseurl) {
-  resources::CSS* css = (resources::CSS*)engine->manager->metadataToResources(
-    engine->manager->carton->database.get()->equals("fileName", "html" + url)->exec()
+  resources::CSS* css = (resources::CSS*)engine->manager.metadataToResources(
+    engine->manager.carton->database.get()->equals("fileName", "html" + url)->exec()
   )[0];
   if(css != nullptr) {
     text = css->styles;
@@ -246,11 +257,11 @@ void render::LiteHTMLContainer::get_language(litehtml::tstring& language, liteht
   culture = _t("");
 }
 
-esObjectReferencePtr render::LiteHTMLContainer::getESObject(string id) {
+esObjectReferencePtr render::LiteHTMLContainer::getESObject(std::string id) {
   return this->elementToESObject[&*this->idToElement[id]];
 }
 
-esObjectReferencePtr render::LiteHTMLContainer::createChild(litehtml::element::ptr parent, string html) {
+esObjectReferencePtr render::LiteHTMLContainer::createChild(litehtml::element::ptr parent, std::string html) {
   esObjectReferencePtr array = esInstantiateObject(engine->eggscript, "Array", nullptr);
   litehtml::elements_vector vector = engine->renderWindow.htmlDocument->append_children_from_string(*parent, html.c_str());
   for(const auto& child: vector) {

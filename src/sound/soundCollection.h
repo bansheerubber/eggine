@@ -12,7 +12,7 @@ namespace sound {
 		friend class Engine;
 		
 		public:
-			SoundCollection(resources::ResourceManager* manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
+			SoundCollection(resources::ResourceManager &manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
 
 			void play(); // pick a random sound from the collection and play it
 
@@ -26,8 +26,8 @@ namespace sound {
 			}
 		
 		private:
-			string name = "";
-			vector<class Sound*> sounds;
+			std::string name = "";
+			std::vector<class Sound*> sounds;
 
 			double pitchMin = 1.0;
 			double pitchMax = 1.0;

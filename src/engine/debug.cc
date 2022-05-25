@@ -30,7 +30,7 @@ void Debug::addInfoMessage(std::string message) {
 
 std::string Debug::getInfoText() {
 	std::string output;
-	for(string &message: this->infoMessages) {
+	for(std::string &message: this->infoMessages) {
 		output += message + '\n';
 	}
 	return output;

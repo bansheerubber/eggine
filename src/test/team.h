@@ -29,13 +29,15 @@ class Team: public GameObject {
 
 		// ## game_object_definitions Team
 
-		std::string name;
-
 		void add(class Unit* character);
 		void remove(class Unit* character);
+
+		void setName(std::string name);
+		std::string getName();
 
 		static std::vector<Team*> Teams;
 	
 	private:
+		std::string name;
 		SortedArray<class Unit*> units = SortedArray<class Unit*>();
 };

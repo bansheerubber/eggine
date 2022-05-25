@@ -3,13 +3,14 @@
 #include <string>
 
 #include "../carton/metadata.h"
+#include "resourceManager.h"
 
 namespace resources {
 	class ResourceObject { // keep track of resource usage via leasing
 		friend class ResourceManager;
 		
 		public:
-			ResourceObject(class ResourceManager* manager, carton::Metadata* metadata);
+			ResourceObject(ResourceManager &manager, carton::Metadata* metadata);
 			
 			void lease();
 			void release();

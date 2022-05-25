@@ -12,7 +12,7 @@ render::VertexBuffer* resources::Image::UVs = nullptr;
 render::VertexAttributes* resources::Image::Attributes = nullptr;
 
 resources::Image::Image(
-	ResourceManager* manager,
+	ResourceManager &manager,
 	carton::Metadata* metadata,
 	const unsigned char* buffer,
 	uint64_t bufferSize
@@ -61,7 +61,7 @@ void resources::Image::render() {
 		glm::vec2 position;
 		glm::vec2 size;
 	} vb;
-	vb.projection = engine->ui.projectionMatrix;
+	vb.projection = engine->ui.getProjectionMatrix();
 	vb.position = this->position;
 	vb.size = this->size;
 
