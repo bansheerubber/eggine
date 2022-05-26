@@ -145,6 +145,9 @@ void render::Texture::load(
 	}
 	else {
 		this->stagingBuffer = this->window->memory.allocateBuffer(
+			#ifdef EGGINE_DEBUG
+			"textureStagingBuffer",
+			#endif
 			vk::BufferCreateInfo(
 				{},
 				bufferSize,
@@ -155,6 +158,9 @@ void render::Texture::load(
 		);
 
 		this->image = this->window->memory.allocateImage(
+			#ifdef EGGINE_DEBUG
+			"texture",
+			#endif
 			vk::ImageCreateInfo(
 				{},
 				vk::ImageType::e2D,

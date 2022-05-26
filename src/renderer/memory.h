@@ -7,6 +7,8 @@
 #include <vulkan/vulkan.hpp>
 #endif
 
+#include "../engine/debug.h"
+
 #include <stdio.h>
 #include <vector>
 
@@ -66,6 +68,10 @@ namespace render {
 			PieceType valid = INVALID_PIECE;
 			uint64_t bufferSize = 0;
 			#endif
+
+			#ifdef EGGINE_DEBUG
+			std::string origin;
+			#endif
 	};
 
 	// structure to handle a MemBlock and split it up into usable pieces for data
@@ -121,8 +127,13 @@ namespace render {
 			#ifdef __switch__
 			Piece* allocate(uint32_t flags, uint64_t size, uint64_t align);
 			#else
+			#ifdef EGGINE_DEBUG
+			Piece* allocateBuffer(std::string origin, vk::BufferCreateInfo bufferInfo, vk::MemoryPropertyFlags propertyFlags);
+			Piece* allocateImage(std::string origin, vk::ImageCreateInfo imageInfo, vk::MemoryPropertyFlags propertyFlags);
+			#else
 			Piece* allocateBuffer(vk::BufferCreateInfo bufferInfo, vk::MemoryPropertyFlags propertyFlags);
 			Piece* allocateImage(vk::ImageCreateInfo imageInfo, vk::MemoryPropertyFlags propertyFlags);
+			#endif
 			#endif
 
 			void processDeallocationLists();

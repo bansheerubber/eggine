@@ -160,6 +160,9 @@ void render::Program::createUniformBuffer(std::string uniformName, unsigned int 
 			UniformBufferPair &buffer = this->uniformToVulkanBuffer[std::pair(uniformName, index)];
 			
 			buffer.pieces[0] = this->window->memory.allocateBuffer(
+				#ifdef EGGINE_DEBUG
+				"uniformBuffer_" + uniformName,
+				#endif
 				vk::BufferCreateInfo(
 					{},
 					size,
@@ -170,6 +173,9 @@ void render::Program::createUniformBuffer(std::string uniformName, unsigned int 
 			);
 
 			buffer.pieces[1] = this->window->memory.allocateBuffer(
+				#ifdef EGGINE_DEBUG
+				"uniformBuffer_" + uniformName,
+				#endif
 				vk::BufferCreateInfo(
 					{},
 					size,

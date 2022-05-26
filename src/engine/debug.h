@@ -1,13 +1,14 @@
 #pragma once
 
+#ifndef __switch__
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
+#endif
+
 #include <string>
 #include <vector>
 
 #include "../engine/console.h"
-#include "../renderer/program.h"
-#include "../renderer/texture.h"
-#include "../renderer/vertexAttributes.h"
-#include "../renderer/vertexBuffer.h"
 
 #define EGGINE_DEBUG 1
 
@@ -131,6 +132,13 @@ struct GLDebugMessage {
 	}
 };
 #endif
+
+namespace render {
+	class Program;
+	class Texture;
+	class VertexBuffer;
+	class VertexAttributes;
+};
 
 class Debug {
 	friend class Engine;

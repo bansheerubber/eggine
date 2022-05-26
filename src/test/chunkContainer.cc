@@ -55,23 +55,23 @@ ChunkContainer::ChunkContainer() {
 	}
 
 	if(ChunkContainer::Vertices == nullptr) { // vertices for square
-		ChunkContainer::Vertices = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::Vertices = new render::VertexBuffer(&engine->renderWindow, "chunkContainerPositions");
 		ChunkContainer::Vertices->setData((glm::vec2*)&ChunkContainer::VerticesSource[0], sizeof(ChunkContainer::VerticesSource), alignof(glm::vec2));
 	}
 
 	
 	if(ChunkContainer::UVs == nullptr) { // uvs for square
-		ChunkContainer::UVs = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::UVs = new render::VertexBuffer(&engine->renderWindow, "chunkContainerUVs");
 		ChunkContainer::UVs->setData((glm::vec2*)&ChunkContainer::UVsSource[0], sizeof(ChunkContainer::UVsSource), alignof(glm::vec2));
 	}
 
 	if(ChunkContainer::Colors == nullptr) { // colors for square
-		ChunkContainer::Colors = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::Colors = new render::VertexBuffer(&engine->renderWindow, "chunkContainerColors");
 		ChunkContainer::Colors->setData((glm::vec4*)&ChunkContainer::ColorsSource[0], sizeof(ChunkContainer::ColorsSource), alignof(glm::vec4));
 	}
 
 	if(ChunkContainer::XRay == nullptr) {
-		ChunkContainer::XRay = new render::VertexBuffer(&engine->renderWindow);
+		ChunkContainer::XRay = new render::VertexBuffer(&engine->renderWindow, "chunkContainerXRay");
 		ChunkContainer::XRay->setData((int*)&ChunkContainer::XRaySource, sizeof(ChunkContainer::XRaySource), alignof(int));
 	}
 

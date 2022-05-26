@@ -21,6 +21,31 @@ render::VertexBuffer::VertexBuffer(Window* window, std::string debugName) {
 
 render::VertexBuffer::~VertexBuffer() {
 	this->destroyBuffer();
+	VertexBuffer::OutOfDateBuffers[0].erase(this);
+	VertexBuffer::OutOfDateBuffers[1].erase(this);
+
+	if(this->isDynamicDraw) {
+		if(this->dynamicBuffers[0].buffer != nullptr) {
+			this->dynamicBuffers[0].buffer->deallocate();
+			this->dynamicBuffers[0].buffer = nullptr;
+		}
+
+		if(this->dynamicBuffers[1].buffer != nullptr) {
+			this->dynamicBuffers[1].buffer->deallocate();
+			this->dynamicBuffers[1].buffer = nullptr;
+		}
+	}
+	else {
+		if(this->stagingBuffer != nullptr) {
+			this->stagingBuffer->deallocate();
+			this->stagingBuffer = nullptr;
+		}
+		
+		if(this->gpuBuffer != nullptr) {
+			this->gpuBuffer->deallocate();
+			this->gpuBuffer = nullptr;
+		}
+	}
 }
 
 void render::VertexBuffer::reallocate() {
@@ -215,6 +240,9 @@ void render::VertexBuffer::allocateBuffer() {
 	else {
 		if(this->isDynamicDraw) { // do not use staging buffer if we're dynamic draw
 			this->dynamicBuffers[this->window->framePingPong].buffer = this->window->memory.allocateBuffer(
+				#ifdef EGGINE_DEBUG
+				this->debugName + "_dynamicVertexBuffer_" + std::to_string(this->window->framePingPong),
+				#endif
 				vk::BufferCreateInfo(
 					{},
 					size,
@@ -226,6 +254,9 @@ void render::VertexBuffer::allocateBuffer() {
 
 			if(!this->dynamicBufferInitialized) {
 				this->dynamicBuffers[!this->window->framePingPong].buffer = this->window->memory.allocateBuffer(
+					#ifdef EGGINE_DEBUG
+					this->debugName + "_dynamicVertexBuffer_" + std::to_string(this->window->framePingPong),
+					#endif
 					vk::BufferCreateInfo(
 						{},
 						size,
@@ -239,6 +270,9 @@ void render::VertexBuffer::allocateBuffer() {
 		}
 		else {
 			this->stagingBuffer = this->window->memory.allocateBuffer(
+				#ifdef EGGINE_DEBUG
+				this->debugName + "_vertexStagingBuffer",
+				#endif
 				vk::BufferCreateInfo(
 					{},
 					size,
@@ -249,6 +283,9 @@ void render::VertexBuffer::allocateBuffer() {
 			);
 			
 			this->gpuBuffer = this->window->memory.allocateBuffer(
+				#ifdef EGGINE_DEBUG
+				this->debugName + "_vertexGPUBuffer",
+				#endif
 				vk::BufferCreateInfo(
 					{},
 					size,
@@ -278,10 +315,12 @@ void render::VertexBuffer::destroyBuffer() {
 		if(this->oldSize != 0) {
 			if(this->stagingBuffer != nullptr) {
 				this->stagingBuffer->deallocate();
+				this->stagingBuffer = nullptr;
 			}
 			
 			if(this->gpuBuffer != nullptr) {
 				this->gpuBuffer->deallocate();
+				this->gpuBuffer = nullptr;
 			}
 
 			if(this->dynamicBuffers[this->window->framePingPong].buffer != nullptr) {
@@ -306,6 +345,9 @@ void render::VertexBuffer::handleOutOfDateBuffer() {
 	if(writeSubBuffer.state == VERTEX_SUB_BUFFER_SIZE_OUT_OF_DATE) {
 		writeSubBuffer.buffer->deallocate();
 		writeSubBuffer.buffer = this->window->memory.allocateBuffer(
+			#ifdef EGGINE_DEBUG
+			this->debugName + "_dynamicVertexBuffer_" + std::to_string(this->window->framePingPong),
+			#endif
 			vk::BufferCreateInfo(
 				{},
 				this->size,

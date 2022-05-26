@@ -35,10 +35,10 @@ resources::Image::Image(
 	}
 
 	if(resources::Image::Vertices == nullptr) {
-		resources::Image::Vertices = new render::VertexBuffer(&engine->renderWindow);
+		resources::Image::Vertices = new render::VertexBuffer(&engine->renderWindow, "imagePositions");
 		resources::Image::Vertices->setData((glm::vec2*)resources::Image::VertexSource, sizeof(resources::Image::VertexSource), alignof(glm::vec2));
 
-		resources::Image::UVs = new render::VertexBuffer(&engine->renderWindow);
+		resources::Image::UVs = new render::VertexBuffer(&engine->renderWindow, "imageUVs");
 		resources::Image::UVs->setData((glm::vec2*)resources::Image::UVSource, sizeof(resources::Image::UVSource), alignof(glm::vec2));
 
 		resources::Image::Attributes = new render::VertexAttributes(&engine->renderWindow);

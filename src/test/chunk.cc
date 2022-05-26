@@ -44,7 +44,7 @@ Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) 
 	// this->height = ((double)rand() / (RAND_MAX)) * 10 + 1;
 	this->height = 5;
 
-	this->vertexBuffer = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexBuffer = new render::VertexBuffer(&engine->renderWindow, "chunkTextures");
 	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
 
 	this->textureIndices = new int[Size * Size * Chunk::MaxHeight];

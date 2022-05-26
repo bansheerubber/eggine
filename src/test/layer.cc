@@ -18,9 +18,9 @@ DynamicArray<int> Layer::XRayEnabled = DynamicArray<int>(4);
 Layer::Layer(Chunk* chunk) {
 	this->chunk = chunk;
 
-	this->buffers[0] = new render::VertexBuffer(&engine->renderWindow);
-	this->buffers[1] = new render::VertexBuffer(&engine->renderWindow);
-	this->buffers[2] = new render::VertexBuffer(&engine->renderWindow);
+	this->buffers[0] = new render::VertexBuffer(&engine->renderWindow, "layerOffsets");
+	this->buffers[1] = new render::VertexBuffer(&engine->renderWindow, "layerTextures");
+	this->buffers[2] = new render::VertexBuffer(&engine->renderWindow, "layerColors");
 
 	this->attributes = new render::VertexAttributes(&engine->renderWindow);
 
@@ -61,10 +61,10 @@ Layer::Layer(Chunk* chunk) {
 	}
 
 	// handle xray tiles
-	this->xrayBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
-	this->xrayBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
-	this->xrayBuffers[2] = new render::VertexBuffer(&engine->renderWindow);
-	this->xrayBuffers[3] = new render::VertexBuffer(&engine->renderWindow);
+	this->xrayBuffers[0] = new render::VertexBuffer(&engine->renderWindow, "layerXRayOffsets");
+	this->xrayBuffers[1] = new render::VertexBuffer(&engine->renderWindow, "layerXRayTextures");
+	this->xrayBuffers[2] = new render::VertexBuffer(&engine->renderWindow, "layerXRayColors");
+	this->xrayBuffers[3] = new render::VertexBuffer(&engine->renderWindow, "layerXRays");
 
 	this->xrayAttributes = new render::VertexAttributes(&engine->renderWindow);
 

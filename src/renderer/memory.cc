@@ -21,6 +21,9 @@ void render::Piece::print() {
 	console::print("    end: %ld,\n", this->end);
 	console::print("    align: %ld,\n", this->align);
 	console::print("    size: %ld,\n", this->end - this->start + 1);
+	#ifdef EGGINE_DEBUG
+	console::print("    origin: %s,\n", this->origin.c_str());
+	#endif
 	console::print("  };\n");
 }
 
@@ -59,6 +62,10 @@ void render::Piece::requestDeallocate() {
 }
 
 void render::Piece::deallocate() {
+	if(!this->allocated) {
+		return;
+	}
+	
 	this->parent->deallocate(this);
 
 	#ifndef __switch__
@@ -265,7 +272,11 @@ void render::Manager::processDeallocationLists() {
 }
 
 #ifndef __switch__
+#ifdef EGGINE_DEBUG
+render::Piece* render::Manager::allocateBuffer(std::string origin, vk::BufferCreateInfo bufferInfo, vk::MemoryPropertyFlags propertyFlags) {
+#else
 render::Piece* render::Manager::allocateBuffer(vk::BufferCreateInfo bufferInfo, vk::MemoryPropertyFlags propertyFlags) {
+#endif
 	vk::Buffer buffer = this->window->device.device.createBuffer(bufferInfo);
 	vk::MemoryRequirements requirements = this->window->device.device.getBufferMemoryRequirements(buffer);
 
@@ -273,11 +284,18 @@ render::Piece* render::Manager::allocateBuffer(vk::BufferCreateInfo bufferInfo, 
 	piece->buffer = buffer;
 	piece->bufferSize = bufferInfo.size;
 	piece->valid = BUFFER_PIECE;
+	#ifdef EGGINE_DEBUG
+	piece->origin = origin;
+	#endif
 	this->window->device.device.bindBufferMemory(buffer, piece->parent->memory, piece->start);
 	return piece;
 }
 
+#ifdef EGGINE_DEBUG
+render::Piece* render::Manager::allocateImage(std::string origin, vk::ImageCreateInfo imageInfo, vk::MemoryPropertyFlags propertyFlags) {
+#else
 render::Piece* render::Manager::allocateImage(vk::ImageCreateInfo imageInfo, vk::MemoryPropertyFlags propertyFlags) {
+#endif
 	vk::Image image = this->window->device.device.createImage(imageInfo);
 	vk::MemoryRequirements requirements = this->window->device.device.getImageMemoryRequirements(image);
 
@@ -285,6 +303,9 @@ render::Piece* render::Manager::allocateImage(vk::ImageCreateInfo imageInfo, vk:
 	piece->image = image;
 	piece->bufferSize = requirements.size;
 	piece->valid = IMAGE_PIECE;
+	#ifdef EGGINE_DEBUG
+	piece->origin = origin;
+	#endif
 	this->window->device.device.bindImageMemory(image, piece->parent->memory, piece->start);
 	return piece;
 }

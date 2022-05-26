@@ -6,11 +6,11 @@
 #include "tileMath.h"
 
 InterweavedTile::InterweavedTile(bool createReference) : OverlappingTile(false) {
-	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow);
-	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow);
-	this->vertexBuffers[2] = new render::VertexBuffer(&engine->renderWindow);
-	this->vertexBuffers[3] = new render::VertexBuffer(&engine->renderWindow);
-	this->xrayVertexBuffer = new render::VertexBuffer(&engine->renderWindow);
+	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow, "interweavedTilePosition");
+	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow, "interweavedTileTexture");
+	this->vertexBuffers[2] = new render::VertexBuffer(&engine->renderWindow, "interweavedTileColor");
+	this->vertexBuffers[3] = new render::VertexBuffer(&engine->renderWindow, "interweavedTileNoXRay");
+	this->xrayVertexBuffer = new render::VertexBuffer(&engine->renderWindow, "interweavedTileXRay");
 
 	this->vertexAttributes = new render::VertexAttributes(&engine->renderWindow);
 	this->xrayVertexAttributes = new render::VertexAttributes(&engine->renderWindow);
@@ -71,6 +71,13 @@ InterweavedTile::~InterweavedTile() {
 	if(this->reference != nullptr) {
 		this->reference = nullptr;
 	}
+
+	delete this->vertexBuffers[0];
+	delete this->vertexBuffers[1];
+	delete this->vertexBuffers[2];
+	delete this->vertexBuffers[3];
+
+	delete this->xrayVertexBuffer;
 }
 
 OverlappingTile* InterweavedTile::setPosition(glm::uvec3 position) {

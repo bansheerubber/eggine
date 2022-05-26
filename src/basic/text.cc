@@ -23,11 +23,11 @@ Text::Text(bool addToUiList) : RenderObject(false) {
 	#ifdef __switch__
 	filePrefix = "romfs:/";
 	#endif
-	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow, "text pos vertex");
+	this->vertexBuffers[0] = new render::VertexBuffer(&engine->renderWindow, "textPositions");
 	this->vertexBuffers[0]->setDynamicDraw(true);
 	this->vertexBuffers[0]->setData(nullptr, sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 
-	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow, "text uv vertex");
+	this->vertexBuffers[1] = new render::VertexBuffer(&engine->renderWindow, "textUVs");
 	this->vertexBuffers[1]->setDynamicDraw(true);
 	this->vertexBuffers[1]->setData(nullptr, sizeof(glm::vec2) * this->text.size() * 6, alignof(glm::vec2));
 

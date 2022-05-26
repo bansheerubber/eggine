@@ -22,7 +22,7 @@ render::Box::Box() {
 	}
 
 	if(render::Box::Vertices == nullptr) {
-		render::Box::Vertices = new render::VertexBuffer(&engine->renderWindow);
+		render::Box::Vertices = new render::VertexBuffer(&engine->renderWindow, "boxPositions");
 		render::Box::Vertices->setData((glm::vec2*)&render::Box::VerticesSource[0], sizeof(render::Box::VerticesSource), alignof(glm::vec2));
 	}
 	

@@ -2,7 +2,11 @@
 
 #include "../util/cloneString.h"
 #include "engine.h"
+#include "../renderer/program.h"
 #include "../renderer/shader.h"
+#include "../renderer/texture.h"
+#include "../renderer/vertexAttributes.h"
+#include "../renderer/vertexBuffer.h"
 
 #ifndef __switch__
 void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {

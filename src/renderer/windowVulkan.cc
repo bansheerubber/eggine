@@ -258,6 +258,9 @@ void render::Window::createSwapchain() {
 	// create depth image/imageview
 	{
 		this->depthImage = this->memory.allocateImage(
+			#ifdef EGGINE_DEBUG
+			"depthImage",
+			#endif
 			vk::ImageCreateInfo(
 				{},
 				vk::ImageType::e2D,
