@@ -28,6 +28,13 @@ render::State::State(render::Window* window) {
 	this->window = window;
 }
 
+#ifdef EGGINE_DEVELOPER_MODE
+void render::State::drawImgui() {
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), this->buffer[this->window->framePingPong]);
+	this->bindPipeline(true);
+}
+#endif
+
 void render::State::draw(
 	PrimitiveType type, unsigned int firstVertex, unsigned int vertexCount, unsigned int firstInstance, unsigned int instanceCount
 ) {
@@ -263,13 +270,13 @@ void render::State::resize(unsigned int width, unsigned int height) {
 	this->current.viewportHeight = height;
 }
 
-void render::State::bindPipeline() {
+void render::State::bindPipeline(bool force) {
 	#ifndef __switch__
 	if(this->window->backend != VULKAN_BACKEND || this->window->swapchainOutOfDate) {
 		return;
 	}
 
-	if(this->current != this->old) {
+	if(this->current != this->old || force) {
 		if(this->current.program == nullptr) {
 			console::print("render state: no program bound\n");
 			exit(1);

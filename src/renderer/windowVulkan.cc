@@ -112,6 +112,53 @@ void render::Window::initializeVulkan() {
 
 	this->getState(0).enableDepthTest(true);
 	this->getState(0).enableStencilTest(true);
+
+	#ifdef EGGINE_DEVELOPER_MODE
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForVulkan(this->window, false);
+
+	std::array<vk::DescriptorPoolSize, 11> imguiPoolSizes = {
+		vk::DescriptorPoolSize(vk::DescriptorType::eSampler, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eSampledImage, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eStorageImage, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eUniformTexelBuffer, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eStorageTexelBuffer, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBufferDynamic, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eStorageBufferDynamic, 1000),
+		vk::DescriptorPoolSize(vk::DescriptorType::eInputAttachment, 1000)
+	};
+
+	vk::DescriptorPoolCreateInfo imguiDescriptorInfo(
+		vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, 1000, imguiPoolSizes
+	);
+
+	this->imguiDescriptorPool = this->device.device.createDescriptorPool(imguiDescriptorInfo);
+	
+	// do the imgui stuff
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = this->instance;
+	init_info.PhysicalDevice = this->device.physicalDevice;
+	init_info.Device = this->device.device;
+	init_info.Queue = this->graphicsQueue;
+	init_info.DescriptorPool = this->imguiDescriptorPool;
+	init_info.MinImageCount = this->device.capabilities.minImageCount;
+	init_info.ImageCount = this->device.capabilities.minImageCount;
+	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+	ImGui_ImplVulkan_Init(&init_info, this->renderPass);
+
+	vk::CommandBuffer buffer = this->beginTransientCommands();
+	ImGui_ImplVulkan_CreateFontsTexture(buffer);
+	this->endTransientCommands(buffer, {});
+	this->graphicsQueue.waitIdle();
+	#endif
 }
 
 void render::Window::createSwapchain() {

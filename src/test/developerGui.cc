@@ -19,7 +19,7 @@ int developerPrint(const char* buffer, ...) {
 
 	engine->developerGui->addEntry(ConsoleEntry {
 		level: 2,
-		contents: string(output),
+		contents: std::string(output),
 	});
 	
 	return 0;
@@ -38,7 +38,7 @@ int developerWarning(const char* buffer, ...) {
 
 	engine->developerGui->addEntry(ConsoleEntry {
 		level: 1,
-		contents: string(output),
+		contents: std::string(output),
 	});
 	
 	return 0;
@@ -57,7 +57,7 @@ int developerError(const char* buffer, ...) {
 
 	engine->developerGui->addEntry(ConsoleEntry {
 		level: 2,
-		contents: string(output),
+		contents: std::string(output),
 	});
 	
 	return 0;
@@ -72,7 +72,7 @@ int vDeveloperPrint(const char* buffer, va_list args) {
 	vsnprintf(output, 1024, buffer, args);
 	engine->developerGui->addEntry(ConsoleEntry {
 		level: 0,
-		contents: string(output),
+		contents: std::string(output),
 	});
 
 	return 0;
@@ -87,7 +87,7 @@ int vDeveloperWarning(const char* buffer, va_list args) {
 	vsnprintf(output, 1024, buffer, args);
 	engine->developerGui->addEntry(ConsoleEntry {
 		level: 1,
-		contents: string(output),
+		contents: std::string(output),
 	});
 
 	return 0;
@@ -102,7 +102,7 @@ int vDeveloperError(const char* buffer, va_list args) {
 	vsnprintf(output, 1024, buffer, args);
 	engine->developerGui->addEntry(ConsoleEntry {
 		level: 2,
-		contents: string(output),
+		contents: std::string(output),
 	});
 
 	return 0;
@@ -131,7 +131,7 @@ int DeveloperGui::consoleCallback(ImGuiInputTextCallbackData* data) {
 			}
 			
 			if(oldHistoryPosition == 0) { // save incomplete command
-				this->incompleteCommand = string(data->Buf);
+				this->incompleteCommand = std::string(data->Buf);
 			}
 
 			if(this->historyPosition == 0) {
@@ -265,12 +265,12 @@ void DeveloperGui::render() {
 		) {
 			this->addEntry(ConsoleEntry {
 				level: 0,
-				contents: "> " + string(buffer),
+				contents: "> " + std::string(buffer),
 			});
 			esEval(engine->eggscript, buffer);
 			ImGui::SetKeyboardFocusHere(-1);
 
-			this->history.push_back(string(buffer));
+			this->history.push_back(std::string(buffer));
 			this->historyPosition = 0;
 		}
 		ImGui::PopItemWidth();
@@ -279,11 +279,23 @@ void DeveloperGui::render() {
 	}
 
 	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	if(engine->renderWindow.backend == render::OPENGL_BACKEND) {
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
+	else if(engine->renderWindow.backend == render::VULKAN_BACKEND) {
+		engine->renderWindow.getState(0).drawImgui();
+	}
 }
 
 void DeveloperGui::prerender() {
-	ImGui_ImplOpenGL3_NewFrame();
+	if(engine->renderWindow.backend == render::OPENGL_BACKEND) {
+		ImGui_ImplOpenGL3_NewFrame();
+	}
+	else if(engine->renderWindow.backend == render::VULKAN_BACKEND) {
+		ImGui_ImplVulkan_NewFrame();
+	}
+
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 }

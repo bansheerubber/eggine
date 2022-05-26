@@ -239,9 +239,7 @@ void onMousePress(GLFWwindow* window, int button, int action, int mods) {
 
 void onMouseMove(GLFWwindow* window, double x, double y) {
 	#ifdef EGGINE_DEVELOPER_MODE
-	if(engine->renderWindow.backend == render::OPENGL_BACKEND) {
-		ImGui_ImplGlfw_CursorPosCallback(window, x, y);
-	}
+	ImGui_ImplGlfw_CursorPosCallback(window, x, y);
 	#endif
 	
 	esEntry arguments1[2];

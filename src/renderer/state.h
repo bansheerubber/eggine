@@ -136,6 +136,10 @@ namespace render {
 			State();
 			State(class Window* window);
 			
+			#ifdef EGGINE_DEVELOPER_MODE
+			void drawImgui();
+			#endif
+
 			void draw(PrimitiveType type, unsigned int firstVertex, unsigned int vertexCount, unsigned int firstInstance, unsigned int instanceCount);
 
 			void bindProgram(class Program* program);
@@ -180,6 +184,6 @@ namespace render {
 			SubState current;
 			SubState old;
 
-			void bindPipeline();
+			void bindPipeline(bool force = false);
 	};
 };

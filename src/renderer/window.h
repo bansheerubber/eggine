@@ -211,6 +211,10 @@ namespace render {
 			std::vector<vk::Fence> memoryCopyFences;
 			std::vector<vk::CommandBuffer> transientCommandBuffers;
 
+			#ifdef EGGINE_DEVELOPER_MODE
+			vk::DescriptorPool imguiDescriptorPool;
+			#endif
+
 			bool swapchainOutOfDate = false;
 			bool swapchainCreated = false;
 
