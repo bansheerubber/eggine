@@ -59,3 +59,27 @@ void render::Box::render(glm::mat4 projection) {
 	engine->renderWindow.getState(0).bindVertexAttributes(render::Box::VertexAttributes);
 	engine->renderWindow.getState(0).draw(render::PRIMITIVE_TRIANGLE_STRIP, 0, 4, 0, 1);
 }
+
+void render::Box::setPosition(glm::vec2 position) {
+	this->position = position;
+}
+
+glm::vec2 render::Box::getPosition() {
+	return this->position;
+}
+
+void render::Box::setSize(glm::vec2 size) {
+	this->size = size;
+}
+
+glm::vec2 render::Box::getSize() {
+	return this->size;
+}
+
+void render::Box::setColor(glm::vec4 color) {
+	this->color = color;
+}
+
+glm::vec4 render::Box::getColor() {
+	return this->color;
+}

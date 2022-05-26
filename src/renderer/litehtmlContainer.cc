@@ -125,15 +125,23 @@ void render::LiteHTMLContainer::get_image_size(const litehtml::tchar_t* src, con
 
 void render::LiteHTMLContainer::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg) {
   if(bg.color.alpha) {
-    this->box.position.x = bg.clip_box.left();
-    if(this->box.position.x < 0) {
-      this->box.position.x = bg.clip_box.left() + engine->renderWindow.width;
+    if(bg.clip_box.left() < 0) {
+      this->box.setPosition(glm::vec2(
+        bg.clip_box.left() + engine->renderWindow.width,
+        bg.clip_box.y
+      ));
+    }
+    else {
+      this->box.setPosition(glm::vec2(
+        bg.clip_box.left(),
+        bg.clip_box.y
+      ));
     }
 
-    this->box.position.y = bg.clip_box.y;
-    this->box.size.x = bg.clip_box.width;
-    this->box.size.y = bg.clip_box.height;
-    this->box.color = glm::vec4((float)bg.color.red / 255.0, (float)bg.color.green / 255.0, (float)bg.color.blue / 255.0, (float)bg.color.alpha / 255.0);
+    this->box.setSize(glm::vec2(bg.clip_box.width, bg.clip_box.height));
+    this->box.setColor(
+      glm::vec4((float)bg.color.red / 255.0, (float)bg.color.green / 255.0, (float)bg.color.blue / 255.0, (float)bg.color.alpha / 255.0)
+    );
 
     this->box.render();
   }

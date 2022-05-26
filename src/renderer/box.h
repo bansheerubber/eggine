@@ -14,11 +14,20 @@ namespace render {
 			Box();
 			void render(glm::mat4 projection = glm::mat4(1));
 
+			void setPosition(glm::vec2 position);
+			glm::vec2 getPosition();
+
+			void setSize(glm::vec2 size);
+			glm::vec2 getSize();
+
+			void setColor(glm::vec4 color);
+			glm::vec4 getColor();
+
+		protected:
 			glm::vec2 position;
 			glm::vec2 size;
 			glm::vec4 color;
-
-		protected:
+			
 			static render::Program* Program;
 			static render::VertexBuffer* Vertices;
 			static render::VertexAttributes* VertexAttributes;

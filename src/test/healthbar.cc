@@ -21,19 +21,18 @@ void Healthbar::render(double deltaTime, RenderContext &context) {
 	double height = 0.1;
 	double offset = 0.2;
 
-	this->box.size.x = width;
-	this->box.size.y = height;
-	this->box.color = glm::vec4(0.2, 0.2, 0.2, 1);
+	this->box.setSize(glm::vec2(width, height));
+	this->box.setColor(glm::vec4(0.2, 0.2, 0.2, 1));
 
-	this->box.position = tilemath::tileToScreen(this->position, 0, engine->chunkContainer->getRotation());
-	this->box.position.x -= width / 2;
-	this->box.position.y -= height / 2;
-
-	this->box.position.y += offset;
+	glm::vec2 position = tilemath::tileToScreen(this->position, 0, engine->chunkContainer->getRotation());
+	this->box.setPosition(glm::vec2(
+		position.x - width / 2,
+		position.y - height / 2 + offset
+	));
 
 	this->box.render(context.camera->getProjectionMatrix()); // render the background
 
-	this->box.size.x = width * this->percent;
-	this->box.color = glm::vec4(1, 0, 0, 1);
+	this->box.setSize(glm::vec2(width * this->percent, height));
+	this->box.setColor(glm::vec4(1, 0, 0, 1));
 	this->box.render(context.camera->getProjectionMatrix()); // render the foreground
 }
