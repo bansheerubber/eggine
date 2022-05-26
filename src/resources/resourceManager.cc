@@ -24,6 +24,7 @@
 #include "shaderSource.h"
 #include "../sound/soundCollection.h"
 #include "spriteSheet.h"
+#include "textFile.h"
 #include "../renderer/texture.h"
 #include "../test/tileMath.h"
 
@@ -113,6 +114,11 @@ void handleMaps(void* owner, carton::File* file, const char* buffer, uint64_t bu
 void handleSounds(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
 	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
 		= new sound::SoundCollection(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
+}
+
+void handleTxts(void* owner, carton::File* file, const char* buffer, uint64_t bufferSize) {
+	((resources::ResourceManager*)owner)->metadataToResource[file->metadata]
+		= new resources::TextFile(*(resources::ResourceManager*)owner, file->metadata, (const unsigned char*)buffer, bufferSize);
 }
 
 resources::ShaderSource* getShaderSource(std::string fileName) {
@@ -246,6 +252,7 @@ void resources::ResourceManager::reload() {
 	this->carton->addExtensionHandler(".spv", handleSPVShaders, this);
 	this->carton->addExtensionHandler(".map", handleMaps, this);
 	this->carton->addExtensionHandler(".sound", handleSounds, this);
+	this->carton->addExtensionHandler(".txt", handleTxts, this);
 }
 
 unsigned int resources::ResourceManager::getBytesUsed() {

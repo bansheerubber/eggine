@@ -16,12 +16,16 @@
 #include <switch.h>
 #endif
 
+#include <sstream>
+#include <string>
+
 #include "callbacks.h"
 #include "console.h"
 #include "../test/developerGui.h"
 #include "eggscript.h"
 #include "../basic/renderContext.h"
 #include "../resources/scriptFile.h"
+#include "../resources/textFile.h"
 #include "../util/time.h"
 
 Engine* engine = new Engine();
@@ -316,11 +320,17 @@ void Engine::initialize() {
 	#endif
 
 	#ifndef __switch__
-	glfwUpdateGamepadMappings("03000000d620000011a7000011010000,Nintendo Switch PowerA Core Plus Controller,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b0,y:b3,platform:Linux,");
+	resources::TextFile* file = (resources::TextFile*)this->manager.loadResources(
+		engine->manager.carton->database.get()->equals("fileName", "gamecontrollerdb.txt")->exec()
+	)[0];
 
-	glfwUpdateGamepadMappings("05000000de2800000511000001000000,Steam Controller,a:b0,b:b1,back:b6,guide:b8,leftshoulder:b4,leftstick:b9,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,righttrigger:a3,start:b7,x:b2,y:b3,platform:iOS,");
-
-	glfwUpdateGamepadMappings("05000000de2800000611000001000000,Steam Controller,a:b0,b:b1,back:b6,guide:b8,leftshoulder:b4,leftstick:b9,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,righttrigger:a3,start:b7,x:b2,y:b3,platform:iOS,");
+	std::stringstream ss(file->getSource());
+	std::string line;
+	while(std::getline(ss, line, '\n')){
+		if(line[0] != '#') {
+			glfwUpdateGamepadMappings(line.c_str());
+		}
+	}
 	#endif
 }
 
