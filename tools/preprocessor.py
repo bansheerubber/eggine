@@ -19,13 +19,63 @@ def write_file(filename, contents):
 		file.write(line)
 	file.close()
 
+header_nodes = {}
+class HeaderNode:
+	def __init__(self, filename, tmp_filename):
+		self.filename = filename
+		self.tmp_filename = tmp_filename
+		self.dependencies = set()
+		self.dependents = set()
+	
+	def add_dependency(self, node):
+		self.dependencies.add(node)
+	
+	def add_dependent(self, node):
+		self.dependents.add(node)
+	
+	def get_dependents(self):
+		dependents = set()
+		for dependent in self.dependents:
+			dependents.add(dependent)
+			
+			dependent_dependents = dependent.get_dependents()
+			for dependent_dependent in dependent_dependents: # add the dependents
+				dependents.add(dependent_dependent)
+		return dependents
+	
+	def print_dependencies(self):
+		for dependency in self.dependencies:
+			print(dependency.filename)
+	
+	def print_dependents(self):
+		dependents = self.get_dependents()
+		for dependent in dependents:
+			print(dependent.filename)
+	
+	def __eq__(self, other):
+		return self.filename == other.filename
+	
+	def __hash__(self):
+		return hash(self.filename)
+
+def create_header_node(filename, tmp_filename):
+	if filename not in header_nodes:
+		header_nodes[filename] = HeaderNode(filename, tmp_filename)
+
+	if tmp_filename != None:
+		header_nodes[filename].tmp_filename = tmp_filename
+	
+	return header_nodes[filename]
+
 environment_variables = {}
-es_definition_headers = []
-es_definition_functions = []
+es_definition_headers = set()
+es_definition_functions = set()
 max_depth = 0
 files_with_custom_depth = set()
 
-game_object_type_enums = []
+changed_files = set()
+
+game_object_type_enums = set()
 
 keywords = ["game_object_definitions"]
 
@@ -176,6 +226,9 @@ def handle_headers(filename, contents):
 	global es_definition_headers
 	global es_definition_functions
 	global game_object_type_enums
+
+	full_filename = str(pathlib.Path(filename).resolve())
+	base = str(pathlib.Path(full_filename).parent)
 	
 	read_namespace = False
 	for line in contents:
@@ -184,21 +237,21 @@ def handle_headers(filename, contents):
 			order = re.compile(r"// order = (\d+)").search(line.strip())
 		elif read_namespace:
 			if "void define" in line:
-				es_definition_headers.append(filename)
+				es_definition_headers.add(filename)
 
 				if order == None:
 					order = 0
 				else:
 					order = int(order.group(1))
 
-				es_definition_functions.append((re.compile(r"^void ([\w]+)").match(line.strip()).group(1), order))
+				es_definition_functions.add((re.compile(r"^void ([\w]+)").match(line.strip()).group(1), order))
 				read_namespace = False
 		
 		if match := re.match(command_pattern, line):
 			command = match.group(2).strip()
 			if "game_object_definitions" in command:
 				rest = " ".join(command.split(" ")[1:])
-				game_object_type_enums.append(to_snake_case(rest.split(" ")[0]))
+				game_object_type_enums.add(to_snake_case(rest.split(" ")[0]))
 			elif "remote_object_definitions" in command:
 				rest = " ".join(command.split(" ")[1:])
 				if rest not in network_class_list:
@@ -304,6 +357,9 @@ def handle_file(file, depth = 0):
 	file_object = pathlib.Path(file)
 	tmp_file = file.replace("./src/", "./tmp/")
 
+	full_filename = str(pathlib.Path(file).resolve())
+	base = str(pathlib.Path(file).parent)
+
 	if ".src" in file:
 		tmp_file = file.replace(".src", ".gen")
 
@@ -326,6 +382,13 @@ def handle_file(file, depth = 0):
 		file_contents = opened_file.readlines()
 		opened_file.close()
 
+		if (".cc" in file or ".h" in file) and depth == 0:
+			for line in file_contents:
+				if '#include "' in line:
+					included_file = line.split('"')[1]
+					full_included_file = str(pathlib.Path(f"{base}/{included_file}").resolve())
+					create_header_node(full_filename, str(pathlib.Path(tmp_file).resolve())).add_dependency(create_header_node(full_included_file, None))
+
 		if extension in glsl_extensions:
 			file_contents.insert(0, "R\"\"(\n")
 			file_contents.append(")\"\"\n")
@@ -336,6 +399,7 @@ def handle_file(file, depth = 0):
 
 			if src_time > tmp_time or depth > 0 or ".src" in file: # recopy file if source file is newer than tmp file
 				write_file(tmp_file, preprocess(original_file, file_contents, depth))
+				changed_files.add(full_filename)
 		else:
 			os.makedirs(tmp_parent, exist_ok=True)
 			write_file(tmp_file, preprocess(original_file, file_contents, depth))
@@ -370,6 +434,27 @@ if __name__ == "__main__":
 		for file in files:
 			total_files.append(file)
 			handle_file(file)
+	
+	# handle dependencies
+	for header_node in header_nodes.values():
+		for dependency in header_node.dependencies:
+			dependency.add_dependent(header_node)
+	
+	for file in changed_files:
+		if ".h" in file and file in header_nodes:
+			dependents = header_nodes[file].get_dependents()
+			for dependent in dependents:
+				if dependent in changed_files:
+					continue
+				
+				os.remove(dependent.tmp_filename)
+				relative = "./" + str(pathlib.Path(dependent.filename).relative_to(os.getcwd()))
+				handle_file(relative)
+	
+	# handle depth
+	for depth in range(1, max_depth + 1):
+		for file in files_with_custom_depth:
+			handle_file(file, depth)
 
 	# handle network class stuff
 	def recurse_network_properties(original_class, classname):
@@ -397,11 +482,7 @@ if __name__ == "__main__":
 	for network_class in network_class_list:
 		recurse_network_properties(network_class, network_class)
 
-	environment_variables["game_object_type_enums"] = json.dumps(game_object_type_enums)
-
-	for depth in range(1, max_depth + 1):
-		for file in files_with_custom_depth:
-			handle_file(file, depth)
+	environment_variables["game_object_type_enums"] = json.dumps(list(game_object_type_enums))
 	
 	# handle eggscript.h
 	eggscript_header = "./src/engine/eggscript.h"
@@ -421,6 +502,7 @@ if __name__ == "__main__":
 	write_file(eggscript_header_tmp, eggscript_header_contents)
 
 	# handle eggscript.cc
+	es_definition_functions = list(es_definition_functions)
 	es_definition_functions.sort(key=lambda item: item[1])
 	eggscript_code = "./src/engine/eggscript.cc"
 	eggscript_code_tmp = "./tmp/engine/eggscript.cc"
@@ -444,7 +526,7 @@ if __name__ == "__main__":
 				stage = "vert" if ".vert" in file else "frag"
 				os.system(f"command -v uam >/dev/null 2>&1 && uam {root}/{file} -s {stage} -o {root}/{file}.dksh")
 				os.system(f"glslc {root}/{file} -fshader-stage={stage} -o {root}/{file}.spv")
-	
+
 	print("Packing carton...")
 	os.system(f"carton pack resources --output ./dist/out.carton")
 	print("Done")
