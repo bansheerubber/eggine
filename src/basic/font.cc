@@ -1,5 +1,7 @@
 #include "font.h"
 
+#include <filesystem>
+
 #include "../engine/console.h"
 #include "../engine/engine.h"
 
@@ -22,6 +24,11 @@ render::Font* render::Font::GetFont(std::string family, int size) {
 render::Font::Font(std::string fileName, int size) {
 	this->fileName = fileName;
 	this->size = size;
+
+	if(!std::filesystem::exists(fileName)) {
+		console::error("could not load font %s\n", fileName.c_str());
+		exit(1);
+	}
 
 	FT_New_Face(engine->ft, fileName.c_str(), 0, &this->face);
 	FT_Set_Pixel_Sizes(this->face, 0, size);
