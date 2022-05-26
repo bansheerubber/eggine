@@ -73,15 +73,8 @@ class OverlappingTile : public GameObject {
 
 namespace std {
 	template<>
-	struct greater<OverlappingTile*> {
-		bool operator()(const OverlappingTile* &lhs, const OverlappingTile* &rhs) const {
-			return *lhs > *rhs;
-		}
-	};
-	
-	template<>
 	struct less<OverlappingTile*> {
-		bool operator()(const OverlappingTile* &lhs, const OverlappingTile* &rhs) const {
+		bool operator()(OverlappingTile* &lhs, OverlappingTile* &rhs) const {
 			return *lhs < *rhs;
 		}
 	};

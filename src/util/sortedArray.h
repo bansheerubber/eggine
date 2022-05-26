@@ -4,7 +4,7 @@
 
 #include "dynamicArray.h"
 
-template <typename T>
+template <typename T, typename Comparator = std::less<T>>
 class SortedArray {
 	public:
 		SortedArray() {
@@ -13,7 +13,7 @@ class SortedArray {
 		void insert(T value) {
 			// find a place to insert it at
 			for(uint64_t i = 0; i < this->array.head; i++) {
-				if(value < this->array[i]) {
+				if(Comparator()(value, this->array[i])) {
 					this->array.shift(i, 1);
 					this->array[i] = value;
 					return;
@@ -50,7 +50,7 @@ class SortedArray {
 			std::sort(
 				&this->array[0],
 				&this->array[0] + this->array.head,
-				[](const T &a, const T &b){ return a < b; }
+				[](T &a, T &b){ return Comparator()(a, b); }
 			);
 		}
 	

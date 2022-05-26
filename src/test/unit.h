@@ -89,15 +89,8 @@ class Unit: public Character {
 
 namespace std {
 	template<>
-	struct greater<Unit*> {
-		bool operator()(const Unit* &lhs, const Unit* &rhs) const {
-			return *lhs > *rhs;
-		}
-	};
-	
-	template<>
 	struct less<Unit*> {
-		bool operator()(const Unit* &lhs, const Unit* &rhs) const {
+		bool operator()(Unit* &lhs, Unit* &rhs) const {
 			return *lhs < *rhs;
 		}
 	};

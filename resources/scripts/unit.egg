@@ -195,6 +195,10 @@ function Unit::updateUI(%this) { // if we're selected, then update the UI
 }
 
 function Unit::onSelect(%this) {
+	if($Unit::SelectedAbility == null) {
+		%this.selectAbility(0);
+	}
+	
 	%this.updateUI();
 }
 
