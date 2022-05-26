@@ -18,7 +18,7 @@ glm::vec3 Chunk::OffsetsSource[Chunk::Size * Chunk::Size * Chunk::MaxHeight];
 render::VertexBuffer* Chunk::Offsets = nullptr;
 tsl::robin_map<std::pair<tilemath::Rotation, tilemath::Rotation>, std::vector<int64_t>> Chunk::Rotations = tsl::robin_map<std::pair<tilemath::Rotation, tilemath::Rotation>, std::vector<int64_t>>();
 
-Chunk::Chunk(ChunkContainer* container) : InstancedRenderObjectContainer(false) {
+Chunk::Chunk(ChunkContainer* container) : RenderObject() {
 	this->container = container;
 	
 	if(Chunk::Offsets == nullptr) {

@@ -7,7 +7,6 @@
 #include <tsl/robin_set.h>
 
 #include "../engine/debug.h"
-#include "../basic/instancedRenderObjectContainer.h"
 #include "../basic/renderContext.h"
 #include "../basic/renderObject.h"
 #include "../util/sortedArray.h"
@@ -67,7 +66,7 @@ namespace std {
 	};
 };
 
-class Chunk : public InstancedRenderObjectContainer<Tile> {
+class Chunk : public RenderObject {
 	friend class ChunkContainer;
 	
 	public:
