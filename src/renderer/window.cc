@@ -35,6 +35,10 @@ void render::Window::initialize() {
 		exit(1);
 	}
 
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	this->width = mode->width;
+	this->height = mode->height;
+
 	// support 4.3
 	if(this->backend == OPENGL_BACKEND) {
 		this->initializeOpenGL();
