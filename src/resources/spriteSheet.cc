@@ -105,6 +105,10 @@ resources::SpriteSheet::SpriteSheet(
 	}
 }
 
+resources::SpriteSheet::~SpriteSheet() {
+	delete this->texture;
+}
+
 resources::SpriteSheetInfo resources::SpriteSheet::getSpriteInfo(uint64_t index) {
 	if(index < this->spriteInfo.head) {
 		return this->spriteInfo[index];

@@ -12,7 +12,7 @@ TileSet::TileSet() {
 }
 
 TileSet::~TileSet() {
-	// esDeleteObject(this->reference);
+	esDeleteObject(this->reference);
 	this->hideBorder();
 }
 

@@ -147,6 +147,8 @@ class Debug {
 	#endif
 
 	public:
+		~Debug();
+		
 		void addInfoMessage(std::string message);
 		void drawTexture(render::Texture* texture);
 	

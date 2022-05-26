@@ -4,7 +4,7 @@
 #include "packet.h"
 
 network::PacketHandler::~PacketHandler() {
-	
+	delete this->receiveStream;	
 }
 
 void network::PacketHandler::readPacket() {

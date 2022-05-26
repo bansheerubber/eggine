@@ -13,6 +13,7 @@
 #include "callbacks.h"
 #include "../network/client.h"
 #include "debug.h"
+#include "../test/developerGui.h"
 #include "../util/dynamicArray.h"
 #include "../sound/engine.h"
 #include "keybind.h"
@@ -104,7 +105,7 @@ class Engine {
 		#endif
 
 		#ifdef EGGINE_DEVELOPER_MODE
-		class DeveloperGui* developerGui = nullptr;
+		DeveloperGui developerGui;
 		#endif
 		
 		void initialize();
@@ -140,7 +141,6 @@ class Engine {
 		int64_t cpuRenderTime = 0;
 		int64_t eggscriptTickTime = 0;
 		
-		class Shader* boundShader = nullptr;
 		int64_t lastRenderTime;
 
 		#ifdef EGGINE_DEBUG
@@ -170,7 +170,7 @@ class Engine {
 		#ifdef __switch__
 		uint64_t lastGamepadButtons = 0;
 		#else
-		unsigned char* lastGamepadButtons = new unsigned char[15]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		unsigned char lastGamepadButtons[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		#endif
 };
 

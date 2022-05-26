@@ -24,6 +24,7 @@ namespace sound {
 		
 		public:
 			Engine();
+			~Engine();
 
 			void initialize();
 			void tick();

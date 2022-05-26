@@ -45,7 +45,10 @@ Text::Text(std::string family, int size, bool addToUiList) : Text(addToUiList) {
 }
 
 Text::~Text() {
-	
+	delete this->vertexBuffers[0];
+	delete this->vertexBuffers[1];
+
+	delete this->vertexAttributes;
 }
 
 void Text::updateBuffers() {

@@ -26,6 +26,7 @@ namespace render {
 		
 		public:
 			Shader(class Window* window);
+			~Shader();
 
 			void load(resources::ShaderSource* source, ShaderType type);
 			void bind();

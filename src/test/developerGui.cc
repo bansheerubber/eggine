@@ -5,6 +5,7 @@
 
 #include "chunkContainer.h"
 #include "../engine/engine.h"
+#include "../renderer/texture.h"
 
 int developerPrint(const char* buffer, ...) {
 	if(engine->developerGui == nullptr) {
@@ -17,7 +18,7 @@ int developerPrint(const char* buffer, ...) {
 	vsnprintf(output, 1024, buffer, argptr);
 	va_end(argptr);
 
-	engine->developerGui->addEntry(ConsoleEntry {
+	engine->developerGui.addEntry(ConsoleEntry {
 		level: 2,
 		contents: std::string(output),
 	});
@@ -36,7 +37,7 @@ int developerWarning(const char* buffer, ...) {
 	vsnprintf(output, 1024, buffer, argptr);
 	va_end(argptr);
 
-	engine->developerGui->addEntry(ConsoleEntry {
+	engine->developerGui.addEntry(ConsoleEntry {
 		level: 1,
 		contents: std::string(output),
 	});
@@ -55,7 +56,7 @@ int developerError(const char* buffer, ...) {
 	vsnprintf(output, 1024, buffer, argptr);
 	va_end(argptr);
 
-	engine->developerGui->addEntry(ConsoleEntry {
+	engine->developerGui.addEntry(ConsoleEntry {
 		level: 2,
 		contents: std::string(output),
 	});
@@ -70,7 +71,7 @@ int vDeveloperPrint(const char* buffer, va_list args) {
 	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
-	engine->developerGui->addEntry(ConsoleEntry {
+	engine->developerGui.addEntry(ConsoleEntry {
 		level: 0,
 		contents: std::string(output),
 	});
@@ -85,7 +86,7 @@ int vDeveloperWarning(const char* buffer, va_list args) {
 	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
-	engine->developerGui->addEntry(ConsoleEntry {
+	engine->developerGui.addEntry(ConsoleEntry {
 		level: 1,
 		contents: std::string(output),
 	});
@@ -100,7 +101,7 @@ int vDeveloperError(const char* buffer, va_list args) {
 	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
-	engine->developerGui->addEntry(ConsoleEntry {
+	engine->developerGui.addEntry(ConsoleEntry {
 		level: 2,
 		contents: std::string(output),
 	});

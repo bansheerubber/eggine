@@ -28,6 +28,9 @@ Line::Line() {
 
 Line::~Line() {
 	delete[] this->positionBuffer;
+
+	delete this->buffer;
+	delete this->attributes;
 }
 
 void Line::addPosition(glm::vec2 position) {

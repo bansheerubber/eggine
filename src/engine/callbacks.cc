@@ -212,7 +212,7 @@ void onKeyPress(GLFWwindow* window, int key, int scanCode, int action, int mods)
 
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(key == GLFW_KEY_GRAVE_ACCENT) {
-		engine->developerGui->focusConsole();
+		engine->developerGui.focusConsole();
 	}
 	#endif
 	

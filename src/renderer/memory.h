@@ -35,11 +35,6 @@ namespace render {
 		
 		public:
 			Piece(class Page* parent);
-			
-			uint64_t start; // start of the chunk relative to the memory block
-			uint64_t end; // end of the chunk relative to the memory block
-			uint64_t align;
-			Page* parent = nullptr;
 
 			void print();
 			uint64_t size();
@@ -58,6 +53,11 @@ namespace render {
 			void deallocate();
 
 		protected:
+			uint64_t start; // start of the chunk relative to the memory block
+			uint64_t end; // end of the chunk relative to the memory block
+			uint64_t align;
+			Page* parent = nullptr;
+			
 			Piece* next = nullptr;
 			Piece* prev = nullptr;
 			bool allocated = false;
@@ -86,11 +86,7 @@ namespace render {
 			Page(Window* window, vk::MemoryPropertyFlags flags, uint32_t memoryTypeIndex, uint64_t size);
 			#endif
 
-			#ifdef __switch__
-			dk::MemBlock block;
-			#else
-			vk::DeviceMemory memory;
-			#endif
+			~Page();
 			
 			Piece* allocate(uint64_t size, uint64_t align);
 			void processDeallocationList();
@@ -104,6 +100,13 @@ namespace render {
 		
 		protected:
 			Window* window;
+
+			#ifdef __switch__
+			dk::MemBlock block;
+			#else
+			vk::DeviceMemory memory;
+			#endif
+
 			Piece* head = nullptr;
 			uint64_t size;
 			#ifdef __switch__

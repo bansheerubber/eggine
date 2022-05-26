@@ -14,6 +14,10 @@ resources::MapSource::MapSource(
 	this->bufferSize = bufferSize;
 }
 
+resources::MapSource::~MapSource() {
+	delete[] this->buffer;
+}
+
 void resources::MapSource::loadIntoMap(Map* map) {
 	map->load(this->buffer, this->bufferSize);
 }

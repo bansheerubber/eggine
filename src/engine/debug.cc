@@ -28,6 +28,15 @@ void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 }
 #endif
 
+Debug::~Debug() {
+	delete this->buffers[0];
+	delete this->buffers[1];
+
+	delete this->attributes;
+
+	delete this->program;
+}
+
 void Debug::addInfoMessage(std::string message) {
 	this->infoMessages.push_back(message);
 }

@@ -15,6 +15,10 @@ resources::ShaderSource::ShaderSource(
 	this->fileName = metadata->getMetadata("fileName");
 }
 
+resources::ShaderSource::~ShaderSource() {
+	delete[] this->buffer;
+}
+
 unsigned int resources::ShaderSource::getBytesUsed() {
 	return this->bufferSize;
 }

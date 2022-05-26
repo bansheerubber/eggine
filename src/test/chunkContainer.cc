@@ -89,6 +89,9 @@ ChunkContainer::~ChunkContainer() {
 	for(uint64_t i = 0; i < this->renderOrder.head; i++) {
 		delete this->renderOrder[i];
 	}
+
+	delete this->tileSelectionSprite;
+	delete this->characterSelectionSprite;
 }
 
 void ChunkContainer::setSize(unsigned int size) {

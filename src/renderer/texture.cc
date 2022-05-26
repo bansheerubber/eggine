@@ -16,6 +16,35 @@ render::Texture::Texture(Window* window) {
 	this->window = window;
 }
 
+render::Texture::~Texture() {
+	#ifdef __switch__
+	if(this->memory != nullptr) {
+		this->memory->deallocate();
+		this->memory = nullptr;
+	}
+
+	if(this->imageDescriptorMemory != nullptr) {
+		this->imageDescriptorMemory->deallocate();
+		this->imageDescriptorMemory = nullptr;
+	}
+
+	if(this->samplerDescriptorMemory != nullptr) {
+		this->samplerDescriptorMemory->deallocate();
+		this->samplerDescriptorMemory = nullptr;
+	}
+	#else
+	if(this->stagingBuffer != nullptr) {
+		this->stagingBuffer->deallocate();
+		this->stagingBuffer = nullptr;
+	}
+	
+	if(this->image != nullptr) {
+		this->image->deallocate();
+		this->image = nullptr;
+	}
+	#endif
+}
+
 void render::Texture::setFilters(TextureFilter minFilter, TextureFilter magFilter) {
 	this->minFilter = minFilter;
 	this->magFilter = magFilter;

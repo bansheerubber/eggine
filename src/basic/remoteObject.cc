@@ -11,6 +11,7 @@ network::RemoteObject::RemoteObject() {
 
 network::RemoteObject::~RemoteObject() {
 	engine->network.removeRemoteObject(this);
+	delete[] this->updateMask;
 }
 
 void network::RemoteObject::writeUpdateMask(unsigned int position) {

@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "../util/png.h"
-#include "../renderer/texture.h"
 
 struct ConsoleEntry {
 	int level;
@@ -20,6 +19,10 @@ int developerError(const char* buffer, ...);
 int vDeveloperPrint(const char* buffer, va_list args);
 int vDeveloperWarning(const char* buffer, va_list args);
 int vDeveloperError(const char* buffer, va_list args);
+
+namespace render {
+	class Texture;
+};
 
 class DeveloperGui {
 	public:

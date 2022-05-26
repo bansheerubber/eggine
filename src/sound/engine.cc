@@ -14,6 +14,11 @@ sound::Engine::Engine() {
 	
 }
 
+sound::Engine::~Engine() {
+	alcCloseDevice(this->device);
+	alcDestroyContext(this->context);
+}
+
 void sound::Engine::initialize() {
 	this->device = alcOpenDevice(nullptr);
 	this->context = alcCreateContext(this->device, nullptr);

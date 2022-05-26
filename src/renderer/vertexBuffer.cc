@@ -21,9 +21,11 @@ render::VertexBuffer::VertexBuffer(Window* window, std::string debugName) {
 
 render::VertexBuffer::~VertexBuffer() {
 	this->destroyBuffer();
+
+	#ifndef __switch__
 	VertexBuffer::OutOfDateBuffers[0].erase(this);
 	VertexBuffer::OutOfDateBuffers[1].erase(this);
-
+	
 	if(this->isDynamicDraw) {
 		if(this->dynamicBuffers[0].buffer != nullptr) {
 			this->dynamicBuffers[0].buffer->deallocate();
@@ -46,6 +48,7 @@ render::VertexBuffer::~VertexBuffer() {
 			this->gpuBuffer = nullptr;
 		}
 	}
+	#endif
 }
 
 void render::VertexBuffer::reallocate() {

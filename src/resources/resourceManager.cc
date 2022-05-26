@@ -35,7 +35,7 @@ void handleSpritesheets(void* owner, carton::File* file, const char* buffer, uin
 	#ifdef EGGINE_DEVELOPER_MODE
 	if(file->getFileName() == "spritesheets/spritesheet.ss") {
 		png spritesheet = loadPng((unsigned char*)buffer, bufferSize);
-		engine->developerGui->setSpritesheet(spritesheet);
+		engine->developerGui.setSpritesheet(spritesheet);
 		for(unsigned int i = 0; i < stoul(file->metadata->getMetadata("amount")); i++) {
 			glm::ivec2 start = tilemath::textureIndexToXY(i, 1057, 391);
 			cropped result = crop(spritesheet, start.x, start.y, 64, 128);
@@ -45,7 +45,7 @@ void handleSpritesheets(void* owner, carton::File* file, const char* buffer, uin
 			texture->setWrap(render::TEXTURE_WRAP_CLAMP_TO_BORDER, render::TEXTURE_WRAP_CLAMP_TO_BORDER);
 			texture->load(result.buffer, result.bufferSize, result.width, result.height, result.source.bitDepth, result.source.channels);
 
-			engine->developerGui->addSpritesheetTexture(texture);
+			engine->developerGui.addSpritesheetTexture(texture);
 
 			delete[] result.buffer;
 		}

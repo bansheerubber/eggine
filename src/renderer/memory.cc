@@ -108,6 +108,16 @@ render::Page::Page(Window* window, vk::MemoryPropertyFlags flags, uint32_t memor
 	#endif
 }
 
+render::Page::~Page() {
+	render::Piece* current = this->head;
+	while(current != nullptr) {
+		current = current->next;
+		delete current->prev;
+	}
+
+	// TODO deallocate memory
+}
+
 #ifdef __switch__
 void* render::Page::cpuAddr() {
 	return this->block.getCpuAddr();

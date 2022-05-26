@@ -25,6 +25,14 @@ render::Shader::Shader(Window* window) {
 	this->window = window;
 }
 
+render::Shader::~Shader() {
+	#ifdef __switch__
+	if(this->memory != nullptr) {
+		this->memory->deallocate();
+	}
+	#endif	
+}
+
 void render::Shader::bind() {
 	
 }

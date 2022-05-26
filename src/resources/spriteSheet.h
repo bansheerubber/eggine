@@ -103,6 +103,7 @@ namespace resources {
 	class SpriteSheet: public ResourceObject {
 		public:
 			SpriteSheet(ResourceManager &manager, carton::Metadata* metadata, const unsigned char* buffer, uint64_t bufferSize);
+			~SpriteSheet();
 
 			render::Texture* texture = nullptr;
 

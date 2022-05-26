@@ -107,6 +107,20 @@ Layer::Layer(Chunk* chunk) {
 	}
 }
 
+Layer::~Layer() {
+	delete this->buffers[0];
+	delete this->buffers[1];
+	delete this->buffers[2];
+
+	delete this->xrayBuffers[0];
+	delete this->xrayBuffers[1];
+	delete this->xrayBuffers[2];
+	delete this->xrayBuffers[3];
+
+	delete this->attributes;
+	delete this->xrayAttributes;
+}
+
 void Layer::rebuildBuffers() {
 	this->Offsets.allocate(this->tiles.array.head);
 	this->TextureIndices.allocate(this->tiles.array.head);

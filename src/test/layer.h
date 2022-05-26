@@ -16,6 +16,7 @@ class Layer : public GameObject {
 	
 	public:
 		Layer(class Chunk* chunk);
+		~Layer();
 
 		// ## game_object_definitions Layer
 

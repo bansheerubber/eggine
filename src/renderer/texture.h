@@ -286,6 +286,7 @@ namespace render {
 		
 		public:
 			Texture(class Window* window);
+			~Texture();
 
 			void setFilters(TextureFilter minFilter, TextureFilter magFilter);
 			void setWrap(TextureWrap uWrap, TextureWrap vWrap);
@@ -327,15 +328,15 @@ namespace render {
 			dk::ImageDescriptor imageDescriptor;
 			dk::Sampler sampler;
 			dk::SamplerDescriptor samplerDescriptor;
-			Piece* memory;
+			Piece* memory = nullptr;
 
-			Piece* imageDescriptorMemory;
-			Piece* samplerDescriptorMemory;
+			Piece* imageDescriptorMemory = nullptr;
+			Piece* samplerDescriptorMemory = nullptr;
 			#else
 			GLuint texture = GL_INVALID_INDEX;
 
-			Piece* stagingBuffer;
-			Piece* image;
+			Piece* stagingBuffer = nullptr;
+			Piece* image = nullptr;
 			vk::ImageView imageView;
 			vk::Sampler sampler;
 			#endif

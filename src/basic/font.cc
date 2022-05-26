@@ -106,6 +106,10 @@ render::Font::Font(std::string fileName, int size) {
 	FT_Done_Face(face);
 }
 
+render::Font::~Font() {
+	delete this->texture;
+}
+
 render::FontInfo render::Font::getInfo() {
 	return {
 		this->size,

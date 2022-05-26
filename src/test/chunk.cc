@@ -91,6 +91,9 @@ Chunk::~Chunk() {
 	if(this->debugLine != nullptr) {
 		delete this->debugLine;
 	}
+
+	delete this->vertexBuffer;
+	delete this->vertexAttributes;
 }
 
 void Chunk::BuildOffsets(tilemath::Rotation rotation) {

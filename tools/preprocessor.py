@@ -444,7 +444,7 @@ if __name__ == "__main__":
 		if ".h" in file and file in header_nodes:
 			dependents = header_nodes[file].get_dependents()
 			for dependent in dependents:
-				if dependent in changed_files:
+				if dependent.filename in changed_files:
 					continue
 				
 				os.remove(dependent.tmp_filename)

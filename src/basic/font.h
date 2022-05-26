@@ -34,6 +34,7 @@ namespace render {
 		
 		public:
 			Font(std::string fileName, int size);
+			~Font();
 
 			FontInfo getInfo();
 			FontGlyph getGlyph(unsigned char character);

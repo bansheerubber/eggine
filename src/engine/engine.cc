@@ -315,10 +315,6 @@ void Engine::initialize() {
 
 	this->renderWindow.initializeHTML();
 
-	#ifdef EGGINE_DEVELOPER_MODE
-	this->developerGui = new DeveloperGui();
-	#endif
-
 	#ifndef __switch__
 	resources::TextFile* file = (resources::TextFile*)this->manager.loadResources(
 		engine->manager.carton->database.get()->equals("fileName", "gamecontrollerdb.txt")->exec()
@@ -365,7 +361,7 @@ void Engine::tick() {
 	this->renderWindow.prerender();
 
 	#ifdef EGGINE_DEVELOPER_MODE
-	this->developerGui->prerender();
+	this->developerGui.prerender();
 	#endif
 
 	#ifdef __switch__ // handle switch binds
@@ -539,7 +535,7 @@ void Engine::tick() {
 	}
 
 	#ifdef EGGINE_DEVELOPER_MODE
-	this->developerGui->render();
+	this->developerGui.render();
 	#endif
 
 	this->cpuRenderTime = getMicrosecondsNow() - startRenderTime;
