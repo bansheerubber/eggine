@@ -308,6 +308,12 @@ void render::Texture::load(
 		);
 
 		this->sampler = this->window->device.device.createSampler(samplerInfo);
+
+		#ifdef EGGINE_DEVELOPER_MODE
+		this->imguiTexture = ImGui_ImplVulkan_AddTexture(
+			this->sampler, this->imageView, (VkImageLayout)vk::ImageLayout::eShaderReadOnlyOptimal
+		);
+		#endif
 	}
 	#endif
 }
@@ -327,6 +333,17 @@ vk::DescriptorImageInfo render::Texture::getVulkanImageInfo() {
 		this->imageView,
 		vk::ImageLayout::eShaderReadOnlyOptimal
 	);
+}
+#endif
+
+#ifdef EGGINE_DEVELOPER_MODE
+ImTextureID render::Texture::getImTexture() {
+	if(this->window->backend == OPENGL_BACKEND) {
+		return (ImTextureID)(intptr_t)this->texture;
+	}
+	else {
+		return (ImTextureID)this->imguiTexture;
+	}
 }
 #endif
 

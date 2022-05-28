@@ -8,10 +8,6 @@
 #include "../renderer/texture.h"
 
 int developerPrint(const char* buffer, ...) {
-	if(engine->developerGui == nullptr) {
-		return 0;
-	}
-	
 	char output[1024];
 	va_list argptr;
 	va_start(argptr, buffer);
@@ -27,10 +23,6 @@ int developerPrint(const char* buffer, ...) {
 }
 
 int developerWarning(const char* buffer, ...) {
-	if(engine->developerGui == nullptr) {
-		return 0;
-	}
-	
 	char output[1024];
 	va_list argptr;
 	va_start(argptr, buffer);
@@ -46,10 +38,6 @@ int developerWarning(const char* buffer, ...) {
 }
 
 int developerError(const char* buffer, ...) {
-	if(engine->developerGui == nullptr) {
-		return 0;
-	}
-	
 	char output[1024];
 	va_list argptr;
 	va_start(argptr, buffer);
@@ -65,10 +53,6 @@ int developerError(const char* buffer, ...) {
 }
 
 int vDeveloperPrint(const char* buffer, va_list args) {
-	if(engine->developerGui == nullptr) {
-		return 0;
-	}
-	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
 	engine->developerGui.addEntry(ConsoleEntry {
@@ -80,10 +64,6 @@ int vDeveloperPrint(const char* buffer, va_list args) {
 }
 
 int vDeveloperWarning(const char* buffer, va_list args) {
-	if(engine->developerGui == nullptr) {
-		return 0;
-	}
-	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
 	engine->developerGui.addEntry(ConsoleEntry {
@@ -95,10 +75,6 @@ int vDeveloperWarning(const char* buffer, va_list args) {
 }
 
 int vDeveloperError(const char* buffer, va_list args) {
-	if(engine->developerGui == nullptr) {
-		return 0;
-	}
-	
 	char output[1024];
 	vsnprintf(output, 1024, buffer, args);
 	engine->developerGui.addEntry(ConsoleEntry {
@@ -175,8 +151,9 @@ void DeveloperGui::render() {
 			else if(usedWidth + size >= width) {
 				usedWidth = 0.f;
 			}
+			
 			ImGui::PushID(count);
-			if(ImGui::ImageButton((void*)(intptr_t)texture->texture, ImVec2(size, size * 2), ImVec2(0, 0), ImVec2(1, 1), 0)) {
+			if(ImGui::ImageButton(texture->getImTexture(), ImVec2(size, size * 2), ImVec2(0, 0), ImVec2(1, 1), 0)) {
 				esEntry arguments[1];
 				esCreateNumberAt(arguments, count);
 				esDeleteEntry(esCallFunction(engine->eggscript, "onDevTextureSwitch", 1, arguments));

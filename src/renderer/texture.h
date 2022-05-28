@@ -12,6 +12,7 @@
 #include <string>
 
 #include "../engine/console.h"
+#include "../engine/developer.h"
 #include "memory.h"
 
 class DeveloperGui;
@@ -309,6 +310,10 @@ namespace render {
 			#ifndef __switch__
 			vk::DescriptorImageInfo getVulkanImageInfo();
 			#endif
+
+			#ifdef EGGINE_DEVELOPER_MODE
+			ImTextureID getImTexture();
+			#endif
 		
 		protected:
 			Window* window;
@@ -339,6 +344,10 @@ namespace render {
 			Piece* image = nullptr;
 			vk::ImageView imageView;
 			vk::Sampler sampler;
+
+			#ifdef EGGINE_DEVELOPER_MODE
+			VkDescriptorSet imguiTexture;
+			#endif
 			#endif
 	};
 };

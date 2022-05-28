@@ -3,6 +3,7 @@
 #include "../engine/developer.h"
 
 #ifdef EGGINE_DEVELOPER_MODE
+#include <string>
 #include <vector>
 
 #include "../util/png.h"
